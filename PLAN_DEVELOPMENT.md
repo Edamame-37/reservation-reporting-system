@@ -50,12 +50,30 @@ Proyek ini menggunakan pola arsitektur **MVC (Model-View-Controller)** yang meru
 │   ├── css/                    # 🎨 [FRONTEND] File input Tailwind CSS
 │   ├── js/                     # 🎨 [FRONTEND] File input Alpine/JavaScript
 │   └── views/                  # 🎨 [FRONTEND] TAMPILAN ANTARMUKA (Blade HTML)
-│       ├── layouts/            # 🎨 [FRONTEND] Kerangka master (admin.blade, petugas.blade, public.blade)
-│       ├── public/             # 🎨 [FRONTEND] Area Publik / Visitor (home, catalog, availability)
+│       ├── layouts/            # 🎨 [FRONTEND] Kerangka master
+│       │   ├── admin.blade.php
+│       │   ├── petugas.blade.php
+│       │   └── public.blade.php
+│       ├── public/             # 🎨 [FRONTEND] Area Publik / Visitor
+│       │   ├── home.blade.php
+│       │   ├── catalog.blade.php
+│       │   └── availability.blade.php
 │       ├── auth/               # 🎨 [FRONTEND] Area Login & Registrasi (Bawaan Breeze)
-│       ├── user/               # 🎨 [FRONTEND] Area Pengguna (dashboard, reservation-form, report-form)
-│       ├── petugas/            # 🎨 [FRONTEND] Area Petugas (dashboard, reservation-management)
-│       └── admin/              # 🎨 [FRONTEND] Area Admin (dashboard, facility-master, export-report)
+│       ├── user/               # 🎨 [FRONTEND] Area Pengguna
+│       │   ├── dashboard.blade.php
+│       │   ├── reservation-form.blade.php
+│       │   ├── reservation-history.blade.php
+│       │   ├── report-form.blade.php
+│       │   └── report-history.blade.php
+│       ├── petugas/            # 🎨 [FRONTEND] Area Petugas
+│       │   ├── dashboard.blade.php
+│       │   ├── reservation-management.blade.php
+│       │   └── report-management.blade.php
+│       └── admin/              # 🎨 [FRONTEND] Area Admin
+│           ├── dashboard.blade.php
+│           ├── facility-master.blade.php
+│           ├── user-management.blade.php
+│           └── export-report.blade.php
 │
 ├── routes/                     # 🗄️ [KEDUANYA] NAVIGASI URL
 │   └── web.php                 # 🗄️ [KEDUANYA] Backend membuat route, Frontend mengonsumsi (menyesuaikan URL)
