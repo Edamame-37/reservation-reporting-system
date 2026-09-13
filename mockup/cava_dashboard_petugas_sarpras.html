@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+  <style>
+    @layer base {
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        overscroll-behavior: none;
+      }
+
+      main> :first-child {
+        margin-top: 0 !important;
+      }
+
+      main> :last-child {
+        margin-bottom: 0 !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-highest": "#d3e4fe",
+            "on-tertiary-fixed": "#2f1500",
+            "surface": "#f8f9ff",
+            "on-secondary-fixed": "#002114",
+            "on-surface-variant": "#44474e",
+            "on-background": "#0b1c30",
+            "tertiary-fixed-dim": "#ffb77d",
+            "on-error": "#ffffff",
+            "surface-container": "#e5eeff",
+            "secondary": "#006c4a",
+            "secondary-fixed": "#85f8c4",
+            "outline": "#74777f",
+            "surface-container-high": "#dce9ff",
+            "surface-container-low": "#eff4ff",
+            "surface-variant": "#d3e4fe",
+            "tertiary-container": "#552b00",
+            "on-surface": "#0b1c30",
+            "surface-dim": "#cbdbf5",
+            "primary-fixed": "#d6e3ff",
+            "primary": "#002046",
+            "on-secondary": "#ffffff",
+            "tertiary-fixed": "#ffdcc3",
+            "error-container": "#ffdad6",
+            "tertiary": "#361900",
+            "inverse-surface": "#213145",
+            "on-primary-fixed": "#001b3d",
+            "on-tertiary": "#ffffff",
+            "inverse-primary": "#aec7f7",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#68dba9",
+            "inverse-on-surface": "#eaf1ff",
+            "secondary-container": "#82f5c1",
+            "on-secondary-fixed-variant": "#005137",
+            "error": "#ba1a1a",
+            "on-secondary-container": "#00714e",
+            "background": "#f8f9ff",
+            "outline-variant": "#c4c6cf",
+            "surface-tint": "#465f88",
+            "on-tertiary-container": "#eb851c",
+            "surface-container-lowest": "#ffffff",
+            "primary-fixed-dim": "#aec7f7",
+            "on-tertiary-fixed-variant": "#6e3900",
+            "on-primary-container": "#87a0cd",
+            "surface-bright": "#f8f9ff",
+            "on-primary-fixed-variant": "#2e476f",
+            "primary-container": "#1b365d",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "gutter": "1rem",
+            "gutter-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "margin-md": "1.5rem",
+            "space-xl": "1.5rem",
+            "margin-lg": "2rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "data-mono": ["Inter"]
+          },
+          "fontSize": {
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "display-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant">
+    <div class="h-9 bg-primary-container text-on-primary px-margin-lg flex items-center justify-between">
+      <div class="flex items-center gap-space-md">
+        <div class="flex items-center gap-space-xs"></div>
+      </div>
+      <div class="flex items-center gap-space-lg">
+        <span class="font-label-sm text-label-sm text-on-primary-container">TA 2024/2025 GANJIL</span>
+      </div>
+    </div>
+    <div class="h-16 px-margin-lg flex items-center justify-between bg-surface-container-lowest">
+      <div class="flex items-center gap-space-xl">
+        <div class="flex items-center gap-space-md">
+          <img alt="CAVA Logo" class="h-8 w-auto object-contain"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1VHq-QcduHOZVMRgxrWzvqB7dPW8S_QhtMVOlxFT7UDEVsOjJ9KkIznXouyBrFuKlK9zBaJGdj7Dg3D4c6QDdNsi2nERjloj0UUtHZUJMc8TSOZvAenpJwYeldeR7Wsh35HAO_PLg6cCuE5G60jlFkP9iazQsaH_4SFYf7y5HwFZM4X4YB99qLvQJU8xIwxd4DHOtWwmbhxksDFZ-uwcjuR5jbIbQvDP02YWarZTwA6vQQFXu-vEqh6j08">
+          <div class="flex flex-col">
+            <span class="font-headline-sm text-headline-sm text-primary tracking-tight">CAVA - Campus Venue
+              Access</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sistem Otomasi
+              Reservasi Fasilitas Terpadu</span>
+          </div>
+        </div>
+        <div class="h-8 w-[1px] bg-outline-variant"></div>
+        <div class="flex items-center gap-space-xs"></div>
+      </div>
+      <div class="flex items-center gap-space-lg">
+        <div
+          class="flex items-center gap-space-md bg-surface-container-low px-space-md py-1 rounded border border-outline-variant">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">STATUS RUANG HARI INI:</span>
+          <span class="font-label-sm text-label-sm text-secondary font-bold">42 TERSEDIA</span>
+          <span class="text-outline">|</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant font-bold">18 TERPAKAI</span>
+        </div>
+        <div class="flex items-center gap-space-md">
+          <div class="flex flex-col text-right">
+            <span class="font-label-lg text-label-lg text-on-surface">Dr. Ir. Hendra Prasetyo</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant font-data-mono text-data-mono">NIP
+              198402112009121003</span>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR (Fixed top-[100px] to match 100px header height) -->
+  <aside
+    class="fixed left-0 top-[100px] bottom-0 w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col z-40">
+    <div class="p-space-lg border-b border-outline-variant">
+      <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Navigasi Ruang &amp;
+        Sesi</span>
+      <div class="mt-1 font-headline-sm text-headline-sm text-primary">Direktori Kampus</div>
+    </div>
+    <nav class="flex-1 p-space-md flex flex-col gap-1"
+      data-active-classes="bg-primary-container text-on-primary font-bold">
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="dashboard-monitoring" href="#"><span class="">Dashboard Monitoring</span><span
+          class="font-data-mono text-data-mono px-1.5 py-0.5 bg-surface-container rounded">LIVE</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="direktori-venue" href="#"><span class="">Direktori Venue</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="jadwal-kalender" href="#"><span class="">Matriks Jadwal</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="permohonan-reservasi" href="#"><span class="">Pengajuan Reservasi</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="verifikasi-sarpras" href="#"><span class="">Verifikasi &amp; Approval</span><span
+          class="font-label-sm text-label-sm px-1.5 py-0.2 bg-error-container text-on-error-container rounded-full">3</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="manajemen-fasilitas" href="#"><span class="">Manajemen Fasilitas</span></a>
+      <a class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        data-path="laporan-utilisasi" href="#"><span class="">Laporan Utilisasi</span></a>
+    </nav>
+    <div class="p-space-md border-t border-outline-variant bg-surface-container-low">
+      <div class="flex items-center justify-between text-on-surface-variant">
+        <span class="font-label-sm text-label-sm font-data-mono text-data-mono">v2.4-BUILD-92</span>
+        <button class="font-label-sm text-label-sm text-error hover:underline" type="button">Keluar Sesi</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA (pt-[124px] to provide 24px margin below 100px fixed header) -->
+  <div class="pl-64">
+    <main class="relative pt-[124px] pb-margin-lg min-h-screen bg-surface px-margin-lg">
+      <div class="flex flex-col w-full">
+        <div class="flex flex-col gap-space-lg">
+
+          <!-- SUB-HEADER CONTEXT / OFFICER INFO BANNER -->
+          <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+            <div class="flex flex-wrap items-center justify-between gap-space-md">
+              <div class="flex items-center gap-space-lg">
+                <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+                  <span class="material-symbols-outlined text-[28px]">shield_person</span>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-space-sm">
+                    <span class="font-headline-md text-headline-md text-on-surface tracking-tight">CAVA - Pusat
+                      Operasional &amp; Sarpras Kampus</span>
+                    <span
+                      class="px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-semibold flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                      ZONA-A AKTIF
+                    </span>
+                  </div>
+                  <div
+                    class="flex flex-wrap items-center gap-x-space-md gap-y-1 mt-1 text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="flex items-center gap-1 font-label-md text-label-md text-primary font-semibold">
+                      <span class="material-symbols-outlined text-[16px]">badge</span>
+                      Pak Bambang S. (Petugas Sarpras Zona Gedung A)
+                    </span>
+                    <span class="">•</span>
+                    <span
+                      class="font-data-mono text-data-mono bg-surface-container px-space-sm py-0.5 rounded text-on-surface">
+                      NIP. 197804122005011002
+                    </span>
+                    <span class="">•</span>
+                    <span class="flex items-center gap-1 text-secondary font-medium">
+                      <span class="material-symbols-outlined text-[16px]">schedule</span>
+                      Shift Pagi: 07.00 - 15.00 WIB
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-space-md">
+                <div class="hidden xl:flex flex-col items-end text-right">
+                  <span
+                    class="font-label-sm text-label-sm uppercase text-on-surface-variant font-data-mono text-data-mono">Status
+                    Sistem Otomasi</span>
+                  <span class="font-label-md text-label-md text-secondary flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-secondary"></span>
+                    Pendeteksi Bentrok: Realtime Active
+                  </span>
+                </div>
+                <div class="h-8 w-[1px] bg-surface-container-high hidden xl:block"></div>
+                <button
+                  class="px-space-md py-space-sm rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors font-label-md text-label-md flex items-center gap-space-xs"
+                  type="button">
+                  <span class="material-symbols-outlined text-[16px]">refresh</span>
+                  Sinkron Data
+                </button>
+                <button
+                  class="px-space-md py-space-sm rounded-lg bg-error-container text-on-error-container hover:bg-error/20 transition-colors font-label-md text-label-md flex items-center gap-space-xs"
+                  type="button">
+                  <span class="material-symbols-outlined text-[16px]">logout</span>
+                  Keluar Sesi
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- OVERVIEW STATS (UR08) -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+            <!-- CARD 1 -->
+            <div
+              class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-surface-container/60 rounded-bl-full pointer-events-none">
+              </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <span
+                    class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-tertiary-container">pending_actions</span>
+                    Antrian Reservasi Menunggu
+                  </span>
+                  <span
+                    class="px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface font-data-mono text-data-mono">UR08-A</span>
+                </div>
+                <div class="mt-space-md flex items-baseline gap-space-sm">
+                  <span class="font-display-lg text-display-lg text-primary tracking-tight font-bold">8</span>
+                  <span class="font-headline-sm text-headline-sm text-on-surface">Pengajuan Butuh Verifikasi</span>
+                </div>
+              </div>
+              <div class="mt-space-lg pt-space-md flex items-center justify-between">
+                <span
+                  class="inline-flex items-center gap-1 px-space-md py-1 rounded font-label-md text-label-md bg-surface-container-highest text-primary font-bold">
+                  <span class="material-symbols-outlined text-[14px]">bolt</span>
+                  +3 Pengajuan Hari Ini
+                </span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">SLA Respon &lt; 2 Jam</span>
+              </div>
+            </div>
+
+            <!-- CARD 2 -->
+            <div
+              class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-error-container/40 rounded-bl-full pointer-events-none">
+              </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <span
+                    class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-error">build_circle</span>
+                    Antrian Laporan Kerusakan
+                  </span>
+                  <span
+                    class="px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container font-data-mono text-data-mono">UR08-B</span>
+                </div>
+                <div class="mt-space-md flex items-baseline gap-space-sm">
+                  <span class="font-display-lg text-display-lg text-error tracking-tight font-bold">5</span>
+                  <span class="font-headline-sm text-headline-sm text-on-surface">Laporan Aktif</span>
+                </div>
+              </div>
+              <div class="mt-space-lg pt-space-md flex items-center justify-between">
+                <span
+                  class="inline-flex items-center gap-1 px-space-md py-1 rounded font-label-md text-label-md bg-error-container text-on-error-container font-bold">
+                  <span class="material-symbols-outlined text-[14px]">warning</span>
+                  2 Darurat Proyektor &amp; Listrik
+                </span>
+                <span class="font-body-sm text-body-sm text-error font-medium">Prioritas Tinggi</span>
+              </div>
+            </div>
+
+            <!-- CARD 3 -->
+            <div
+              class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+              <div
+                class="absolute right-0 top-0 w-24 h-24 bg-surface-container-high/60 rounded-bl-full pointer-events-none">
+              </div>
+              <div>
+                <div class="flex items-center justify-between">
+                  <span
+                    class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-primary">domain_disabled</span>
+                    Fasilitas Dalam Perbaikan
+                  </span>
+                  <span
+                    class="px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface font-data-mono text-data-mono">UR08-C</span>
+                </div>
+                <div class="mt-space-md flex items-baseline gap-space-sm">
+                  <span class="font-display-lg text-display-lg text-primary tracking-tight font-bold">2</span>
+                  <span class="font-headline-sm text-headline-sm text-on-surface">Ruangan Non-Aktif (Locked)</span>
+                </div>
+              </div>
+              <div class="mt-space-lg pt-space-md flex items-center justify-between">
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    class="px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface font-medium">Lab
+                    Hardware 2</span>
+                  <span
+                    class="px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface font-medium">R.
+                    Rapat Senat</span>
+                </div>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Maintenance Mode</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION A: ANTRIAN PERSETUJUAN RESERVASI (UR09, SFR06) -->
+          <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+            <div class="flex flex-wrap items-center justify-between gap-space-md">
+              <div class="flex flex-col">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-headline-lg text-headline-lg text-primary">Antrian Persetujuan Reservasi
+                    Fasilitas</span>
+                  <span
+                    class="px-space-sm py-0.5 rounded font-data-mono text-data-mono bg-surface-container text-on-surface">UR09
+                    • SFR06</span>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Evaluasi berkas pengajuan, tujuan kegiatan, dan verifikasi validitas bentrok sistem sebelum memberikan
+                  persetujuan resmi.
+                </p>
+              </div>
+              <div class="flex items-center gap-space-sm">
+                <div class="relative">
+                  <input
+                    class="h-9 px-space-md pl-9 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors w-64"
+                    placeholder="Cari Mahasiswa/NIP/Ruang..." type="text">
+                  <span
+                    class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-on-surface-variant">search</span>
+                </div>
+                <button
+                  class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1 hover:bg-surface-container-high transition-colors"
+                  type="button">
+                  <span class="material-symbols-outlined text-[16px]">filter_list</span>
+                  Semua Zona
+                </button>
+              </div>
+            </div>
+
+            <!-- TABLE WRAPPER -->
+            <div class="overflow-x-auto w-full">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
+                    <th class="py-space-md px-space-md font-semibold">ID &amp; Pemohon</th>
+                    <th class="py-space-md px-space-md font-semibold">Fasilitas Diminta</th>
+                    <th class="py-space-md px-space-md font-semibold">Tanggal &amp; Slot Waktu</th>
+                    <th class="py-space-md px-space-md font-semibold">Tujuan &amp; Surat Izin</th>
+                    <th class="py-space-md px-space-md font-semibold">Validasi Konflik (SFR06)</th>
+                    <th class="py-space-md px-space-md font-semibold text-right">Keputusan Operasional</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container-high/40 font-body-md text-body-md text-on-surface">
+                  <!-- ROW 1: SAFE / HMIF -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors">
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Dimas Pratama</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant">Mahasiswa TI •
+                          2110512044</span>
+                        <span class="font-label-sm text-label-sm text-primary-container mt-1">Himpunan Mahasiswa
+                          Informatika</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-semibold text-primary">Auditorium B.J.
+                          Habibie</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Gedung Utama Lantai 3 •
+                          Kapasitas: 350 Orang</span>
+                        <div class="flex items-center gap-1 mt-1">
+                          <span
+                            class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">TIER-1
+                            AV</span>
+                          <span
+                            class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">MIC-WIRELESS
+                            (4)</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-md text-label-md font-bold text-on-surface">24 Apr 2024</span>
+                        <span class="font-data-mono text-data-mono text-secondary font-semibold">09:00 - 12:00
+                          WIB</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">(6 slot 30-menit
+                          beruntun)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-label-md text-label-md font-medium text-on-surface">Seminar Cloud Computing
+                          HMIF</span>
+                        <a class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline"
+                          href="#">
+                          <span class="material-symbols-outlined text-[14px]">description</span>
+                          Lampiran SK Terverifikasi.pdf
+                        </a>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">Peserta: 200
+                          mahasiswa semester 4-6</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <span
+                        class="inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                        Jadwal Aman - 100% Bebas Bentrok
+                      </span>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 text-[11px]">Tidak ada reservasi
+                        reguler/pengganti pada slot ini</p>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <div class="flex items-center justify-end gap-space-xs">
+                        <button
+                          class="px-space-md py-1.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md font-semibold hover:bg-secondary/90 transition-colors flex items-center gap-1 shadow-sm"
+                          onclick="alert('Permohonan Dimas Pratama telah disetujui resmi.')" type="button">
+                          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                          Setujui Pengajuan
+                        </button>
+                        <button
+                          class="px-space-md py-1.5 rounded-lg bg-surface-container text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md font-semibold flex items-center gap-1"
+                          onclick="promptTolak('Dimas Pratama')" type="button">
+                          <span class="material-symbols-outlined text-[16px]">cancel</span>
+                          Tolak
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- ROW 2: CONFLICT WARNING / DOSEN ELEKTRO -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-low/20">
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Dr. Ir. Hendra
+                          Prasetyo</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant">Dosen Elektro •
+                          198203112008011003</span>
+                        <span class="font-label-sm text-label-sm text-primary-container mt-1">Fakultas Teknik
+                          Industri</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-semibold text-primary">Ruang Teater Multimedia
+                          B-201</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Gedung B Lantai 2 • Kapasitas:
+                          80 Orang</span>
+                        <div class="flex items-center gap-1 mt-1">
+                          <span
+                            class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">SMART-BOARD</span>
+                          <span
+                            class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">HYBRID-CAM</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-md text-label-md font-bold text-on-surface">25 Apr 2024</span>
+                        <span class="font-data-mono text-data-mono text-on-surface font-semibold">13:00 - 15:30
+                          WIB</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">(5 slot 30-menit
+                          beruntun)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-label-md text-label-md font-medium text-on-surface">Kuliah Umum Tamu
+                          Internasional (IoT)</span>
+                        <a class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline"
+                          href="#">
+                          <span class="material-symbols-outlined text-[14px]">description</span>
+                          Nota-Dinas-Dekan-FT-412.pdf
+                        </a>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">Narasumber: Prof.
+                          K. Tanaka (Tokyo Tech)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <span
+                        class="inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-sm text-label-sm bg-error-container text-on-error-container font-bold">
+                        <span class="material-symbols-outlined text-[14px]">warning</span>
+                        Peringatan Bentrok: Bertumpuk 30 Menit dgn Kuliah Pengganti
+                      </span>
+                      <p class="font-body-sm text-body-sm text-error font-medium mt-1 text-[11px]">Konflik dengan: EL401
+                        (15:00-16:40 WIB)</p>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <div class="flex items-center justify-end gap-space-xs">
+                        <button
+                          class="px-space-md py-1.5 rounded-lg bg-surface-container-high text-primary font-label-md text-label-md font-semibold hover:bg-surface-container-highest transition-colors flex items-center gap-1"
+                          onclick="alert('Pengajuan Dr. Ir. Hendra diteruskan dengan catatan negosiasi pergeseran 30 menit.')"
+                          type="button">
+                          <span class="material-symbols-outlined text-[16px]">rule</span>
+                          Solusi Parsial
+                        </button>
+                        <button
+                          class="px-space-md py-1.5 rounded-lg bg-surface-container text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md font-semibold flex items-center gap-1"
+                          onclick="promptTolak('Dr. Ir. Hendra')" type="button">
+                          <span class="material-symbols-outlined text-[16px]">cancel</span>
+                          Tolak
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- ROW 3: SUDAH DISETUJUI / EMERGENCY ACTION BATALKAN (UR10) -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors">
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Siti Nurhaliza</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant">Staf BEM Kampus •
+                          2021099231</span>
+                        <span class="font-label-sm text-label-sm text-secondary font-medium mt-1">Status: Disetujui
+                          (Terjadwal)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-semibold text-primary">Hall Serbaguna Gedung
+                          C</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Gedung C Lantai 1 • Kapasitas:
+                          180 Orang</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-md text-label-md font-bold text-on-surface">26 Apr 2024</span>
+                        <span class="font-data-mono text-data-mono text-on-surface font-semibold">10:00 - 14:00
+                          WIB</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">(8 slot 30-menit
+                          beruntun)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-label-md text-label-md font-medium text-on-surface">Pekan Seni &amp; Budaya
+                          Mahasiswa</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Disetujui kemarin oleh Petugas
+                          Zona B</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <span
+                        class="inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-sm text-label-sm bg-surface-container text-on-surface font-medium">
+                        <span class="material-symbols-outlined text-[14px]">task_alt</span>
+                        Terverifikasi Sistem
+                      </span>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <!-- EMERGENCY ACTION UR10 -->
+                      <button
+                        class="px-space-md py-1.5 rounded-lg bg-error text-on-error hover:bg-error/90 transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 shadow-sm ml-auto"
+                        onclick="promptBatalkanEmergency('Siti Nurhaliza', 'Hall Serbaguna Gedung C')" type="button">
+                        <span class="material-symbols-outlined text-[16px]">gavel</span>
+                        Batalkan Reservasi Disetujui
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- SECTION B: PENGELOLAAN LAPORAN KERUSAKAN & KONTROL FASILITAS (UR11, UR12) -->
+          <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+            <div class="flex flex-wrap items-center justify-between gap-space-md">
+              <div class="flex flex-col">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-headline-lg text-headline-lg text-primary">Pengelolaan Laporan Kerusakan &amp;
+                    Kontrol Fasilitas</span>
+                  <span
+                    class="px-space-sm py-0.5 rounded font-data-mono text-data-mono bg-surface-container text-on-surface">UR11
+                    • UR12</span>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Tindak lanjuti laporan kerusakan sarana, perbarui status resolusi perbaikan teknisi, dan lakukan
+                  penguncian booking sistem jika fasilitas tidak laik pakai.
+                </p>
+              </div>
+              <div class="flex items-center gap-space-sm">
+                <span class="font-label-sm text-label-sm text-on-surface-variant font-data-mono text-data-mono">KONTROL
+                  LOCKDOWN FASILITAS: AKTIF</span>
+              </div>
+            </div>
+
+            <!-- TABLE WRAPPER -->
+            <div class="overflow-x-auto w-full">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
+                    <th class="py-space-md px-space-md font-semibold">Kode Laporan</th>
+                    <th class="py-space-md px-space-md font-semibold">Fasilitas Terkait</th>
+                    <th class="py-space-md px-space-md font-semibold">Masalah &amp; Bukti Visual</th>
+                    <th class="py-space-md px-space-md font-semibold">Status Tindakan</th>
+                    <th class="py-space-md px-space-md font-semibold">Catatan Resolusi Perbaikan</th>
+                    <th class="py-space-md px-space-md font-semibold text-right">Kontrol Akses Fasilitas (UR12)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container-high/40 font-body-md text-body-md text-on-surface">
+                  <!-- REPORT 1: LOCKED FACILITY -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-low/30"
+                    id="facility-row-1">
+                    <td class="py-space-md px-space-md align-top font-data-mono text-data-mono">
+                      <span class="font-bold text-error">DMG-882</span>
+                      <div class="text-[10px] text-on-surface-variant mt-1">22 Apr, 08:15 WIB</div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Lab Hardware 2 (Ged.
+                          D-301)</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Kapasitas 40 PC
+                          Workstation</span>
+                        <span
+                          class="mt-1 inline-flex items-center gap-1 px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error-container text-on-error-container font-semibold w-fit"
+                          id="badge-lock-1">
+                          <span class="material-symbols-outlined text-[14px]">lock</span>
+                          Fasilitas Terkunci (Non-Aktif)
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1 max-w-xs">
+                        <span class="font-label-md text-label-md font-semibold text-on-surface">Kompresor AC Meledak
+                          &amp; MCB Turun</span>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Suhu ruangan mencapai
+                          34°C, bau hangus kelistrikan di panel utama barat.</p>
+                        <div class="flex items-center gap-2 mt-1">
+                          <img class="w-12 h-12 rounded object-cover shadow-sm bg-surface-container"
+                            data-alt="High-resolution administrative evidence photograph showing a scorched electrical circuit breaker panel inside a university computer lab with warning tape around the perimeter."
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCWvpXj5iIUeknYXnmem39mdOshkmOOs_C7fiU63-Ckg-eY_HR36y4BnzrfckEACYX3aebBMyaiT5E6YA0ijucRbunX57izIL4APsQsXqhPLUNkkle1fpkJISOEEJzB4UDy4IGWQXIIwwzByK_k4vk0z5P-hgogjkg0uKNc8NBP21XyoAewYedr8J7hqHPrIUcKavUC55VU31zt3n9rdL_YLBIdm7ha4RmNAqwjgzv">
+                          <span class="font-label-sm text-label-sm text-primary underline cursor-pointer">Lihat 2 Foto
+                            Bukti</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <select
+                        class="h-8 px-space-sm rounded bg-surface-container-high text-on-surface font-label-md text-label-md border-0 focus:ring-1 focus:ring-primary focus:outline-none">
+                        <option value="baru">Baru Dilaporkan</option>
+                        <option selected="" value="diproses">Diproses Teknisi</option>
+                        <option value="selesai">Selesai Dikerjakan</option>
+                        <option value="ditolak">Ditolak / Batal</option>
+                      </select>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <div
+                          class="bg-surface-container-high p-space-sm rounded text-body-sm text-on-surface font-mono">
+                          "Kompresor AC sedang diganti oleh vendor Daikin. Estimasi selesai tgl 25 Apr siang."
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Update: Bpk. Joko (Teknisi
+                          Listrik)</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <button
+                        class="px-space-md py-1.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary/90 transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 shadow-sm ml-auto"
+                        id="btn-toggle-1" onclick="toggleFacilityLock(1, 'Lab Hardware 2')" type="button">
+                        <span class="material-symbols-outlined text-[16px]">lock_open</span>
+                        Aktifkan Fasilitas Kembali
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- REPORT 2: ACTIVE FACILITY (MINOR DAMAGE) -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors" id="facility-row-2">
+                    <td class="py-space-md px-space-md align-top font-data-mono text-data-mono">
+                      <span class="font-bold text-primary">DMG-885</span>
+                      <div class="text-[10px] text-on-surface-variant mt-1">23 Apr, 11:40 WIB</div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Auditorium B.J.
+                          Habibie</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Gedung Utama Lantai 3</span>
+                        <span
+                          class="mt-1 inline-flex items-center gap-1 px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-semibold w-fit"
+                          id="badge-lock-2">
+                          <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                          Fasilitas Aktif (Bisa Dibooking)
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1 max-w-xs">
+                        <span class="font-label-md text-label-md font-semibold text-on-surface">Remote Proyektor HDMI-2
+                          Hilang</span>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Konektor port HDMI
+                          panggung kendur, audio berdengung tipis.</p>
+                        <div class="flex items-center gap-2 mt-1">
+                          <img class="w-12 h-12 rounded object-cover shadow-sm bg-surface-container"
+                            data-alt="Institutional photograph showing a lectern stage audio-visual connection box with labeled HDMI ports inside a university lecture auditorium."
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI_7UYl23e0zMcU-j1dQuBsO7kLmvFWflGGEuRCx6unl0O3NKGkUHe4TScB8Viow7FiFNDy0ooKw8EbbGgwtriSLnOEE6hn1TtnHn45BVsSKV-CyyuLyb8Myze1oi3LVc68mTqs1ix5nKclhkdeB9sfLSRbRa217Gf-4cEL4mOfmGW7oWmYsvqk25ru-zG25tET7FwmK5eCxh3Hcu7W-N-Eoohv8Tw00Tp14di5STn">
+                          <span class="font-label-sm text-label-sm text-primary underline cursor-pointer">Lihat Foto
+                            Port</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <select
+                        class="h-8 px-space-sm rounded bg-surface-container-high text-on-surface font-label-md text-label-md border-0 focus:ring-1 focus:ring-primary focus:outline-none">
+                        <option selected="" value="baru">Baru Dilaporkan</option>
+                        <option value="diproses">Diproses Teknisi</option>
+                        <option value="selesai">Selesai Dikerjakan</option>
+                        <option value="ditolak">Ditolak / Batal</option>
+                      </select>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <div
+                          class="bg-surface-container-low p-space-sm rounded text-body-sm text-on-surface-variant font-mono italic">
+                          "Belum ada catatan teknisi. Unit cadangan disiapkan di pos jaga Zona A."
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Menunggu verifikasi tim
+                          multimedia</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <button
+                        class="px-space-md py-1.5 rounded-lg bg-surface-container text-error hover:bg-error hover:text-on-error transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 ml-auto"
+                        id="btn-toggle-2" onclick="toggleFacilityLock(2, 'Auditorium B.J. Habibie')" type="button">
+                        <span class="material-symbols-outlined text-[16px]">lock</span>
+                        Tandai Fasilitas: Dalam Perbaikan (Kunci Booking)
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- REPORT 3: SENATE MEETING ROOM -->
+                  <tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-low/30"
+                    id="facility-row-3">
+                    <td class="py-space-md px-space-md align-top font-data-mono text-data-mono">
+                      <span class="font-bold text-error">DMG-879</span>
+                      <div class="text-[10px] text-on-surface-variant mt-1">21 Apr, 16:20 WIB</div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">R. Rapat Senat (Rektorat Lt.
+                          2)</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Kapasitas 60 Kursi
+                          Eksekutif</span>
+                        <span
+                          class="mt-1 inline-flex items-center gap-1 px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error-container text-on-error-container font-semibold w-fit"
+                          id="badge-lock-3">
+                          <span class="material-symbols-outlined text-[14px]">lock</span>
+                          Fasilitas Terkunci (Non-Aktif)
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1 max-w-xs">
+                        <span class="font-label-md text-label-md font-semibold text-on-surface">Bocor Plafon Saat Hujan
+                          Deras</span>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Karpet basah seluas 3
+                          meter persegi, gypsum plafon retak dan rawan runtuh.</p>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <select
+                        class="h-8 px-space-sm rounded bg-surface-container-high text-on-surface font-label-md text-label-md border-0 focus:ring-1 focus:ring-primary focus:outline-none">
+                        <option value="baru">Baru Dilaporkan</option>
+                        <option selected="" value="diproses">Diproses Teknisi</option>
+                        <option value="selesai">Selesai Dikerjakan</option>
+                        <option value="ditolak">Ditolak / Batal</option>
+                      </select>
+                    </td>
+                    <td class="py-space-md px-space-md align-top">
+                      <div class="flex flex-col gap-1">
+                        <div
+                          class="bg-surface-container-high p-space-sm rounded text-body-sm text-on-surface font-mono">
+                          "Pekerjaan waterproofing atap dan penggantian gypsum dimulai 23 Apr."
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Update: Mandor Sarpras
+                          Sipil</span>
+                      </div>
+                    </td>
+                    <td class="py-space-md px-space-md align-top text-right">
+                      <button
+                        class="px-space-md py-1.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary/90 transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 shadow-sm ml-auto"
+                        id="btn-toggle-3" onclick="toggleFacilityLock(3, 'R. Rapat Senat')" type="button">
+                        <span class="material-symbols-outlined text-[16px]">lock_open</span>
+                        Aktifkan Fasilitas Kembali
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- FOOTER PROTOCOL COMPLIANCE -->
+          <section
+            class="bg-surface-container-low rounded-xl p-space-md flex flex-wrap items-center justify-between gap-space-md text-on-surface-variant font-label-sm text-label-sm">
+            <div class="flex items-center gap-space-md">
+              <span class="flex items-center gap-1 font-semibold text-primary">
+                <span class="material-symbols-outlined text-[16px]">verified_user</span>
+                Protokol Sarpras Kampus v2.4
+              </span>
+              <span class="">•</span>
+              <span class="">Semua tindakan persetujuan dan pembatalan tercatat permanen pada Audit Trail Log
+                Sim-Sarpras.</span>
+            </div>
+            <div class="flex items-center gap-space-sm font-data-mono text-data-mono">
+              <span class="">SESI: BMS-ZONA-A-88392</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              <span class="">ENKRIPSI: TLS-1.3</span>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function promptTolak(nama) {
+      const alasan = prompt("Masukkan alasan penolakan permohonan dari " + nama + ":", "Dokumen kelengkapan izin belum memenuhi standar fakultas.");
+      if (alasan !== null && alasan.trim() !== "") {
+        alert("Pengajuan oleh " + nama + " resmi DITOLAK.\nAlasan: " + alasan);
+      }
+    }
+
+    function promptBatalkanEmergency(nama, venue) {
+      const alasan = prompt("[UR10 - BATALKAN RESERVASI TERJADWAL]\nMasukkan alasan pembatalan darurat untuk " + nama + " di " + venue + ":", "Kerusakan teknis darurat / Agenda Rektorat mendesak.");
+      if (alasan !== null && alasan.trim() !== "") {
+        alert("Pemberitahuan darurat telah dikirimkan ke email " + nama + ".\nStatus reservasi: DIBATALKAN PETUGAS.\nAlasan: " + alasan);
+      }
+    }
+
+    function toggleFacilityLock(id, name) {
+      const btn = document.getElementById("btn-toggle-" + id);
+      const badge = document.getElementById("badge-lock-" + id);
+      const isCurrentlyLocked = btn.textContent.includes("Aktifkan Fasilitas Kembali");
+
+      if (isCurrentlyLocked) {
+        if (confirm("Apakah Anda yakin ingin mengaktifkan kembali " + name + " ke direktori publik? Fasilitas dapat langsung dibooking.")) {
+          badge.className = "mt-1 inline-flex items-center gap-1 px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-semibold w-fit";
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Fasilitas Aktif (Bisa Dibooking)';
+
+          btn.className = "px-space-md py-1.5 rounded-lg bg-surface-container text-error hover:bg-error hover:text-on-error transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 ml-auto";
+          btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">lock</span> Tandai Fasilitas: Dalam Perbaikan (Kunci Booking)';
+        }
+      } else {
+        if (confirm("KUNCI BOOKING (UR12): Tandai " + name + " dalam status perbaikan darurat? Jadwal baru akan diblokir otomatis.")) {
+          badge.className = "mt-1 inline-flex items-center gap-1 px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error-container text-on-error-container font-semibold w-fit";
+          badge.innerHTML = '<span class="material-symbols-outlined text-[14px]">lock</span> Fasilitas Terkunci (Non-Aktif)';
+
+          btn.className = "px-space-md py-1.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary/90 transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 shadow-sm ml-auto";
+          btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">lock_open</span> Aktifkan Fasilitas Kembali';
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
