@@ -37,4 +37,4 @@ Wajib mengacu dan tunduk sepenuhnya pada dokumen `github_guide.md`.
 
 ## 5. Kebersihan Kode (*Clean Code*)
 *   **Hapus Komentar Sampah:** Jangan meninggalkan kodingan "eksperimen" yang dimatikan (*commented-out*) berserakan di dalam proyek sebelum didorong (*push*) ke GitHub. Hapus kodingan mati tersebut!
-*   **Indentasi & Kerapian:** Format *file* Anda (gunakan pintasan *Shift+Alt+F* di VS Code) sebelum menyimpannya agar tulisan *tag* HTML dan PHP tidak rata kiri semua dan menyiksa mata *programmer* selanjutnya yang membaca.
+*   **Indentasi & Kerapian:** Format *file* Anda (gunakan pintasan *Shift+Alt+F* di VS Code) sebelum menyimpannya agar tulisan *tag* HTML dan PHP tidak rata kiri semua dan menyiksa mata *programmer* selanjutnya yang membaca (termasuk diri anda sendiri di masa depan).
