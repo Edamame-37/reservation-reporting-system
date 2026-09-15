@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : NewPasswordController.php
+ * FUNGSI       : Controller penetapan kata sandi baru
+ * DESKRIPSI    : Menangani formulir reset kata sandi baru (dalam mode mockup dialihkan tanpa kueri database MySQL).
+ * CARA KERJA   : Menerima token dan password baru, menonaktifkan kueri broker password database, dan mengarahkan ke halaman login.
+ */
 
 namespace App\Http\Controllers\Auth;
 
@@ -17,7 +23,9 @@ use Illuminate\View\View;
 class NewPasswordController extends Controller
 {
     /**
-     * Display the password reset view.
+     * FUNCTION/PROCEDURE : create()
+     * KEGUNAAN           : Menampilkan formulir input password baru.
+     * CARA KERJA         : Mengembalikan tampilan Blade auth.reset-password.
      */
     public function create(Request $request): View
     {
@@ -25,21 +33,22 @@ class NewPasswordController extends Controller
     }
 
     /**
-     * Handle an incoming new password request.
+     * FUNCTION/PROCEDURE : store()
+     * KEGUNAAN           : Memperbarui kata sandi pengguna.
+     * CARA KERJA         : [MODE MOCKUP] Kueri reset password ke database dinonaktifkan sementara dan mengarahkan langsung ke halaman login.
      *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'token'    => ['required'],
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'confirmed'],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
+        /*
+        // [MOCKUP MODE] Kueri database dinonaktifkan sementara:
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -51,13 +60,9 @@ class NewPasswordController extends Controller
                 event(new PasswordReset($user));
             }
         );
+        */
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        return redirect()->route('login')->with('status', 'Kata sandi berhasil diperbarui (Mode Mockup). Silakan masuk.');
     }
 }
+
