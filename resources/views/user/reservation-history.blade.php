@@ -203,6 +203,39 @@
             </div>
         </section>
 
+        {{-- Popover Konfirmasi Pembatalan Mandiri (UR04) --}}
+        <div x-show="showCancelPopover" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
+            <div @click.away="showCancelPopover = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-md w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
+                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+                    <h3 class="font-headline-sm text-headline-sm text-error flex items-center gap-2">
+                        <span class="material-symbols-outlined">warning</span>
+                        Konfirmasi Pembatalan
+                    </h3>
+                    <button type="button" @click="showCancelPopover = false"><span class="material-symbols-outlined">close</span></button>
+                </div>
+
+                <form action="#" method="POST" class="flex flex-col gap-space-md">
+                    @csrf
+                    <div class="p-space-sm bg-error-container text-on-error-container rounded-lg text-[12px]">
+                        <strong>Perhatian:</strong> Pembatalan mandiri hanya diizinkan maksimal <strong>H-1</strong> sebelum jadwal penggunaan fasilitas (Sesuai UR04). Tindakan ini tidak dapat dibatalkan.
+                    </div>
+                    <p class="font-body-sm text-body-sm text-on-surface">
+                        Apakah Anda yakin ingin membatalkan permohonan reservasi Anda untuk fasilitas ini?
+                    </p>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="usr-cancel-reason">Alasan Pembatalan (Opsional)</label>
+                        <textarea id="usr-cancel-reason" name="cancel_reason" rows="2" placeholder="Contoh: Perubahan jadwal kegiatan..." class="w-full p-space-md bg-surface-container-low rounded-lg text-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-outline-variant/40">
+                        <button type="button" @click="showCancelPopover = false" class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md">Batal</button>
+                        <button type="button" @click="showCancelPopover = false" class="px-space-md py-1.5 rounded-lg bg-error text-on-error font-label-md font-semibold hover:bg-red-800 transition-colors">Eksekusi Pembatalan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- Detail Modal Dialog --}}
         <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
             <div @click.away="showDetailModal = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-lg w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
