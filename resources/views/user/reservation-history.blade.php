@@ -1,278 +1,287 @@
 {{-- 
   NAMA FILE      : reservation-history.blade.php
-  FUNGSIONALITAS : Halaman Lengkap Riwayat & Detail Reservasi Pengguna
-  DESKRIPSI      : Menampilkan daftar seluruh tiket permohonan reservasi pengguna dengan filter status, pencarian tiket, modal detail lengkap, dan alur pembatalan mandiri H-1.
-  CARA KERJA     : Menggunakan layout <x-app-layout active="reservation-history">, menyediakan modal dialog detail dan konfirmasi pembatalan mandiri via Alpine.js.
+  FUNGSIONALITAS : Halaman Antarmuka Riwayat & Detail Reservasi Pengguna
+  DESKRIPSI      : Menampilkan daftar seluruh tiket permohonan reservasi pengguna, status verifikasi petugas, modal detail, dan aksi pembatalan mandiri (H-1).
+  CARA KERJA     : Menggunakan layout <x-app-layout active="reservation-history">, menyediakan popover konfirmasi pembatalan dan dialog detail interaktif via Alpine.js.
 --}}
 
-<x-app-layout title="Riwayat Lengkap Reservasi Saya" active="reservation-history">
+<x-app-layout title="Riwayat Reservasi Saya" active="reservation-history">
     <div x-data="{
         showDetailModal: false,
-        showCancelModal: false,
-        search: '',
-        activeTab: 'semua',
-        selectedTicket: null,
-        tickets: [
-            {
-                id: 'TKT-20240428-009',
-                venue: 'Lab Komputasi Cloud & Jaringan',
-                building: 'Gedung Lab Terpadu C, Lt. 2',
-                date: '28 Apr 2024',
-                time: '13:00 - 15:30 WIB',
-                purpose: 'Praktikum Mandiri Pemrograman Web Lanjut (35 Mahasiswa)',
-                status: 'pending',
-                statusLabel: 'Menunggu Konfirmasi',
-                officerNote: 'Sedang dalam antrean evaluasi staf sarpras.',
-                canCancel: true
-            },
-            {
-                id: 'TKT-20240424-001',
-                venue: 'Auditorium Utama B.J. Habibie',
-                building: 'Gedung Rektorat, Lt. 1 & 2',
-                date: '24 Apr 2024',
-                time: '09:00 - 12:00 WIB',
-                purpose: 'Seminar Nasional Cloud Architecture Himpunan TI (75 Peserta)',
-                status: 'approved',
-                statusLabel: 'Disetujui Petugas',
-                officerNote: 'Disetujui oleh Bambang S. Surat izin kegiatan telah diverifikasi valid.',
-                canCancel: true
-            },
-            {
-                id: 'TKT-20240418-034',
-                venue: 'Smart Classroom 302',
-                building: 'Gedung Kuliah Bersama B, Lt. 3',
-                date: '18 Apr 2024',
-                time: '10:00 - 12:00 WIB',
-                purpose: 'Kuliah Tamu Industri AI & Machine Learning (50 Peserta)',
-                status: 'approved',
-                statusLabel: 'Selesai Digunakan',
-                officerNote: 'Kegiatan selesai terlaksana tanpa insiden.',
-                canCancel: false
-            },
-            {
-                id: 'TKT-20240410-012',
-                venue: 'Aula Serbaguna & Olahraga PKM',
-                building: 'Pusat Kegiatan Mahasiswa, Lt. 1',
-                date: '10 Apr 2024',
-                time: '08:00 - 17:00 WIB',
-                purpose: 'Festival Musik Dies Natalis BEM Universitas',
-                status: 'rejected',
-                statusLabel: 'Ditolak',
-                officerNote: 'Jadwal bentrok dengan agenda resmi Wisuda Sarjana di aula utama.',
-                canCancel: false
-            },
-            {
-                id: 'TKT-20240329-005',
-                venue: 'Ruang Seminar Lt. 3',
-                building: 'Gedung Kuliah Terpadu A, Lt. 3',
-                date: '29 Mar 2024',
-                time: '14:00 - 16:00 WIB',
-                purpose: 'Rapat Koordinasi Pengurus Ormawa BEM',
-                status: 'cancelled',
-                statusLabel: 'Dibatalkan Pengguna',
-                officerNote: 'Dibatalkan oleh pemohon pada H-2 jadwal kegiatan.',
-                canCancel: false
-            }
-        ],
-        get filteredTickets() {
-            return this.tickets.filter(t => {
-                const matchSearch = t.id.toLowerCase().includes(this.search.toLowerCase()) || t.venue.toLowerCase().includes(this.search.toLowerCase()) || t.purpose.toLowerCase().includes(this.search.toLowerCase());
-                const matchTab = this.activeTab === 'semua' || t.status === this.activeTab;
-                return matchSearch && matchTab;
-            });
+        showCancelPopover: false,
+        selectedTicket: {
+            code: 'TKT-20240424-001',
+            venue: 'Auditorium B.J. Habibie',
+            location: 'Gedung A, Lt. 3',
+            date: '24 Apr 2024',
+            time: '09:00 - 12:00 WIB',
+            purpose: 'Seminar Nasional Cloud Architecture Himpunan TI (Estimasi 75 Peserta)',
+            status: 'Menunggu Konfirmasi',
+            officerNote: 'Dalam antrean verifikasi staf sarpras.'
         },
-        openDetail(t) {
-            this.selectedTicket = t;
+        openDetail(ticket) {
+            this.selectedTicket = ticket;
             this.showDetailModal = true;
-        },
-        openCancel(t) {
-            this.selectedTicket = t;
-            this.showCancelModal = true;
         }
     }">
-
-        {{-- Breadcrumb & Header --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Riwayat Lengkap Reservasi</span>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Riwayat Lengkap Permohonan Reservasi</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Daftar seluruh reservasi aktif dan arsip peminjaman ruang Anda di universitas.</p>
-                </div>
-                <a href="{{ url('/user/reservation-form') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition shadow-xs">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span>Ajukan Reservasi Baru</span>
-                </a>
-            </div>
-        </div>
-
-        {{-- Filter Tabs & Pencarian --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            {{-- Tabs Status --}}
-            <div class="flex items-center gap-1 overflow-x-auto w-full md:w-auto p-1 bg-slate-100 rounded-xl text-xs font-medium">
-                <button type="button" @click="activeTab = 'semua'" :class="activeTab === 'semua' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                    Semua (5)
-                </button>
-                <button type="button" @click="activeTab = 'pending'" :class="activeTab === 'pending' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                    Menunggu (1)
-                </button>
-                <button type="button" @click="activeTab = 'approved'" :class="activeTab === 'approved' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                    Disetujui (2)
-                </button>
-                <button type="button" @click="activeTab = 'rejected'" :class="activeTab === 'rejected' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                    Ditolak (1)
-                </button>
-                <button type="button" @click="activeTab = 'cancelled'" :class="activeTab === 'cancelled' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                    Dibatalkan (1)
-                </button>
-            </div>
-
-            {{-- Input Pencarian --}}
-            <div class="relative w-full md:w-64">
-                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
-                <input type="text" x-model="search" placeholder="Cari kode tiket / ruang..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
-            </div>
-        </div>
-
-        {{-- Tabel Riwayat Lengkap --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                            <th class="py-3 px-4">Kode Tiket</th>
-                            <th class="py-3 px-4">Fasilitas & Lokasi</th>
-                            <th class="py-3 px-4">Jadwal & Waktu</th>
-                            <th class="py-3 px-4">Tujuan Penggunaan</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <template x-for="ticket in filteredTickets" :key="ticket.id">
-                            <tr class="hover:bg-slate-50/70 transition">
-                                <td class="py-3.5 px-4 font-mono font-bold text-slate-800" x-text="ticket.id"></td>
-                                <td class="py-3.5 px-4">
-                                    <div class="font-bold text-slate-900" x-text="ticket.venue"></div>
-                                    <div class="text-[11px] text-slate-500" x-text="ticket.building"></div>
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    <div class="text-slate-800 font-medium" x-text="ticket.date"></div>
-                                    <div class="text-[11px] text-slate-500 font-mono" x-text="ticket.time"></div>
-                                </td>
-                                <td class="py-3.5 px-4 max-w-xs truncate text-slate-600" x-text="ticket.purpose"></td>
-                                <td class="py-3.5 px-4">
-                                    <span x-show="ticket.status === 'pending'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                        Menunggu Konfirmasi
-                                    </span>
-                                    <span x-show="ticket.status === 'approved'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-semibold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                                        Disetujui Petugas
-                                    </span>
-                                    <span x-show="ticket.status === 'rejected'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-rose-50 text-rose-700 border border-rose-200/60 font-medium">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                        Ditolak
-                                    </span>
-                                    <span x-show="ticket.status === 'cancelled'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200 font-medium">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                        Dibatalkan
-                                    </span>
-                                </td>
-                                <td class="py-3.5 px-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <button type="button" @click="openDetail(ticket)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                                            Detail
-                                        </button>
-                                        <button type="button" x-show="ticket.canCancel" @click="openCancel(ticket)" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold hover:bg-rose-100 transition" title="Batalkan Reservasi (Maksimal H-1)">
-                                            Batal
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- Modal Detail Reservasi --}}
-        <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div @click.away="showDetailModal = false" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative">
-                <button type="button" @click="showDetailModal = false" class="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-
-                <template x-if="selectedTicket">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 rounded-md bg-slate-100 font-mono text-xs font-bold text-slate-800" x-text="selectedTicket.id"></span>
-                            <span class="text-xs font-semibold text-slate-500">Detail Permohonan</span>
-                        </div>
-                        <h2 class="text-lg font-bold text-slate-900" x-text="selectedTicket.venue"></h2>
-                        <p class="text-xs text-slate-500 mb-4" x-text="selectedTicket.building"></p>
-
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4 space-y-2 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Tanggal Kegiatan:</span>
-                                <span class="font-bold text-slate-900" x-text="selectedTicket.date"></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Rentang Waktu:</span>
-                                <span class="font-mono font-bold text-slate-900" x-text="selectedTicket.time"></span>
-                            </div>
-                            <div class="pt-2 border-t border-slate-200/60">
-                                <span class="text-slate-500 block mb-0.5">Tujuan Penggunaan:</span>
-                                <span class="text-slate-800" x-text="selectedTicket.purpose"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <span class="text-xs font-bold text-slate-700 block mb-1">Catatan Verifikasi Petugas:</span>
-                            <p class="text-xs text-slate-600 bg-blue-50/60 p-3 rounded-xl border border-blue-100" x-text="selectedTicket.officerNote"></p>
-                        </div>
-
-                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                            <button type="button" @click="showDetailModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
-                                Tutup
-                            </button>
-                        </div>
+        <!-- 
+          ELEMEN       : Section Riwayat & Detail Reservasi (UR04, UR05)
+          KEGUNAAN     : Memantau proses approval petugas dan membatalkan pesanan sebelum batas waktu H-1.
+          CARA KERJA   : Merender tabel riwayat dengan filter status dan modal detail berbasis Alpine.js.
+        -->
+        <section class="bg-surface-container-lowest rounded-xl shadow-md p-space-xl mb-space-xl">
+            {{-- Header & Search --}}
+            <div class="flex flex-wrap items-center justify-between pb-space-md mb-space-md gap-space-md border-b border-outline-variant">
+                <div class="flex items-center gap-space-sm">
+                    <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-[24px]">history</span>
                     </div>
-                </template>
-            </div>
-        </div>
-
-        {{-- Modal Konfirmasi Pembatalan Mandiri H-1 --}}
-        <div x-show="showCancelModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div @click.away="showCancelModal = false" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center">
-                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
-                    <span class="material-symbols-outlined text-[28px]">warning</span>
+                    <div>
+                        <h1 class="font-headline-md text-headline-md text-primary">Riwayat & Detail Reservasi Saya</h1>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant">Modul UR04 & UR05: Pantau status verifikasi petugas sarpras atau batalkan pesanan sebelum batas H-1.</p>
+                    </div>
                 </div>
-                <h3 class="text-base font-bold text-slate-900 mb-1">Konfirmasi Pembatalan Reservasi</h3>
-                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                    Sesuai ketentuan, pembatalan mandiri hanya diizinkan maksimal <strong>H-1 sebelum jadwal</strong>. Slot waktu yang dilepas akan langsung terbuka kembali di kalender ketersediaan umum.
-                </p>
+                <div class="flex items-center gap-space-sm">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari kode tiket / ruang..." class="h-9 px-space-md pl-8 bg-surface-container-low rounded-lg text-body-sm text-on-surface border border-outline-variant/60 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
+                        <span class="material-symbols-outlined absolute left-2 top-2 text-[18px] text-on-surface-variant">search</span>
+                    </div>
+                </div>
+            </div>
 
-                <div class="flex items-center justify-center gap-2">
-                    <button type="button" @click="showCancelModal = false" class="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
-                        Kembali
+            {{-- Cancellation Warning Popover --}}
+            <div x-show="showCancelPopover" x-cloak class="mb-space-md p-space-md bg-error-container text-on-error-container rounded-lg shadow-sm flex flex-wrap items-center justify-between gap-space-md">
+                <div class="flex items-center gap-space-md">
+                    <span class="material-symbols-outlined text-error text-[28px]">warning</span>
+                    <div>
+                        <div class="font-label-lg text-label-lg font-bold">Konfirmasi Pembatalan Reservasi TKT-20240424-001 (Batas Maksimal H-1)</div>
+                        <div class="font-body-sm text-body-sm">Slot 09:00 - 12:00 WIB pada Auditorium B.J. Habibie akan segera dilepas kembali ke matriks ketersediaan umum. Tindakan ini tidak dapat dibatalkan.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <button type="button" @click="showCancelPopover = false" class="px-space-md py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">
+                        Batal
                     </button>
                     <!-- 
                       ROUTE: POST /user/reservations/{id}/cancel
-                      FUNGSI: Membatalkan reservasi mandiri dengan validasi H-1 di server
+                      FUNGSI: Membatalkan permohonan reservasi dengan validasi batas waktu H-1
                     -->
-                    <form action="{{ url('/user/reservation-history') }}" method="GET" class="flex-1">
-                        <button type="submit" @click="alert('Reservasi berhasil dibatalkan. Slot waktu telah dilepas kembali ke matriks umum.'); showCancelModal = false;" class="w-full px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs">
-                            Ya, Batalkan
+                    <form action="{{ url('/user/reservations/1/cancel') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-space-md py-1.5 rounded-lg bg-error text-on-error font-label-md text-label-md hover:bg-red-800 transition-colors shadow-sm font-semibold">
+                            Ya, Batalkan Reservasi
                         </button>
                     </form>
                 </div>
             </div>
+
+            {{-- Tabel Daftar Reservasi --}}
+            <div class="overflow-x-auto rounded-lg">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                            <th class="py-space-md px-space-md">Kode Tiket</th>
+                            <th class="py-space-md px-space-md">Fasilitas & Lokasi</th>
+                            <th class="py-space-md px-space-md">Tanggal & Waktu</th>
+                            <th class="py-space-md px-space-md">Tujuan Penggunaan</th>
+                            <th class="py-space-md px-space-md">Status Validasi</th>
+                            <th class="py-space-md px-space-md text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm text-on-surface">
+                        {{-- Row 1: Menunggu Konfirmasi --}}
+                        <tr class="hover:bg-surface-container-low/60 transition-colors">
+                            <td class="py-space-md px-space-md font-data-mono text-data-mono font-bold text-primary">TKT-20240424-001</td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-lg text-label-lg text-on-surface font-semibold">Auditorium B.J. Habibie</div>
+                                <div class="font-body-sm text-body-sm text-on-surface-variant">Gedung A, Lt. 3</div>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-md text-label-md text-on-surface font-medium">24 Apr 2024</div>
+                                <div class="font-data-mono text-data-mono text-on-surface-variant">09:00 - 12:00 WIB</div>
+                            </td>
+                            <td class="py-space-md px-space-md max-w-xs">
+                                <p class="font-body-sm text-body-sm text-on-surface truncate">Seminar Nasional Cloud Architecture Himpunan TI</p>
+                                <span class="font-data-mono text-[11px] text-on-surface-variant">Estimasi 75 Peserta</span>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <x-cava.status-badge status="Menunggu Konfirmasi" />
+                            </td>
+                            <td class="py-space-md px-space-md text-right">
+                                <div class="flex items-center justify-end gap-space-xs">
+                                    <button type="button" @click="openDetail({
+                                        code: 'TKT-20240424-001',
+                                        venue: 'Auditorium B.J. Habibie',
+                                        location: 'Gedung A, Lt. 3',
+                                        date: '24 Apr 2024',
+                                        time: '09:00 - 12:00 WIB (6 Slot 30m)',
+                                        purpose: 'Seminar Nasional Cloud Architecture Himpunan TI (Estimasi 75 Peserta, PIC: Dimas Pratama)',
+                                        status: 'Menunggu Konfirmasi',
+                                        officerNote: 'Berkas SK sedang dievaluasi oleh petugas sarpras Zona Gedung A.'
+                                    })" class="px-space-sm py-1 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[16px]">visibility</span> Detail
+                                    </button>
+                                    <button type="button" @click="showCancelPopover = !showCancelPopover" class="px-space-sm py-1 rounded bg-error-container text-on-error-container font-label-md text-label-md hover:bg-error hover:text-on-error transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[16px]">cancel</span> Batalkan
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Row 2: Disetujui Petugas --}}
+                        <tr class="hover:bg-surface-container-low/60 transition-colors">
+                            <td class="py-space-md px-space-md font-data-mono text-data-mono font-bold text-primary">TKT-20240418-034</td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-lg text-label-lg text-on-surface font-semibold">Lab Komputasi Awan</div>
+                                <div class="font-body-sm text-body-sm text-on-surface-variant">Gedung C, Lt. 2</div>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-md text-label-md text-on-surface font-medium">18 Apr 2024</div>
+                                <div class="font-data-mono text-data-mono text-on-surface-variant">13:00 - 15:30 WIB</div>
+                            </td>
+                            <td class="py-space-md px-space-md max-w-xs">
+                                <p class="font-body-sm text-body-sm text-on-surface truncate">Praktikum Mandiri Final Project Web</p>
+                                <span class="font-data-mono text-[11px] text-on-surface-variant">35 Mahasiswa</span>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <x-cava.status-badge status="Disetujui" />
+                            </td>
+                            <td class="py-space-md px-space-md text-right">
+                                <div class="flex items-center justify-end gap-space-xs">
+                                    <button type="button" @click="openDetail({
+                                        code: 'TKT-20240418-034',
+                                        venue: 'Lab Komputasi Awan',
+                                        location: 'Gedung C, Lt. 2',
+                                        date: '18 Apr 2024',
+                                        time: '13:00 - 15:30 WIB',
+                                        purpose: 'Praktikum Mandiri Final Project Pemrograman Web',
+                                        status: 'Disetujui',
+                                        officerNote: 'Disetujui resmi oleh Pak Bambang S. (Petugas Sarpras Zona Gedung C).'
+                                    })" class="px-space-sm py-1 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[16px]">visibility</span> Detail
+                                    </button>
+                                    <span class="px-space-sm py-1 rounded text-[11px] text-outline cursor-not-allowed">Selesai / Terkunci</span>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Row 3: Ditolak --}}
+                        <tr class="hover:bg-surface-container-low/60 transition-colors">
+                            <td class="py-space-md px-space-md font-data-mono text-data-mono font-bold text-primary">TKT-20240410-012</td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-lg text-label-lg text-on-surface font-semibold">Aula Kemahasiswaan PKM</div>
+                                <div class="font-body-sm text-body-sm text-on-surface-variant">Gedung PKM, Lt. 1</div>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <div class="font-label-md text-label-md text-on-surface font-medium">10 Apr 2024</div>
+                                <div class="font-data-mono text-data-mono text-on-surface-variant">08:00 - 17:00 WIB</div>
+                            </td>
+                            <td class="py-space-md px-space-md max-w-xs">
+                                <p class="font-body-sm text-body-sm text-on-surface truncate">Festival Musik Dies Natalis BEM</p>
+                                <span class="font-data-mono text-[11px] text-error">Alasan: Bertabrakan dengan Agenda Wisuda</span>
+                            </td>
+                            <td class="py-space-md px-space-md">
+                                <x-cava.status-badge status="Ditolak" />
+                            </td>
+                            <td class="py-space-md px-space-md text-right">
+                                <button type="button" @click="openDetail({
+                                    code: 'TKT-20240410-012',
+                                    venue: 'Aula Kemahasiswaan PKM',
+                                    location: 'Gedung PKM, Lt. 1',
+                                    date: '10 Apr 2024',
+                                    time: '08:00 - 17:00 WIB',
+                                    purpose: 'Festival Musik Dies Natalis BEM Universitas',
+                                    status: 'Ditolak',
+                                    officerNote: 'Ditolak: Bertabrakan dengan agenda wisuda universitas gelombang II.'
+                                })" class="px-space-sm py-1 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1 ml-auto">
+                                    <span class="material-symbols-outlined text-[16px]">visibility</span> Detail
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {{-- Popover Konfirmasi Pembatalan Mandiri (UR04) --}}
+        <div x-show="showCancelPopover" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
+            <div @click.away="showCancelPopover = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-md w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
+                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+                    <h3 class="font-headline-sm text-headline-sm text-error flex items-center gap-2">
+                        <span class="material-symbols-outlined">warning</span>
+                        Konfirmasi Pembatalan
+                    </h3>
+                    <button type="button" @click="showCancelPopover = false"><span class="material-symbols-outlined">close</span></button>
+                </div>
+
+                <form action="#" method="POST" class="flex flex-col gap-space-md">
+                    @csrf
+                    <div class="p-space-sm bg-error-container text-on-error-container rounded-lg text-[12px]">
+                        <strong>Perhatian:</strong> Pembatalan mandiri hanya diizinkan maksimal <strong>H-1</strong> sebelum jadwal penggunaan fasilitas (Sesuai UR04). Tindakan ini tidak dapat dibatalkan.
+                    </div>
+                    <p class="font-body-sm text-body-sm text-on-surface">
+                        Apakah Anda yakin ingin membatalkan permohonan reservasi Anda untuk fasilitas ini?
+                    </p>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="usr-cancel-reason">Alasan Pembatalan (Opsional)</label>
+                        <textarea id="usr-cancel-reason" name="cancel_reason" rows="2" placeholder="Contoh: Perubahan jadwal kegiatan..." class="w-full p-space-md bg-surface-container-low rounded-lg text-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-outline-variant/40">
+                        <button type="button" @click="showCancelPopover = false" class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md">Batal</button>
+                        <button type="button" @click="showCancelPopover = false" class="px-space-md py-1.5 rounded-lg bg-error text-on-error font-label-md font-semibold hover:bg-red-800 transition-colors">Eksekusi Pembatalan</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
+        {{-- Detail Modal Dialog --}}
+        <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
+            <div @click.away="showDetailModal = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-lg w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
+                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[24px]">confirmation_number</span>
+                        <h3 class="font-headline-sm text-headline-sm text-primary">Detail Reservasi</h3>
+                    </div>
+                    <button type="button" @click="showDetailModal = false" class="text-on-surface-variant hover:text-on-surface">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-space-sm text-body-sm">
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Kode Tiket:</span>
+                        <span class="font-data-mono font-bold text-primary" x-text="selectedTicket.code"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Fasilitas:</span>
+                        <span class="font-semibold text-on-surface" x-text="selectedTicket.venue"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Jadwal & Waktu:</span>
+                        <span class="font-data-mono" x-text="selectedTicket.date + ' • ' + selectedTicket.time"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Status Saat Ini:</span>
+                        <span class="font-semibold" x-text="selectedTicket.status"></span>
+                    </div>
+                    <div class="p-space-sm bg-surface-container-low rounded-lg mt-1">
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase">Tujuan Kegiatan:</div>
+                        <div class="text-on-surface mt-0.5" x-text="selectedTicket.purpose"></div>
+                    </div>
+                    <div class="p-space-sm bg-surface-container-high/60 rounded-lg">
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase">Catatan Petugas Sarpras:</div>
+                        <div class="text-on-surface mt-0.5 italic" x-text="selectedTicket.officerNote"></div>
+                    </div>
+                </div>
+
+                <div class="pt-space-sm flex justify-end">
+                    <button type="button" @click="showDetailModal = false" class="px-space-lg py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>

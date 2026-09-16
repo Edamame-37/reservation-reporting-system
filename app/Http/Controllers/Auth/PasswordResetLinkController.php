@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : PasswordResetLinkController.php
+ * FUNGSI       : Controller pengiriman permintaan tautan reset kata sandi
+ * DESKRIPSI    : Menangani formulir lupa kata sandi (dalam mode mockup dialihkan tanpa kueri database MySQL).
+ * CARA KERJA   : Menerima email tujuan, melewati kueri tabel password_reset_tokens, dan mengembalikan pesan status tiruan.
+ */
 
 namespace App\Http\Controllers\Auth;
 
@@ -12,7 +18,9 @@ use Illuminate\View\View;
 class PasswordResetLinkController extends Controller
 {
     /**
-     * Display the password reset link request view.
+     * FUNCTION/PROCEDURE : create()
+     * KEGUNAAN           : Menampilkan formulir permintaan tautan reset password.
+     * CARA KERJA         : Mengembalikan tampilan Blade auth.forgot-password.
      */
     public function create(): View
     {
@@ -20,7 +28,9 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
+     * FUNCTION/PROCEDURE : store()
+     * KEGUNAAN           : Mengirimkan tautan reset kata sandi ke email pemohon.
+     * CARA KERJA         : [MODE MOCKUP] Kueri broker password dinonaktifkan sementara dan mengembalikan pesan sukses simulasi.
      *
      * @throws ValidationException
      */
@@ -30,16 +40,14 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+        /*
+        // [MOCKUP MODE] Kueri database dinonaktifkan sementara:
         $status = Password::sendResetLink(
             $request->only('email')
         );
+        */
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        return back()->with('status', 'Tautan simulasi reset password berhasil dikirim ke email Anda (Mode Mockup).');
     }
 }
+
