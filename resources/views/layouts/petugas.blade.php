@@ -1,7 +1,7 @@
 {{-- 
   NAMA FILE      : petugas.blade.php
   FUNGSIONALITAS : Kerangka Layout Utama (Master) untuk Halaman Petugas Sarpras
-  DESKRIPSI      : Menampilkan dasbor operasional petugas, banner konteks zona sarpras aktif, sidebar antrean verifikasi & approval, dan manajemen tiket.
+  DESKRIPSI      : Menampilkan bingkai kerja operasional petugas sarpras, konteks shift piket, deteksi bentrok real-time, dan sidebar antrean verifikasi dengan desain Modern Campus Minimalist.
   CARA KERJA     : Bertindak sebagai master layout. Halaman petugas menggunakan layout ini via <x-petugas-layout> atau @extends('layouts.petugas').
 --}}
 
@@ -37,72 +37,54 @@
         }
     </style>
 </head>
-<body class="bg-surface font-sans text-body-md text-on-surface antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA --}}
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="true" 
         userName="{{ auth()->user()->name ?? 'Bambang Setyawan' }}"
         userRole="Petugas Sarpras Zona A"
         userIdentifier="NIP. {{ auth()->user()->nip ?? '197804122005011002' }}"
-        title="CAVA - Pusat Operasional Sarpras" 
-        subtitle="Sistem Verifikasi Reservasi & Pemeliharaan Fasilitas"
+        title="CAVA Operasional" 
+        subtitle="Sistem Verifikasi & Pemeliharaan Sarpras"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Petugas) --}}
     <x-cava.sidebar role="petugas" :active="$active" />
 
-    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 100px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-[100px]">
-        {{-- Role Switcher Tab (Untuk Pengujian & Navigasi Peran) --}}
-        <x-cava.role-switcher activeRole="petugas" />
-
-        <main class="flex-1 bg-surface px-margin-lg py-margin-md flex flex-col gap-space-lg">
-            {{-- SUB-HEADER CONTEXT / OFFICER INFO BANNER --}}
-            <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
-                <div class="flex flex-wrap items-center justify-between gap-space-md">
-                    <div class="flex items-center gap-space-lg">
-                        <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm">
-                            <span class="material-symbols-outlined text-[28px]">shield_person</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-space-sm">
-                                <span class="font-headline-md text-headline-md text-on-surface tracking-tight">CAVA - Pusat Operasional & Sarpras Kampus</span>
-                                <span class="px-space-sm py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-semibold flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-                                    ZONA-A AKTIF
-                                </span>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-x-space-md gap-y-1 mt-1 text-on-surface-variant font-body-sm text-body-sm">
-                                <span class="flex items-center gap-1 font-label-md text-label-md text-primary font-semibold">
-                                    <span class="material-symbols-outlined text-[16px]">badge</span>
-                                    Pak Bambang S. (Petugas Sarpras Zona Gedung A)
-                                </span>
-                                <span>•</span>
-                                <span class="font-data-mono text-data-mono bg-surface-container px-space-sm py-0.5 rounded text-on-surface">
-                                    NIP. 197804122005011002
-                                </span>
-                                <span>•</span>
-                                <span class="flex items-center gap-1 text-secondary font-medium">
-                                    <span class="material-symbols-outlined text-[16px]">schedule</span>
-                                    Shift Pagi: 07.00 - 15.00 WIB
-                                </span>
-                            </div>
-                        </div>
+    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
+    <div class="pl-64 flex-1 flex flex-col pt-16">
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+            {{-- Context Officer Info Bar (Sleek Single Strip) --}}
+            <section class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+                        <span class="material-symbols-outlined text-[22px]">shield_person</span>
                     </div>
-                    <div class="flex items-center gap-space-md">
-                        <div class="hidden xl:flex flex-col items-end text-right">
-                            <span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-data-mono text-data-mono">Status Sistem Otomasi</span>
-                            <span class="font-label-md text-label-md text-secondary flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-secondary"></span>
-                                Pendeteksi Bentrok: Realtime Active
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-slate-900">Bambang Setyawan</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Zona Gedung A Aktif
                             </span>
                         </div>
-                        <div class="h-8 w-[1px] bg-surface-container-high hidden xl:block"></div>
-                        <button class="px-space-md py-space-sm rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors font-label-md text-label-md flex items-center gap-space-xs" type="button" onclick="location.reload()">
-                            <span class="material-symbols-outlined text-[16px]">refresh</span>
-                            Sinkron Data
-                        </button>
+                        <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                            <span>NIP. 197804122005011002</span>
+                            <span>•</span>
+                            <span class="text-slate-600 font-medium">Shift Pagi (07.00 - 15.00 WIB)</span>
+                        </div>
                     </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="hidden md:flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-200/60">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Validasi Anti-Bentrok: Aktif</span>
+                    </span>
+                    <button type="button" onclick="location.reload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 transition shadow-xs">
+                        <span class="material-symbols-outlined text-[16px]">refresh</span>
+                        <span>Sinkron Data</span>
+                    </button>
                 </div>
             </section>
 
@@ -111,10 +93,13 @@
         </main>
 
         {{-- Footer Minimalis --}}
-        <footer class="px-margin-lg py-space-md bg-surface-container-lowest border-t border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
-            <span>&copy; {{ date('Y') }} CAVA - Pusat Kendali Petugas Sarpras. Modul UR08 • UR09 • UR10 • UR11 • UR12.</span>
-            <span class="font-data-mono text-data-mono">AUTOMATED CONCURRENCY ENGINE READY</span>
+        <footer class="px-6 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
+            <span>&copy; {{ date('Y') }} CAVA - Pusat Kendali Petugas Sarpras Kampus.</span>
+            <span class="text-slate-400">Modul Operasional Aktif</span>
         </footer>
     </div>
+
+    {{-- Role Switcher Floating Widget (Testing Helper) --}}
+    <x-cava.role-switcher activeRole="petugas" />
 </body>
 </html>

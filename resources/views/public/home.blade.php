@@ -1,209 +1,185 @@
 {{-- 
   NAMA FILE      : home.blade.php
-  FUNGSIONALITAS : Halaman Antarmuka Beranda (Landing Page) Publik CAVA
-  DESKRIPSI      : Menampilkan masthead sambutan, ikhtisar fasilitas kampus, pencarian cepat, dan matriks slot ketersediaan 30 menit publik.
-  CARA KERJA     : Menggunakan layout <x-public-layout active="home">, merender fitur pencarian fasilitas dan status ketersediaan terbuka.
+  FUNGSIONALITAS : Halaman Beranda (Landing Page) Publik CAVA
+  DESKRIPSI      : Menampilkan sambutan portal kampus, pencarian cepat, 3 fasilitas unggulan dengan batas data preview, dan tautan 'Lihat Selengkapnya' ke katalog dan jadwal lengkap.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="home">, menyajikan 3 data preview terkurasi dan tombol redirect ke halaman detail.
 --}}
 
-<x-public-layout title="Beranda Publik" active="home">
+<x-public-layout title="Beranda Publik Fasilitas Kampus" active="home">
     <!-- 
-      ELEMEN       : Sub-Header / Portal Masthead Publik
-      KEGUNAAN     : Menyambut pengunjung dan sivitas dengan identitas resmi kampus dan kepatuhan privasi UR-01.
-      CARA KERJA   : Menampilkan banner statis dengan tautan cepat menuju Login SSO Universitas.
+      ELEMEN       : Hero Banner Pencarian Fasilitas Kampus
+      KEGUNAAN     : Menyambut pengunjung dan sivitas dengan pencarian langsung ruang universitas.
+      CARA KERJA   : Menerima input kata kunci dan mengirimkan parameter filter ke katalog.
     -->
-    <section class="bg-surface-container-lowest shadow-sm rounded-xl p-space-lg mb-space-xl">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-lg">
-            <div class="flex items-center gap-space-lg">
-                <div class="w-14 h-14 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm">
-                    <span class="material-symbols-outlined text-[32px]">domain</span>
+    <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 rounded-3xl p-6 sm:p-10 text-white shadow-md mb-10 relative overflow-hidden">
+        <div class="max-w-2xl relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-blue-200 border border-white/10 mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>Sistem Otomasi Reservasi Fasilitas Kampus Terpadu</span>
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
+                Temukan & Cek Ketersediaan Fasilitas Akademik Kampus
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 mb-6 font-normal leading-relaxed">
+                Akses informasi ruang auditorium, laboratorium komputer, dan smart classroom secara transparan per slot 30 menit dari pukul 07:00 hingga 20:00 WIB.
+            </p>
+
+            <!-- 
+              ROUTE: Form pencarian GET ke /public/catalog
+              FUNGSI: Membawa kata kunci pencarian pengunjung menuju katalog lengkap
+            -->
+            <form action="{{ url('/public/catalog') }}" method="GET" class="bg-white p-2 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center gap-2 text-slate-800">
+                <div class="relative flex-1 w-full">
+                    <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-[20px]">search</span>
+                    <input type="text" name="q" placeholder="Cari nama ruang (Auditorium, Lab Komputer, Smart Classroom)..." class="w-full pl-11 pr-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 bg-transparent text-slate-800 placeholder:text-slate-400">
                 </div>
-                <div class="h-10 w-[1px] bg-outline-variant hidden sm:block"></div>
-                <div>
-                    <div class="flex items-center gap-space-sm">
-                        <span class="font-data-mono text-data-mono uppercase tracking-widest text-secondary font-bold text-[11px]">PORTAL PUBLIK TERBUKA</span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                        <span class="font-label-sm text-label-sm text-on-surface-variant font-data-mono">UR-01 PRIVACY COMPLIANT</span>
-                    </div>
-                    <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Portal Informasi Fasilitas & Jadwal Kampus</h1>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">Informasi ketersediaan ruang, laboratorium, dan auditorium secara real-time untuk sivitas akademika & publik.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-space-md w-full sm:w-auto justify-end">
-                <div class="hidden xl:flex flex-col text-right">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Autentikasi Terpusat</span>
-                    <span class="font-data-mono text-data-mono text-primary font-semibold text-[11px]">SSO UNIVERSITAS ACTIVE</span>
-                </div>
-                <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-lg text-label-lg whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[18px]">key</span>
-                    <span>Masuk / Login SSO</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- 
-      ELEMEN       : Parameter Pencarian & Filter Fasilitas (UR02)
-      KEGUNAAN     : Memungkinkan pengunjung menyaring daftar fasilitas berdasarkan kata kunci, tipe, gedung, dan kapasitas.
-      CARA KERJA   : Mengirim form GET ke /public/catalog untuk memfilter daftar ruang tanpa reload berat.
-    -->
-    <section class="bg-surface-container-lowest shadow-sm rounded-xl p-space-lg mb-space-xl">
-        <div class="flex items-center justify-between pb-space-sm mb-space-md border-b border-outline-variant">
-            <div class="flex items-center gap-space-xs">
-                <span class="material-symbols-outlined text-[18px] text-primary">filter_alt</span>
-                <span class="font-headline-sm text-headline-sm text-primary">Pencarian Cepat Fasilitas Kampus</span>
-                <span class="font-data-mono text-data-mono text-on-surface-variant ml-space-sm text-[11px]">MODUL UR02</span>
-            </div>
-            <span class="font-label-sm text-label-sm text-on-surface-variant font-data-mono text-[11px]">TAMPILAN PUBLIK TERFILTER</span>
-        </div>
-
-        <!-- 
-          ROUTE: Form filter pencarian via GET ke /public/catalog
-          FUNGSI: Menyaring fasilitas kampus sesuai parameter yang ditentukan pengunjung
-        -->
-        <form action="{{ url('/public/catalog') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-space-md items-end">
-            {{-- Kata Kunci --}}
-            <div class="lg:col-span-4 flex flex-col gap-1">
-                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="search-query">Kata Kunci Ruangan / Kode</label>
-                <div class="relative flex items-center">
-                    <span class="material-symbols-outlined absolute left-space-md text-on-surface-variant text-[18px]">search</span>
-                    <input type="text" id="search-query" name="q" placeholder="Mis: Auditorium, Lab Komputer, Smart Classroom..." class="w-full h-10 pl-10 pr-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm border border-outline-variant/50 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
-                </div>
-            </div>
-
-            {{-- Tipe Fasilitas --}}
-            <div class="lg:col-span-2 flex flex-col gap-1">
-                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="filter-type">Tipe Fasilitas</label>
-                <select id="filter-type" name="type" class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm border border-outline-variant/50 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
-                    <option value="all">Semua Tipe</option>
-                    <option value="auditorium">Auditorium & Hall</option>
-                    <option value="kelas">Ruang Kelas</option>
-                    <option value="lab">Lab Komputer / Riset</option>
-                    <option value="olahraga">Lapangan Olahraga</option>
-                </select>
-            </div>
-
-            {{-- Lokasi / Gedung --}}
-            <div class="lg:col-span-3 flex flex-col gap-1">
-                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="filter-location">Lokasi / Gedung</label>
-                <select id="filter-location" name="location" class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm border border-outline-variant/50 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
-                    <option value="all">Semua Gedung Kampus</option>
-                    <option value="rektorat">Gedung Rektorat Baru</option>
-                    <option value="gedung-a">Gedung Kuliah Terpadu A</option>
-                    <option value="gedung-b">Gedung Kuliah B</option>
-                    <option value="lab-barat">Gedung Lab Barat</option>
-                    <option value="pkm">Student Center (PKM)</option>
-                </select>
-            </div>
-
-            {{-- Kapasitas --}}
-            <div class="lg:col-span-2 flex flex-col gap-1">
-                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="filter-capacity">Kapasitas</label>
-                <select id="filter-capacity" name="capacity" class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm border border-outline-variant/50 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
-                    <option value="all">Semua Kapasitas</option>
-                    <option value="small">&lt; 30 Orang</option>
-                    <option value="medium">30 - 60 Orang</option>
-                    <option value="large">&gt; 60 Orang</option>
-                </select>
-            </div>
-
-            {{-- Tombol Filter --}}
-            <div class="lg:col-span-1">
-                <button type="submit" class="w-full h-10 inline-flex items-center justify-center gap-space-xs rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-lg text-label-lg">
-                    <span class="material-symbols-outlined text-[18px]">tune</span>
-                    <span class="hidden md:inline lg:hidden xl:inline">Cari</span>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition shadow-xs flex items-center justify-center gap-1.5 shrink-0">
+                    <span>Cari Ruang</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </section>
 
     <!-- 
-      ELEMEN       : Live Time-Slot Directory Header Notice
-      KEGUNAAN     : Indikator sinkronisasi berkala data slot ketersediaan 30 menit.
-      CARA KERJA   : Menampilkan label status privasi aktif dan pulsasi waktu.
+      ELEMEN       : Fasilitas Kampus Unggulan (Batas 3 Data Preview + Lihat Selengkapnya)
+      KEGUNAAN     : Menampilkan 3 fasilitas utama agar antarmuka tidak berantakan, disertai tombol 'Lihat Seluruh Fasilitas' ke halaman katalog.
+      CARA KERJA   : Merender 3 artikel fasilitas terkurasi dengan ketersediaan visual dan tautan detail.
     -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm bg-surface-container-high px-space-lg py-space-sm rounded-lg mb-space-md">
-        <div class="flex items-center gap-space-sm">
-            <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
-            <span class="font-label-lg text-label-lg text-on-surface font-semibold">Matriks Slot Waktu 30 Menitan Hari Ini</span>
-            <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">(07:00 - 20:00 WIB)</span>
+    <section class="mb-12">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-6 border-b border-slate-200">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight">Fasilitas Kampus Unggulan</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Menampilkan 3 dari 24 fasilitas akademik dan ruang pertemuan universitas.</p>
+            </div>
+            {{-- Tombol Lihat Selengkapnya menuju Katalog Lengkap --}}
+            <a href="{{ url('/public/catalog') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
+                <span>Lihat Seluruh Fasilitas (24 Ruang)</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
         </div>
-        <div class="flex items-center gap-space-md">
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container text-on-surface font-data-mono text-data-mono text-[11px]">
-                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                SINKRON OTOMATIS: REAL-TIME
-            </span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant hidden md:inline">Privasi Aktif: Data Pengaju Disembunyikan</span>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Card 1: Auditorium B.J. Habibie --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">AUD-H01</span>
+                        <x-cava.status-badge status="approved" label="Tersedia Hari Ini" />
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 leading-snug">Auditorium Utama B.J. Habibie</h3>
+                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-1 mb-3">
+                        <span class="material-symbols-outlined text-[15px]">location_on</span>
+                        <span>Gedung Rektorat (Lt. 1 & 2)</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-slate-600 pb-3 mb-3 border-b border-slate-100">
+                        <span class="font-semibold text-slate-800">450 Kursi</span>
+                        <span>•</span>
+                        <span class="truncate">AC Central, Laser Projector, Sound 5000W</span>
+                    </div>
+                </div>
+                <div>
+                    <x-cava.slot-matrix :interactive="false" :availableCount="14" :totalCount="27" />
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <a href="{{ url('/public/catalog') }}" class="text-xs font-semibold text-blue-900 hover:underline">
+                            Detail Spesifikasi →
+                        </a>
+                        <a href="{{ route('login') }}" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition">
+                            Reservasi
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            {{-- Card 2: Lab Komputasi Cloud --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">LAB-C201</span>
+                        <x-cava.status-badge status="approved" label="Tersedia Hari Ini" />
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 leading-snug">Lab Komputasi Cloud & Jaringan</h3>
+                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-1 mb-3">
+                        <span class="material-symbols-outlined text-[15px]">location_on</span>
+                        <span>Gedung Lab Terpadu C (Lt. 2)</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-slate-600 pb-3 mb-3 border-b border-slate-100">
+                        <span class="font-semibold text-slate-800">45 PC Core i7</span>
+                        <span>•</span>
+                        <span class="truncate">Gigabit LAN, Smart Screen, AC Dual</span>
+                    </div>
+                </div>
+                <div>
+                    <x-cava.slot-matrix :interactive="false" :availableCount="19" :totalCount="27" />
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <a href="{{ url('/public/catalog') }}" class="text-xs font-semibold text-blue-900 hover:underline">
+                            Detail Spesifikasi →
+                        </a>
+                        <a href="{{ route('login') }}" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition">
+                            Reservasi
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            {{-- Card 3: Smart Classroom 302 --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">SMR-B302</span>
+                        <x-cava.status-badge status="approved" label="Tersedia Hari Ini" />
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 leading-snug">Smart Classroom 302</h3>
+                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-1 mb-3">
+                        <span class="material-symbols-outlined text-[15px]">location_on</span>
+                        <span>Gedung Kuliah Bersama B (Lt. 3)</span>
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-slate-600 pb-3 mb-3 border-b border-slate-100">
+                        <span class="font-semibold text-slate-800">60 Mahasiswa</span>
+                        <span>•</span>
+                        <span class="truncate">Interactive Whiteboard, Collab Desk</span>
+                    </div>
+                </div>
+                <div>
+                    <x-cava.slot-matrix :interactive="false" :availableCount="11" :totalCount="27" />
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <a href="{{ url('/public/catalog') }}" class="text-xs font-semibold text-blue-900 hover:underline">
+                            Detail Spesifikasi →
+                        </a>
+                        <a href="{{ route('login') }}" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition">
+                            Reservasi
+                        </a>
+                    </div>
+                </div>
+            </article>
         </div>
-    </div>
+
+        {{-- Action Button: Lihat Seluruh Fasilitas --}}
+        <div class="mt-8 text-center">
+            <a href="{{ url('/public/catalog') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition shadow-xs">
+                <span>Buka Katalog Lengkap Seluruh Fasilitas Kampus</span>
+                <span class="material-symbols-outlined text-[18px]">east</span>
+            </a>
+        </div>
+    </section>
 
     <!-- 
-      ELEMEN       : Daftar Kartu Fasilitas & Matriks Ketersediaan (UR01, SFR03, SFR04)
-      KEGUNAAN     : Menampilkan ringkasan spesifikasi fasilitas kampus dan matriks ketersediaan per slot 30 menit.
-      CARA KERJA   : Merender kartu fasilitas dengan data spesifikasi teks murni dan grid visual slot 30 menit.
+      ELEMEN       : Card Ringkasan Jadwal 30 Menit & Redirect ke Availability
+      KEGUNAAN     : Memberikan ringkasan cepat kalender tanpa menampilkan ratusan slot, disertai tombol ke matriks jadwal lengkap.
     -->
-    <div class="flex flex-col gap-space-lg mb-space-xl">
-        {{-- Card 1: Auditorium Utama B.J. Habibie --}}
-        <article class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
-            <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-space-md pb-space-md border-b border-outline-variant">
-                <div class="flex flex-col gap-space-xs">
-                    <div class="flex flex-wrap items-center gap-space-xs">
-                        <span class="px-2 py-0.5 rounded font-data-mono text-data-mono bg-primary-container text-on-primary text-[11px]">AUD-H01</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface">Gedung Rektorat - Lt. 1 & 2</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface">Auditorium & Hall Utama</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary-container text-on-secondary-container font-semibold">Buka Operasional 07:00 - 20:00 WIB</span>
-                    </div>
-                    <h2 class="font-headline-lg text-headline-lg text-primary">Auditorium Utama B.J. Habibie</h2>
-                    <div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
-                        <span class="material-symbols-outlined text-[16px]">groups</span>
-                        <span>450 Kursi Bertingkat • AC Central • Dual Screen Laser Projector • 8 Wireless Mic • Audio Mixer Yamaha</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-space-md self-stretch xl:self-auto justify-between xl:justify-end shrink-0">
-                    <div class="text-right">
-                        <div class="font-label-sm text-label-sm text-on-surface-variant">Okupansi Slot Hari Ini</div>
-                        <div class="font-data-mono text-headline-sm text-primary font-bold">14 / 27 TERSEDIA</div>
-                    </div>
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-lg text-label-lg whitespace-nowrap">
-                        <span class="material-symbols-outlined text-[16px]">lock</span>
-                        <span>Login untuk Mengajukan</span>
-                    </a>
-                </div>
+    <section class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[28px]">calendar_month</span>
             </div>
-
-            {{-- Matriks Slot 30 Menit --}}
-            <x-cava.slot-matrix :selectable="false" venueName="Auditorium B.J. Habibie" />
-        </article>
-
-        {{-- Card 2: Smart Lab Multimedia & RPL --}}
-        <article class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
-            <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-space-md pb-space-md border-b border-outline-variant">
-                <div class="flex flex-col gap-space-xs">
-                    <div class="flex flex-wrap items-center gap-space-xs">
-                        <span class="px-2 py-0.5 rounded font-data-mono text-data-mono bg-primary-container text-on-primary text-[11px]">LAB-C204</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface">Gedung Lab Barat - Lt. 2</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface">Laboratorium Komputer</span>
-                        <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary-container text-on-secondary-container font-semibold">Buka Operasional 07:00 - 20:00 WIB</span>
-                    </div>
-                    <h2 class="font-headline-lg text-headline-lg text-primary">Smart Lab Multimedia & Rekayasa Perangkat Lunak</h2>
-                    <div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
-                        <span class="material-symbols-outlined text-[16px]">computer</span>
-                        <span>40 PC Core i7 RAM 32GB RTX 4060 • Gigabit LAN 1 Gbps • Smart Interactive Whiteboard • 2 AC Split</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-space-md self-stretch xl:self-auto justify-between xl:justify-end shrink-0">
-                    <div class="text-right">
-                        <div class="font-label-sm text-label-sm text-on-surface-variant">Okupansi Slot Hari Ini</div>
-                        <div class="font-data-mono text-headline-sm text-secondary font-bold">20 / 27 TERSEDIA</div>
-                    </div>
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-lg text-label-lg whitespace-nowrap">
-                        <span class="material-symbols-outlined text-[16px]">lock</span>
-                        <span>Login untuk Mengajukan</span>
-                    </a>
-                </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Perlu Memeriksa Ketersediaan Slot Waktu Tertentu?</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Lihat matriks lengkap jadwal penggunaan per interval 30 menit (07:00 - 20:00 WIB) untuk seluruh ruang.</p>
             </div>
-
-            {{-- Matriks Slot 30 Menit --}}
-            <x-cava.slot-matrix :selectable="false" venueName="Smart Lab Multimedia" />
-        </article>
-    </div>
+        </div>
+        <a href="{{ url('/public/availability') }}" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition shadow-xs flex items-center gap-1.5 shrink-0">
+            <span>Buka Matriks Jadwal Lengkap</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </a>
+    </section>
 </x-public-layout>

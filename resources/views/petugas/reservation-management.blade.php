@@ -1,295 +1,259 @@
 {{-- 
   NAMA FILE      : reservation-management.blade.php
-  FUNGSIONALITAS : Halaman Manajemen & Approval Reservasi Petugas Sarpras
-  DESKRIPSI      : Menampilkan antrean permohonan reservasi dengan deteksi bentrok otomatis (SFR06), aksi persetujuan/penolakan, serta fitur pembatalan darurat (UR10) ber-alasan.
+  FUNGSIONALITAS : Lembar Kerja Verifikasi & Approval Permohonan Reservasi Petugas Sarpras
+  DESKRIPSI      : Menampilkan seluruh antrean reservasi masuk dengan deteksi bentrok otomatis (SFR06), modal persetujuan cepat, penolakan dengan alasan, serta pembatalan darurat (UR10).
   CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="reservation-management">, mengelola modal interaktif penolakan dan pembatalan darurat via Alpine.js.
 --}}
 
 <x-petugas-layout title="Manajemen & Approval Reservasi" active="reservation-management">
     <div x-data="{
         showRejectModal: false,
-        showOverrideModal: false,
+        showCancelModal: false,
         applicantName: '',
         ticketCode: '',
+        venueName: '',
+        activeFilter: 'semua',
+        search: '',
         openReject(name, code) {
             this.applicantName = name;
             this.ticketCode = code;
             this.showRejectModal = true;
         },
-        openOverride(code, venue) {
+        openCancel(code, venue) {
             this.ticketCode = code;
-            this.applicantName = venue;
-            this.showOverrideModal = true;
+            this.venueName = venue;
+            this.showCancelModal = true;
         }
-    }" class="flex flex-col gap-space-xl">
-        <!-- 
-          ELEMEN       : Section A: Antrian Persetujuan Reservasi (UR09, SFR06)
-          KEGUNAAN     : Memeriksa dan memutuskan permohonan reservasi yang masuk dengan validasi bentrok jadwal otomatis.
-          CARA KERJA   : Sistem menampilkan status bentrok secara otomatis. Petugas dapat menekan 'Setujui' atau membuka modal 'Tolak'.
-        -->
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
-            {{-- Header --}}
-            <div class="flex flex-wrap items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant">
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-space-sm">
-                        <h2 class="font-headline-lg text-headline-lg text-primary">Antrian Persetujuan Reservasi Fasilitas</h2>
-                        <span class="px-space-sm py-0.5 rounded font-data-mono text-data-mono bg-surface-container text-on-surface text-[11px]">UR09 • SFR06</span>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                        Evaluasi berkas pengajuan, tujuan kegiatan, dan verifikasi validitas bentrok sistem sebelum memberikan persetujuan resmi.
-                    </p>
+    }" class="flex flex-col gap-6">
+
+        {{-- Breadcrumb & Header --}}
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
+                <a href="{{ url('/petugas/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Operasional</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-slate-900">Manajemen & Approval Reservasi</span>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Antrean Lengkap Persetujuan Reservasi</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Evaluasi berkas pengajuan, tujuan kegiatan, dan verifikasi validitas bentrok sistem sebelum memberikan persetujuan resmi.</p>
                 </div>
-                <div class="flex items-center gap-space-sm">
-                    <div class="relative">
-                        <input type="text" placeholder="Cari Mahasiswa/NIP/Ruang..." class="h-9 px-space-md pl-9 rounded-lg bg-surface-container-low text-on-surface font-body-sm placeholder:text-on-surface-variant border border-outline-variant/60 focus:outline-none focus:bg-surface-container-lowest w-64">
-                        <span class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-on-surface-variant">search</span>
-                    </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-xs">
+                        Total Antrean: <strong class="text-slate-900">8 Pengajuan</strong>
+                    </span>
                 </div>
             </div>
+        </div>
 
-            {{-- Tabel Antrian Approval --}}
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-left border-collapse">
+        {{-- Filter & Search Bar --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium w-full md:w-auto overflow-x-auto">
+                <button type="button" @click="activeFilter = 'semua'" :class="activeFilter === 'semua' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Semua (8)
+                </button>
+                <button type="button" @click="activeFilter = 'pending'" :class="activeFilter === 'pending' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Menunggu (4)
+                </button>
+                <button type="button" @click="activeFilter = 'approved'" :class="activeFilter === 'approved' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Disetujui (3)
+                </button>
+                <button type="button" @click="activeFilter = 'conflict'" :class="activeFilter === 'conflict' ? 'bg-white text-rose-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Terdeteksi Bentrok (1)
+                </button>
+            </div>
+
+            <div class="relative w-full md:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
+                <input type="text" x-model="search" placeholder="Cari pemohon / ruang / tiket..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
+            </div>
+        </div>
+
+        {{-- Tabel Antrean Lengkap --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
-                            <th class="py-space-md px-space-md font-semibold">ID & Pemohon</th>
-                            <th class="py-space-md px-space-md font-semibold">Fasilitas Diminta</th>
-                            <th class="py-space-md px-space-md font-semibold">Tanggal & Slot Waktu</th>
-                            <th class="py-space-md px-space-md font-semibold">Tujuan & Surat Izin</th>
-                            <th class="py-space-md px-space-md font-semibold">Validasi Konflik (SFR06)</th>
-                            <th class="py-space-md px-space-md font-semibold text-right">Keputusan Operasional</th>
+                        <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                            <th class="py-3 px-4">ID & Pemohon</th>
+                            <th class="py-3 px-4">Fasilitas Diminta</th>
+                            <th class="py-3 px-4">Tanggal & Slot Waktu</th>
+                            <th class="py-3 px-4">Tujuan & Surat Izin</th>
+                            <th class="py-3 px-4">Validasi Bentrok (SFR06)</th>
+                            <th class="py-3 px-4 text-right">Keputusan Operasional</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-surface-container-high/40 font-body-sm text-body-sm text-on-surface">
-                        {{-- Row 1: SAFE / HMIF --}}
-                        <tr class="hover:bg-surface-container-low/60 transition-colors">
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-lg text-label-lg font-bold text-on-surface">Dimas Pratama</span>
-                                    <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">Mahasiswa TI • 2110512044</span>
-                                    <span class="font-label-sm text-label-sm text-primary-container mt-1 font-semibold">Himpunan Mahasiswa TI</span>
-                                </div>
+                    <tbody class="divide-y divide-slate-100">
+                        {{-- Row 1: SAFE HMIF --}}
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Dimas Pratama</div>
+                                <div class="text-[11px] text-slate-500">2110512044 • Mahasiswa TI</div>
+                                <span class="text-[10px] text-blue-900 font-semibold mt-0.5 block">Himpunan Mahasiswa TI (HMIF)</span>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-lg text-label-lg font-semibold text-primary">Auditorium B.J. Habibie</span>
-                                    <span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Gedung Utama Lt. 3 • 350 Orang</span>
-                                    <div class="flex items-center gap-1 mt-1">
-                                        <span class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">TIER-1 AV</span>
-                                        <span class="px-space-xs py-0.5 rounded font-data-mono text-[10px] bg-surface-container text-on-surface">MIC-WIRELESS (4)</span>
-                                    </div>
-                                </div>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Auditorium B.J. Habibie</div>
+                                <div class="text-[11px] text-slate-500">Gedung Rektorat (450 Kursi)</div>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-md text-label-md font-bold text-on-surface">24 Apr 2024</span>
-                                    <span class="font-data-mono text-data-mono text-secondary font-semibold">09:00 - 12:00 WIB</span>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant text-[11px]">(6 slot 30m beruntun)</span>
-                                </div>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">24 Apr 2024</div>
+                                <div class="text-[11px] text-slate-600 font-mono">09:00 - 12:00 WIB (6 slot)</div>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col gap-1 max-w-xs">
-                                    <span class="font-label-md text-label-md font-medium text-on-surface">Seminar Cloud Computing HMIF</span>
-                                    <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline cursor-pointer">
-                                        <span class="material-symbols-outlined text-[14px]">description</span>
-                                        Lampiran SK Terverifikasi.pdf
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <span class="inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                    Jadwal Aman - Bebas Bentrok
+                            <td class="py-3.5 px-4 align-top max-w-xs">
+                                <p class="text-slate-800">Seminar Nasional Cloud Computing HMIF</p>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold mt-1">
+                                    <span class="material-symbols-outlined text-[14px]">attachment</span>
+                                    Surat Izin Dekanat Valid
                                 </span>
-                                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 text-[11px]">Tidak ada reservasi reguler pada slot ini</p>
                             </td>
-                            <td class="py-space-md px-space-md align-top text-right">
-                                <div class="flex items-center justify-end gap-space-xs">
+                            <td class="py-3.5 px-4 align-top">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    100% Bebas Bentrok
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <div class="flex items-center justify-end gap-1.5">
                                     <!-- 
                                       ROUTE: POST /petugas/reservations/{id}/approve
-                                      FUNGSI: Menyetujui pengajuan reservasi dan mengunci slot waktu secara permanen
+                                      FUNGSI: Menyetujui reservasi secara resmi dan mengunci slot
                                     -->
-                                    <form action="{{ url('/petugas/reservations/1/approve') }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-space-md py-1.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md font-semibold hover:bg-secondary/90 transition-colors flex items-center gap-1 shadow-sm">
-                                            <span class="material-symbols-outlined text-[16px]">check_circle</span> Setujui
+                                    <form action="{{ url('/petugas/reservation-management') }}" method="GET" class="inline">
+                                        <button type="submit" @click="alert('Reservasi TKT-20240424-001 berhasil disetujui. Slot jadwal telah dikunci secara otomatis.')" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-xs flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                                            <span>Setujui</span>
                                         </button>
                                     </form>
-                                    <button type="button" @click="openReject('Dimas Pratama', 'TKT-20240424-001')" class="px-space-md py-1.5 rounded-lg bg-surface-container text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md font-semibold flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">cancel</span> Tolak
+                                    <button type="button" @click="openReject('Dimas Pratama (HMIF)', 'TKT-20240424-001')" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-rose-700 hover:bg-rose-50 transition font-semibold">
+                                        Tolak
                                     </button>
                                 </div>
                             </td>
                         </tr>
 
-                        {{-- Row 2: CONFLICT WARNING / DOSEN ELEKTRO --}}
-                        <tr class="hover:bg-surface-container-low/60 transition-colors bg-error-container/10">
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-lg text-label-lg font-bold text-on-surface">Dr. Ir. Hendra Prasetyo</span>
-                                    <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">Dosen Elektro • 198203112008011003</span>
-                                    <span class="font-label-sm text-label-sm text-primary-container mt-1 font-semibold">Fakultas Teknik Industri</span>
-                                </div>
+                        {{-- Row 2: BENTROK JADWAL --}}
+                        <tr class="hover:bg-slate-50/70 transition bg-rose-50/20">
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Dr. Ir. Hendra Prasetyo</div>
+                                <div class="text-[11px] text-slate-500">NIP 198402112009121003</div>
+                                <span class="text-[10px] text-slate-600 font-semibold mt-0.5 block">Prodi Sistem Informasi</span>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-lg text-label-lg font-semibold text-primary">Smart Classroom 302</span>
-                                    <span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Gedung B Lt. 3 • 60 Orang</span>
-                                </div>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Lab Komputasi Cloud</div>
+                                <div class="text-[11px] text-slate-500">Gedung C Lt. 2 (45 PC)</div>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col">
-                                    <span class="font-label-md text-label-md font-bold text-on-surface">25 Apr 2024</span>
-                                    <span class="font-data-mono text-data-mono text-error font-semibold">13:00 - 15:30 WIB</span>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant text-[11px]">(5 slot 30m)</span>
-                                </div>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">24 Apr 2024</div>
+                                <div class="text-[11px] text-rose-600 font-mono font-bold">10:00 - 13:00 WIB</div>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="flex flex-col gap-1 max-w-xs">
-                                    <span class="font-label-md text-label-md font-medium text-on-surface">Kuliah Umum Tamu IoT</span>
-                                    <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline cursor-pointer">
-                                        <span class="material-symbols-outlined text-[14px]">description</span>
-                                        Nota-Dinas-Dekan-FT.pdf
-                                    </span>
-                                </div>
+                            <td class="py-3.5 px-4 align-top max-w-xs">
+                                <p class="text-slate-800">Workshop Sertifikasi Cloud Practitioner</p>
+                                <span class="text-[11px] text-slate-500">Estimasi 40 Dosen & Asisten</span>
                             </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <span class="inline-flex items-center gap-1 px-space-sm py-1 rounded font-label-sm text-label-sm bg-error-container text-on-error-container font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
-                                    Bentrok Terdeteksi (2 Slot)
+                            <td class="py-3.5 px-4 align-top">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+                                    <span class="material-symbols-outlined text-[14px]">block</span>
+                                    Bentrok: Praktikum Reguler
                                 </span>
-                                <p class="font-body-sm text-body-sm text-error mt-1 text-[11px]">Bentrok dengan: Praktikum Jaringan Sesi 3 (14:00 - 15:30 WIB)</p>
                             </td>
-                            <td class="py-space-md px-space-md align-top text-right">
-                                <div class="flex items-center justify-end gap-space-xs">
-                                    <button type="button" disabled title="Persetujuan diblokir karena bentrok jadwal (SFR06)" class="px-space-md py-1.5 rounded-lg bg-surface-container-highest text-outline font-label-md text-label-md font-semibold cursor-not-allowed flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">block</span> Terkunci
-                                    </button>
-                                    <button type="button" @click="openReject('Dr. Hendra Prasetyo', 'TKT-20240425-088')" class="px-space-md py-1.5 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md font-semibold flex items-center gap-1 hover:bg-error hover:text-on-error transition-colors">
-                                        <span class="material-symbols-outlined text-[16px]">cancel</span> Tolak Bentrok
-                                    </button>
-                                </div>
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <button type="button" @click="openReject('Dr. Ir. Hendra Prasetyo', 'TKT-20240424-002')" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 transition shadow-xs">
+                                    Tolak Bentrok
+                                </button>
                             </td>
                         </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
 
-        <!-- 
-          ELEMEN       : Section B: Pembatalan Darurat / Override oleh Petugas (UR10)
-          KEGUNAAN     : Memungkinkan petugas membatalkan paksa pemesanan yang sudah disetujui jika terjadi kondisi darurat (dengan alasan tertulis).
-          CARA KERJA   : Membuka modal konfirmasi pembatalan darurat yang mewajibkan input alasan pembatalan resmi.
-        -->
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
-            <div class="flex flex-wrap items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant">
-                <div>
-                    <div class="flex items-center gap-space-xs">
-                        <h2 class="font-headline-lg text-headline-lg text-primary">Daftar Reservasi Disetujui & Hak Override Darurat</h2>
-                        <span class="px-space-sm py-0.5 rounded font-data-mono text-data-mono bg-error-container text-on-error-container text-[11px] font-bold">UR10 OVERRIDE</span>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                        Kewenangan petugas sarpras untuk membatalkan reservasi aktif secara darurat (misal atap bocor atau bencana) wajib menyertakan alasan resmi.
-                    </p>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
-                            <th class="py-space-md px-space-md">ID Reservasi</th>
-                            <th class="py-space-md px-space-md">Fasilitas & Lokasi</th>
-                            <th class="py-space-md px-space-md">Jadwal Penggunaan</th>
-                            <th class="py-space-md px-space-md">Pemohon</th>
-                            <th class="py-space-md px-space-md">Status</th>
-                            <th class="py-space-md px-space-md text-right">Aksi Hak Override</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-surface-container-high/40 font-body-sm text-body-sm text-on-surface">
-                        <tr class="hover:bg-surface-container-low/60 transition-colors">
-                            <td class="py-space-md px-space-md font-data-mono text-data-mono font-bold text-primary">TKT-20240428-099</td>
-                            <td class="py-space-md px-space-md font-semibold">Aula Kemahasiswaan PKM</td>
-                            <td class="py-space-md px-space-md font-data-mono">28 Apr 2024 • 08:00 - 16:00 WIB</td>
-                            <td class="py-space-md px-space-md">BEM Universitas (Ketua: Fahri)</td>
-                            <td class="py-space-md px-space-md">
-                                <x-cava.status-badge status="Disetujui" />
+                        {{-- Row 3: DISETUJUI DENGAN OPSI BATAL DARURAT --}}
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Fadhil Rahman</div>
+                                <div class="text-[11px] text-slate-500">2010511032 • Mahasiswa Elektro</div>
+                                <span class="text-[10px] text-blue-900 font-semibold mt-0.5 block">Himpunan Mahasiswa Elektro</span>
                             </td>
-                            <td class="py-space-md px-space-md text-right">
-                                <button type="button" @click="openOverride('TKT-20240428-099', 'Aula Kemahasiswaan PKM')" class="px-space-md py-1.5 rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error font-label-md text-label-md font-semibold transition-colors inline-flex items-center gap-1 shadow-sm">
-                                    <span class="material-symbols-outlined text-[16px]">warning</span>
-                                    <span>Batalkan Paksa (Override)</span>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">Smart Classroom 302</div>
+                                <div class="text-[11px] text-slate-500">Gedung B Lt. 3 (60 Kursi)</div>
+                            </td>
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">25 Apr 2024</div>
+                                <div class="text-[11px] text-slate-600 font-mono">13:00 - 15:30 WIB</div>
+                            </td>
+                            <td class="py-3.5 px-4 align-top max-w-xs">
+                                <p class="text-slate-800">Pelatihan Simulasi Mikrokontroler IoT</p>
+                            </td>
+                            <td class="py-3.5 px-4 align-top">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                                    <span class="material-symbols-outlined text-[14px]">check</span>
+                                    Sudah Disetujui
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <button type="button" @click="openCancel('TKT-20240425-015', 'Smart Classroom 302')" class="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 transition font-semibold" title="Batal Darurat Petugas (UR10)">
+                                    Batal Darurat (UR10)
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
 
-        {{-- Modal Tolak Reservasi --}}
-        <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
-            <div @click.away="showRejectModal = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-md w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
-                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
-                    <h3 class="font-headline-sm text-headline-sm text-error flex items-center gap-2">
-                        <span class="material-symbols-outlined">cancel</span>
-                        Tolak Pengajuan Reservasi
-                    </h3>
-                    <button type="button" @click="showRejectModal = false"><span class="material-symbols-outlined">close</span></button>
+        {{-- Modal Tolak Permohonan --}}
+        <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.away="showRejectModal = false" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold text-slate-900">Tolak Permohonan Reservasi</h3>
+                    <button type="button" @click="showRejectModal = false" class="text-slate-400 hover:text-slate-700">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
-
-                <!-- 
-                  ROUTE: POST /petugas/reservations/{id}/reject
-                  FUNGSI: Menolak permohonan reservasi dengan catatan alasan penolakan
-                -->
-                <form action="{{ url('/petugas/reservations/1/reject') }}" method="POST" class="flex flex-col gap-space-md">
-                    @csrf
-                    <div>
-                        <span class="font-body-sm text-body-sm text-on-surface-variant">Pemohon: </span>
-                        <span class="font-semibold text-on-surface" x-text="applicantName + ' (' + ticketCode + ')'"></span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm text-on-surface font-semibold" for="rej-reason">Alasan Resmi Penolakan</label>
-                        <textarea id="rej-reason" name="rejection_reason" rows="3" required placeholder="Contoh: Bertabrakan dengan agenda wisuda universitas gelombang II..." class="w-full p-space-md bg-surface-container-low rounded-lg text-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" @click="showRejectModal = false" class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md">Batal</button>
-                        <button type="submit" class="px-space-md py-1.5 rounded-lg bg-error text-on-error font-label-md font-semibold hover:bg-red-800 transition-colors">Konfirmasi Tolak</button>
-                    </div>
-                </form>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                    Menolak tiket <strong class="text-slate-900" x-text="ticketCode"></strong> untuk pemohon <strong class="text-slate-900" x-text="applicantName"></strong>. Masukkan alasan penolakan secara resmi:
+                </p>
+                <div class="mb-4">
+                    <label for="reject-reason" class="block text-xs font-bold text-slate-700 mb-1">Alasan Penolakan (Wajib):</label>
+                    <textarea id="reject-reason" rows="3" required placeholder="Contoh: Jadwal bertabrakan dengan agenda resmi universitas atau fasilitas sedang dalam perbaikan..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2">
+                    <button type="button" @click="showRejectModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
+                        Batal
+                    </button>
+                    <button type="button" @click="alert('Permohonan reservasi berhasil ditolak beserta alasan.'); showRejectModal = false;" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs">
+                        Kirim Penolakan
+                    </button>
+                </div>
             </div>
         </div>
 
-        {{-- Modal Override Darurat (UR10) --}}
-        <div x-show="showOverrideModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
-            <div @click.away="showOverrideModal = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-md w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
-                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
-                    <h3 class="font-headline-sm text-headline-sm text-error flex items-center gap-2">
+        {{-- Modal Pembatalan Darurat oleh Petugas (UR10) --}}
+        <div x-show="showCancelModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.away="showCancelModal = false" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5 text-rose-600">
                         <span class="material-symbols-outlined">warning</span>
-                        Override Pembatalan Darurat
+                        <span>Pembatalan Darurat (UR10)</span>
                     </h3>
-                    <button type="button" @click="showOverrideModal = false"><span class="material-symbols-outlined">close</span></button>
+                    <button type="button" @click="showCancelModal = false" class="text-slate-400 hover:text-slate-700">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
-
-                <!-- 
-                  ROUTE: POST /petugas/reservations/{id}/override-cancel
-                  FUNGSI: Pembatalan darurat sepihak oleh petugas sarpras disertai input alasan resmi
-                -->
-                <form action="{{ url('/petugas/reservations/1/override-cancel') }}" method="POST" class="flex flex-col gap-space-md">
-                    @csrf
-                    <div class="p-space-sm bg-error-container text-on-error-container rounded-lg text-[12px]">
-                        Tindakan ini akan membatalkan reservasi aktif <strong x-text="ticketCode"></strong> dan mengirimkan notifikasi alasan pembatalan langsung kepada pemohon.
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm text-on-surface font-semibold" for="over-reason">Alasan Pembatalan Darurat (Wajib)</label>
-                        <textarea id="over-reason" name="override_reason" rows="3" required placeholder="Contoh: Kebocoran instalasi pipa air di atas panggung aula mendadak membutuhkan perbaikan darurat..." class="w-full p-space-md bg-surface-container-low rounded-lg text-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" @click="showOverrideModal = false" class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md">Batal</button>
-                        <button type="submit" class="px-space-md py-1.5 rounded-lg bg-error text-on-error font-label-md font-semibold hover:bg-red-800 transition-colors">Eksekusi Override</button>
-                    </div>
-                </form>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                    Petugas berwenang membatalkan reservasi yang <strong>telah disetujui</strong> jika terjadi kondisi darurat (misal: pipa bocor, kabel terbakar, hewan liar). Alasan pembatalan wajib dicantumkan.
+                </p>
+                <div class="mb-4">
+                    <label for="override-reason" class="block text-xs font-bold text-slate-700 mb-1">Alasan Pembatalan Darurat:</label>
+                    <textarea id="override-reason" rows="3" required placeholder="Contoh: Terjadi kebocoran atap mendadak di ruangan, fasilitas harus segera diperbaiki..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2">
+                    <button type="button" @click="showCancelModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
+                        Kembali
+                    </button>
+                    <button type="button" @click="alert('Reservasi berhasil dibatalkan darurat. Notifikasi dan slot kalender telah disesuaikan.'); showCancelModal = false;" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs">
+                        Eksekusi Batal Darurat
+                    </button>
+                </div>
             </div>
         </div>
+
     </div>
 </x-petugas-layout>
