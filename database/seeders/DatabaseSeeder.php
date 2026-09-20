@@ -1,25 +1,28 @@
 <?php
+/**
+ * NAMA FILE    : DatabaseSeeder.php
+ * FUNGSI       : Seeder Utama (Master Orchestrator Seeder)
+ * DESKRIPSI    : Mengorkestrasi eksekusi seluruh seeder sistem secara berurutan sesuai relasi ketergantungan data.
+ * CARA KERJA   : Memanggil RolePermissionSeeder -> UserSeeder -> FacilitySeeder saat perintah php artisan db:seed dijalankan.
+ */
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * FUNCTION/PROCEDURE : run()
+     * KEGUNAAN           : Mengeksekusi penanaman master data secara berurutan.
+     * CARA KERJA         : Menjalankan seeder otorisasi terlebih dahulu, kemudian seeder pengguna, dan inventaris fasilitas kampus.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RolePermissionSeeder::class,
+            UserSeeder::class,
+            FacilitySeeder::class,
         ]);
     }
 }
