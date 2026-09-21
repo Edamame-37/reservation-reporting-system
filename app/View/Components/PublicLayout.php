@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : PublicLayout.php
+ * FUNGSI       : Blade Component Class untuk master layout portal publik CAVA
+ * DESKRIPSI    : Menyajikan view layouts.public saat tag <x-public-layout> dipanggil pada view mockup.
+ * CARA KERJA   : Mengembalikan view 'layouts.public' untuk merender antarmuka publik kampus.
+ */
 
 namespace App\View\Components;
 

@@ -1,6 +1,11 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <!-- MOCKUP LOGIN INTERAKTIF BERBASIS ROLE (TANPA BACKEND) -->
+    <div x-data="{
+        selectedRole: 'user',
+        login() {
+            window.location.href = '/' + this.selectedRole + '/dashboard';
+        }
+    }" class="flex flex-col gap-space-md">
 
     <div class="text-center mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Mockup Login</h2>
