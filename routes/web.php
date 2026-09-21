@@ -42,8 +42,6 @@ Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })-
 Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
 Route::get('/admin/user-management', function () { return view('admin.user-management'); })->name('admin.user-management');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
-    return view('welcome');
-})->name('home');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
 // FUNGSI: Menampilkan katalog daftar fasilitas dan ruang kampus beserta filter
