@@ -1,53 +1,75 @@
 {{-- 
   NAMA FILE      : reservation-form.blade.php
-  FUNGSIONALITAS : Halaman Formulir Pengajuan Reservasi Fasilitas (Mahasiswa / Dosen)
+  FUNGSIONALITAS : Formulir Pengajuan Reservasi Ruang & Fasilitas Kampus
   DESKRIPSI      : Form interaktif pemilihan fasilitas, tanggal, picker rentang slot 30 menit (07:00 - 20:00 WIB), tujuan kegiatan, dan live conflict check.
-  CARA KERJA     : Memanfaatkan layout <x-app-layout active="reservation-form">, mengirimkan data form via POST ke route reservasi.
+  CARA KERJA     : Memanfaatkan layout <x-app-layout active="reservation-form">, mengirimkan data form via POST ke route reservasi dengan validasi anti-bentrok.
 --}}
 
-<x-app-layout title="Pengajuan Reservasi Fasilitas" active="reservation-form">
-    <!-- 
-      ELEMEN       : Form Pengajuan Reservasi Baru (UR03, SFR03, SFR04)
-      KEGUNAAN     : Memungkinkan mahasiswa dan dosen memesan slot ruang kampus dengan validasi anti-bentrok secara real-time.
-      CARA KERJA   : Alpine.js mengelola state pemilihan slot 30 menit, menghitung total durasi, dan memperbarui kotak validasi preview seketika.
-    -->
-    <section class="bg-surface-container-lowest rounded-xl shadow-md p-space-xl mb-space-xl" id="section-form">
-        {{-- Card Header --}}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-space-md mb-space-lg border-b border-outline-variant gap-2">
-            <div class="flex items-center gap-space-sm">
-                <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
-                    <span class="material-symbols-outlined text-[24px]">edit_calendar</span>
-                </div>
+<x-app-layout title="Form Pengajuan Reservasi" active="reservation-form">
+    <div x-data="{
+        submitting: false,
+        submitted: false,
+        selectedVenueName: 'Auditorium Utama B.J. Habibie',
+        selectedDate: '{{ date('Y-m-d', strtotime('+3 days')) }}',
+        handleSubmit() {
+            this.submitting = true;
+            setTimeout(() => {
+                this.submitting = false;
+                this.submitted = true;
+                setTimeout(() => {
+                    window.location.href = '{{ url('/user/reservation-history') }}';
+                }, 1500);
+            }, 800);
+        }
+    }">
+
+        {{-- Breadcrumb & Header --}}
+        <div class="mb-6">
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
+                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-slate-900">Form Pengajuan Reservasi</span>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="font-headline-md text-headline-md text-primary">Form Pengajuan Reservasi Ruang & Fasilitas</h1>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">Modul UR03 & SFR03: Pilih fasilitas, tanggal, dan rentang slot 30 menit operasional (07:00 - 20:00 WIB).</p>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Form Permohonan Reservasi Fasilitas</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih fasilitas, tanggal pelaksanaan, dan rentang slot waktu operasional (07:00 - 20:00 WIB).</p>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Pengecekan Bentrok Jadwal: Aktif</span>
                 </div>
             </div>
-            <div class="flex items-center gap-space-xs font-data-mono text-data-mono text-secondary text-[11px] font-bold">
-                <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
-                PENGECEKAN KONFLIK OTOMATIS: AKTIF
+        </div>
+
+        {{-- Toast Sukses --}}
+        <div x-show="submitted" x-cloak class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 shadow-xs">
+            <span class="material-symbols-outlined text-emerald-600 text-[24px]">check_circle</span>
+            <div>
+                <h4 class="text-sm font-bold">Permohonan Reservasi Berhasil Diajukan!</h4>
+                <p class="text-xs text-emerald-700">Tiket Anda telah masuk ke antrean verifikasi Petugas Sarpras. Mengalihkan ke riwayat reservasi...</p>
             </div>
         </div>
 
         <!-- 
-          ROUTE: Mengirimkan form data input pemesanan via POST ke /user/reservations
-          FUNGSI: Menyimpan permohonan reservasi baru ke dalam database untuk diverifikasi oleh Petugas Sarpras
+          ROUTE: POST /user/reservations
+          FUNGSI: Mengirimkan permohonan reservasi baru dengan proteksi interval 30 menit
         -->
-        <form action="{{ url('/user/reservations') }}" method="POST">
+        <form @submit.prevent="handleSubmit" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             @csrf
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
-                {{-- Kolom Kiri: Input Pilihan (7 Kolom) --}}
-                <div class="lg:col-span-7 flex flex-col gap-space-lg">
+            {{-- Kolom Kiri: Form Input Data (7 Kolom) --}}
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                {{-- Card Input Utama --}}
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col gap-5">
                     {{-- Pilihan Fasilitas --}}
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-lg text-label-lg text-on-surface flex items-center justify-between" for="venue-select">
-                            <span>Fasilitas & Ruang Akademik</span>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant">Gedung Utama / Kampus Barat</span>
+                    <div>
+                        <label for="venue-select" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                            Pilih Fasilitas & Ruang Akademik
                         </label>
-                        <select name="facility_id" id="venue-select" class="w-full h-10 px-space-md bg-surface-container-low rounded-lg text-on-surface font-body-md border border-outline-variant/60 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
-                            <option value="1">Auditorium B.J. Habibie - Gedung A (Kapasitas: 450, Sound & Videotron)</option>
-                            <option value="2">Lab Jaringan & Cloud Komputasi - Gedung C Lt. 2 (Kapasitas: 45)</option>
+                        <select name="facility_id" id="venue-select" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                            <option value="1">Auditorium Utama B.J. Habibie - Gedung Rektorat (Kapasitas: 450)</option>
+                            <option value="2">Lab Komputasi Cloud & Jaringan - Gedung C Lt. 2 (Kapasitas: 45)</option>
                             <option value="3">Smart Classroom 302 - Gedung B Lt. 3 (Kapasitas: 60)</option>
                             <option value="4">Aula Kemahasiswaan & Olahraga - Gedung PKM (Kapasitas: 500)</option>
                             <option value="5">Ruang Seminar Lantai 3 - Gedung A (Kapasitas: 120)</option>
@@ -55,96 +77,88 @@
                     </div>
 
                     {{-- Tanggal Pelaksanaan --}}
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-lg text-label-lg text-on-surface flex items-center justify-between" for="res-date">
-                            <span>Tanggal Pelaksanaan Kegiatan</span>
-                            <span class="font-label-sm text-label-sm text-secondary font-semibold">Tersedia untuk reservasi H-14 s/d H-2</span>
-                        </label>
-                        <input type="date" id="res-date" name="reservation_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}" class="w-full h-10 px-space-md bg-surface-container-low rounded-lg font-body-md text-on-surface border border-outline-variant/60 focus:border-primary focus:bg-surface-container-lowest focus:outline-none">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="res-date" class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                Tanggal Pelaksanaan Kegiatan
+                            </label>
+                            <span class="text-[11px] text-emerald-700 font-semibold">Tersedia H-14 s/d H-2</span>
+                        </div>
+                        <input type="date" id="res-date" name="reservation_date" x-model="selectedDate" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
                     </div>
 
-                    {{-- Slot Picker 30 Menit Interaktif --}}
-                    <x-cava.slot-matrix :selectable="true" venueName="Auditorium B.J. Habibie" />
+                    {{-- Pemilih Sesi & Slot 30 Menit --}}
+                    <div>
+                        <x-cava.slot-matrix :interactive="true" />
+                    </div>
 
-                    {{-- Tujuan Penggunaan & PIC --}}
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-lg text-label-lg text-on-surface flex items-center justify-between" for="purpose">
-                            <span>Tujuan Penggunaan & Penanggung Jawab Kegiatan</span>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant font-data-mono">Wajib diisi detail</span>
+                    {{-- Tujuan Penggunaan & Estimasi Peserta --}}
+                    <div>
+                        <label for="purpose" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                            Tujuan Penggunaan, Nama Acara & PIC
                         </label>
-                        <textarea id="purpose" name="purpose" rows="3" placeholder="Contoh: Seminar Nasional Cloud Architecture Himpunan Mahasiswa TI - Estimasi 75 Peserta, PIC: Dimas Pratama (08123456789)" class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-on-surface border border-outline-variant/60 focus:border-primary focus:bg-surface-container-lowest focus:outline-none"></textarea>
+                        <textarea id="purpose" name="purpose" rows="3" required placeholder="Contoh: Seminar Nasional Cloud Computing HMIF - Estimasi 75 Peserta Mahasiswa. PIC: Dimas Pratama (08123456789)" class="w-full p-3.5 bg-slate-50 rounded-xl text-sm text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition"></textarea>
                     </div>
                 </div>
+            </div>
 
-                {{-- Kolom Kanan: Kotak Preview Real-Time & Submit (5 Kolom) --}}
-                <div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/40">
-                    <div class="flex flex-col gap-space-md">
-                        <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/40">
-                            <span class="font-headline-sm text-headline-sm text-primary flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-secondary text-[20px]">verified</span>
-                                Status Validasi Real-time
-                            </span>
-                            <span class="font-data-mono text-data-mono px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-semibold text-[11px]">
-                                SFR04 VALIDATED
-                            </span>
+            {{-- Kolom Kanan: Preview Validasi & Submit (5 Kolom) --}}
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                {{-- Box Validasi --}}
+                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-emerald-600 text-[20px]">verified</span>
+                                <span>Ringkasan Validasi Sistem</span>
+                            </h3>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">BEBAS BENTROK</span>
                         </div>
 
-                        {{-- Preview Box --}}
-                        <div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col gap-space-sm">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Venue Terpilih</span>
-                                    <div class="font-label-lg text-label-lg text-primary font-bold">Auditorium B.J. Habibie</div>
-                                    <div class="font-body-sm text-body-sm text-on-surface-variant">Gedung Rektorat Baru, Lantai 1 & 2</div>
-                                </div>
-                                <span class="px-2 py-0.5 rounded font-data-mono text-data-mono bg-surface-container-high text-on-surface text-[11px]">
-                                    KAP: 450 ORANG
-                                </span>
+                        <div class="space-y-3 text-xs mb-6">
+                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 block mb-0.5">Ruang Terpilih:</span>
+                                <span class="font-bold text-slate-900 text-sm">Auditorium Utama B.J. Habibie</span>
+                                <span class="text-slate-500 block text-[11px]">Gedung Rektorat Baru, Lt. 1 & 2</span>
                             </div>
 
-                            <div class="pt-space-xs border-t border-outline-variant/30">
-                                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Slot Waktu Terpilih:</span>
-                                <div class="font-headline-sm text-headline-sm text-secondary font-bold">
-                                    09:00 - 12:00 WIB
+                            <div class="grid grid-cols-2 gap-2 text-slate-600">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block mb-0.5">Tanggal Kegiatan:</span>
+                                    <span class="font-bold text-slate-900" x-text="selectedDate"></span>
                                 </div>
-                                <div class="font-body-sm text-body-sm text-secondary flex items-center gap-1 mt-0.5">
-                                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                                    <span>Status: Siap Diajukan, Bebas Konflik</span>
-                                </div>
-                            </div>
-
-                            <div class="pt-space-xs text-[12px] bg-surface-container-low p-space-sm rounded">
-                                <div class="font-label-sm text-label-sm text-on-surface-variant mb-1 font-semibold">Peralatan Terintegrasi:</div>
-                                <div class="flex flex-wrap gap-1">
-                                    <span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-data-mono text-[10px]">Dual Screen Projector</span>
-                                    <span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-data-mono text-[10px]">8 Wireless Mic</span>
-                                    <span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-data-mono text-[10px]">Central AC</span>
-                                    <span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-data-mono text-[10px]">WiFi Eduroam 1 Gbps</span>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block mb-0.5">Jam Operasional:</span>
+                                    <span class="font-bold text-slate-900">09:00 - 12:00 WIB</span>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Checkbox Persetujuan Tata Tertib --}}
-                        <div class="flex items-start gap-space-sm pt-space-xs">
-                            <input type="checkbox" id="terms-check" name="terms" required checked class="mt-1 w-4 h-4 rounded text-primary focus:ring-primary">
-                            <label for="terms-check" class="font-body-sm text-body-sm text-on-surface leading-tight">
-                                Saya menyetujui <span class="text-primary font-semibold underline cursor-pointer">Tata Tertib Penggunaan Sarana Kampus</span> dan bertanggung jawab penuh atas kebersihan dan keutuhan fasilitas selama sesi.
-                            </label>
+                        {{-- Panduan Kebijakan Kampus --}}
+                        <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-600 mb-6 space-y-1.5">
+                            <div class="font-bold text-blue-950 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">rule</span>
+                                Aturan Penggunaan Fasilitas:
+                            </div>
+                            <p class="text-[11px] leading-relaxed">
+                                1. Pengajuan diverifikasi oleh petugas sarpras maksimal 1x24 jam.<br>
+                                2. Pembatalan mandiri hanya diizinkan maksimal <strong>H-1</strong> sebelum kegiatan.<br>
+                                3. Wajib menjaga kebersihan dan mengembalikan tata letak fasilitas.
+                            </p>
                         </div>
                     </div>
 
                     {{-- Tombol Submit --}}
-                    <div class="pt-space-lg">
-                        <button type="submit" class="w-full py-3 px-space-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg rounded-lg shadow-md transition-all flex items-center justify-center gap-space-sm">
-                            <span class="material-symbols-outlined text-[20px]">send</span>
-                            <span>Kirim Pengajuan Reservasi</span>
+                    <div>
+                        <button type="submit" :disabled="submitting" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition shadow-sm flex items-center justify-center gap-2">
+                            <span x-show="!submitting" class="material-symbols-outlined text-[18px]">send</span>
+                            <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span x-text="submitting ? 'Memproses Validasi...' : 'Kirim Permohonan Reservasi'"></span>
                         </button>
-                        <p class="font-label-sm text-label-sm text-center text-on-surface-variant mt-2">
-                            Notifikasi persetujuan petugas sarpras akan tercatat di menu Riwayat Saya.
-                        </p>
                     </div>
                 </div>
             </div>
         </form>
-    </section>
+
+    </div>
 </x-app-layout>

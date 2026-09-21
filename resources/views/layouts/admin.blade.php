@@ -1,7 +1,7 @@
 {{-- 
   NAMA FILE      : admin.blade.php
   FUNGSIONALITAS : Kerangka Layout Utama (Master) untuk Konsol Tata Kelola Super Admin
-  DESKRIPSI      : Menampilkan masthead konsol tata kelola sentral, profil Super Admin TIK/Rektorat, sidebar master data, user management, dan ekspor laporan.
+  DESKRIPSI      : Menampilkan masthead konsol tata kelola sentral, profil Administrator TIK/Rektorat, sidebar master data, user management, dan ekspor laporan dengan desain Modern Campus Minimalist.
   CARA KERJA     : Bertindak sebagai master layout. Halaman admin menggunakan layout ini via <x-admin-layout> atau @extends('layouts.admin').
 --}}
 
@@ -37,47 +37,42 @@
         }
     </style>
 </head>
-<body class="bg-surface font-sans text-body-md text-on-surface antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA --}}
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="true" 
         userName="{{ auth()->user()->name ?? 'Administrator Rektorat' }}"
         userRole="Super Admin Biro TIK"
-        userIdentifier="TIK-ROOT#SYSADMIN-9901"
-        title="CAVA - Konsol Tata Kelola Admin" 
-        subtitle="Pengendalian Otorisasi Sentral & Analitik Kampus"
+        userIdentifier="Biro TIK & Rektorat"
+        title="CAVA Admin" 
+        subtitle="Konsol Tata Kelola & Analitik Statuter Kampus"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Admin) --}}
     <x-cava.sidebar role="admin" :active="$active" />
 
-    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 100px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-[100px]">
-        {{-- Role Switcher Tab (Untuk Pengujian & Navigasi Peran) --}}
-        <x-cava.role-switcher activeRole="admin" />
-
-        <main class="flex-1 bg-surface px-margin-lg py-margin-md flex flex-col gap-space-xl">
-            {{-- GOVERNANCE CONTEXT BAR --}}
-            <section class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md p-space-lg rounded-xl bg-surface-container-lowest shadow-sm">
-                <div class="flex flex-col gap-space-xs">
-                    <div class="flex items-center gap-space-sm flex-wrap">
-                        <span class="font-data-mono text-data-mono uppercase tracking-wider text-primary px-space-sm py-0.5 rounded bg-surface-container-highest font-bold">NODE-ROOT: REKTORAT-TIK-01</span>
-                        <span class="flex items-center gap-1 font-label-sm text-label-sm text-secondary bg-surface-container-low px-space-sm py-0.5 rounded font-semibold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Sistem Online & Optimal
-                        </span>
-                        <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">UPTIME: 99.98%</span>
-                    </div>
-                    <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">CAVA - Konsol Tata Kelola & Administrasi Sistem</h1>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">Pengendalian Otorisasi Sentral, Manajemen Basis Data Inventaris Ruang, dan Analitik Pelaporan Statuter Kampus</p>
-                </div>
-                <div class="flex items-center gap-space-md bg-surface-container-low p-space-sm rounded-xl">
-                    <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
+    <div class="pl-64 flex-1 flex flex-col pt-16">
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+            {{-- Governance Context Bar --}}
+            <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
                         <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
                     </div>
-                    <div class="flex flex-col text-left pr-space-md">
-                        <span class="font-label-lg text-label-lg text-primary leading-tight font-semibold">Super Admin (Biro TIK)</span>
-                        <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">SYSADMIN-9901</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-sm font-bold text-slate-900">Konsol Tata Kelola Biro TIK & Rektorat</h1>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Sistem Beroperasi Normal
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Otorisasi sentral akun sivitas, inventaris ruang akademik, dan analitik statuter universitas.</p>
                     </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="font-mono bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">Tahun Akademik 2024/2025</span>
                 </div>
             </section>
 
@@ -86,10 +81,13 @@
         </main>
 
         {{-- Footer Minimalis --}}
-        <footer class="px-margin-lg py-space-md bg-surface-container-lowest border-t border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
-            <span>&copy; {{ date('Y') }} CAVA - Konsol Pusat Super Administrator. Modul UR13 • UR14 • UR15 • UR16 • UR17.</span>
-            <span class="font-data-mono text-data-mono">AUDIT LOG ENCRYPTED</span>
+        <footer class="px-6 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
+            <span>&copy; {{ date('Y') }} CAVA - Konsol Super Administrator Universitas.</span>
+            <span class="text-slate-400">Hak Akses Tingkat Tinggi Terenkripsi</span>
         </footer>
     </div>
+
+    {{-- Role Switcher Floating Widget (Testing Helper) --}}
+    <x-cava.role-switcher activeRole="admin" />
 </body>
 </html>

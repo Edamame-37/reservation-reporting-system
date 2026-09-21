@@ -1,6 +1,6 @@
 {{-- 
   NAMA FILE      : report-management.blade.php
-  FUNGSIONALITAS : Halaman Manajemen Tiket Kerusakan & Status Fasilitas Sarpras
+  FUNGSIONALITAS : Lembar Kerja Manajemen Tiket Kerusakan Fasilitas Petugas Sarpras
   DESKRIPSI      : Menampilkan seluruh antrean tiket kerusakan fasilitas kampus, mengubah status progres (Baru/Diproses/Selesai), menginput catatan resolusi, serta mengunci fasilitas ke status 'Dalam Perbaikan' (UR11, UR12).
   CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="report-management">, mengelola modal pembaruan status dan sinkronisasi kalender maintenance via Alpine.js.
 --}}
@@ -8,174 +8,259 @@
 <x-petugas-layout title="Manajemen Tiket Kerusakan Fasilitas" active="report-management">
     <div x-data="{
         showStatusModal: false,
-        reportId: '',
-        venueName: '',
-        currentStatus: 'baru',
-        openStatusModal(id, venue, status) {
-            this.reportId = id;
-            this.venueName = venue;
-            this.currentStatus = status;
+        activeTab: 'semua',
+        search: '',
+        selectedReport: null,
+        reports: [
+            {
+                id: 'RPT-20240422-001',
+                reporter: 'Rudi H. (Laboran)',
+                date: '22 Apr 2024 • 08:30 WIB',
+                venue: 'Lab Hardware 2',
+                building: 'Gedung C, Lt. 1',
+                category: 'Kelistrikan',
+                desc: 'Korsleting panel daya utama 3-phase di ruang praktikum robotika.',
+                status: 'diproses',
+                facilityLocked: true,
+                resolutionNote: 'Teknisi PLN kampus sedang mengganti MCB utama.'
+            },
+            {
+                id: 'RPT-20240420-009',
+                reporter: 'Dimas Pratama (Mahasiswa)',
+                date: '20 Apr 2024 • 10:14 WIB',
+                venue: 'Lab Komputasi Cloud',
+                building: 'Gedung C, Lt. 2',
+                category: 'Jaringan & Kabel',
+                desc: 'Kabel LAN meja praktikum 12 & 13 putus terpotong hewan liar.',
+                status: 'baru',
+                facilityLocked: false,
+                resolutionNote: 'Menunggu alokasi teknisi jaringan shift siang.'
+            },
+            {
+                id: 'RPT-20240419-003',
+                reporter: 'Siti Nurhaliza (Mahasiswa)',
+                date: '19 Apr 2024 • 14:30 WIB',
+                venue: 'Smart Classroom 302',
+                building: 'Gedung B, Lt. 3',
+                category: 'Proyektor & Audio',
+                desc: 'Lampu proyektor berkedip merah dan mati total saat perkuliahan.',
+                status: 'diproses',
+                facilityLocked: true,
+                resolutionNote: 'Penggantian lampu optik dan pengujian display.'
+            },
+            {
+                id: 'RPT-20240417-001',
+                reporter: 'Ahmad Faisal (Staf)',
+                date: '17 Apr 2024 • 08:20 WIB',
+                venue: 'Auditorium B.J. Habibie',
+                building: 'Gedung Rektorat, Lt. 1',
+                category: 'AC & Pendingin',
+                desc: 'AC central blower sisi barat mengeluarkan tetesan air.',
+                status: 'baru',
+                facilityLocked: false,
+                resolutionNote: 'Jadwal servis teknisi pendingin pukul 13.00 WIB.'
+            },
+            {
+                id: 'RPT-20240415-021',
+                reporter: 'Dr. Ir. Hendra (Dosen)',
+                date: '15 Apr 2024 • 09:00 WIB',
+                venue: 'Ruang Rapat Senat',
+                building: 'Gedung Rektorat, Lt. 3',
+                category: 'Tata Suara',
+                desc: 'Mic wireless mimbar podium feedback dan mendengung keras.',
+                status: 'selesai',
+                facilityLocked: false,
+                resolutionNote: 'Kabel receiver audio telah diperbaiki dan frekuensi disesuaikan.'
+            }
+        ],
+        get filteredReports() {
+            return this.reports.filter(r => {
+                const matchSearch = r.id.toLowerCase().includes(this.search.toLowerCase()) || r.venue.toLowerCase().includes(this.search.toLowerCase()) || r.desc.toLowerCase().includes(this.search.toLowerCase());
+                const matchTab = this.activeTab === 'semua' || r.status === this.activeTab;
+                return matchSearch && matchTab;
+            });
+        },
+        openUpdate(r) {
+            this.selectedReport = JSON.parse(JSON.stringify(r));
             this.showStatusModal = true;
+        },
+        saveStatus() {
+            const idx = this.reports.findIndex(x => x.id === this.selectedReport.id);
+            if (idx !== -1) {
+                this.reports[idx].status = this.selectedReport.status;
+                this.reports[idx].facilityLocked = this.selectedReport.facilityLocked;
+                this.reports[idx].resolutionNote = this.selectedReport.resolutionNote;
+            }
+            this.showStatusModal = false;
+            alert('Status tiket ' + this.selectedReport.id + ' berhasil diperbarui! Sinkronisasi status ruang ke kalender telah tersimpan.');
         }
-    }">
-        <!-- 
-          ELEMEN       : Section Manajemen Tiket Kerusakan (UR11, UR12)
-          KEGUNAAN     : Menindaklanjuti keluhan sarana, menginput progress kerja teknisi, dan mengunci kalender fasilitas yang sedang diperbaiki.
-          CARA KERJA   : Petugas memilih tiket, memperbarui status tiket, dan opsi mencentang 'Kunci Status Fasilitas: Dalam Perbaikan'.
-        -->
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
-            {{-- Header & Search --}}
-            <div class="flex flex-wrap items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant">
+    }" class="flex flex-col gap-6">
+
+        {{-- Breadcrumb & Header --}}
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
+                <a href="{{ url('/petugas/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Operasional</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-slate-900">Manajemen Tiket Kerusakan</span>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-space-xs">
-                        <h2 class="font-headline-lg text-headline-lg text-primary">Manajemen Laporan Kerusakan & Ticketing Sarpras</h2>
-                        <span class="px-space-sm py-0.5 rounded font-data-mono text-data-mono bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold">UR11 • UR12</span>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                        Kelola pergerakan status tiket perbaikan sarpras dan otomatisasi kunci kalender fasilitas (Mode Perbaikan).
-                    </p>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Manajemen Laporan Kerusakan & Fasilitas</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pantau laporan kerusakan sivitas, kelola penugasan teknisi, dan kunci jadwal ruang yang memerlukan pemeliharaan (UR11, UR12).</p>
                 </div>
-                <div class="flex items-center gap-space-sm">
-                    <div class="relative">
-                        <input type="text" placeholder="Cari tiket/ruang/kategori..." class="h-9 px-space-md pl-9 rounded-lg bg-surface-container-low text-on-surface font-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none w-64">
-                        <span class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-on-surface-variant">search</span>
-                    </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-xs">
+                        Total Tiket: <strong class="text-slate-900">5 Laporan</strong>
+                    </span>
                 </div>
             </div>
+        </div>
 
-            {{-- Tabel Tiket Laporan Sarpras --}}
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-left border-collapse">
+        {{-- Filter & Search Bar --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium w-full md:w-auto overflow-x-auto">
+                <button type="button" @click="activeTab = 'semua'" :class="activeTab === 'semua' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Semua (5)
+                </button>
+                <button type="button" @click="activeTab = 'baru'" :class="activeTab === 'baru' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Baru (2)
+                </button>
+                <button type="button" @click="activeTab = 'diproses'" :class="activeTab === 'diproses' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Sedang Diproses (2)
+                </button>
+                <button type="button" @click="activeTab = 'selesai'" :class="activeTab === 'selesai' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Selesai (1)
+                </button>
+            </div>
+
+            <div class="relative w-full md:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
+                <input type="text" x-model="search" placeholder="Cari tiket / ruang / pelapor..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
+            </div>
+        </div>
+
+        {{-- Tabel Tiket Kerusakan Lengkap --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
-                            <th class="py-space-md px-space-md font-semibold">Tiket & Pelapor</th>
-                            <th class="py-space-md px-space-md font-semibold">Fasilitas & Kategori</th>
-                            <th class="py-space-md px-space-md font-semibold">Deskripsi Malfungsi</th>
-                            <th class="py-space-md px-space-md font-semibold">Status Tiket</th>
-                            <th class="py-space-md px-space-md font-semibold">Status Fasilitas (UR12)</th>
-                            <th class="py-space-md px-space-md font-semibold text-right">Tindakan</th>
+                        <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                            <th class="py-3 px-4">Tiket & Pelapor</th>
+                            <th class="py-3 px-4">Fasilitas & Kategori</th>
+                            <th class="py-3 px-4">Deskripsi Kerusakan</th>
+                            <th class="py-3 px-4">Status Tiket</th>
+                            <th class="py-3 px-4">Status Kalender (UR12)</th>
+                            <th class="py-3 px-4 text-right">Tindakan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-surface-container-high/40 font-body-sm text-body-sm text-on-surface">
-                        {{-- Row 1: Maintenance Locked --}}
-                        <tr class="hover:bg-surface-container-low/60 transition-colors bg-error-container/5">
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="font-data-mono text-data-mono font-bold text-primary">RPT-20240422-001</div>
-                                <div class="font-label-sm text-label-sm text-on-surface">Rudi H. (Laboran)</div>
-                                <span class="font-data-mono text-[11px] text-on-surface-variant">22 Apr 2024 08:30</span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="font-label-lg text-label-lg font-semibold text-primary">Lab Hardware 2</div>
-                                <span class="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-medium">Kelistrikan</span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top max-w-xs">
-                                <p class="line-clamp-2">Korsleting panel daya utama 3-phase di ruang praktikum robotika.</p>
-                                <span class="text-primary text-[11px] font-semibold underline cursor-pointer">Foto_Kerusakan.jpg</span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <x-cava.status-badge status="Diproses" />
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-error font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
-                                    Dalam Perbaikan (Terkunci)
-                                </span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top text-right">
-                                <button type="button" @click="openStatusModal('RPT-20240422-001', 'Lab Hardware 2', 'diproses')" class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors shadow-sm">
-                                    Kelola Tiket
-                                </button>
-                            </td>
-                        </tr>
-
-                        {{-- Row 2: Baru --}}
-                        <tr class="hover:bg-surface-container-low/60 transition-colors">
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="font-data-mono text-data-mono font-bold text-primary">RPT-20240420-009</div>
-                                <div class="font-label-sm text-label-sm text-on-surface">Dimas Pratama (Mahasiswa)</div>
-                                <span class="font-data-mono text-[11px] text-on-surface-variant">20 Apr 2024 10:14</span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <div class="font-label-lg text-label-lg font-semibold text-primary">Lab Komputasi Awan</div>
-                                <span class="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-medium">Jaringan Internet</span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top max-w-xs">
-                                <p class="line-clamp-2">Port switch nomor 12 baris C tidak terhubung ke router gateway.</p>
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <x-cava.status-badge status="Baru" />
-                            </td>
-                            <td class="py-space-md px-space-md align-top">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                    Aktif (Dapat Dipesan)
-                                </span>
-                            </td>
-                            <td class="py-space-md px-space-md align-top text-right">
-                                <button type="button" @click="openStatusModal('RPT-20240420-009', 'Lab Komputasi Awan', 'baru')" class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors shadow-sm">
-                                    Kelola Tiket
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody class="divide-y divide-slate-100">
+                        <template x-for="r in filteredReports" :key="r.id">
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="py-3.5 px-4 align-top">
+                                    <div class="font-mono font-bold text-slate-800" x-text="r.id"></div>
+                                    <div class="text-[11px] text-slate-700 font-medium" x-text="r.reporter"></div>
+                                    <span class="text-[10px] text-slate-400" x-text="r.date"></span>
+                                </td>
+                                <td class="py-3.5 px-4 align-top">
+                                    <div class="font-bold text-slate-900" x-text="r.venue"></div>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 inline-block mt-0.5" x-text="r.category"></span>
+                                </td>
+                                <td class="py-3.5 px-4 align-top max-w-xs text-slate-700" x-text="r.desc"></td>
+                                <td class="py-3.5 px-4 align-top">
+                                    <span x-show="r.status === 'baru'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        Laporan Baru
+                                    </span>
+                                    <span x-show="r.status === 'diproses'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-sky-50 text-sky-800 border border-sky-200/60 font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                                        Sedang Diproses
+                                    </span>
+                                    <span x-show="r.status === 'selesai'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        Selesai Ditangani
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4 align-top">
+                                    <span x-show="r.facilityLocked" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-rose-50 text-rose-700 border border-rose-200 font-semibold">
+                                        <span class="material-symbols-outlined text-[13px]">lock</span>
+                                        Terkunci (Perbaikan)
+                                    </span>
+                                    <span x-show="!r.facilityLocked" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                                        <span class="material-symbols-outlined text-[13px]">check</span>
+                                        Kalender Terbuka
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4 align-top text-right">
+                                    <button type="button" @click="openUpdate(r)" class="px-3 py-1 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-xs">
+                                        Perbarui Status
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
 
-        {{-- Modal Update Status Tiket & Kunci Fasilitas --}}
-        <div x-show="showStatusModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-black/50 backdrop-blur-xs">
-            <div @click.away="showStatusModal = false" class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-lg w-full p-space-xl border border-outline-variant flex flex-col gap-space-md">
-                <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
-                    <h3 class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
-                        <span class="material-symbols-outlined">edit_note</span>
-                        Update Status Penanganan Tiket
-                    </h3>
-                    <button type="button" @click="showStatusModal = false"><span class="material-symbols-outlined">close</span></button>
+        {{-- Modal Perbarui Status Tiket & Kunci Fasilitas --}}
+        <div x-show="showStatusModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.away="showStatusModal = false" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold text-slate-900">Perbarui Status Penanganan & Fasilitas</h3>
+                    <button type="button" @click="showStatusModal = false" class="text-slate-400 hover:text-slate-700">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
 
-                <!-- 
-                  ROUTE: POST /petugas/reports/{id}/status
-                  FUNGSI: Memperbarui pergerakan status laporan sarpras dan mengunci/membuka fasilitas di kalender ketersediaan
-                -->
-                <form action="{{ url('/petugas/reports/1/status') }}" method="POST" class="flex flex-col gap-space-md">
-                    @csrf
-                    <div>
-                        <span class="font-body-sm text-body-sm text-on-surface-variant">Fasilitas: </span>
-                        <strong class="text-on-surface" x-text="venueName + ' (' + reportId + ')'"></strong>
-                    </div>
+                <template x-if="selectedReport">
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-400 block mb-0.5" x-text="selectedReport.id"></span>
+                            <span class="font-bold text-slate-900 text-sm block" x-text="selectedReport.venue"></span>
+                            <p class="text-slate-600 mt-1" x-text="selectedReport.desc"></p>
+                        </div>
 
-                    {{-- Pilihan Status Tiket --}}
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm text-on-surface font-semibold" for="rep-status-sel">Status Tiket Sarpras</label>
-                        <select id="rep-status-sel" name="status" class="w-full h-10 px-space-md bg-surface-container-low rounded-lg text-body-md border border-outline-variant/60 focus:border-primary focus:outline-none">
-                            <option value="baru">1. Baru Masuk (Pemeriksaan Awal)</option>
-                            <option value="diproses" selected>2. Diproses (Teknisi Sedang Menangani)</option>
-                            <option value="selesai">3. Selesai (Perbaikan Tuntas)</option>
-                            <option value="ditolak">4. Ditolak (Bukan Kerusakan Teknis)</option>
-                        </select>
-                    </div>
+                        {{-- Pilihan Status Tiket --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Progres Tiket (UR11):</label>
+                            <select x-model="selectedReport.status" class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900">
+                                <option value="baru">Laporan Baru</option>
+                                <option value="diproses">Sedang Diproses Teknisi</option>
+                                <option value="selesai">Selesai Ditangani</option>
+                            </select>
+                        </div>
 
-                    {{-- Toggle Status Fasilitas: Dalam Perbaikan (UR12) --}}
-                    <div class="p-space-md bg-error-container/20 rounded-xl border border-error-container flex items-start gap-space-sm">
-                        <input type="checkbox" id="lock-facility" name="lock_facility" value="1" class="mt-1 w-4 h-4 rounded text-error focus:ring-error">
-                        <label for="lock-facility" class="font-body-sm text-body-sm text-on-surface">
-                            <strong class="text-error block">Tandai Fasilitas 'Dalam Perbaikan' (Maintenance Mode)</strong>
-                            Otomatis memblokir dan mengunci slot fasilitas di kalender ketersediaan agar tidak dapat dipesan pengguna selama perbaikan.
-                        </label>
-                    </div>
+                        {{-- Toggle Fasilitas Dalam Perbaikan (UR12) --}}
+                        <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+                            <label class="flex items-start gap-2.5 cursor-pointer">
+                                <input type="checkbox" x-model="selectedReport.facilityLocked" class="mt-0.5 rounded text-slate-900 focus:ring-slate-900 w-4 h-4">
+                                <div>
+                                    <span class="text-xs font-bold text-amber-950 block">Tandai Fasilitas 'Dalam Perbaikan' (Kunci Jadwal UR12)</span>
+                                    <span class="text-[11px] text-amber-800 leading-snug block mt-0.5">
+                                        Fasilitas akan otomatis tidak dapat dipesan di kalender umum agar tidak terjadi bentrok atau pemesanan ruang yang sedang rusak.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
 
-                    {{-- Catatan Resolusi / Perbaikan --}}
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm text-on-surface font-semibold" for="rep-resolution">Catatan Resolusi / Log Penanganan</label>
-                        <textarea id="rep-resolution" name="resolution_notes" rows="3" placeholder="Tuliskan tindakan teknisi, penggantian suku cadang, atau alasan penutupan tiket..." class="w-full p-space-md bg-surface-container-low rounded-lg text-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none"></textarea>
-                    </div>
+                        {{-- Catatan Resolusi --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Catatan Resolusi / Tindakan Teknisi:</label>
+                            <textarea x-model="selectedReport.resolutionNote" rows="3" placeholder="Contoh: Komponen telah diganti baru, tata suara diuji dan normal..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900"></textarea>
+                        </div>
 
-                    <div class="flex justify-end gap-2 pt-2 border-t border-outline-variant/40">
-                        <button type="button" @click="showStatusModal = false" class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md">Batal</button>
-                        <button type="submit" class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md font-semibold hover:bg-primary-container transition-colors shadow-sm">Simpan Pembaruan</button>
+                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                            <button type="button" @click="showStatusModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
+                                Batal
+                            </button>
+                            <button type="button" @click="saveStatus" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-xs">
+                                Simpan Perubahan
+                            </button>
+                        </div>
                     </div>
-                </form>
+                </template>
             </div>
         </div>
+
     </div>
 </x-petugas-layout>

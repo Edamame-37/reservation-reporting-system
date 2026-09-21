@@ -7,72 +7,54 @@
         }
     }" class="flex flex-col gap-space-md">
 
-        <!-- Role Selection -->
-        <div class="mb-4">
-            <h3 class="font-label-md text-label-md text-on-surface font-semibold mb-2 text-center">Simulasi Login (Pilih Role Anda)</h3>
-            <div class="grid grid-cols-3 gap-2">
-                <button type="button" @click="selectedRole = 'user'" 
-                    :class="selectedRole === 'user' ? 'bg-primary text-on-primary shadow-md border-transparent' : 'bg-surface-container text-on-surface hover:bg-surface-container-high border-outline-variant'"
-                    class="py-2 px-1 rounded-lg border font-label-sm text-label-sm font-semibold transition-all flex flex-col items-center justify-center gap-1">
-                    <span class="material-symbols-outlined text-[20px]">person</span>
-                    Pengguna
-                </button>
-                <button type="button" @click="selectedRole = 'petugas'" 
-                    :class="selectedRole === 'petugas' ? 'bg-primary text-on-primary shadow-md border-transparent' : 'bg-surface-container text-on-surface hover:bg-surface-container-high border-outline-variant'"
-                    class="py-2 px-1 rounded-lg border font-label-sm text-label-sm font-semibold transition-all flex flex-col items-center justify-center gap-1">
-                    <span class="material-symbols-outlined text-[20px]">support_agent</span>
-                    Petugas
-                </button>
-                <button type="button" @click="selectedRole = 'admin'" 
-                    :class="selectedRole === 'admin' ? 'bg-primary text-on-primary shadow-md border-transparent' : 'bg-surface-container text-on-surface hover:bg-surface-container-high border-outline-variant'"
-                    class="py-2 px-1 rounded-lg border font-label-sm text-label-sm font-semibold transition-all flex flex-col items-center justify-center gap-1">
-                    <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-                    Admin
-                </button>
-            </div>
-            
-            <div class="mt-3 p-2 bg-secondary-container text-on-secondary-container rounded text-[11px] text-center font-data-mono">
-                Destinasi Navigasi: <span class="font-bold text-primary" x-text="'/' + selectedRole + '/dashboard'"></span>
-            </div>
-        </div>
+    <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Mockup Login</h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Pilih jenis *user* untuk masuk ke pratinjau dasbor.</p>
+    </div>
 
-        <div class="border-t border-outline-variant/50 pt-space-md mb-2">
-            <h4 class="font-label-sm text-label-sm text-on-surface-variant text-center uppercase tracking-wider mb-4">Informasi Login Visual</h4>
-            
-            <!-- Email Address (Dummy) -->
-            <div>
-                <x-input-label for="email" :value="__('Email (Visual Only)')" />
-                <x-text-input id="email" class="block mt-1 w-full bg-surface-container-lowest text-on-surface-variant" type="email" name="email" value="mockup@univ.ac.id" readonly />
+    <div class="grid grid-cols-1 gap-4">
+        <!-- Pengunjung -->
+        <a href="{{ route('home') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
+            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
             </div>
-
-            <!-- Password (Dummy) -->
-            <div class="mt-4">
-                <x-input-label for="password" :value="__('Password (Visual Only)')" />
-                <x-text-input id="password" class="block mt-1 w-full bg-surface-container-lowest text-on-surface-variant" type="password" name="password" value="password" readonly />
+            <div class="ms-4 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Pengunjung</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Lihat halaman publik & katalog fasilitas.</p>
             </div>
+        </a>
 
-            <!-- Remember Me -->
-            <div class="block mt-4 flex items-center justify-between">
-                <label for="remember_me" class="inline-flex items-center cursor-pointer">
-                    <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary shadow-sm focus:ring-primary dark:focus:ring-offset-gray-800" name="remember" checked disabled>
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Ingat Saya') }}</span>
-                </label>
-                <a class="underline text-sm text-primary hover:text-primary-container" href="#">
-                    {{ __('Lupa password?') }}
-                </a>
+        <!-- Pengguna -->
+        <a href="{{ route('user.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
+            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
             </div>
-        </div>
+            <div class="ms-4 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Pengguna (Sivitas)</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ajukan reservasi & laporkan kerusakan.</p>
+            </div>
+        </a>
 
-        <div class="flex items-center justify-between mt-4">
-            <a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" href="{{ route('register') }}">
-                <span class="material-symbols-outlined text-[16px]">person_add</span> Daftar Akun Baru
-            </a>
+        <!-- Petugas -->
+        <a href="{{ route('petugas.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
+            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            </div>
+            <div class="ms-4 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Petugas Sarpras</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Verifikasi antrean & ubah status kerusakan.</p>
+            </div>
+        </a>
 
-            <!-- MOCKUP LOGIN BUTTON (No form submission, pure client-side redirect) -->
-            <button type="button" @click="login()" class="inline-flex items-center gap-space-xs px-space-xl py-space-sm bg-primary border border-transparent rounded-lg font-semibold text-xs text-on-primary uppercase tracking-widest hover:bg-primary-container focus:bg-primary-container active:bg-primary-container focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-sm">
-                {{ __('Masuk (Mockup)') }}
-                <span class="material-symbols-outlined text-[16px]">login</span>
-            </button>
-        </div>
+        <!-- Admin -->
+        <a href="{{ route('admin.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
+            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </div>
+            <div class="ms-4 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Administrator</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Kelola master data & ekspor laporan.</p>
+            </div>
+        </a>
     </div>
 </x-guest-layout>

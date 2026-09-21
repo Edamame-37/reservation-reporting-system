@@ -1,7 +1,7 @@
 {{-- 
   NAMA FILE      : sidebar.blade.php
-  FUNGSIONALITAS : Sidebar Navigasi Kiri CAVA (Structural Left Rail)
-  DESKRIPSI      : Menampilkan menu navigasi modul operasional kampus sesuai dengan hak wewenang peran (Petugas/Admin/Pengguna/Publik).
+  FUNGSIONALITAS : Sidebar Navigasi Kiri CAVA (Role-Aware Minimalist Navigation Rail)
+  DESKRIPSI      : Menampilkan menu navigasi modul operasional kampus sesuai dengan hak wewenang peran (Petugas/Admin/Pengguna/Publik) dengan offset 64px.
   CARA KERJA     : Menerima props 'role' (petugas|admin|user|public) dan 'active' (nama halaman aktif) untuk menentukan daftar rute dan state highlight.
 --}}
 
@@ -11,167 +11,171 @@
 ])
 
 <!-- 
-  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Top 100px)
-  KEGUNAAN     : Menyediakan akses instan ke seluruh modul sistem reservasi dan pelaporan sarpras.
-  CARA KERJA   : Menerapkan kelas aktif bg-primary-container text-on-primary pada menu yang sesuai props 'active'.
+  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Top 64px / top-16)
+  KEGUNAAN     : Menyediakan akses instan ke modul sistem sesuai otorisasi peran pengguna.
+  CARA KERJA     : Menerapkan kelas aktif bg-slate-900 text-white pada rute yang sesuai props 'active'.
 -->
-<aside class="fixed left-0 top-[100px] bottom-0 w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col z-40">
+<aside class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-30">
     {{-- Header Sidebar --}}
-    <div class="p-space-lg border-b border-outline-variant">
-        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Navigasi Ruang & Sesi</span>
-        <div class="mt-1 font-headline-sm text-headline-sm text-primary font-bold">
+    <div class="p-5 border-b border-slate-100">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
+        <div class="mt-1 text-sm font-bold text-slate-900">
             @if($role === 'admin')
-                Konsol Biro Sarpras
+                Konsol Biro Sarpras & TIK
             @elseif($role === 'petugas')
-                Operasional Sarpras
+                Pusat Operasional Sarpras
             @elseif($role === 'user')
-                Portal Mahasiswa/Dosen
+                Portal Mahasiswa & Dosen
             @else
-                Direktori Kampus
+                Direktori Fasilitas Publik
             @endif
         </div>
     </div>
 
-    {{-- Menu List --}}
-    <nav class="flex-1 p-space-md flex flex-col gap-1 overflow-y-auto">
+    {{-- Menu List per Role --}}
+    <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
         @if($role === 'petugas')
             {{-- Menu Petugas Sarpras --}}
-            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'dashboard' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">dashboard</span>
-                    Dashboard Monitoring
+                    <span>Dasbor Operasional</span>
                 </span>
-                <span class="font-data-mono text-[10px] px-1.5 py-0.5 bg-secondary-container text-on-secondary-container rounded font-bold">LIVE</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-bold {{ $active === 'dashboard' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' }}">LIVE</span>
             </a>
 
-            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'reservation-management' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">approval</span>
-                    Verifikasi & Approval
+                    <span>Antrean Reservasi</span>
                 </span>
-                <span class="font-label-sm text-label-sm px-1.5 py-0.2 bg-error-container text-on-error-container rounded-full font-bold">8</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">8</span>
             </a>
 
-            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'report-management' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">build</span>
-                    Tiket Perbaikan & Aset
+                    <span>Penanganan Laporan</span>
                 </span>
-                <span class="font-label-sm text-label-sm px-1.5 py-0.2 bg-tertiary-fixed text-on-tertiary-fixed rounded-full font-bold">5</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">5</span>
             </a>
 
-            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'availability' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'availability' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">calendar_month</span>
-                    Matriks Jadwal 30m
+                    <span>Matriks Jadwal 30m</span>
                 </span>
             </a>
 
         @elseif($role === 'admin')
             {{-- Menu Super Admin --}}
-            <a href="{{ url('/admin/dashboard') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'dashboard' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">analytics</span>
-                    Statistik & Analitik
+            <a href="{{ url('/admin/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">insights</span>
+                    <span>Konsol Eksekutif</span>
                 </span>
-                <span class="font-data-mono text-[10px] px-1.5 py-0.5 bg-surface-container rounded">LIVE</span>
             </a>
 
-            <a href="{{ url('/admin/user-management') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'user-management' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
-                    Verifikasi User (UR15)
+            <a href="{{ url('/admin/user-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'user-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+                    <span>Manajemen Akun Sivitas</span>
                 </span>
-                <span class="font-label-sm text-label-sm px-1.5 py-0.2 bg-error-container text-on-error-container rounded-full font-bold">5</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">5</span>
             </a>
 
-            <a href="{{ url('/admin/facility-master') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'facility-master' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/admin/facility-master') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'facility-master' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">domain</span>
-                    Master Fasilitas (CRUD)
+                    <span>Master Fasilitas</span>
                 </span>
             </a>
 
-            <a href="{{ url('/admin/export-report') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'export-report' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">download</span>
-                    Ekspor Laporan Resmi
+            <a href="{{ url('/admin/export-report') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'export-report' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">file_download</span>
+                    <span>Laporan & Analitik</span>
                 </span>
             </a>
 
         @elseif($role === 'user')
             {{-- Menu Mahasiswa / Dosen --}}
-            <a href="{{ url('/dashboard') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'dashboard' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">space_dashboard</span>
-                    Dasbor Utama
+            <a href="{{ url('/user/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">home</span>
+                    <span>Dasbor Saya</span>
                 </span>
             </a>
 
-            <a href="{{ url('/user/reservation-form') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'reservation-form' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/user/reservation-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    Pengajuan Reservasi
+                    <span>Ajukan Reservasi</span>
                 </span>
             </a>
 
-            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'reservation-history' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">history</span>
-                    Riwayat Pinjaman
+                    <span>Riwayat Reservasi</span>
                 </span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">12</span>
             </a>
 
-            <a href="{{ url('/user/report-form') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'report-form' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/user/report-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">report_problem</span>
-                    Lapor Kerusakan (UR06)
+                    <span>Lapor Kerusakan</span>
                 </span>
             </a>
 
-            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'report-history' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
+            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">checklist</span>
-                    Status Laporan Saya
+                    <span>Status Laporan</span>
                 </span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">2</span>
             </a>
 
         @else
-            {{-- Menu Publik / Visitor --}}
-            <a href="{{ url('/') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'home' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">home</span>
-                    Beranda Publik
+            {{-- Menu Publik / Pengunjung --}}
+            <a href="{{ url('/') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'home' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">explore</span>
+                    <span>Beranda Publik</span>
                 </span>
             </a>
 
-            <a href="{{ url('/public/catalog') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'catalog' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">inventory_2</span>
-                    Katalog Fasilitas
+            <a href="{{ url('/public/catalog') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'catalog' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">domain</span>
+                    <span>Direktori Fasilitas</span>
                 </span>
             </a>
 
-            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-space-md py-space-sm rounded font-label-lg text-label-lg transition-colors {{ $active === 'availability' ? 'bg-primary-container text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface' }}">
-                <span class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">event_available</span>
-                    Matriks Slot 30 Menit
+            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'availability' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                    <span>Matriks Jadwal</span>
                 </span>
             </a>
         @endif
     </nav>
 
-    {{-- Footer Sidebar / Sesi Info --}}
-    <div class="p-space-md border-t border-outline-variant bg-surface-container-low">
-        <div class="flex items-center justify-between text-on-surface-variant">
-            <span class="font-label-sm text-label-sm font-data-mono text-data-mono">v2.4-BUILD-92</span>
-            <form action="{{ route('logout') }}" method="POST" class="inline">
+    {{-- Footer Sidebar: Keluar Sesi --}}
+    <div class="p-3 border-t border-slate-100 bg-slate-50/50">
+        @if($role !== 'public')
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="font-label-sm text-label-sm text-error hover:underline flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">logout</span>
-                    Keluar Sesi
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition">
+                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                    <span>Keluar Sesi</span>
                 </button>
             </form>
-        </div>
+        @else
+            <div class="text-center py-1">
+                <span class="text-[11px] text-slate-400">CAVA Universitas &copy; 2024</span>
+            </div>
+        @endif
     </div>
 </aside>

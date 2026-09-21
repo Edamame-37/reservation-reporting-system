@@ -1,7 +1,7 @@
 {{-- 
   NAMA FILE      : public.blade.php
   FUNGSIONALITAS : Kerangka Layout Utama (Master) untuk Halaman Publik / Pengunjung
-  DESKRIPSI      : Berisi struktur HTML dasar, Google Fonts (Inter & Material Symbols), Header CAVA, Sidebar Navigasi Publik, dan slot konten utama.
+  DESKRIPSI      : Berisi struktur HTML dasar, Google Fonts (Inter & Material Symbols), Header CAVA 64px, Sidebar Navigasi Publik, dan slot konten utama.
   CARA KERJA     : Bertindak sebagai master layout. Halaman publik menggunakan layout ini via <x-public-layout> atau @extends('layouts.public').
 --}}
 
@@ -27,7 +27,7 @@
     {{-- Asset Vite (Tailwind CSS & JavaScript) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Alpine.js CDN Backup (jika belum dibundle via Vite) --}}
+    {{-- Alpine.js CDN Backup --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -37,32 +37,32 @@
         }
     </style>
 </head>
-<body class="bg-surface font-sans text-body-md text-on-surface antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA --}}
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="false" 
-        title="CAVA - Campus Venue Access" 
-        subtitle="Sistem Otomasi Reservasi Fasilitas Terpadu"
+        title="CAVA" 
+        subtitle="Portal Informasi Fasilitas & Jadwal Kampus"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Publik) --}}
     <x-cava.sidebar role="public" :active="$active" />
 
-    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 100px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-[100px]">
-        {{-- Role Switcher Tab (Untuk Pengujian & Navigasi Peran) --}}
-        <x-cava.role-switcher activeRole="public" />
-
-        <main class="flex-1 bg-surface px-margin-lg py-margin-md">
+    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
+    <div class="pl-64 flex-1 flex flex-col pt-16">
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
 
         {{-- Footer Minimalis --}}
-        <footer class="px-margin-lg py-space-md bg-surface-container-lowest border-t border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
-            <span>&copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus. Hak Cipta Dilindungi.</span>
-            <span class="font-data-mono text-data-mono">UR-01 PRIVACY COMPLIANT</span>
+        <footer class="px-6 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
+            <span>&copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus. Terbuka untuk Umum.</span>
+            <span class="text-slate-400">Mode Privasi: Data Pemohon Dirahasiakan</span>
         </footer>
     </div>
+
+    {{-- Role Switcher Floating Widget (Testing Helper) --}}
+    <x-cava.role-switcher activeRole="public" />
 </body>
 </html>
