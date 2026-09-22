@@ -39,7 +39,17 @@ Proyek ini menggunakan pola arsitektur **MVC (Model-View-Controller)** yang meru
 │   │   │   │   ├── RegisteredUserController.php          # Memproses pendaftaran akun baru.
 │   │   │   │   └── VerifyEmailController.php             # Memvalidasi tautan verifikasi email.
 │   │   │   ├── Controller.php                        # Induk dasar pengendali (base controller) Laravel.
-│   │   │   └── ProfileController.php                 # Mengendalikan pembaruan data profil pengguna.
+│   │   │   ├── ProfileController.php                 # Mengendalikan pembaruan data profil pengguna.
+│   │   │   ├── PublicFacilityController.php          # [PUB] Mengendalikan Katalog Fasilitas Publik & Kalender.
+│   │   │   ├── ReservationController.php             # [USR] Mengolah pengajuan & riwayat reservasi pengguna.
+│   │   │   ├── ReportController.php                  # [USR] Mengolah pelaporan kerusakan dari pengguna.
+│   │   │   ├── DashboardPetugasController.php        # [PTG] Memuat metrik & antrean di dasbor petugas.
+│   │   │   ├── ReservationManagementController.php   # [PTG] Mengelola persetujuan/penolakan dan anti-bentrok.
+│   │   │   ├── ReportManagementController.php        # [PTG] Menindaklanjuti keluhan & status blokir fasilitas.
+│   │   │   ├── AdminUserManagementController.php     # [ADM] Memverifikasi dan mendaftarkan akun internal.
+│   │   │   ├── FacilityController.php                # [ADM] Melakukan fungsi CRUD master data fasilitas.
+│   │   │   ├── AdminDashboardController.php          # [ADM] Menampilkan analitik dan rekapitulasi okupansi.
+│   │   │   └── ExportController.php                  # [ADM] Mengeksekusi pencetakan laporan ke Excel/PDF.
 │   │   └── Requests/           # 🗄️ [BACKEND] Validasi Input Form API/Server
 │   │       ├── Auth/           
 │   │       │   └── LoginRequest.php                  # Aturan validasi ketika submit form login.
