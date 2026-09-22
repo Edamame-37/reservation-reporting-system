@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : 0001_01_01_000000_create_users_table.php
+ * FUNGSI       : Migrasi pembuatan tabel dasar pengguna, token reset password, dan sesi
+ * DESKRIPSI    : Menyimpan data kredensial dan atribut sivitas akademika (Mahasiswa, Dosen, Staf, Petugas, Admin).
+ * CARA KERJA   : Dijalankan oleh Artisan Migration untuk membangun skema tabel users pada basis data MySQL.
+ */
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,10 +19,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('name', 150);
+            $table->string('email', 150)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('identity_number', 50)->nullable()->index(); // NIM / NIP
+            $table->enum('role', ['admin', 'petugas', 'mahasiswa', 'dosen', 'staf'])->default('mahasiswa');
+            $table->string('department', 100)->nullable(); // Prodi / Fakultas / Unit
+            $table->string('phone_number', 25)->nullable();
+            $table->string('id_card_path', 255)->nullable(); // File bukti KTM / SK
+            $table->enum('status', ['pending', 'active', 'rejected'])->default('pending');
+            $table->text('rejection_reason')->nullable();
+            $table->string('assignment_zone', 100)->nullable(); // Zona tugas khusus petugas
             $table->rememberToken();
             $table->timestamps();
         });
