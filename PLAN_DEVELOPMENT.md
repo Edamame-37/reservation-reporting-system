@@ -28,19 +28,17 @@ Proyek ini menggunakan pola arsitektur **MVC (Model-View-Controller)** yang meru
 ├── app/                        # 🗄️ [BACKEND] SERVER-SIDE: PUSAT LOGIKA MVC
 │   ├── Http/
 │   │   ├── Controllers/        # 🗄️ [BACKEND] Pengendali Alur
-│   │   │   ├── HomeController.php
-│   │   │   ├── ReservationController.php
-│   │   │   ├── ReportController.php
-│   │   │   └── FacilityController.php
-│   │   ├── Middleware/         # 🗄️ [BACKEND] Gerbang Keamanan Akses
+│   │   │   ├── Auth/           # 🗄️ [BACKEND] Kontroler Autentikasi (Breeze)
+│   │   │   ├── Controller.php
+│   │   │   └── ProfileController.php
 │   │   └── Requests/           # 🗄️ [BACKEND] Validasi Input Form API/Server
-│   │       ├── StoreReservationRequest.php
-│   │       ├── StoreReportRequest.php
-│   │       └── StoreFacilityRequest.php
+│   │       ├── Auth/           # 🗄️ [BACKEND] Validasi Form Login
+│   │       └── ProfileUpdateRequest.php
 │   └── Models/                 # 🗄️ [BACKEND] Skema Entitas Database 
+│       ├── DamageReport.php
 │       ├── Facility.php
 │       ├── Reservation.php
-│       └── Report.php
+│       └── User.php
 │
 ├── config/                     # 🗄️ [BACKEND] Pengaturan Aplikasi (Database, Email, dll)
 │
@@ -50,40 +48,27 @@ Proyek ini menggunakan pola arsitektur **MVC (Model-View-Controller)** yang meru
 │   ├── css/                    # 🎨 [FRONTEND] File input Tailwind CSS
 │   ├── js/                     # 🎨 [FRONTEND] File input Alpine/JavaScript
 │   └── views/                  # 🎨 [FRONTEND] TAMPILAN ANTARMUKA (Blade HTML)
-│       ├── layouts/            # 🎨 [FRONTEND] Kerangka master
-│       │   ├── admin.blade.php
-│       │   ├── petugas.blade.php
-│       │   └── public.blade.php
-│       ├── public/             # 🎨 [FRONTEND] Area Publik / Visitor
-│       │   ├── home.blade.php
-│       │   ├── catalog.blade.php
-│       │   └── availability.blade.php
+│       ├── admin/              # 🎨 [FRONTEND] Area Admin (dashboard, export, facility-master, user-management)
 │       ├── auth/               # 🎨 [FRONTEND] Area Login & Registrasi (Bawaan Breeze)
-│       ├── user/               # 🎨 [FRONTEND] Area Pengguna
-│       │   ├── dashboard.blade.php
-│       │   ├── reservation-form.blade.php
-│       │   ├── reservation-history.blade.php
-│       │   ├── report-form.blade.php
-│       │   └── report-history.blade.php
-│       ├── petugas/            # 🎨 [FRONTEND] Area Petugas
-│       │   ├── dashboard.blade.php
-│       │   ├── reservation-management.blade.php
-│       │   └── report-management.blade.php
-│       └── admin/              # 🎨 [FRONTEND] Area Admin
-│           ├── dashboard.blade.php
-│           ├── facility-master.blade.php
-│           ├── user-management.blade.php
-│           └── export-report.blade.php
+│       ├── components/         # 🎨 [FRONTEND] Komponen Reusable (Breeze & Kustom)
+│       │   └── cava/           # 🎨 [FRONTEND] Komponen Kustom UI CAVA (header, sidebar, dll)
+│       ├── layouts/            # 🎨 [FRONTEND] Kerangka master (admin, app, guest, navigation, petugas, public)
+│       ├── petugas/            # 🎨 [FRONTEND] Area Petugas (dashboard, report/reservation-management)
+│       ├── profile/            # 🎨 [FRONTEND] Area Profil Akun
+│       ├── public/             # 🎨 [FRONTEND] Area Publik / Visitor (availability, catalog, home)
+│       └── user/               # 🎨 [FRONTEND] Area Pengguna (dashboard, report/reservation-form, dll)
 │
 ├── routes/                     # 🗄️ [KEDUANYA] NAVIGASI URL
 │   └── web.php                 # 🗄️ [KEDUANYA] Backend membuat route, Frontend mengonsumsi (menyesuaikan URL)
 │
 └── database/                   # 🗄️ [BACKEND] Skema struktur tabel MySQL
-    ├── migrations/             # 🗄️ [BACKEND] File perakit tabel
+    ├── factories/              # 🗄️ [BACKEND] Pembuat pola data palsu (UserFactory)
+    ├── migrations/             # 🗄️ [BACKEND] File perakit tabel (users, facilities, reservations, damage_reports, dll)
     └── seeders/                # 🗄️ [BACKEND] Pembuat data awal/dummy
+        ├── DatabaseSeeder.php
+        ├── FacilitySeeder.php
         ├── RolePermissionSeeder.php
-        ├── UserSeeder.php
-        └── FacilitySeeder.php
+        └── UserSeeder.php
 ```
 
 ---
@@ -155,10 +140,8 @@ Jika ada anggota tim yang bingung, *"Fitur ini harus saya koding di file sebelah
 Ikuti standar operasional ini setiap kali Anda baru menyalakan laptop untuk melanjutkan *coding*:
 
 1. **Nyalakan Server & Konfigurasi Database:**
-   - Buka aplikasi **Laragon** (atau XAMPP).
-   - Klik tombol **"Start All"** untuk menghidupkan mesin Apache dan MySQL.
-   - Masuk ke pengelola Database (HeidiSQL / phpMyAdmin), lalu *Create New Database* (misal: `db_reservasi_kampus`).
-   - Sambungkan `.env` di proyek Anda dengan nama database tersebut.
+   - **WAJIB MEMBACA:** Silakan ikuti prosedur lengkap pembuatan database pada file [CREATE_DATABASE.md](CREATE_DATABASE.md) sebelum melanjutkan.
+   - Buka aplikasi **Laragon** (atau XAMPP) dan pastikan Apache & MySQL menyala.
 2. **Nyalakan Aplikasi Laravel (Terminal Pertama):**
    - Buka terminal di dalam *folder* proyek Anda (contoh: di dalam `reservasi-app`).
    - Ketikkan perintah peluncur: `php artisan serve`.
