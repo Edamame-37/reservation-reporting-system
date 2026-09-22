@@ -26,3 +26,32 @@ Semua tiket keluhan (kerusakan) dari pengguna masuk ke dasbor ini. Petugas menge
 
 ## 5. Aturan Penolakan / Edge Cases
 - Pengguna pelapor tidak akan bisa menghapus laporannya sendiri yang sudah berstatus `diproses` (Cegah modifikasi data di tengah penanganan operasional).
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::get('/petugas/reports', [ReportManagementController::class, 'index'])->name('petugas.reports.index');
+    Route::patch('/petugas/reports/{id}', [ReportManagementController::class, 'updateStatus'])->name('petugas.reports.update');
+});
+```
+
+### Logika Eksekusi di Controller (`ReportManagementController@updateStatus`)
+1. **Validasi Logika Transisi Status:**
+   ```php
+   $request->validate([
+       'status_laporan' => 'required|in:diproses,selesai,ditolak',
+       // Jika status diubah menjadi selesai, maka catatan resolusi WAJIB ADA.
+       'catatan_resolusi' => 'required_if:status_laporan,selesai|string|nullable'
+   ]);
+   ```
+2. **Proses Pembaruan DB:**
+   ```php
+   $report = DamageReport::findOrFail($id);
+   $report->status_laporan = $request->status_laporan;
+   $report->catatan_resolusi = $request->catatan_resolusi ?? $report->catatan_resolusi; // Jangan timpa null jika sudah ada
+   $report->save();
+   
+   return back()->with('success', 'Status laporan keluhan diperbarui.');
+   ```

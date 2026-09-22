@@ -29,3 +29,53 @@ Pengguna yang telah login dapat memilih fasilitas dari katalog dan mengisi formu
 ## 5. Aturan Penolakan / Edge Cases
 - Jika jam yang diminta bertabrakan dengan pesanan orang lain yang sudah disetujui, tolak (*HTTP 422*).
 - Jika fasilitas yang hendak dipesan kebetulan berstatus 'Dalam Perbaikan' (Rusak), tolak pendaftaran.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
+    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+});
+```
+
+### Logika Eksekusi di Controller (`ReservationController@store`)
+1. **Validasi Kustom FormRequest:**
+   ```php
+   $request->validate([
+       'facility_id' => 'required|exists:facilities,id',
+       'date' => 'required|date|after_or_equal:today',
+       'start_time' => 'required|date_format:H:i',
+       'end_time' => 'required|date_format:H:i|after:start_time',
+       'purpose' => 'required|string'
+   ]);
+   ```
+2. **Validasi Menit & Jam Operasional (07.00 - 20.00):**
+   ```php
+   // Ekstrak menit dan jam pakai Carbon atau explode
+   // Jika menit != '00' && menit != '30', lempar error 422.
+   // Jika jam < 07 || jam >= 20, lempar error 422.
+   ```
+3. **Validasi Anti-Bentrok & Fasilitas Rusak:**
+   ```php
+   $facility = Facility::find($request->facility_id);
+   if ($facility->status_aktif == 'maintenance') {
+       return back()->withErrors('Fasilitas sedang diperbaiki.');
+   }
+   
+   $overlap = Reservation::where('facility_id', $request->facility_id)
+       ->where('date', $request->date)
+       ->where('status', 'approved')
+       ->where(function($q) use ($request) {
+           $q->where('start_time', '<', $request->end_time)
+             ->where('end_time', '>', $request->start_time);
+       })->exists();
+
+   if ($overlap) {
+       return back()->withErrors('Jadwal bentrok dengan pengguna lain.');
+   }
+   ```
+4. **Penyimpanan:**
+   ```php
+   Reservation::create([... $request->all(), 'user_id' => Auth::id(), 'status' => 'pending']);
+   ```

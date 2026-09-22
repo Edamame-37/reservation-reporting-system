@@ -29,3 +29,42 @@ Sebagai otak tata kelola aplikasi, Admin berhak menambah ruangan baru, memperbai
 
 ## 5. Aturan Penolakan / Edge Cases
 - Jika nama fasilitas yang sama (contoh: "Lab Komputer A") diketikkan lagi di formulir tambah, validasi `unique:facilities,name` akan melempar pesan *error* agar tidak terjadi data ganda.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Resource route meng-generate index, create, store, edit, update, destroy
+    Route::resource('admin/facilities', FacilityController::class)->except(['show']);
+});
+```
+
+### Logika Eksekusi di Controller (`FacilityController@store`)
+1. **Validasi File:**
+   ```php
+   $request->validate([
+       'name' => 'required|string|unique:facilities,name',
+       'type' => 'required|in:Kelas,Laboratorium,Aula,Lapangan',
+       'capacity' => 'required|integer|min:1',
+       'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+   ]);
+   ```
+2. **Unggah Foto:**
+   ```php
+   $path = $request->file('cover_image')->store('public/facilities');
+   ```
+3. **Simpan DB:**
+   ```php
+   Facility::create([...$request->all(), 'cover_image' => $path, 'status_aktif' => 'aktif']);
+   return back()->with('success', 'Fasilitas baru ditambahkan!');
+   ```
+
+### Logika Penghapusan Lunak (`FacilityController@destroy`)
+```php
+// Pastikan model Facility menggunakan trait `SoftDeletes` di app/Models/Facility.php
+$facility = Facility::findOrFail($id);
+$facility->status_aktif = 'dihapus'; // Flag kustom untuk aplikasi
+$facility->delete(); // Memicu SoftDeletes Laravel (isi deleted_at)
+return back()->with('success', 'Fasilitas dicabut dari peredaran.');
+```

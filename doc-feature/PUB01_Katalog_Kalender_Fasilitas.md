@@ -25,3 +25,31 @@ Pengunjung mengakses beranda aplikasi dan dapat melihat daftar seluruh fasilitas
 ## 5. Aturan Penolakan / Edge Cases
 - **Fasilitas Non-aktif:** Fasilitas yang sudah dinonaktifkan Admin (dihapus lunak / *soft delete* / status tidak aktif) tidak boleh muncul di katalog pengunjung.
 - **Fasilitas Sedang Diperbaiki:** Waktu *maintenance* (US-12) harus diikutkan di dalam *output* ketersediaan agar slot waktunya berwarna merah/tidak tersedia.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::get('/catalog', [PublicFacilityController::class, 'index'])->name('catalog.index');
+Route::get('/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('catalog.availability');
+```
+
+### Logika Eksekusi di Controller (`PublicFacilityController@showAvailability`)
+Fungsi ini dipanggil oleh Ajax/Fetch dari kalender untuk mendapatkan slot yang sudah terisi.
+1. **Pemeriksaan Kerusakan (Maintenance):**
+   ```php
+   $facility = Facility::findOrFail($id);
+   if ($facility->status_aktif !== 'aktif') {
+       return response()->json(['status' => 'maintenance', 'message' => 'Fasilitas sedang ditutup.']);
+   }
+   ```
+2. **Pencarian Reservasi (Approval Saja):**
+   ```php
+   $bookedSlots = Reservation::where('facility_id', $id)
+       ->where('status', 'approved')
+       ->whereDate('start_time', $date)
+       ->get(['start_time', 'end_time']); // Hanya waktu, rahasiakan nama pemesan!
+   
+   return response()->json($bookedSlots);
+   ```
+3. **Di sisi Frontend (JavaScript Matrix):** Kalender akan mewarnai kotak jam antara `start_time` dan `end_time` menjadi warna merah. Jam operasional yang dirender hanyalah 07.00 hingga 20.00.

@@ -23,3 +23,34 @@ Ada kondisi tertentu (misalnya atap bocor atau perintah mendadak Rektor) di mana
 ## 5. Aturan Penolakan / Edge Cases
 - Jika petugas tidak memasukkan alasan, server mengembalikan error validasi dan tidak mengeksekusi pembatalan.
 - Setelah dibatalkan, slot waktu terkait di Kalender Publik (PUB-01) harus langsung kembali bersih (Tersedia) kecuali ruangannya juga ditandai rusak.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
+});
+```
+
+### Logika Eksekusi di Controller (`ReservationManagementController@forceCancel`)
+1. **Validasi Alasan:**
+   ```php
+   $request->validate([
+       'alasan_batal' => 'required|string|min:10' // Petugas wajib memberi alasan panjang
+   ]);
+   ```
+2. **Proses Eksekusi (Pembatalan Sepihak):**
+   ```php
+   $reservation = Reservation::findOrFail($id);
+   // Pastikan hanya membatalkan yang sudah approved (jika tidak, ini bisa error salah sasaran)
+   if ($reservation->status !== 'approved') {
+       return back()->withErrors('Hanya reservasi yang telah disetujui yang dapat dibatalkan paksa.');
+   }
+
+   $reservation->status = 'cancelled_by_admin'; // Atau rejected
+   $reservation->alasan_batal = $request->alasan_batal;
+   $reservation->save();
+   
+   return back()->with('success', 'Pembatalan darurat berhasil dieksekusi.');
+   ```

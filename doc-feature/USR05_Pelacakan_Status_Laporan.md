@@ -23,3 +23,33 @@ Setelah memotret dan melapor, Pengguna membutuhkan transparansi (*SLA*) terkait 
 
 ## 5. Aturan Penolakan / Edge Cases
 - Sangat dilarang keras sebuah kueri menampilkan laporan kerusakan dari mahasiswa A kepada mahasiswa B demi menjaga privasi pelapor (hanya Petugas dan Admin yang berhak melihat semua laporan lintas akun).
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
+    Route::get('/reports/history', [ReportController::class, 'index'])->name('reports.index');
+});
+```
+
+### Logika Eksekusi di Controller (`ReportController@index`)
+1. **Pencarian Data Eksklusif (Hanya Milik Sendiri):**
+   ```php
+   // Cegah N+1 dengan `with('facility')`
+   $reports = DamageReport::with('facility')
+               ->where('user_id', Auth::id())
+               ->orderBy('created_at', 'desc')
+               ->paginate(10);
+               
+   return view('user.report-history', compact('reports'));
+   ```
+
+### Logika Frontend (`report-history.blade.php`)
+1. **Menampilkan Gambar dari Storage:**
+   Karena direktori yang tersimpan di DB adalah `public/reports/...`, pastikan *programmer* menggunakan fungsi `Storage::url()` untuk mencetak tautan foto di HTML.
+   ```blade
+   <img src="{{ Storage::url($report->photo_path) }}" alt="Bukti Rusak" class="w-32">
+   ```
+   *(Ingat: Programmers wajib menjalankan `php artisan storage:link` terlebih dahulu agar folder public terhubung).*
+2. **Cetak Catatan Petugas:** Jika kolom `catatan_resolusi` pada tiket tersebut tidak kosong, tampilkan *alert box* kecil berisi catatan itu (SLA transparansi).

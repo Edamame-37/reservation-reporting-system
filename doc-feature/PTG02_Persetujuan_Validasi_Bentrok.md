@@ -25,3 +25,49 @@ Di halaman manajemen reservasi, Petugas menyeleksi seluruh peminjaman berstatus 
 
 ## 5. Aturan Penolakan / Edge Cases
 - **Persetujuan Berganda Secara Konkuren:** Untuk menghindari celah jika dua petugas menyetujui dua antrean bentrok dalam fraksi detik yang sama (berlomba), sistem idealnya menggunakan fitur `DB::transaction()` dengan teknik *pesimistic locking* (`lockForUpdate()`) saat membaca tabel reservasi sebelum melakukan status `update()`. (Sesuai dengan syarat "Sistem handal menangani konkurensi 100 user" di PDF).
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
+    Route::patch('/petugas/reservations/{id}/approve', [ReservationManagementController::class, 'approve'])->name('petugas.reservations.approve');
+    Route::patch('/petugas/reservations/{id}/reject', [ReservationManagementController::class, 'reject'])->name('petugas.reservations.reject');
+});
+```
+
+### Logika Eksekusi di Controller (`ReservationManagementController@approve`)
+Metode ini adalah jantung sistem, harus tahan dari celah konkurensi (2 petugas meng-klik secara bersamaan).
+```php
+public function approve($id) {
+    // 1. Awali transaksi database yang mengunci baris (Pessimistic Locking)
+    DB::transaction(function () use ($id) {
+        $reservation = Reservation::lockForUpdate()->findOrFail($id);
+        
+        // 2. Jika status bukan lagi pending (mungkin sudah disetujui petugas lain), hentikan.
+        if ($reservation->status !== 'pending') {
+            abort(422, 'Reservasi ini sudah diproses.');
+        }
+
+        // 3. Pengecekan Bentrok Jadwal (Overlap SQL)
+        $overlap = Reservation::where('facility_id', $reservation->facility_id)
+            ->where('date', $reservation->date)
+            ->where('status', 'approved')
+            ->where(function($query) use ($reservation) {
+                $query->where('start_time', '<', $reservation->end_time)
+                      ->where('end_time', '>', $reservation->start_time);
+            })->exists();
+
+        if ($overlap) {
+            abort(422, 'Fasilitas sudah dibooking pada jam tersebut!');
+        }
+
+        // 4. Lolos semua? Lakukan persetujuan.
+        $reservation->status = 'approved';
+        $reservation->save();
+    });
+    
+    return back()->with('success', 'Reservasi berhasil disetujui.');
+}
+```

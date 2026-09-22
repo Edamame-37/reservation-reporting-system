@@ -30,3 +30,26 @@ Pengunjung web yang belum memiliki akun dapat melakukan registrasi secara mandir
 ## 5. Aturan Penolakan / Edge Cases
 - **Email Sudah Digunakan:** Server melempar *HTTP 422* dengan pesan bahwa email telah terdaftar.
 - **Login Langsung Setelah Register:** Secara *default*, Laravel Breeze otomatis melakukan sesi login sesaat setelah daftar. **Hal ini WAJIB DIMATIKAN** dari logika *controller* Breeze, karena akun baru wajib menunggu persetujuan verifikasi Admin.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php` atau `routes/auth.php`)
+```php
+Route::get('/register', [RegisteredUserController::class, 'create'])->middleware('guest')->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('guest');
+```
+
+### Logika Eksekusi di Controller (`RegisteredUserController@store`)
+1. **Validasi Input:** Jalankan fungsi `request()->validate()` untuk `name`, `email` (harus `unique`), dan `password`.
+2. **Pembuatan Pengguna:**
+   ```php
+   $user = User::create([
+       'name' => $request->name,
+       'email' => $request->email,
+       'password' => Hash::make($request->password),
+       'status' => 'pending' // STATUS AKUN TERKUNCI (US-15)
+   ]);
+   ```
+3. **Pemberian Peran:** Panggil paket Spatie `$user->assignRole('pengguna');`.
+4. **Mencegah Auto-Login:** Pastikan BUKAN menggunakan fungsi `Auth::login($user)`.
+5. **Pengalihan (Redirect):** Arahkan pengguna kembali dengan `return redirect()->route('login')->with('success', 'Akun terdaftar, menunggu persetujuan Admin.');`

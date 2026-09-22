@@ -24,3 +24,32 @@ Sistem memiliki tiga kelompok pengguna (*role*) yakni Pengguna Biasa, Petugas, d
 
 ## 5. Aturan Penolakan / Edge Cases
 - **Upaya Login Akun Tertahan:** Jika akun `pending` atau di-`banned` oleh Admin mencoba login, sesi tidak akan dibuat dan sistem mengembalikan *HTTP 401* (Unauthorized) atau *HTTP 302* (Redirect back) lengkap dengan pesan kesalahan status akun.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php` atau `routes/auth.php`)
+```php
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->middleware('guest')->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('guest');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth')->name('logout');
+```
+
+### Logika Eksekusi di Controller (`AuthenticatedSessionController@store`)
+1. **Validasi Kredensial:** Sistem mengecek kecocokan *email* dan *password* melalui `Auth::attempt()`.
+2. **Validasi Status Pending (Penting):**
+   ```php
+   $user = Auth::user();
+   if ($user->status !== 'verified') {
+       Auth::logout(); // Putuskan sesi
+       return back()->withErrors(['email' => 'Akun Anda belum disetujui Admin.']);
+   }
+   ```
+3. **Pengecekan Otorisasi (Redirect):**
+   ```php
+   if ($user->hasRole('admin')) {
+       return redirect()->intended('/admin/dashboard');
+   } elseif ($user->hasRole('petugas')) {
+       return redirect()->intended('/petugas/dashboard');
+   }
+   return redirect()->intended('/user/dashboard');
+   ```

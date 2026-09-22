@@ -26,3 +26,37 @@ Jika agenda acara pengguna batal atau berubah, mereka memiliki wewenang untuk me
 ## 5. Aturan Penolakan / Edge Cases
 - Pengguna yang mencoba mengirim API POST/DELETE pemalsuan (*curl* langsung) untuk membatalkan pesanan di hari-H akan gagal total karena ada filter validasi server batas H-1.
 - Jika pengguna membatalkan pesanan yang berstatus *Approved*, maka di kalender utama (PUB-01), jadwal tersebut otomatis tercabut dan menjadi kosong kembali.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
+    Route::delete('/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+});
+```
+
+### Logika Eksekusi di Controller (`ReservationController@cancel`)
+1. **Otorisasi Kepemilikan:**
+   ```php
+   $reservation = Reservation::findOrFail($id);
+   if ($reservation->user_id !== Auth::id()) {
+       abort(403, 'Akses ditolak.');
+   }
+   ```
+2. **Validasi Batas H-1 (Wajib Sesuai PDF):**
+   ```php
+   // Gabungkan tanggal dan jam mulai menjadi objek Carbon
+   $startDateTime = Carbon::parse($reservation->date . ' ' . $reservation->start_time);
+   
+   // Cek selisih dengan waktu sekarang
+   if (now()->diffInHours($startDateTime, false) <= 24) {
+       return back()->withErrors('Pembatalan maksimal dilakukan H-1 (24 jam) sebelum acara.');
+   }
+   ```
+3. **Penyimpanan Status Baru:**
+   ```php
+   $reservation->status = 'cancelled_by_user';
+   $reservation->save();
+   return back()->with('success', 'Reservasi berhasil dibatalkan.');
+   ```

@@ -22,3 +22,31 @@ Ini adalah jembatan *sinkronisasi* antara Pelaporan dan Peminjaman. Ketika fasil
 
 ## 5. Aturan Penolakan / Edge Cases
 - Jika fasilitas sedang dalam "Mode Perbaikan", lalu di tengah waktu itu ada reservasi yang kebetulan sudah terlanjur *Approved* di hari esok, petugas diharapkan membatal-paksanya (via PTG-03). Blokir perbaikan ini bersifat mengunci *booking* baru.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::patch('/petugas/facilities/{id}/toggle-maintenance', [ReportManagementController::class, 'toggleMaintenance'])->name('petugas.facilities.toggle-maintenance');
+});
+```
+
+### Logika Eksekusi di Controller (`ReportManagementController@toggleMaintenance`)
+1. **Saklar (Toggle) Status Master Fasilitas:**
+   ```php
+   $facility = Facility::findOrFail($id);
+   
+   // Jika sedang aktif, ubah ke maintenance, begitu pula sebaliknya (Toggling).
+   if ($facility->status_aktif == 'aktif') {
+       $facility->status_aktif = 'maintenance';
+       $msg = 'Fasilitas diblokir (Masuk mode maintenance).';
+   } else {
+       $facility->status_aktif = 'aktif';
+       $msg = 'Fasilitas dikembalikan ke status aktif.';
+   }
+   
+   $facility->save();
+   return back()->with('success', $msg);
+   ```
+2. **Catatan Arsitektur:** Ini adalah manipulasi tingkat Dewa dari sisi Petugas, karena ia mengubah master data (yang seharusnya ranah Admin). Namun ini legal secara bisnis, mengingat Petugas adalah ujung tombak di lapangan yang melihat kerusakan, sehingga tak perlu menunggu Admin untuk menutup fasilitas.

@@ -24,3 +24,20 @@ Pengguna yang telah berhasil masuk (login) dapat membuka halaman profil mereka u
 
 ## 5. Aturan Penolakan / Edge Cases
 - **Konfirmasi Salah:** Jika sandi lama yang diketikkan pengguna keliru, kembalikan dengan pesan *error* validasi khusus tanpa menyentuh *database*.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+```
+
+### Logika Eksekusi di Controller (`ProfileController@update`)
+1. **Validasi Form:** Pastikan `$request->name` diisi.
+2. **Sinkronisasi Data:** ` $request->user()->fill($request->validated());`
+3. **Penyimpanan:** `$request->user()->save();`
+4. **Respon Visual:** Mengembalikan ke halaman profil (`Redirect::route('profile.edit')`) dan menyematkan parameter sesi `->with('status', 'profile-updated');`. Di file Blade, variabel sesi tersebut akan ditangkap oleh Alpine.js `x-data="{ show: true }"` untuk memunculkan lencana *toast* "Saved." warna hijau yang menghilang setelah 2 detik.

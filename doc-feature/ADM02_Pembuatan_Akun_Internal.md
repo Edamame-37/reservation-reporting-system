@@ -28,3 +28,37 @@ Admin memiliki kendali penuh untuk mendaftarkan akun secara langsung tanpa melal
 
 ## 5. Aturan Penolakan / Edge Cases
 - Tidak boleh ada antarmuka yang mengizinkan Admin membuat akun dengan role "Admin". Pembatasan ini mencegah admin-admin bayangan diciptakan sembarangan. Murni dibatasi pada dua peran pendukung.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+});
+```
+
+### Logika Eksekusi di Controller (`AdminUserManagementController@storeUser`)
+1. **Validasi Form Request:**
+   ```php
+   $request->validate([
+       'name' => 'required|string|max:255',
+       'email' => 'required|email|unique:users,email',
+       'password' => 'required|string|min:8',
+       'role' => 'required|in:petugas,pengguna' // SANGAT PENTING: Jangan izinkan 'admin'!
+   ]);
+   ```
+2. **Insert User Langsung Aktif:**
+   ```php
+   $user = User::create([
+       'name' => $request->name,
+       'email' => $request->email,
+       'password' => Hash::make($request->password),
+       'status' => 'verified' // Langsung aktif tanpa antre verifikasi!
+   ]);
+   ```
+3. **Penyematan Peran (Spatie):**
+   ```php
+   $user->assignRole($request->role);
+   return back()->with('success', 'Akun internal berhasil diciptakan.');
+   ```

@@ -27,3 +27,41 @@ Petugas Sarpras adalah garda terdepan operasional. Ketika mereka login ke sistem
 
 ## 5. Aturan Penolakan / Edge Cases
 - Tidak berlaku aksi tulis DB di modul ini. Seluruh tampilan murni *dashboard monitoring*. Jika metrik kosong, sistem menampilkan ikon ilustrasi "Semua antrean beres".
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
+});
+```
+
+### Logika Eksekusi di Controller (`DashboardPetugasController@index`)
+1. **Perhitungan Metrik (Agregasi):**
+   ```php
+   $pendingReservationsCount = Reservation::where('status', 'pending')->count();
+   $newReportsCount = DamageReport::whereIn('status_laporan', ['baru', 'diproses'])->count();
+   ```
+2. **Pengambilan Data Pratinjau (Mini Table):**
+   ```php
+   // Ambil 5 data teratas saja untuk ditampilkan di dashboard
+   $recentReservations = Reservation::with('facility', 'user')
+       ->where('status', 'pending')
+       ->orderBy('created_at', 'asc') // First in, first out
+       ->limit(5)->get();
+       
+   $recentReports = DamageReport::with('facility', 'user')
+       ->whereIn('status_laporan', ['baru', 'diproses'])
+       ->orderBy('created_at', 'asc')
+       ->limit(5)->get();
+   ```
+3. **Pengembalian View:**
+   ```php
+   return view('petugas.dashboard', compact(
+       'pendingReservationsCount', 
+       'newReportsCount', 
+       'recentReservations', 
+       'recentReports'
+   ));
+   ```

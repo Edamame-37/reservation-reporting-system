@@ -24,3 +24,36 @@ Karena siapa saja bisa mendaftar lewat web Publik (AUTH-01), Admin bertugas menj
 
 ## 5. Aturan Penolakan / Edge Cases
 - Akun berstatus `pending` atau `rejected` yang mencoba masuk di halaman Login (AUTH-02) secara paksa tidak akan pernah diizinkan membuat sesi (*session*).
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/users', [AdminUserManagementController::class, 'index'])->name('admin.users.index');
+    Route::patch('/admin/users/{id}/verify', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
+    Route::patch('/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
+});
+```
+
+### Logika Eksekusi di Controller (`AdminUserManagementController@verifyUser`)
+1. **Verifikasi:**
+   ```php
+   $user = User::findOrFail($id);
+   if ($user->status !== 'pending') {
+       return back()->withErrors('Akun sudah diproses sebelumnya.');
+   }
+   
+   $user->status = 'verified'; // Akun aktif
+   $user->save();
+   
+   return back()->with('success', 'Akun pengguna disetujui.');
+   ```
+2. **Penolakan (`rejectUser`):**
+   ```php
+   $user = User::findOrFail($id);
+   $user->status = 'rejected'; // Atau langsung $user->delete() sesuai selera.
+   $user->save();
+   
+   return back()->with('success', 'Pendaftaran akun ditolak.');
+   ```

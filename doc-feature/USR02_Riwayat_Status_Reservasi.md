@@ -26,3 +26,37 @@ Setelah mengajukan permintaan peminjaman ruangan, Pengguna membutuhkan wadah unt
 
 ## 5. Aturan Penolakan / Edge Cases
 - Sistem tidak melayani aksi edit (Ubah) peminjaman. Jika Pengguna melakukan kesalahan ketik tujuan atau jam, mereka harus membatalkan pesanannya dan membuat pesanan yang baru.
+
+## 6. Penjelasan Rinci Cara Kerja (Pseudocode & Logika)
+
+### Routing (`routes/web.php`)
+```php
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
+    Route::get('/reservations/history', [ReservationController::class, 'history'])->name('reservations.history');
+});
+```
+
+### Logika Eksekusi di Controller (`ReservationController@history`)
+1. **Pencarian Data (Query):**
+   ```php
+   // Harus memuat relasi (Eager Loading) agar tidak N+1 Query Problem
+   $reservations = Reservation::with('facility')
+                   ->where('user_id', Auth::id())
+                   ->orderBy('created_at', 'desc')
+                   ->paginate(10);
+   ```
+2. **Pengembalian View:**
+   ```php
+   return view('user.reservation-history', compact('reservations'));
+   ```
+
+### Logika Frontend (`reservation-history.blade.php`)
+Di dalam baris tabel (looping `@foreach($reservations as $res)`), buat pengkondisian IF untuk status:
+```blade
+@if($res->status == 'pending')
+    <span class="bg-yellow-100 text-yellow-800">Menunggu</span>
+@elseif($res->status == 'approved')
+    <span class="bg-green-100 text-green-800">Disetujui</span>
+@endif
+```
+Jika statusnya `rejected` atau `cancelled`, cetak nilai variabel `$res->alasan_batal` di dalam kolom keterangan agar pengguna mengerti mengapa pengajuannya digagalkan.
