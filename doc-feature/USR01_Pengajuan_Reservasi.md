@@ -22,7 +22,7 @@ Sistem melayani tiga segmen pengguna utama dalam sivitas akademika dengan hak da
 
 ### 2.2. Ringkasan Alur Pengajuan Reservasi
 1. Pengguna yang telah berhasil melakukan *login* dan berstatus akun aktif dapat mengakses formulir pengajuan reservasi baik melalui menu Dasbor Pengguna maupun melalui tombol *"Reservasi Ruang Ini"* pada kartu fasilitas di halaman Katalog Publik.
-2. Pengguna menentukan fasilitas yang ingin dipinjam, tanggal pelaksanaan kegiatan, rentang waktu pemakaian (*start time* dan *end time*), serta rincian tujuan penggunaan ruangan.
+2. Pengguna menentukan fasilitas yang ingin dipinjam melalui **3 dropdown bertingkat (*Cascading Dropdown*)**: memilih Gedung (Gedung A, B, C, D, E, F, atau Gedung Rektorat/PKM), memilih Lantai (Lantai 1, 2, atau 3), lalu memilih Ruangan spesifik (misal: A104). Pengguna juga menentukan tanggal pelaksanaan kegiatan, rentang waktu pemakaian (*start time* dan *end time*), serta rincian tujuan penggunaan ruangan.
 3. Antarmuka formulir secara interaktif menyaring pilihan slot waktu agar selalu berada dalam koridor jam operasional kampus (07:00 – 20:00 WIB) dengan durasi kelipatan 30 menit.
 4. Saat formulir dikirimkan (*submit*), sistem memvalidasi integritas data, status kesiapan fasilitas (bukan dalam status pemeliharaan/*maintenance*), serta memastikan tidak ada persinggungan jadwal (*schedule conflict / overlap*) dengan peminjaman lain yang telah berstatus *Approved*.
 5. Apabila seluruh validasi terpenuhi, sistem mengunci data secara transaksional, menyimpan entitas reservasi baru ke basis data dengan status awal `pending`, dan memasukkannya ke dalam antrean persetujuan Petugas Sarpras. Pengguna selanjutnya diarahkan ke halaman Riwayat Reservasi disertai notifikasi umpan balik sukses.
@@ -43,6 +43,7 @@ Setiap baris kode *Frontend* maupun *Backend* wajib mematuhi aturan bisnis baku 
 | **BR-USR01-06** | **Proteksi Fasilitas Pemeliharaan** | Fasilitas yang sedang berstatus 'Dalam Perbaikan' (*maintenance*) atau non-aktif (`status_aktif != 'aktif'`) dilarang keras untuk diajukan peminjamannya. | Client-side & Server-side |
 | **BR-USR01-07** | **Inisiasi Status Awal** | Setiap pengajuan reservasi baru yang berhasil terkirim secara otomatis memiliki status `pending` (*Menunggu Persetujuan Petugas*). Pengguna tidak memiliki wewenang mengubah statusnya sendiri menjadi *approved*. | Server-side (Otomatisasi) |
 | **BR-USR01-08** | **Integritas Akun Pengguna** | Hanya akun pengguna yang telah diverifikasi oleh Administrator (`status = 'verified'`) yang diizinkan mengirimkan data reservasi. Akun berstatus `pending` atau `suspended` ditolak aksesnya oleh *middleware*. | Middleware Server-side |
+| **BR-USR01-09** | **Hierarki Penomoran Kode Ruang** | Pemilihan fasilitas diorganisasikan dalam hierarki 3 level: Gedung ➔ Lantai ➔ Ruangan. Format kode ruangan baku diawali huruf gedung, angka lantai, dan nomor urut ruangan (contoh: Gedung A Lantai 1 Ruang 4 diberi kode **A104**). | Client-side (UI) & Master DB |
 
 ---
 
@@ -51,8 +52,8 @@ Setiap baris kode *Frontend* maupun *Backend* wajib mematuhi aturan bisnis baku 
 | ID Kebutuhan | Nama Kebutuhan | Deskripsi Spesifikasi Fungsional |
 |---|---|---|
 | **FR-USR01-001** | Aksesibilitas Formulir | Sistem harus menyediakan halaman formulir pengajuan reservasi yang dapat diakses oleh Pengguna terautentikasi melalui URL `/user/reservation-form`. |
-| **FR-USR01-002** | Pre-Seleksi Data Fasilitas | Sistem harus mampu menerima parameter *query string* (misal: `?facility_id=1`) untuk langsung memilihkan fasilitas yang dituju secara otomatis saat pengguna datang dari halaman katalog. |
-| **FR-USR01-003** | Pemilihan Fasilitas Dinamis | Sistem harus menampilkan daftar fasilitas berstatus aktif (`status_aktif = 'aktif'`) dalam bentuk pilihan visual atau *dropdown* jika pengguna membuka formulir secara langsung dari dasbor. |
+| **FR-USR01-002** | Pre-Seleksi Data Fasilitas | Sistem harus mampu menerima parameter *query string* (misal: `?facility_id=1`) untuk langsung memilihkan gedung, lantai, dan ruangan yang dituju secara otomatis saat pengguna datang dari halaman katalog. |
+| **FR-USR01-003** | Pemilihan Fasilitas Bertingkat | Antarmuka formulir menyediakan 3 dropdown bertingkat (*Cascading Dropdown*): (1) Pemilih Gedung (A–F / Rektorat / PKM), (2) Pemilih Lantai (1–3), dan (3) Pemilih Ruangan (A101–A104, B201–B204, dst.) yang secara reaktif mengikat `facility_id` valid ke basis data. |
 | **FR-USR01-004** | Pemilihan Tanggal Aman | Sistem harus menyediakan pemilih tanggal (*date picker*) dengan atribut batasan minimal tanggal hari ini (`min="{{ date('Y-m-d') }}"`). |
 | **FR-USR01-005** | Pemilihan Slot Waktu Terstruktur | Sistem harus menyediakan antarmuka pemilihan waktu mulai dan waktu selesai yang dibatasi secara ketat hanya pada opsi jam 07:00 hingga 20:00 dengan interval 30 menit. |
 | **FR-USR01-006** | Pengisian Tujuan & Kategori | Sistem harus mewajibkan pengguna mengisikan deskripsi tujuan peminjaman (minimal 10 karakter, maksimal 500 karakter) serta opsi kategori kegiatan (Akademik, Organisasi, Rapat Resmi). |

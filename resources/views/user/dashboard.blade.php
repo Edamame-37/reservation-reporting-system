@@ -7,25 +7,6 @@
 
 <x-app-layout title="Dasbor Mahasiswa & Dosen" active="dashboard">
     <!-- 
-      ELEMEN       : Banner Informasi Kebijakan Reservasi & Kuota
-      KEGUNAAN     : Mengingatkan batas waktu reservasi minimal 2x24 jam dan batas pembatalan mandiri H-1.
-    -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[22px]">info</span>
-            </div>
-            <div>
-                <h2 class="text-sm font-bold text-slate-900 leading-snug">Kebijakan Pemesanan Fasilitas Kampus (SK Rektor No. 428/2024)</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Reservasi diajukan minimal H-2 sebelum kegiatan. Pembatalan mandiri hanya diizinkan maksimal H-1 sebelum jadwal.</p>
-            </div>
-        </div>
-        <div class="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 whitespace-nowrap self-stretch md:self-auto text-center">
-            Kuota Bulanan: <span class="text-slate-900 font-bold">4 / 5 Terpakai</span>
-        </div>
-    </section>
-
-    <!-- 
       ELEMEN       : Spotlight Jadwal Terdekat (Upcoming Reservation Highlight)
       KEGUNAAN     : Memanjakan pengguna dengan menyajikan jadwal kegiatan paling mendesak dalam kartu hero fokus.
     -->
