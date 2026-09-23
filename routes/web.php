@@ -7,7 +7,9 @@
  */
 
 use App\Http\Controllers\AdminUserManagementController;
+use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,7 +42,6 @@ Route::get('/petugas/report-management', function () { return view('petugas.repo
 
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
-Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -82,10 +83,27 @@ Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagemen
 Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
 // ROUTE: Menerima GET request ke '/admin/facility-master'
-// FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
-Route::get('/admin/facility-master', function () {
-    return view('admin.facility-master');
-})->name('admin.facility-master');
+// FUNGSI: Menampilkan tabel master data fasilitas dan agregat statistik inventaris kampus (ADM-03 / US-16)
+Route::get('/admin/facility-master', [FacilityController::class, 'index'])->name('admin.facility-master');
+
+// ROUTE: Rute resource manajemen fasilitas (index, create, store, edit, update, destroy)
+// FUNGSI: Menyediakan endpoint RESTful siklus CRUD master data fasilitas kampus (ADM-03 / US-16)
+Route::resource('admin/facilities', FacilityController::class)->except(['show']);
+
+// ROUTE: Menerima POST request ke '/admin/facilities/{id}/toggle'
+// FUNGSI: Mengubah status operasional fasilitas (aktif <-> dalam perbaikan) secara cepat (ADM-03 / US-16)
+Route::post('/admin/facilities/{id}/toggle', [FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
+
+// ROUTE: Menerima POST request ke '/admin/facilities/save' (Kompatibilitas Form Modal Mockup)
+// FUNGSI: Menangani penyimpanan dari formulir modal yang mengirimkan ID tersembunyi (ADM-03 / US-16)
+Route::post('/admin/facilities/save', function (Request $request, FacilityController $controller) {
+    if ($request->filled('id')) {
+        $updateRequest = app(\App\Http\Requests\Admin\UpdateFacilityRequest::class);
+        return $controller->update($updateRequest, $request->input('id'));
+    }
+    $storeRequest = app(\App\Http\Requests\Admin\StoreFacilityRequest::class);
+    return $controller->store($storeRequest);
+})->name('admin.facilities.save');
 
 // ROUTE: Menerima GET request ke '/admin/export-report'
 // FUNGSI: Menampilkan antarmuka ekspor laporan resmi sarpras (PDF/Excel)
