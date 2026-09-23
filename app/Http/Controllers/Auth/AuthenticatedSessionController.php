@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Memproses autentikasi pengguna ke dalam sistem.
-     * CARA KERJA         : [MODE MOCKUP] Kueri database Auth::attempt() dikomentari. Menggunakan data sesi statis agar alur login mockup dapat dicoba langsung tanpa koneksi MySQL.
+     * CARA KERJA         : Menjalankan $request->authenticate() untuk memeriksa kredensial dan status akun (ADM-01), dengan penanganan fallback jika basis data belum tersambung.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
