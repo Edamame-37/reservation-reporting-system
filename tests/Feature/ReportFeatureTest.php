@@ -6,6 +6,7 @@
  * CARA KERJA   : Dieksekusi melalui framework Pest dengan isolasi transaksi basis data MySQL dan fake storage disk.
  */
 
+use App\Models\DamageReport;
 use App\Models\Facility;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -133,3 +134,124 @@ test('USR-04: Penolakan laporan jika facility_id tidak terdaftar di sistem (TC-U
 
     $response->assertSessionHasErrors('facility_id');
 });
+
+test('USR-05: Pengguna dapat mengakses riwayat laporan dan melihat tiket miliknya (TC-USR05-01)', function () {
+    $report = DamageReport::create([
+        'report_code'        => 'RPT-20260924-TEST',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'AC & Pendingin',
+        'description'        => 'AC tidak dingin dan meneteskan air ke lantai.',
+        'status'             => 'baru',
+        'is_facility_locked' => false,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('user.report-history'));
+
+    $response->assertStatus(200);
+    $response->assertSee('RPT-20260924-TEST');
+    $response->assertSee('AC tidak dingin dan meneteskan air ke lantai.');
+    $response->assertSee($this->facility->name);
+    $response->assertSee('Laporan Baru');
+});
+
+test('USR-05: Pengguna tidak dapat melihat laporan milik pengguna lain (TC-USR05-02)', function () {
+    $otherUser = User::firstOrCreate(
+        ['email' => 'other_student@mahasiswa.ac.id'],
+        [
+            'name'            => 'Budi Mahasiswa',
+            'password'        => bcrypt('password'),
+            'identity_number' => '2110512999',
+            'role'            => 'mahasiswa',
+            'department'      => 'Sistem Informasi',
+            'status'          => 'active',
+        ]
+    );
+
+    $otherReport = DamageReport::create([
+        'report_code'        => 'RPT-OTHER-SECRET',
+        'user_id'            => $otherUser->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'Kelistrikan / Stop Kontak',
+        'description'        => 'Laporan rahasia pengguna lain.',
+        'status'             => 'baru',
+        'is_facility_locked' => false,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('user.report-history'));
+
+    $response->assertStatus(200);
+    $response->assertDontSee('RPT-OTHER-SECRET');
+    $response->assertDontSee('Laporan rahasia pengguna lain.');
+});
+
+test('USR-05: Pengguna dapat memfilter riwayat laporan berdasarkan tab status (TC-USR05-03)', function () {
+    $reportBaru = DamageReport::create([
+        'report_code'        => 'RPT-FILTER-BARU',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'Proyektor & Audio',
+        'description'        => 'Proyektor mati total di ruang lab.',
+        'status'             => 'baru',
+        'is_facility_locked' => false,
+    ]);
+
+    $reportSelesai = DamageReport::create([
+        'report_code'        => 'RPT-FILTER-SELESAI',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'Kebersihan',
+        'description'        => 'Sampah menumpuk di dekat pintu masuk.',
+        'status'             => 'selesai',
+        'resolution_note'    => 'Sudah dibersihkan oleh tim kebersihan.',
+        'is_facility_locked' => false,
+    ]);
+
+    // Request filter status = baru
+    $responseBaru = $this->actingAs($this->user)->get(route('user.report-history', ['status' => 'baru']));
+    $responseBaru->assertStatus(200);
+    $responseBaru->assertSee('RPT-FILTER-BARU');
+    $responseBaru->assertDontSee('RPT-FILTER-SELESAI');
+
+    // Request filter status = selesai
+    $responseSelesai = $this->actingAs($this->user)->get(route('user.report-history', ['status' => 'selesai']));
+    $responseSelesai->assertStatus(200);
+    $responseSelesai->assertSee('RPT-FILTER-SELESAI');
+    $responseSelesai->assertSee('Sudah dibersihkan oleh tim kebersihan.');
+    $responseSelesai->assertDontSee('RPT-FILTER-BARU');
+});
+
+test('USR-05: Pengguna dapat mencari riwayat laporan berdasarkan kata kunci (TC-USR05-04)', function () {
+    $report1 = DamageReport::create([
+        'report_code'        => 'RPT-SEARCH-KEY1',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'Lainnya',
+        'description'        => 'Engsel pintu ruangan patah dan berderit.',
+        'status'             => 'diproses',
+        'is_facility_locked' => false,
+    ]);
+
+    $report2 = DamageReport::create([
+        'report_code'        => 'RPT-SEARCH-KEY2',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'category'           => 'Jaringan & Internet',
+        'description'        => 'Kabel LAN port 12 terputus.',
+        'status'             => 'baru',
+        'is_facility_locked' => false,
+    ]);
+
+    // Cari dengan kode tiket
+    $resCode = $this->actingAs($this->user)->get(route('user.report-history', ['search' => 'KEY1']));
+    $resCode->assertStatus(200);
+    $resCode->assertSee('RPT-SEARCH-KEY1');
+    $resCode->assertDontSee('RPT-SEARCH-KEY2');
+
+    // Cari dengan teks deskripsi
+    $resDesc = $this->actingAs($this->user)->get(route('user.report-history', ['search' => 'Kabel LAN']));
+    $resDesc->assertStatus(200);
+    $resDesc->assertSee('RPT-SEARCH-KEY2');
+    $resDesc->assertDontSee('RPT-SEARCH-KEY1');
+});
+
