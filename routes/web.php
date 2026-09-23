@@ -6,6 +6,7 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +41,6 @@ Route::get('/petugas/report-management', function () { return view('petugas.repo
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
 Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
-Route::get('/admin/user-management', function () { return view('admin.user-management'); })->name('admin.user-management');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -67,11 +67,19 @@ Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
 })->name('admin.dashboard');
 
-// ROUTE: Menerima GET request ke '/admin/user-management'
-// FUNGSI: Menampilkan halaman manajemen verifikasi pengguna dan hak akses (UR15)
-Route::get('/admin/user-management', function () {
-    return view('admin.user-management');
-})->name('admin.user-management');
+// ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
+// FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras via AdminUserManagementController
+Route::get('/admin/user-management', [AdminUserManagementController::class, 'index'])->name('admin.user-management');
+Route::get('/admin/users', [AdminUserManagementController::class, 'index'])->name('admin.users.index');
+
+// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
+// FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
+Route::match(['post', 'patch'], '/admin/users/{id}/verify', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
+Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.approve');
+
+// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/reject' beserta payload FormRequest (reason & notes)
+// FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
+Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
 // ROUTE: Menerima GET request ke '/admin/facility-master'
 // FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
