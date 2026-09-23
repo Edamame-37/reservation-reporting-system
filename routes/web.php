@@ -8,6 +8,7 @@
 
 use App\Http\Controllers\DashboardPetugasController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportManagementController;
 use App\Http\Controllers\ReservationManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,9 +34,6 @@ Route::get('/user/reservation-form', function () { return view('user.reservation
 Route::get('/user/reservation-history', function () { return view('user.reservation-history'); })->name('user.reservation-history');
 Route::get('/user/report-form', function () { return view('user.report-form'); })->name('user.report-form');
 Route::get('/user/report-history', function () { return view('user.report-history'); })->name('user.report-history');
-
-// Mockup Routes - Petugas
-Route::get('/petugas/report-management', function () { return view('petugas.report-management'); })->name('petugas.report-management');
 
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
@@ -113,13 +111,16 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     // ROUTE: Menerima DELETE request ke '/petugas/reservations/{id}/force-cancel'
     // FUNGSI: Pembatalan darurat sepihak (override privilege) oleh petugas untuk reservasi yang telah disetujui (PTG-03 / US-10)
     Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
-});
 
-// ROUTE: Menerima GET request ke '/petugas/report-management'
-// FUNGSI: Menampilkan daftar tiket keluhan kerusakan aset/fasilitas untuk tindak lanjut
-Route::get('/petugas/report-management', function () {
-    return view('petugas.report-management');
-})->name('petugas.report-management');
+    // ROUTE: Menerima GET request ke '/petugas/report-management'
+    // FUNGSI: Menampilkan lembar kerja manajemen tiket kerusakan fasilitas sarpras (PTG-04 / US-11)
+    Route::get('/petugas/report-management', [ReportManagementController::class, 'index'])->name('petugas.report-management');
+    Route::get('/petugas/reports', [ReportManagementController::class, 'index'])->name('petugas.reports.index');
+
+    // ROUTE: Menerima PATCH request ke '/petugas/reports/{id}'
+    // FUNGSI: Memperbarui status penanganan tiket keluhan kerusakan dan mencatat resolusi teknisi (PTG-04 / US-11)
+    Route::patch('/petugas/reports/{id}', [ReportManagementController::class, 'updateStatus'])->name('petugas.reports.update');
+});
 
 /*
 |--------------------------------------------------------------------------
