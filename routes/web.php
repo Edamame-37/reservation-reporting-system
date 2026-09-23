@@ -29,8 +29,6 @@ Route::get('/public/availability', function () { return view('public.availabilit
 
 // Mockup Routes - User
 Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
-Route::get('/user/report-form', function () { return view('user.report-form'); })->name('user.report-form');
-Route::get('/user/report-history', function () { return view('user.report-history'); })->name('user.report-history');
 
 // Mockup Routes - Petugas
 Route::get('/petugas/dashboard', function () { return view('petugas.dashboard'); })->name('petugas.dashboard');
@@ -142,10 +140,8 @@ Route::get('/user/report-form', [ReportController::class, 'create'])->name('user
 Route::post('/user/reports', [ReportController::class, 'store'])->name('user.reports.store');
 
 // ROUTE: Menerima GET request ke '/user/report-history'
-// FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
-Route::get('/user/report-history', function () {
-    return view('user.report-history');
-})->name('user.report-history');
+// FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna beserta filter status dan pencarian (USR-05)
+Route::get('/user/report-history', [ReportController::class, 'history'])->name('user.report-history');
 
 /*
 |--------------------------------------------------------------------------
