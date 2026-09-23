@@ -1,4 +1,16 @@
 <x-guest-layout>
+    @if (session('success'))
+        <div class="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 flex items-start gap-3">
+            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Pendaftaran Berhasil</h3>
+                <p class="text-sm text-emerald-600 dark:text-emerald-400 mt-1">{{ session('success') }}</p>
+            </div>
+        </div>
+    @endif
+
     <!-- MOCKUP LOGIN INTERAKTIF BERBASIS ROLE (TANPA BACKEND) -->
     <div x-data="{
         selectedRole: 'user',

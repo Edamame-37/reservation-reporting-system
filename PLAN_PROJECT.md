@@ -9,26 +9,26 @@ Gunakan dokumen ini sebagai daftar periksa (*checklist*) progres pengerjaan sist
 ## Tahap 1: Setup & Inisiasi Dasar (Fondasi Proyek)
 *Tahap ini memastikan seluruh alat dan kerangka kerja siap sebelum mulai mengetik logika.*
 
-- [ ] `[Project Manager]` **Instalasi Framework:** Menjalankan `composer create-project laravel/laravel reservasi-app`.
-- [ ] `[Backend]` **Setup Database:** Membuat *database* di MySQL (Laragon/XAMPP) dan menyambungkannya ke file `.env`.
-- [ ] `[Project Manager]` **Instalasi Pustaka (Library):**
-  - [ ] `[Frontend]` Pasang *Tailwind CSS* & *Alpine.js* (untuk UI & animasi antarmuka).
-  - [ ] `[Backend]` Pasang *Laravel Breeze* (untuk kerangka Login/Register bawaan).
-  - [ ] `[Backend]` Pasang *Spatie Laravel Permission* (untuk mengatur 4 lapis *Role* pengguna).
-  - [ ] `[Backend]` Pasang *Laravel Excel* & *DomPDF* (untuk fitur unduh laporan Admin).
-  - [ ] `[Frontend]` Unduh *FullCalendar.js* via NPM (untuk komponen visualisasi jadwal).
+- [x] `[Project Manager]` **Instalasi Framework:** Menjalankan `composer create-project laravel/laravel reservasi-app`.
+- [x] `[Backend]` **Setup Database:** Membuat *database* di MySQL (Laragon/XAMPP) dan menyambungkannya ke file `.env`.
+- [x] `[Project Manager]` **Instalasi Pustaka (Library):**
+  - [x] `[Frontend]` Pasang *Tailwind CSS* & *Alpine.js* (untuk UI & animasi antarmuka).
+  - [x] `[Backend]` Pasang *Laravel Breeze* (untuk kerangka Login/Register bawaan).
+  - [x] `[Backend]` Pasang *Spatie Laravel Permission* (untuk mengatur 4 lapis *Role* pengguna).
+  - [x] `[Backend]` Pasang *Laravel Excel* & *DomPDF* (untuk fitur unduh laporan Admin).
+  - [x] `[Frontend]` Unduh *FullCalendar.js* via NPM (untuk komponen visualisasi jadwal).
 
 ---
 
 ## Tahap 2: Perancangan Basis Data (Migrasi & Model)
 *Pekerjaan murni Backend. Membangun struktur tabel MySQL agar sesuai dengan analisis ERD.*
 
-- [ ] `[Backend]` **Tabel `users` (Bawaan Breeze):** Tambahkan kolom tambahan jika perlu (misal: NIK/NIM, no_hp).
-- [ ] `[Backend]` **Tabel `facilities`:** Buat *migration* (nama, tipe, lokasi, kapasitas, deskripsi, foto_fasilitas, status_aktif).
-- [ ] `[Backend]` **Tabel `reservations`:** Buat *migration* (user_id, facility_id, tujuan_penggunaan, start_time, end_time, status_reservasi, alasan_batal).
-- [ ] `[Backend]` **Tabel `reports`:** Buat *migration* (user_id, facility_id, kategori_kerusakan, deskripsi_masalah, foto_bukti, status_laporan, catatan_resolusi).
-- [ ] `[Backend]` **Relasi Eloquent (Models):** Menghubungkan logika di dalam *Model* (misal: `User hasMany Reservation`, `Facility hasMany Report`).
-- [ ] `[Backend]` **Data Palsu (Seeder):** Membuat data *dummy* fasilitas (misal: Lab Komputer, Aula) dan membuat 1 akun Admin bawaan via *DatabaseSeeder* agar sistem langsung bisa di-uji.
+- [x] `[Backend]` **Tabel `users` (Bawaan Breeze):** Tambahkan kolom tambahan jika perlu (misal: NIK/NIM, no_hp).
+- [x] `[Backend]` **Tabel `facilities`:** Buat *migration* (nama, tipe, lokasi, kapasitas, deskripsi, foto_fasilitas, status_aktif).
+- [x] `[Backend]` **Tabel `reservations`:** Buat *migration* (user_id, facility_id, tujuan_penggunaan, start_time, end_time, status_reservasi, alasan_batal).
+- [x] `[Backend]` **Tabel `reports`:** Buat *migration* (user_id, facility_id, kategori_kerusakan, deskripsi_masalah, foto_bukti, status_laporan, catatan_resolusi).
+- [x] `[Backend]` **Relasi Eloquent (Models):** Menghubungkan logika di dalam *Model* (misal: `User hasMany Reservation`, `Facility hasMany Report`).
+- [x] `[Backend]` **Data Palsu (Seeder):** Membuat data *dummy* fasilitas (misal: Lab Komputer, Aula) dan membuat 1 akun Admin bawaan via *DatabaseSeeder* agar sistem langsung bisa di-uji.
 
 ---
 
@@ -44,9 +44,9 @@ Gunakan dokumen ini sebagai daftar periksa (*checklist*) progres pengerjaan sist
 ## SOP Standar Siklus Kerja Pembuatan Antarmuka (Wajib Dipatuhi)
 *Sebelum masuk ke pengerjaan modul-modul di bawah (Tahap 4 hingga 7), tim wajib memahami urutan kerja baku ini untuk membangun setiap halaman web agar tidak berantakan:*
 
-1. [ ] `[UI/UX / Frontend]` **Perancangan Visual:** Membuat dan mematangkan desain halaman (*page*) menggunakan *software prototyping* (seperti Figma atau stich.ai).
-2. [ ] `[Frontend]` **Konversi Desain (Slicing):** Mengubah desain *mockup* tersebut ke dalam bahasa pemrograman visual murni (HTML Statis & Tailwind CSS).
-3. [ ] `[Frontend]` **Integrasi Struktur File (Blade):** Memindahkan HTML hasil *slicing* ke dalam format dan struktur *folder* yang telah disediakan oleh Laravel (yaitu di direktori `resources/views/`).
+1. [x] `[UI/UX / Frontend]` **Perancangan Visual:** Membuat dan mematangkan desain halaman (*page*) menggunakan *software prototyping* (seperti Figma atau stich.ai).
+2. [x] `[Frontend]` **Konversi Desain (Slicing):** Mengubah desain *mockup* tersebut ke dalam bahasa pemrograman visual murni (HTML Statis & Tailwind CSS).
+3. [x] `[Frontend]` **Integrasi Struktur File (Blade):** Memindahkan HTML hasil *slicing* ke dalam format dan struktur *folder* yang telah disediakan oleh Laravel (yaitu di direktori `resources/views/`).
 4. [ ] `[Frontend]` **Pemecahan Komponen Terisolasi:** Memecah objek-objek UI dan logika dari masing-masing halaman menjadi komponen kecil yang bisa didaur ulang (seperti `<x-button>`, `<x-navbar>`) menggunakan fitur *Blade Components* agar kodingan utama tidak menumpuk dan rapi.
 5. [ ] `[Backend]` **Penyiapan Suplai Data (API/Controller):** Menyiapkan *Endpoint API* atau variabel dari *Controller* yang berisi data matang (*query database*) untuk ditampilkan oleh Frontend.
 6. [ ] `[Frontend]` **Injeksi Data Dinamis:** Berkomunikasi dengan tim Backend terkait alamat *endpoint* / variabelnya, lalu mengganti seluruh data palsu (*mock data*) pada HTML desain menjadi data riil dari sistem.

@@ -28,62 +28,128 @@ Proyek ini menggunakan pola arsitektur **MVC (Model-View-Controller)** yang meru
 ├── app/                        # 🗄️ [BACKEND] SERVER-SIDE: PUSAT LOGIKA MVC
 │   ├── Http/
 │   │   ├── Controllers/        # 🗄️ [BACKEND] Pengendali Alur
-│   │   │   ├── HomeController.php
-│   │   │   ├── ReservationController.php
-│   │   │   ├── ReportController.php
-│   │   │   └── FacilityController.php
-│   │   ├── Middleware/         # 🗄️ [BACKEND] Gerbang Keamanan Akses
+│   │   │   ├── Auth/           # 🗄️ [BACKEND] Kontroler Autentikasi (Bawaan Breeze)
+│   │   │   │   ├── AuthenticatedSessionController.php    # Memproses login dan logout pengguna.
+│   │   │   │   ├── ConfirmablePasswordController.php     # Meminta konfirmasi password sebelum aksi krusial.
+│   │   │   │   ├── EmailVerificationNotificationController.php # Mengirim ulang email verifikasi.
+│   │   │   │   ├── EmailVerificationPromptController.php # Menampilkan form permintaan verifikasi email.
+│   │   │   │   ├── NewPasswordController.php             # Memproses penyimpanan password baru.
+│   │   │   │   ├── PasswordController.php                # Mengubah password pengguna aktif.
+│   │   │   │   ├── PasswordResetLinkController.php       # Mengirim tautan reset password via email.
+│   │   │   │   ├── RegisteredUserController.php          # Memproses pendaftaran akun baru.
+│   │   │   │   └── VerifyEmailController.php             # Memvalidasi tautan verifikasi email.
+│   │   │   ├── Controller.php                        # Induk dasar pengendali (base controller) Laravel.
+│   │   │   ├── ProfileController.php                 # Mengendalikan pembaruan data profil pengguna.
+│   │   │   ├── PublicFacilityController.php          # [PUB] Mengendalikan Katalog Fasilitas Publik & Kalender.
+│   │   │   ├── ReservationController.php             # [USR] Mengolah pengajuan & riwayat reservasi pengguna.
+│   │   │   ├── ReportController.php                  # [USR] Mengolah pelaporan kerusakan dari pengguna.
+│   │   │   ├── DashboardPetugasController.php        # [PTG] Memuat metrik & antrean di dasbor petugas.
+│   │   │   ├── ReservationManagementController.php   # [PTG] Mengelola persetujuan/penolakan dan anti-bentrok.
+│   │   │   ├── ReportManagementController.php        # [PTG] Menindaklanjuti keluhan & status blokir fasilitas.
+│   │   │   ├── AdminUserManagementController.php     # [ADM] Memverifikasi dan mendaftarkan akun internal.
+│   │   │   ├── FacilityController.php                # [ADM] Melakukan fungsi CRUD master data fasilitas.
+│   │   │   ├── AdminDashboardController.php          # [ADM] Menampilkan analitik dan rekapitulasi okupansi.
+│   │   │   └── ExportController.php                  # [ADM] Mengeksekusi pencetakan laporan ke Excel/PDF.
 │   │   └── Requests/           # 🗄️ [BACKEND] Validasi Input Form API/Server
-│   │       ├── StoreReservationRequest.php
-│   │       ├── StoreReportRequest.php
-│   │       └── StoreFacilityRequest.php
+│   │       ├── Auth/           
+│   │       │   └── LoginRequest.php                  # Aturan validasi ketika submit form login.
+│   │       └── ProfileUpdateRequest.php              # Aturan validasi saat mengedit profil.
 │   └── Models/                 # 🗄️ [BACKEND] Skema Entitas Database 
-│       ├── Facility.php
-│       ├── Reservation.php
-│       └── Report.php
+│       ├── DamageReport.php    # Model untuk mengolah tabel damage_reports (kerusakan fasilitas).
+│       ├── Facility.php        # Model untuk mengolah tabel facilities (master data aset ruang).
+│       ├── Reservation.php     # Model untuk mengolah tabel reservations (data antrean dan jadwal).
+│       └── User.php            # Model untuk tabel pengguna, dikaitkan dengan Spatie Permission.
 │
 ├── config/                     # 🗄️ [BACKEND] Pengaturan Aplikasi (Database, Email, dll)
 │
 ├── public/                     # 🎨 [FRONTEND] Tempat menyimpan Foto Upload, CSS, JS hasil kompilasi Tailwind
 │
 ├── resources/
-│   ├── css/                    # 🎨 [FRONTEND] File input Tailwind CSS
-│   ├── js/                     # 🎨 [FRONTEND] File input Alpine/JavaScript
+│   ├── css/                    # 🎨 [FRONTEND] File input Tailwind CSS (app.css)
+│   ├── js/                     # 🎨 [FRONTEND] File input Alpine/JavaScript (app.js)
 │   └── views/                  # 🎨 [FRONTEND] TAMPILAN ANTARMUKA (Blade HTML)
-│       ├── layouts/            # 🎨 [FRONTEND] Kerangka master
-│       │   ├── admin.blade.php
-│       │   ├── petugas.blade.php
-│       │   └── public.blade.php
-│       ├── public/             # 🎨 [FRONTEND] Area Publik / Visitor
-│       │   ├── home.blade.php
-│       │   ├── catalog.blade.php
-│       │   └── availability.blade.php
-│       ├── auth/               # 🎨 [FRONTEND] Area Login & Registrasi (Bawaan Breeze)
-│       ├── user/               # 🎨 [FRONTEND] Area Pengguna
-│       │   ├── dashboard.blade.php
-│       │   ├── reservation-form.blade.php
-│       │   ├── reservation-history.blade.php
-│       │   ├── report-form.blade.php
-│       │   └── report-history.blade.php
-│       ├── petugas/            # 🎨 [FRONTEND] Area Petugas
-│       │   ├── dashboard.blade.php
-│       │   ├── reservation-management.blade.php
-│       │   └── report-management.blade.php
-│       └── admin/              # 🎨 [FRONTEND] Area Admin
-│           ├── dashboard.blade.php
-│           ├── facility-master.blade.php
-│           ├── user-management.blade.php
-│           └── export-report.blade.php
+│       ├── admin/              # 🎨 [FRONTEND] Antarmuka Khusus Admin (Biro Sarpras)
+│       │   ├── dashboard.blade.php       # Dasbor statistik dan rekapitulasi pelaporan.
+│       │   ├── export-report.blade.php   # Antarmuka antrean untuk mencetak PDF/Excel.
+│       │   ├── facility-master.blade.php # Halaman CRUD data fasilitas.
+│       │   └── user-management.blade.php # Halaman manajemen validasi dan blokir akun.
+│       ├── auth/               # 🎨 [FRONTEND] Halaman Login & Registrasi (Bawaan Breeze)
+│       │   ├── confirm-password.blade.php # Form minta ketik ulang password keamanan.
+│       │   ├── forgot-password.blade.php  # Form lupa password.
+│       │   ├── login.blade.php            # Form masuk (login).
+│       │   ├── register.blade.php         # Form pendaftaran akun.
+│       │   ├── reset-password.blade.php   # Form mengatur ulang password.
+│       │   └── verify-email.blade.php     # Tampilan instruksi cek email.
+│       ├── components/         # 🎨 [FRONTEND] Komponen UI Reusable (Daur Ulang)
+│       │   ├── cava/           # 🎨 [FRONTEND] Komponen Khusus Desain CAVA 
+│       │   │   ├── header.blade.php       # Komponen navbar atas.
+│       │   │   ├── role-switcher.blade.php# Komponen dropdown untuk pindah dasbor peran.
+│       │   │   ├── sidebar.blade.php      # Komponen navigasi menu di samping.
+│       │   │   ├── slot-matrix.blade.php  # Komponen petak-petak matriks jadwal ketersediaan.
+│       │   │   ├── stat-card.blade.php    # Komponen kartu statistik (angka laporan).
+│       │   │   └── status-badge.blade.php # Komponen label lencana warna-warni (pending/approve).
+│       │   ├── application-logo.blade.php # Logo aplikasi.
+│       │   ├── auth-session-status.blade.php # Pesan status login.
+│       │   ├── danger-button.blade.php    # Tombol merah (hapus/bahaya).
+│       │   ├── dropdown-link.blade.php    # Isi dari menu dropdown.
+│       │   ├── dropdown.blade.php         # Wadah pembungkus dropdown.
+│       │   ├── input-error.blade.php      # Teks merah untuk pesan kesalahan input form.
+│       │   ├── input-label.blade.php      # Teks label di atas input form.
+│       │   ├── modal.blade.php            # Komponen jendela dialog (pop-up).
+│       │   ├── nav-link.blade.php         # Link navigasi biasa.
+│       │   ├── primary-button.blade.php   # Tombol utama (biru/hitam).
+│       │   ├── responsive-nav-link.blade.php # Link navigasi khusus mode mobile.
+│       │   ├── secondary-button.blade.php # Tombol sekunder (putih/abu).
+│       │   └── text-input.blade.php       # Komponen kotak isian teks (input text).
+│       ├── layouts/            # 🎨 [FRONTEND] Kerangka Halaman Master (Template)
+│       │   ├── admin.blade.php            # Kerangka tata letak dasbor Admin.
+│       │   ├── app.blade.php              # Kerangka tata letak aplikasi utama.
+│       │   ├── guest.blade.php            # Kerangka tata letak publik/tanpa login (beranda, dll).
+│       │   ├── navigation.blade.php       # Navigasi utama Breeze.
+│       │   ├── petugas.blade.php          # Kerangka tata letak dasbor Petugas.
+│       │   └── public.blade.php           # Kerangka tata letak khusus area katalog pengunjung.
+│       ├── petugas/            # 🎨 [FRONTEND] Antarmuka Khusus Petugas Operasional
+│       │   ├── dashboard.blade.php            # Dasbor pemantauan petugas.
+│       │   ├── report-management.blade.php    # Daftar keluhan kerusakan dan tindak lanjut.
+│       │   └── reservation-management.blade.php # Antrean persetujuan (approval) peminjaman.
+│       ├── profile/            # 🎨 [FRONTEND] Antarmuka Profil Akun
+│       │   ├── edit.blade.php                 # Halaman utama edit profil.
+│       │   └── partials/                      
+│       │       ├── delete-user-form.blade.php # Form hapus akun.
+│       │       ├── update-password-form.blade.php # Form ubah password.
+│       │       └── update-profile-information-form.blade.php # Form ubah nama/email.
+│       ├── public/             # 🎨 [FRONTEND] Area Publik (Katalog & Beranda)
+│       │   ├── availability.blade.php     # Halaman cek jadwal ketersediaan semua fasilitas.
+│       │   ├── catalog.blade.php          # Halaman grid daftar fasilitas.
+│       │   └── home.blade.php             # Halaman muka (Landing Page) pencarian rungan.
+│       ├── user/               # 🎨 [FRONTEND] Antarmuka Pengguna Sivitas Akademika (Dosen/Mhs)
+│       │   ├── dashboard.blade.php        # Dasbor utama pengguna biasa.
+│       │   ├── report-form.blade.php      # Halaman form pelaporan fasilitas rusak.
+│       │   ├── report-history.blade.php   # Riwayat pelaporan yang pernah di-submit.
+│       │   ├── reservation-form.blade.php # Halaman form booking ruangan.
+│       │   └── reservation-history.blade.php # Riwayat dan tiket booking yang pernah dilakukan.
+│       ├── dashboard.blade.php            # Halaman rute bawaan Breeze.
+│       └── welcome.blade.php              # Halaman sambutan bawaan Laravel (opsional).
 │
 ├── routes/                     # 🗄️ [KEDUANYA] NAVIGASI URL
-│   └── web.php                 # 🗄️ [KEDUANYA] Backend membuat route, Frontend mengonsumsi (menyesuaikan URL)
+│   └── web.php                 # 🗄️ [KEDUANYA] Pintu gerbang URL menuju controller/views.
 │
 └── database/                   # 🗄️ [BACKEND] Skema struktur tabel MySQL
-    ├── migrations/             # 🗄️ [BACKEND] File perakit tabel
-    └── seeders/                # 🗄️ [BACKEND] Pembuat data awal/dummy
-        ├── RolePermissionSeeder.php
-        ├── UserSeeder.php
-        └── FacilitySeeder.php
+    ├── factories/              # 🗄️ [BACKEND] Pembuat pola data palsu untuk testing
+    │   └── UserFactory.php     # Pabrik data dummy untuk tabel pengguna.
+    ├── migrations/             # 🗄️ [BACKEND] File perakit urutan tabel
+    │   ├── 0001_01_01_000000_create_users_table.php          # Migrasi tabel pengguna.
+    │   ├── 0001_01_01_000001_create_cache_table.php          # Migrasi tabel cache.
+    │   ├── 0001_01_01_000002_create_jobs_table.php           # Migrasi tabel antrean pekerjaan.
+    │   ├── 2026_09_20_000001_create_facilities_table.php     # Migrasi tabel master fasilitas.
+    │   ├── 2026_09_20_000002_create_reservations_table.php   # Migrasi tabel transaksi peminjaman.
+    │   ├── 2026_09_20_000003_create_damage_reports_table.php # Migrasi tabel keluhan kerusakan.
+    │   └── 2026_09_20_151512_create_permission_tables.php    # Migrasi tabel role & permission Spatie.
+    └── seeders/                # 🗄️ [BACKEND] Pembuat data awal untuk disuntikkan
+        ├── DatabaseSeeder.php       # Induk pemanggil seluruh seeder.
+        ├── FacilitySeeder.php       # Penyuntik data laboratorium/aula/ruang awal.
+        ├── RolePermissionSeeder.php # Pembuat Role Admin/Petugas/User.
+        └── UserSeeder.php           # Penyuntik 1 akun sakti (Admin) untuk testing.
 ```
 
 ---
@@ -155,10 +221,8 @@ Jika ada anggota tim yang bingung, *"Fitur ini harus saya koding di file sebelah
 Ikuti standar operasional ini setiap kali Anda baru menyalakan laptop untuk melanjutkan *coding*:
 
 1. **Nyalakan Server & Konfigurasi Database:**
-   - Buka aplikasi **Laragon** (atau XAMPP).
-   - Klik tombol **"Start All"** untuk menghidupkan mesin Apache dan MySQL.
-   - Masuk ke pengelola Database (HeidiSQL / phpMyAdmin), lalu *Create New Database* (misal: `db_reservasi_kampus`).
-   - Sambungkan `.env` di proyek Anda dengan nama database tersebut.
+   - **WAJIB MEMBACA:** Silakan ikuti prosedur lengkap pembuatan database pada file [CREATE_DATABASE.md](CREATE_DATABASE.md) sebelum melanjutkan.
+   - Buka aplikasi **Laragon** (atau XAMPP) dan pastikan Apache & MySQL menyala.
 2. **Nyalakan Aplikasi Laravel (Terminal Pertama):**
    - Buka terminal di dalam *folder* proyek Anda (contoh: di dalam `reservasi-app`).
    - Ketikkan perintah peluncur: `php artisan serve`.

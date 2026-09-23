@@ -48,7 +48,31 @@ Berdasarkan analisis kebutuhan dan batasan sistem, berikut adalah asumsi dan atu
 | **Kewenangan Eksekusi Petugas** | Petugas memiliki hak absolut untuk membatalkan reservasi yang sudah disetujui dalam kondisi mendesak/darurat (misalnya fasilitas mendadak bocor atau kotor dimasuki hewan liar liar seperti kucing), dengan syarat wajib mencantumkan alasan pembatalan. |
 | **Sinkronisasi Pelaporan & Reservasi** | Saat Petugas merespons laporan kerusakan dan menandai fasilitas "Dalam Perbaikan", fasilitas tersebut otomatis berstatus tidak tersedia di kalender utama. Hal ini secara otomatis mencegah pengguna lain tanpa sengaja memesan fasilitas yang sedang rusak, sehingga mereka tidak merasa seperti membeli kucing dalam karung. |
 
-## 4. Fitur-Fitur (Mengacu pada User Story)
+## 4. Fitur List (Berdasarkan User Story)
+
+Tabel berikut memetakan masing-masing *User Story* di atas ke dalam daftar fitur fungsional yang akan dibangun:
+
+| No. User Story | Aktor Utama | Nama Fitur |
+|---|---|---|
+| US-1 | Pengunjung / Pengguna | Katalog Fasilitas & Penampil Kalender Ketersediaan |
+| US-2 | Pengunjung / Pengguna | Pencarian (*Search*) & Penyaringan (*Filter*) Fasilitas |
+| US-3 | Pengguna | Form Pengajuan Reservasi Ruangan |
+| US-4 | Pengguna | Pembatalan Reservasi Mandiri (Validasi Batas H-1) |
+| US-5 | Pengguna | Dasbor Riwayat & Detail Reservasi Pengguna |
+| US-6 | Pengguna | Form Pelaporan Kerusakan Fasilitas (Unggah Bukti) |
+| US-7 | Pengguna | Pelacakan Status Laporan (Tiket) Pengguna |
+| US-8 | Petugas | Dasbor Utama & Antrean Petugas Operasional |
+| US-9 | Petugas | Sistem Persetujuan (*Approval*) & Validasi Anti-Bentrok |
+| US-10 | Petugas | Pembatalan Darurat (*Override*) oleh Petugas |
+| US-11 | Petugas | Manajemen Penyelesaian Laporan & Catatan Perbaikan |
+| US-12 | Petugas | Manajemen Blokir/Status Fasilitas (*Maintenance Mode*) |
+| US-13 | Admin | Pembuatan Akun Petugas oleh Admin |
+| US-14 | Admin | Pembuatan Akun Pengguna oleh Admin |
+| US-15 | Admin | Verifikasi & Persetujuan Akun Baru (Status *Pending*) |
+| US-16 | Admin | Manajemen Master Data Fasilitas (*CRUD*) |
+| US-17 | Admin | Rekapitulasi Statistik & Unduh Laporan (*Export* PDF/Excel) |
+
+## 5. Detail Fitur dan Fitur Tambahan
 
 | Modul Utama | Sub-Fitur & Deskripsi |
 |---|---|
@@ -59,7 +83,7 @@ Berdasarkan analisis kebutuhan dan batasan sistem, berikut adalah asumsi dan atu
 | **Master Data Management** | Fitur CRUD (Create, Read, Update, Non-aktifkan) untuk fasilitas yang hanya diakses Admin. |
 | **Reporting & Analytics** | Dashboard rekap okupansi fasilitas dan statistik kerusakan, serta fitur *Export* data ke CSV/Excel/PDF. |
 
-## 5. User Requirement
+## 6. User Requirement
 Kebutuhan dari sisi pengguna sistem agar fitur dapat berjalan optimal:
 
 | Aktor / Perspektif | Requirement (Kebutuhan) |
@@ -70,7 +94,7 @@ Kebutuhan dari sisi pengguna sistem agar fitur dapat berjalan optimal:
 | **Petugas** | Membutuhkan pandangan terpusat (dashboard) yang menampilkan indikator atau notifikasi *real-time* jika ada antrian reservasi atau laporan baru, sehingga SLA terjaga. |
 | **Admin** | Memerlukan halaman *user management* yang terstruktur untuk memudahkan pencarian pengguna *pending* dan pengunduhan laporan secara periodik. |
 
-## 6. System Requirement (Functional & Non-Functional)
+## 7. System Requirement (Functional & Non-Functional)
 
 | Kategori | Requirement (Persyaratan Sistem) |
 |---|---|
