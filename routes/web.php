@@ -6,6 +6,7 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\DashboardPetugasController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,7 +34,6 @@ Route::get('/user/report-form', function () { return view('user.report-form'); }
 Route::get('/user/report-history', function () { return view('user.report-history'); })->name('user.report-history');
 
 // Mockup Routes - Petugas
-Route::get('/petugas/dashboard', function () { return view('petugas.dashboard'); })->name('petugas.dashboard');
 Route::get('/petugas/reservation-management', function () { return view('petugas.reservation-management'); })->name('petugas.reservation-management');
 Route::get('/petugas/report-management', function () { return view('petugas.report-management'); })->name('petugas.report-management');
 
@@ -91,11 +91,11 @@ Route::get('/admin/export-report', function () {
 |--------------------------------------------------------------------------
 */
 
-// ROUTE: Menerima GET request ke '/petugas/dashboard'
-// FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi
-Route::get('/petugas/dashboard', function () {
-    return view('petugas.dashboard');
-})->name('petugas.dashboard');
+// ROUTE: Menerima GET request ke '/petugas/dashboard' (dengan proteksi middleware auth dan role petugas)
+// FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi sarpras (PTG-01 / US-8)
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
+});
 
 // ROUTE: Menerima GET request ke '/petugas/reservation-management'
 // FUNGSI: Menampilkan antarmuka persetujuan (approval) dan penolakan reservasi ruang
