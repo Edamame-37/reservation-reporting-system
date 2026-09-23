@@ -127,4 +127,31 @@ class AdminUserManagementController extends Controller
 
         return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
     }
+
+    /**
+     * FUNCTION/PROCEDURE : storeUser()
+     * KEGUNAAN           : Membuat akun internal baru (Petugas / Pengguna) secara langsung tanpa pendaftaran mandiri.
+     * CARA KERJA         : Memvalidasi input (memastikan role bukan admin), membuat akun dengan status 'active', dan memberikan role Spatie.
+     */
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role'     => 'required|in:petugas,pengguna', // Cegah pembuatan admin baru
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'status'   => 'active', // Langsung aktif
+            'role'     => $request->role,
+        ]);
+
+        $user->assignRole($request->role);
+
+        return back()->with('success', "Akun {$user->name} dengan peran {$request->role} berhasil dibuat.");
+    }
 }

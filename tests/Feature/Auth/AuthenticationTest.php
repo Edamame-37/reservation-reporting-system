@@ -39,7 +39,7 @@ test('users can not authenticate if status is pending', function () {
     ]);
 
     $this->assertGuest();
-    $response->assertSessionHasErrors(['email' => 'Akun Anda belum disetujui Admin.']);
+    $response->assertSessionHasErrors(['email' => 'Akun Anda masih berstatus pending dan menunggu verifikasi dari Admin.']);
 });
 
 test('users can not authenticate if status is rejected', function () {
@@ -54,7 +54,7 @@ test('users can not authenticate if status is rejected', function () {
     ]);
 
     $this->assertGuest();
-    $response->assertSessionHasErrors(['email' => 'Akun Anda belum disetujui Admin.']);
+    $response->assertSessionHasErrors(['email' => 'Pendaftaran akun Anda ditolak oleh Admin.']);
 });
 
 test('active user with admin role is redirected to admin dashboard', function () {

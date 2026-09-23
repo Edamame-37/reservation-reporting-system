@@ -40,11 +40,6 @@ class AuthenticatedSessionController extends Controller
 
             $user = Auth::user();
 
-            if ($user->status !== 'active') {
-                Auth::guard('web')->logout();
-                return back()->withErrors(['email' => 'Akun Anda belum disetujui Admin.']);
-            }
-
             $request->session()->regenerate();
 
             if ($user->hasRole('admin')) {

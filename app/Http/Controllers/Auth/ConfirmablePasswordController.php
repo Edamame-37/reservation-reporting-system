@@ -38,8 +38,6 @@ class ConfirmablePasswordController extends Controller
             'password' => ['required'],
         ]);
 
-        /*
-        // [MOCKUP MODE] Pengecekan database dinonaktifkan sementara:
         if (! Auth::guard('web')->validate([
             'email' => $request->user()->email,
             'password' => $request->password,
@@ -48,7 +46,6 @@ class ConfirmablePasswordController extends Controller
                 'password' => __('auth.password'),
             ]);
         }
-        */
 
         $request->session()->put('auth.password_confirmed_at', time());
 
