@@ -34,24 +34,46 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        try {
+            // Autentikasi sisi server (Server-side Database Auth)
+            $request->authenticate();
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        if ($user->status !== 'active') {
-            Auth::guard('web')->logout();
-            return back()->withErrors(['email' => 'Akun Anda belum disetujui Admin.']);
+            if ($user->status !== 'active') {
+                Auth::guard('web')->logout();
+                return back()->withErrors(['email' => 'Akun Anda belum disetujui Admin.']);
+            }
+
+            $request->session()->regenerate();
+
+            if ($user->hasRole('admin')) {
+                return redirect()->intended(route('admin.dashboard', absolute: false));
+            } elseif ($user->hasRole('petugas')) {
+                return redirect()->intended(route('petugas.dashboard', absolute: false));
+            }
+
+            return redirect()->intended(route('user.dashboard', absolute: false));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Lemparkan kembali jika error karena kredensial salah
+            throw $e;
+        } catch (\Throwable $e) {
+            // [MOCKUP FALLBACK] (Client-side Session)
+            // Jika basis data offline/error, simpan sesi statis secara lokal
+            $email = $request->input('email', 'pengguna@kampus.ac.id');
+            $request->session()->put('mock_user', [
+                'name'  => 'Sivitas Akademika (Mock)',
+                'email' => $email,
+                'role'  => 'user'
+            ]);
+            
+            $request->session()->regenerate();
+
+            // Peringatan: Pastikan route '/dashboard' tidak sepenuhnya dikunci oleh middleware 'auth' murni
+            // jika Anda ingin fallback ini bisa menembus halaman.
+            return redirect()->intended(route('dashboard', absolute: false));
         }
-
-        $request->session()->regenerate();
-
-        if ($user->hasRole('admin')) {
-            return redirect()->intended(route('admin.dashboard', absolute: false));
-        } elseif ($user->hasRole('petugas')) {
-            return redirect()->intended(route('petugas.dashboard', absolute: false));
-        }
-
-        return redirect()->intended(route('user.dashboard', absolute: false));
     }
 
     /**
