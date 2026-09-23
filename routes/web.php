@@ -6,7 +6,9 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserManagementController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
@@ -61,10 +63,8 @@ Route::get('/public/availability', function () {
 */
 
 // ROUTE: Menerima GET request ke '/admin/dashboard'
-// FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
+// FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
 // ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
 // FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras via AdminUserManagementController
@@ -87,10 +87,28 @@ Route::get('/admin/facility-master', function () {
 })->name('admin.facility-master');
 
 // ROUTE: Menerima GET request ke '/admin/export-report'
-// FUNGSI: Menampilkan antarmuka ekspor laporan resmi sarpras (PDF/Excel)
-Route::get('/admin/export-report', function () {
-    return view('admin.export-report');
-})->name('admin.export-report');
+// FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
+Route::get('/admin/export-report', [ExportController::class, 'index'])->name('admin.export-report');
+
+// ROUTE: Menerima GET request ke '/admin/export/reservations/pdf'
+// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi reservasi format PDF landscape A4 (ADM-04 / UR17)
+Route::get('/admin/export/reservations/pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.export.reservations.pdf');
+
+// ROUTE: Menerima GET request ke '/admin/export/reservations/excel'
+// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi peminjaman ruang format Excel/CSV (ADM-04 / UR17)
+Route::get('/admin/export/reservations/excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.export.reservations.excel');
+
+// ROUTE: Menerima GET request ke '/admin/export/damage-reports/pdf'
+// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi kerusakan aset kampus format PDF landscape A4 (ADM-04 / UR17)
+Route::get('/admin/export/damage-reports/pdf', [ExportController::class, 'exportDamageReportsPdf'])->name('admin.export.damage-reports.pdf');
+
+// ROUTE: Menerima GET request ke '/admin/export/damage-reports/excel'
+// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi keluhan kerusakan fasilitas format Excel/CSV (ADM-04 / UR17)
+Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'exportDamageReportsExcel'])->name('admin.export.damage-reports.excel');
+
+// ROUTE ALIAS: Kompatibilitas tautan mockup ekspor laporan statuter pada antarmuka admin
+Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.reports.export-excel');
+Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
 
 /*
 |--------------------------------------------------------------------------
