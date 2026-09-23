@@ -76,6 +76,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // FUNGSI: Mendaftarkan akun internal (petugas/pengguna) secara langsung oleh Admin (ADM-02)
     Route::post('/admin/users', [\App\Http\Controllers\AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
 
+    // ROUTE: Menerima POST request ke '/admin/users/create-petugas' (US-13 / ADM-02)
+    // FUNGSI: Endpoint penangkap modal pendaftaran akun Petugas Sarpras dengan zona penugasan
+    Route::post('/admin/users/create-petugas', [\App\Http\Controllers\AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+
+    // ROUTE: Menerima POST request ke '/admin/users/create-user' (US-14 / ADM-02)
+    // FUNGSI: Endpoint penangkap modal pendaftaran akun Sivitas Akademika langsung aktif
+    Route::post('/admin/users/create-user', [\App\Http\Controllers\AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+
     // ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
     // FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
     Route::match(['post', 'patch'], '/admin/users/{id}/verify', [\App\Http\Controllers\AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');

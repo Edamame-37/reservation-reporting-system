@@ -331,7 +331,7 @@
                 </div>
 
                 {{-- ROUTE: POST /admin/users/create-petugas (UR13) --}}
-                <form action="{{ url('/admin/users/create-petugas') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.users.create-petugas') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
                         <div class="font-semibold mb-0.5">Ketentuan Sistem UR13:</div>
@@ -363,6 +363,12 @@
                         <input type="email" id="pet-email" name="email" required placeholder="bambang.sarpras@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="pet-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
+                    </div>
+
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                         <button type="button" @click="showAddPetugasModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
                         <button type="submit" class="px-4 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light shadow-sm transition-colors">Simpan Akun Petugas</button>
@@ -389,7 +395,7 @@
                 </div>
 
                 {{-- ROUTE: POST /admin/users/create-user (UR14) --}}
-                <form action="{{ url('/admin/users/create-user') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.users.create-user') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs text-blue-800">
                         <div class="font-semibold mb-0.5">Bypass Verifikasi (UR14):</div>
@@ -417,8 +423,19 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-department">Fakultas / Program Studi (Opsional)</label>
+                        <input type="text" id="usr-department" name="department" placeholder="Contoh: Fakultas Teknik / Informatika" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-email">Email Kampus (@univ.ac.id)</label>
                         <input type="email" id="usr-email" name="email" required placeholder="pengguna@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="usr-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
                     </div>
 
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
