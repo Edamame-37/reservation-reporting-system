@@ -76,7 +76,7 @@ class ReportController extends Controller
             'report_code'        => $reportCode,
             'user_id'            => $userId,
             'facility_id'        => $validated['facility_id'],
-            'category'           => $validated['category'],
+            'category'           => !empty($validated['category']) ? $validated['category'] : 'Lainnya',
             'description'        => $validated['description'],
             'attachment_photo'   => $photoPath,
             'status'             => 'baru',
