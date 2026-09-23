@@ -6,6 +6,7 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,6 @@ Route::get('/petugas/report-management', function () { return view('petugas.repo
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
 Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
-Route::get('/admin/user-management', function () { return view('admin.user-management'); })->name('admin.user-management');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -66,11 +66,22 @@ Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
 })->name('admin.dashboard');
 
-// ROUTE: Menerima GET request ke '/admin/user-management'
-// FUNGSI: Menampilkan halaman manajemen verifikasi pengguna dan hak akses (UR15)
-Route::get('/admin/user-management', function () {
-    return view('admin.user-management');
-})->name('admin.user-management');
+// ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
+// FUNGSI: Menampilkan antrean verifikasi akun pending, direktori sivitas, dan petugas via AdminUserManagementController
+Route::get('/admin/user-management', [AdminUserManagementController::class, 'index'])->name('admin.user-management');
+Route::get('/admin/users', [AdminUserManagementController::class, 'index'])->name('admin.users.index');
+
+// ROUTE: Menerima POST request ke '/admin/users' (ADM-02)
+// FUNGSI: Mendaftarkan akun internal baru (petugas atau pengguna) secara langsung tanpa antrean verifikasi
+Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+
+// ROUTE: Menerima POST request ke '/admin/users/create-petugas' (US-13 / ADM-02)
+// FUNGSI: Endpoint penangkap modal pendaftaran akun Petugas Sarpras dengan zona penugasan
+Route::post('/admin/users/create-petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+
+// ROUTE: Menerima POST request ke '/admin/users/create-user' (US-14 / ADM-02)
+// FUNGSI: Endpoint penangkap modal pendaftaran akun Sivitas Akademika langsung aktif
+Route::post('/admin/users/create-user', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
 
 // ROUTE: Menerima GET request ke '/admin/facility-master'
 // FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
