@@ -34,39 +34,45 @@ class RegisteredUserController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Memproses data registrasi pengguna baru.
-     * CARA KERJA         : [MODE MOCKUP] Validasi database unique:users dan User::create() dinonaktifkan sementara. Pengguna diarahkan langsung ke dashboard sebagai mock user.
+     * CARA KERJA         : Memvalidasi input form, mengunggah file identitas, merekam ke tabel users dengan status 'pending', 
+     *                      memberikan peran Spatie 'pengguna', lalu mengarahkan ke halaman login tanpa auto-login.
      *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        // Validasi format isian tanpa menyentuh tabel database
+        // Validasi form registrasi
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255'],
-            'password' => ['required', 'confirmed'],
+            'name'           => ['required', 'string', 'max:255'],
+            'identifier'     => ['required', 'string', 'max:50'],
+            'role_type'      => ['required', 'in:mahasiswa,dosen,staf'],
+            'email'          => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'identity_proof' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'password'       => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        /*
-        // [MOCKUP MODE] Kueri insert database dan auth dinonaktifkan sementara:
+        // Simpan file bukti identitas ke storage (contoh: storage/app/public/id_cards)
+        $idCardPath = $request->file('identity_proof')->store('id_cards', 'public');
+
+        // Buat record pengguna di database
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'password'        => Hash::make($request->password),
+            'identity_number' => $request->identifier,
+            'role'            => $request->role_type,
+            'id_card_path'    => $idCardPath,
+            'status'          => 'pending',
         ]);
 
+        // Berikan role Spatie "pengguna" kepada pendaftar
+        $user->assignRole('pengguna');
+
+        // Panggil event Registered (Opsional, untuk trigger notifikasi jika ada)
         event(new Registered($user));
-        Auth::login($user);
-        */
 
-        // Simpan sesi mockup pengguna
-        $request->session()->put('mock_user', [
-            'name'  => $request->name,
-            'email' => $request->email,
-            'role'  => 'user'
-        ]);
-
-        return redirect(route('dashboard', absolute: false));
+        // Redirect ke halaman login dengan flash message (Tidak ada auto-login)
+        return redirect()->route('login')->with('success', 'Akun terdaftar, menunggu persetujuan Admin.');
     }
 }
 
