@@ -1,8 +1,8 @@
 {{-- 
   NAMA FILE      : reservation-management.blade.php
-  FUNGSIONALITAS : Lembar Kerja Verifikasi & Approval Permohonan Reservasi Petugas Sarpras (PTG-02 / US-9)
-  DESKRIPSI      : Menampilkan seluruh antrean reservasi masuk dengan validasi bentrok jadwal, formulir persetujuan resmi, modal penolakan dengan input alasan wajib, serta modal pembatalan darurat.
-  CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="reservation-management">, mengelola modal interaktif penolakan dan pembatalan via Alpine.js, serta memicu pengiriman PATCH request ke endpoint persetujuan/penolakan.
+  FUNGSIONALITAS : Lembar Kerja Verifikasi, Approval & Pembatalan Darurat Petugas Sarpras (PTG-02 / PTG-03 / US-9 / US-10)
+  DESKRIPSI      : Menampilkan seluruh antrean reservasi masuk dengan validasi bentrok jadwal, formulir persetujuan resmi, modal penolakan dengan input alasan wajib, serta modal pembatalan darurat sepihak (override privilege) oleh petugas dengan alasan wajib minimal 10 karakter.
+  CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="reservation-management">, mengelola modal interaktif penolakan dan pembatalan darurat via Alpine.js, serta memicu pengiriman PATCH/DELETE request ke endpoint operasional petugas.
 --}}
 
 @php
@@ -11,6 +11,7 @@
     $totalCount = $totalCount ?? $reservations->count();
     $pendingCount = $pendingCount ?? $reservations->where('status', 'pending')->count();
     $approvedCount = $approvedCount ?? $reservations->where('status', 'approved')->count();
+    $cancelledCount = $cancelledCount ?? $reservations->where('status', 'cancelled')->count();
     $rejectedCount = $rejectedCount ?? $reservations->where('status', 'rejected')->count();
 @endphp
 
@@ -30,10 +31,11 @@
             this.ticketCode = code;
             this.showRejectModal = true;
         },
-        openCancel(id, code, venue) {
+        openCancel(id, code, venue, applicant) {
             this.selectedId = id;
             this.ticketCode = code;
             this.venueName = venue;
+            this.applicantName = applicant || '';
             this.showCancelModal = true;
         },
         matchesFilter(status, content) {
@@ -47,7 +49,7 @@
         @if(session('success'))
             <!-- 
               ELEMEN       : Banner Notifikasi Sukses
-              KEGUNAAN     : Memberikan umpan balik positif ketika reservasi berhasil disetujui atau ditolak.
+              KEGUNAAN     : Memberikan umpan balik positif ketika reservasi berhasil disetujui, ditolak, atau dibatalkan darurat.
             -->
             <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-2">
@@ -62,8 +64,8 @@
 
         @if(session('error') || $errors->any())
             <!-- 
-              ELEMEN       : Banner Notifikasi Galat / Bentrok Jadwal
-              KEGUNAAN     : Menampilkan penolakan sistem anti-bentrok jika fasilitas telah dibooking di jam yang sama (HTTP 422).
+              ELEMEN       : Banner Notifikasi Galat / Peringatan Sistem
+              KEGUNAAN     : Menampilkan penolakan sistem anti-bentrok atau kegagalan validasi alasan pembatalan/penolakan.
             -->
             <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-2">
@@ -89,7 +91,7 @@
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Antrean Lengkap Persetujuan Reservasi</h1>
                     <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                        Evaluasi berkas pengajuan, tujuan kegiatan, dan verifikasi validitas anti-bentrok sistem sebelum memberikan persetujuan resmi.
+                        Evaluasi berkas pengajuan, tujuan kegiatan, verifikasi anti-bentrok jadwal, serta eksekusi pembatalan darurat jika terjadi keadaan mendesak.
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -112,6 +114,9 @@
                 <button type="button" @click="activeFilter = 'approved'" :class="activeFilter === 'approved' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
                     Disetujui ({{ $approvedCount }})
                 </button>
+                <button type="button" @click="activeFilter = 'cancelled'" :class="activeFilter === 'cancelled' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                    Dibatalkan ({{ $cancelledCount }})
+                </button>
                 <button type="button" @click="activeFilter = 'rejected'" :class="activeFilter === 'rejected' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
                     Ditolak ({{ $rejectedCount }})
                 </button>
@@ -126,7 +131,7 @@
         {{-- 4. Tabel Antrean Lengkap --}}
         <!-- 
           ELEMEN       : Tabel Antrean Reservasi Komprehensif
-          KEGUNAAN     : Menyajikan daftar pemesanan ruang dengan slot waktu, surat izin, status, dan tombol aksi petugas.
+          KEGUNAAN     : Menyajikan daftar pemesanan ruang dengan slot waktu, surat izin, status, tombol approval, dan tuas pembatalan darurat.
           CARA KERJA   : Melakukan perulangan Blade dinamis @forelse($reservations as $reservation) dengan kontrol filter reaktif via Alpine.js.
         -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
@@ -138,7 +143,7 @@
                             <th class="py-3 px-4">Fasilitas Diminta</th>
                             <th class="py-3 px-4">Tanggal & Slot Waktu</th>
                             <th class="py-3 px-4">Tujuan & Surat Izin</th>
-                            <th class="py-3 px-4">Status & Bentrok</th>
+                            <th class="py-3 px-4">Status & Catatan</th>
                             <th class="py-3 px-4 text-right">Keputusan Operasional</th>
                         </tr>
                     </thead>
@@ -207,9 +212,19 @@
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                 <span>Siap Dievaluasi</span>
                                             </span>
+                                        @elseif($reservation->status === 'approved')
+                                            <span class="inline-flex items-center gap-1 text-[10px] text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">
+                                                <span class="material-symbols-outlined text-[12px]">lock</span>
+                                                <span>Slot Terkunci</span>
+                                            </span>
+                                        @elseif($reservation->status === 'cancelled' && !empty($reservation->cancellation_reason))
+                                            <!-- Catatan Alasan Pembatalan Darurat Petugas (PTG-03) -->
+                                            <div class="mt-1 text-[11px] text-slate-700 bg-slate-100 p-2 rounded-lg border border-slate-200/80 max-w-xs">
+                                                <strong class="text-rose-700">Alasan Batal:</strong> {{ $reservation->cancellation_reason }}
+                                            </div>
                                         @elseif($reservation->status === 'rejected' && !empty($reservation->rejection_reason))
                                             <div class="mt-1 text-[11px] text-rose-700 bg-rose-50 p-2 rounded-lg border border-rose-200/60 max-w-xs">
-                                                <strong>Alasan:</strong> {{ $reservation->rejection_reason }}
+                                                <strong>Alasan Tolak:</strong> {{ $reservation->rejection_reason }}
                                             </div>
                                         @endif
                                     </div>
@@ -230,16 +245,20 @@
                                                 </button>
                                             </form>
 
-                                            <!-- Tombol pemicu modal penolakan resmi -->
+                                            <!-- Tombol pemicu modal penolakan resmi (PTG-02) -->
                                             <button type="button" @click="openReject('{{ $reservation->id }}', '{{ addslashes($reservation->user->name ?? 'Pemohon') }}', '{{ $reservation->ticket_code }}')" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-rose-700 hover:bg-rose-50 transition font-semibold text-xs">
                                                 Tolak
                                             </button>
                                         </div>
                                     @elseif($reservation->status === 'approved')
                                         <div class="flex items-center justify-end">
-                                            <!-- Tombol pembatalan darurat petugas (UR10) -->
-                                            <button type="button" @click="openCancel('{{ $reservation->id }}', '{{ $reservation->ticket_code }}', '{{ addslashes($reservation->facility->name ?? 'Fasilitas') }}')" class="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 transition font-semibold text-xs" title="Batal Darurat Petugas (UR10)">
-                                                Batal Darurat
+                                            <!-- 
+                                              ELEMEN       : Tombol Pembatalan Darurat (Override) oleh Petugas (PTG-03 / US-10)
+                                              KEGUNAAN     : Membuka modal pembatalan darurat sepihak untuk reservasi yang telah berstatus disetujui.
+                                            -->
+                                            <button type="button" @click="openCancel('{{ $reservation->id }}', '{{ $reservation->ticket_code }}', '{{ addslashes($reservation->facility->name ?? 'Fasilitas') }}', '{{ addslashes($reservation->user->name ?? 'Pemohon') }}')" class="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-400 transition font-semibold text-xs inline-flex items-center gap-1 shadow-xs" title="Pembatalan Darurat Petugas (US-10)">
+                                                <span class="material-symbols-outlined text-[15px]">event_busy</span>
+                                                <span>Batalkan Paksa</span>
                                             </button>
                                         </div>
                                     @else
@@ -319,47 +338,54 @@
             </div>
         </div>
 
-        {{-- 6. Modal Pembatalan Darurat oleh Petugas (UR10) --}}
+        {{-- 6. Modal Pembatalan Darurat Sepihak oleh Petugas (PTG-03 / US-10) --}}
         <!-- 
-          ELEMEN       : Modal Pembatalan Darurat Fasilitas (UR10)
-          KEGUNAAN     : Membatalkan reservasi yang telah disetujui sebelumnya akibat force majeure.
+          ELEMEN       : Modal Pembatalan Darurat (Override) oleh Petugas
+          KEGUNAAN     : Membatalkan reservasi yang telah disetujui sebelumnya akibat kondisi darurat (atap bocor, korsleting, dll).
+          CARA KERJA   : Terbuka saat showCancelModal = true. Mengirimkan DELETE request ke /petugas/reservations/{id}/force-cancel beserta alasan_batal minimal 10 karakter.
         -->
         <div x-show="showCancelModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showCancelModal = false" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5 text-rose-600">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5 text-rose-700">
                         <span class="material-symbols-outlined text-[20px]">warning</span>
-                        <span>Pembatalan Darurat (UR10)</span>
+                        <span>Pembatalan Darurat (Override Petugas)</span>
                     </h3>
                     <button type="button" @click="showCancelModal = false" class="text-slate-400 hover:text-slate-700">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                    Petugas berwenang membatalkan reservasi tiket <strong class="text-slate-900" x-text="ticketCode"></strong> pada ruang <strong class="text-slate-900" x-text="venueName"></strong> karena kendala darurat / <em>force-majeure</em>.
-                </p>
+
+                <div class="p-3 mb-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed flex items-start gap-2">
+                    <span class="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5">info</span>
+                    <div>
+                        <strong>Peringatan Tindakan Sepihak:</strong> Anda akan membatalkan reservasi tiket <strong class="text-slate-900 font-mono" x-text="ticketCode"></strong> untuk pemohon <strong class="text-slate-900" x-text="applicantName"></strong> pada ruang <strong class="text-slate-900" x-text="venueName"></strong>. Slot waktu terkait akan segera dibebaskan di kalender ketersediaan publik.
+                    </div>
+                </div>
 
                 <!-- 
-                  ROUTE: POST /petugas/reservations/{id}/cancel (dengan @method('PATCH'))
-                  FUNGSI: Membatalkan darurat reservasi yang telah disetujui petugas (UR10).
+                  ROUTE: POST /petugas/reservations/{id}/force-cancel (dengan @method('DELETE'))
+                  FUNGSI: Mengeksekusi pembatalan paksa tiket reservasi approved oleh petugas dan menyimpan alasan resmi (PTG-03 / US-10).
                 -->
-                <form :action="'{{ url('/petugas/reservations') }}/' + selectedId + '/cancel'" method="POST">
+                <form :action="'{{ url('/petugas/reservations') }}/' + selectedId + '/force-cancel'" method="POST">
                     @csrf
-                    @method('PATCH')
+                    @method('DELETE')
 
                     <div class="mb-4">
-                        <label for="cancellation_reason" class="block text-xs font-bold text-slate-700 mb-1">
-                            Alasan Pembatalan Darurat:
+                        <label for="alasan_batal" class="block text-xs font-bold text-slate-700 mb-1">
+                            Alasan Pembatalan Darurat (Wajib, Min. 10 Karakter):
                         </label>
-                        <textarea id="cancellation_reason" name="cancellation_reason" rows="3" required placeholder="Contoh: Terjadi kebocoran atap mendadak di ruangan, fasilitas harus segera diperbaiki teknisi..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                        <textarea id="alasan_batal" name="alasan_batal" rows="3" required minlength="10" placeholder="Jelaskan alasan darurat pembatalan sepihak (contoh: Terjadi kebocoran pipa pendingin ruangan mendadak, ruangan harus segera diperbaiki teknisi sarpras)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                        <p class="text-[11px] text-slate-400 mt-1">Alasan pembatalan resmi ini akan dikirimkan kepada pemohon terkait.</p>
                     </div>
 
                     <div class="flex items-center justify-end gap-2">
                         <button type="button" @click="showCancelModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition">
                             Kembali
                         </button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs transition">
-                            Eksekusi Batal Darurat
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs transition flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">event_busy</span>
+                            <span>Eksekusi Batal Darurat</span>
                         </button>
                     </div>
                 </form>
