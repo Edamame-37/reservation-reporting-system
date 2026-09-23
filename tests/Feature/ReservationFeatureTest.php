@@ -154,3 +154,139 @@ test('USR-02: Dasbor riwayat dapat disaring berdasarkan status dan pencarian (TC
     $responseSearch = $this->actingAs($this->user)->get(route('user.reservation-history', ['search' => 'Auditorium']));
     $responseSearch->assertStatus(200);
 });
+
+test('USR-03: Pengguna berhasil membatalkan reservasi status pending lebih dari 24 jam (TC-USR03-01)', function () {
+    $futureDate = Carbon::now()->addDays(3)->format('Y-m-d');
+    $reservation = Reservation::create([
+        'ticket_code'        => 'TKT-' . Carbon::parse($futureDate)->format('Ymd') . '-TEST1',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'reservation_date'   => $futureDate,
+        'start_time'         => '10:00',
+        'end_time'           => '12:00',
+        'total_slots'        => 4,
+        'purpose'            => 'Rapat Kerja Tahunan UKM',
+        'participants_count' => 20,
+        'status'             => 'pending',
+    ]);
+
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $reservation->id), [
+        'cancellation_reason' => 'Perubahan jadwal dari pimpinan UKM',
+    ]);
+
+    $response->assertRedirect(route('user.reservation-history'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('reservations', [
+        'id'                  => $reservation->id,
+        'status'              => 'cancelled',
+        'cancellation_reason' => 'Perubahan jadwal dari pimpinan UKM',
+    ]);
+});
+
+test('USR-03: Pengguna berhasil membatalkan reservasi status approved lebih dari 24 jam (TC-USR03-02)', function () {
+    $futureDate = Carbon::now()->addDays(4)->format('Y-m-d');
+    $reservation = Reservation::create([
+        'ticket_code'        => 'TKT-' . Carbon::parse($futureDate)->format('Ymd') . '-TEST2',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'reservation_date'   => $futureDate,
+        'start_time'         => '13:00',
+        'end_time'           => '15:00',
+        'total_slots'        => 4,
+        'purpose'            => 'Workshop UI/UX Design',
+        'participants_count' => 35,
+        'status'             => 'approved',
+    ]);
+
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $reservation->id));
+
+    $response->assertRedirect(route('user.reservation-history'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('reservations', [
+        'id'     => $reservation->id,
+        'status' => 'cancelled',
+    ]);
+});
+
+test('USR-03: Pembatalan reservasi ditolak jika dilakukan kurang dari 24 jam / hari H (TC-USR03-03)', function () {
+    // Buat reservasi yang dimulai 5 jam ke depan (kurang dari 24 jam)
+    $todayDate = Carbon::now()->format('Y-m-d');
+    $startTime = Carbon::now()->addHours(5)->format('H:00');
+    $endTime   = Carbon::now()->addHours(7)->format('H:00');
+
+    $reservation = Reservation::create([
+        'ticket_code'        => 'TKT-' . Carbon::parse($todayDate)->format('Ymd') . '-TEST3',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'reservation_date'   => $todayDate,
+        'start_time'         => $startTime,
+        'end_time'           => $endTime,
+        'total_slots'        => 4,
+        'purpose'            => 'Gladi Bersih Pentas Seni',
+        'participants_count' => 15,
+        'status'             => 'approved',
+    ]);
+
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $reservation->id));
+
+    $response->assertSessionHasErrors('error');
+
+    $this->assertDatabaseHas('reservations', [
+        'id'     => $reservation->id,
+        'status' => 'approved', // Status tidak boleh berubah
+    ]);
+});
+
+test('USR-03: Pengguna ditolak (403) saat membatalkan reservasi milik pengguna lain (TC-USR03-04)', function () {
+    $futureDate = Carbon::now()->addDays(5)->format('Y-m-d');
+    $otherUser = User::firstOrCreate(
+        ['email' => 'other_user@mahasiswa.ac.id'],
+        [
+            'name'            => 'Pengguna Lain',
+            'password'        => bcrypt('password'),
+            'identity_number' => '2110599999',
+            'role'            => 'mahasiswa',
+            'status'          => 'active',
+        ]
+    );
+
+    $otherReservation = Reservation::create([
+        'ticket_code'        => 'TKT-' . Carbon::parse($futureDate)->format('Ymd') . '-TEST4',
+        'user_id'            => $otherUser->id,
+        'facility_id'        => $this->facility->id,
+        'reservation_date'   => $futureDate,
+        'start_time'         => '09:00',
+        'end_time'           => '11:00',
+        'total_slots'        => 4,
+        'purpose'            => 'Kegiatan Himpunan Mahasiswa Lain',
+        'participants_count' => 25,
+        'status'             => 'approved',
+    ]);
+
+    // Uji User A mencoba membatalkan tiket User B
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $otherReservation->id));
+
+    $response->assertStatus(403);
+});
+
+test('USR-03: Tiket yang sudah cancelled tidak dapat dibatalkan ulang (TC-USR03-05)', function () {
+    $futureDate = Carbon::now()->addDays(6)->format('Y-m-d');
+    $reservation = Reservation::create([
+        'ticket_code'        => 'TKT-' . Carbon::parse($futureDate)->format('Ymd') . '-TEST5',
+        'user_id'            => $this->user->id,
+        'facility_id'        => $this->facility->id,
+        'reservation_date'   => $futureDate,
+        'start_time'         => '08:00',
+        'end_time'           => '10:00',
+        'total_slots'        => 4,
+        'purpose'            => 'Latihan Paduan Suara',
+        'participants_count' => 10,
+        'status'             => 'cancelled',
+    ]);
+
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $reservation->id));
+
+    $response->assertSessionHasErrors('error');
+});
