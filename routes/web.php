@@ -7,6 +7,7 @@
  */
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 
@@ -133,10 +134,12 @@ Route::post('/user/reservations', [ReservationController::class, 'store'])->name
 Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
 
 // ROUTE: Menerima GET request ke '/user/report-form'
-// FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
-Route::get('/user/report-form', function () {
-    return view('user.report-form');
-})->name('user.report-form');
+// FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas dengan data dinamis (USR-04)
+Route::get('/user/report-form', [ReportController::class, 'create'])->name('user.report-form');
+
+// ROUTE: Menerima POST request ke '/user/reports'
+// FUNGSI: Memproses penyimpanan pengaduan tiket kerusakan fasilitas dan upload foto bukti (USR-04)
+Route::post('/user/reports', [ReportController::class, 'store'])->name('user.reports.store');
 
 // ROUTE: Menerima GET request ke '/user/report-history'
 // FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
