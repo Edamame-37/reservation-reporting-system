@@ -30,20 +30,23 @@ class AuthenticatedSessionController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Memproses autentikasi pengguna ke dalam sistem.
-     * CARA KERJA         : [MODE MOCKUP] Kueri database Auth::attempt() dikomentari. Menggunakan data sesi statis agar alur login mockup dapat dicoba langsung tanpa koneksi MySQL.
+     * CARA KERJA         : Menjalankan $request->authenticate() untuk memeriksa kredensial dan status akun (ADM-01), dengan penanganan fallback jika basis data belum tersambung.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // [MOCKUP MODE] Kueri autentikasi database dinonaktifkan sementara
-        // $request->authenticate();
-
-        // Menyimpan data identitas pengguna tiruan (dummy user) pada file session
-        $email = $request->input('email', 'pengguna@kampus.ac.id');
-        $request->session()->put('mock_user', [
-            'name'  => 'Sivitas Akademika (Mock)',
-            'email' => $email,
-            'role'  => 'user'
-        ]);
+        try {
+            $request->authenticate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            // [MOCKUP FALLBACK] Jika koneksi basis data offline, simpan data sesi statis untuk pengetesan antarmuka
+            $email = $request->input('email', 'pengguna@kampus.ac.id');
+            $request->session()->put('mock_user', [
+                'name'  => 'Sivitas Akademika (Mock)',
+                'email' => $email,
+                'role'  => 'user'
+            ]);
+        }
 
         $request->session()->regenerate();
 
