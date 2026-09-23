@@ -8,6 +8,7 @@
 
 use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,8 +29,6 @@ Route::get('/public/availability', function () { return view('public.availabilit
 
 // Mockup Routes - User
 Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
-Route::get('/user/reservation-form', function () { return view('user.reservation-form'); })->name('user.reservation-form');
-Route::get('/user/reservation-history', function () { return view('user.reservation-history'); })->name('user.reservation-history');
 Route::get('/user/report-form', function () { return view('user.report-form'); })->name('user.report-form');
 Route::get('/user/report-history', function () { return view('user.report-history'); })->name('user.report-history');
 
@@ -130,16 +129,16 @@ Route::get('/user/dashboard', function () {
 })->name('user.dashboard');
 
 // ROUTE: Menerima GET request ke '/user/reservation-form'
-// FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru
-Route::get('/user/reservation-form', function () {
-    return view('user.reservation-form');
-})->name('user.reservation-form');
+// FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru dengan data fasilitas aktif
+Route::get('/user/reservation-form', [ReservationController::class, 'create'])->name('user.reservation-form');
+
+// ROUTE: Menerima POST request ke '/user/reservations'
+// FUNGSI: Memproses penyimpanan pengajuan reservasi baru dan validasi anti-bentrok
+Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
 
 // ROUTE: Menerima GET request ke '/user/reservation-history'
 // FUNGSI: Menampilkan daftar riwayat pengajuan reservasi dan status verifikasi
-Route::get('/user/reservation-history', function () {
-    return view('user.reservation-history');
-})->name('user.reservation-history');
+Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
 
 // ROUTE: Menerima GET request ke '/user/report-form'
 // FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
