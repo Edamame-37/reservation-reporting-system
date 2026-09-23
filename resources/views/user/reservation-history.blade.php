@@ -110,6 +110,17 @@
             </div>
         </div>
 
+        {{-- Flash Session Sukses --}}
+        @if (session('success'))
+            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 shadow-xs">
+                <span class="material-symbols-outlined text-emerald-600 text-[24px]">check_circle</span>
+                <div>
+                    <h4 class="text-sm font-bold">Permohonan Berhasil Dikirim!</h4>
+                    <p class="text-xs text-emerald-700">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
         {{-- Filter Tabs & Pencarian --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
             {{-- Tabs Status --}}
