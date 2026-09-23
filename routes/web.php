@@ -49,11 +49,19 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    // ROUTE: Menerima GET request ke '/admin/user-management'
-    // FUNGSI: Menampilkan halaman manajemen verifikasi pengguna dan hak akses (UR15)
-    Route::get('/admin/user-management', function () {
-        return view('admin.user-management');
-    })->name('admin.user-management');
+    // ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
+    // FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras
+    Route::get('/admin/user-management', [\App\Http\Controllers\AdminUserManagementController::class, 'index'])->name('admin.user-management');
+    Route::get('/admin/users', [\App\Http\Controllers\AdminUserManagementController::class, 'index'])->name('admin.users.index');
+
+    // ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
+    // FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
+    Route::match(['post', 'patch'], '/admin/users/{id}/verify', [\App\Http\Controllers\AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
+    Route::match(['post', 'patch'], '/admin/users/{id}/approve', [\App\Http\Controllers\AdminUserManagementController::class, 'verifyUser'])->name('admin.users.approve');
+
+    // ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/reject' beserta payload FormRequest (reason & notes)
+    // FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
+    Route::match(['post', 'patch'], '/admin/users/{id}/reject', [\App\Http\Controllers\AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
     // ROUTE: Menerima GET request ke '/admin/facility-master'
     // FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
