@@ -2,12 +2,13 @@
 /**
  * NAMA FILE    : AdminUserManagementController.php
  * FUNGSI       : Controller pengelola otorisasi dan pembuatan akun internal (Konsol Admin)
- * DESKRIPSI    : Bertanggung jawab menangani pendaftaran akun petugas langsung (US-13) dan akun pengguna langsung (US-14 / ADM-02) dengan status langsung aktif tanpa verifikasi mandiri.
- * CARA KERJA   : Menerima HTTP POST terotentikasi Admin, memvalidasi payload via StoreInternalUserRequest, menyimpan kredensial ke database, dan menugaskan peran Spatie (petugas / pengguna).
+ * DESKRIPSI    : Bertanggung jawab menangani antrean verifikasi (ADM-01), persetujuan aktivasi, dan pendaftaran akun internal langsung aktif tanpa verifikasi mandiri (ADM-02).
+ * CARA KERJA   : Menerima HTTP Request terotentikasi Admin, memvalidasi payload, menyimpan kredensial ke database, dan mengubah status atau peran Spatie.
  */
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\RejectUserRequest;
 use App\Http\Requests\Admin\StoreInternalUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,7 @@ class AdminUserManagementController extends Controller
     {
         $search = $request->query('search');
 
-        // 1. Data Pemohon Registrasi Mandiri Berstatus Pending
+        // 1. Data Pemohon Registrasi Mandiri Berstatus Pending (UR15 / ADM-01)
         $pendingQuery = User::where('status', 'pending');
         if ($search) {
             $pendingQuery->where(function ($q) use ($search) {
@@ -76,9 +77,63 @@ class AdminUserManagementController extends Controller
     }
 
     /**
+     * FUNCTION/PROCEDURE : verifyUser()
+     * KEGUNAAN           : Memverifikasi dan mengaktifkan akun pengguna baru yang masih berstatus pending.
+     * CARA KERJA         : Mengambil data pengguna berdasarkan ID, memvalidasi bahwa status akun saat ini adalah 'pending', mengubah nilai status menjadi 'active', dan menyimpan ke basis data.
+     */
+    public function verifyUser(int|string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->status !== 'pending') {
+            return back()->withErrors(['error' => 'Akun pengguna ini sudah diproses sebelumnya dan tidak berstatus pending.']);
+        }
+
+        $user->status = 'active';
+        $user->rejection_reason = null;
+        $user->save();
+
+        return back()->with('success', "Akun pengguna {$user->name} berhasil diverifikasi dan diaktifkan.");
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : rejectUser()
+     * KEGUNAAN           : Menolak pendaftaran akun pengguna berstatus pending dan mencatat alasan penolakan.
+     * CARA KERJA         : Memvalidasi payload via RejectUserRequest, memverifikasi status 'pending', memperbarui status menjadi 'rejected', menyimpan alasan pada kolom rejection_reason, dan memutus akses akun.
+     */
+    public function rejectUser(RejectUserRequest $request, int|string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->status !== 'pending') {
+            return back()->withErrors(['error' => 'Akun pengguna ini sudah diproses sebelumnya dan tidak berstatus pending.']);
+        }
+
+        $reasonMap = [
+            'invalid_ktm'     => 'Foto KTM / SK buram atau tidak terbaca',
+            'mismatched_data' => 'Data NIM/NIP tidak cocok dengan pangkalan data PD-DIKTI',
+            'invalid_email'   => 'Bukan domain email resmi universitas',
+            'other'           => 'Alasan lainnya',
+        ];
+
+        $reasonKey = $request->input('reason');
+        $reasonText = $reasonMap[$reasonKey] ?? $reasonKey;
+
+        if ($request->filled('notes')) {
+            $reasonText .= ' (Catatan: ' . $request->input('notes') . ')';
+        }
+
+        $user->status = 'rejected';
+        $user->rejection_reason = $reasonText;
+        $user->save();
+
+        return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
+    }
+
+    /**
      * FUNCTION/PROCEDURE : storeUser()
      * KEGUNAAN           : Mendaftarkan akun internal baru (petugas atau pengguna) secara langsung oleh Super Admin (ADM-02).
-     * CARA KERJA         : Memvalidasi payload via StoreInternalUserRequest, memproteksi agar role admin dilarang, mengenkripsi password, menyimpan ke tabel users dengan status 'active' (bypass verifikasi), dan menyematkan peran Spatie (petugas / pengguna).
+     * CARA KERJA         : Memvalidasi payload via StoreInternalUserRequest, memproteksi agar role admin dilarang, mengenkripsi password, menyimpan ke tabel users dengan status 'active' (bypass verifikasi), dan menyematkan peran Spatie.
      */
     public function storeUser(StoreInternalUserRequest $request): RedirectResponse
     {
