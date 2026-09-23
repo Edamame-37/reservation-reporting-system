@@ -21,10 +21,17 @@
 
     <div x-data="{
         submitting: false,
-        selectedCategory: '{{ old('category', 'AC & Pendingin') }}',
+        selectedCategory: '{{ old('category', '') }}',
         fileName: '',
         imagePreview: null,
         fileError: '',
+        selectCategory(cat) {
+            if (this.selectedCategory === cat) {
+                this.selectedCategory = '';
+            } else {
+                this.selectedCategory = cat;
+            }
+        },
         handleFile(e) {
             const file = e.target.files[0];
             this.fileError = '';
@@ -145,23 +152,30 @@
                 @enderror
             </div>
 
-            {{-- Kategori Kerusakan --}}
+            {{-- Kategori Kerusakan (Opsional) --}}
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                    Kategori Kerusakan Sarana <span class="text-rose-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Kategori Kerusakan Sarana
+                    </label>
+                    <span class="text-[11px] text-slate-500 font-medium">Opsional (dapat dilewati)</span>
+                </div>
                 <input type="hidden" name="category" :value="selectedCategory">
 
                 <div class="flex flex-wrap gap-2">
                     @foreach ($categories as $cat)
                         <button type="button" 
-                                @click="selectedCategory = '{{ $cat }}'"
+                                @click="selectCategory('{{ $cat }}')"
                                 :class="selectedCategory === '{{ $cat }}' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60'"
-                                class="px-3.5 py-1.5 rounded-xl text-xs transition">
+                                class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5">
+                            <span x-show="selectedCategory === '{{ $cat }}'" class="material-symbols-outlined text-[14px]">check</span>
                             <span>{{ $cat }}</span>
                         </button>
                     @endforeach
                 </div>
+                <p class="mt-1.5 text-[11px] text-slate-400">
+                    Jika jenis kerusakan tidak ada pada opsi di atas, Anda dapat melewatinya dan menguraikannya pada deskripsi di bawah.
+                </p>
                 @error('category')
                     <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
                         <span class="material-symbols-outlined text-[14px]">error</span>
@@ -170,18 +184,19 @@
                 @enderror
             </div>
 
-            {{-- Deskripsi Masalah --}}
+            {{-- Deskripsi Masalah (Wajib) --}}
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <label for="rep-desc" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
                         Deskripsi Masalah / Lokasi Spesifik <span class="text-rose-500">*</span>
                     </label>
-                    <span class="text-[11px] text-slate-400">Minimal 10 karakter</span>
+                    <span class="text-[11px] text-rose-600 font-semibold">Wajib Diisi (Min. 10 karakter)</span>
                 </div>
                 <textarea id="rep-desc" 
                           name="description" 
                           rows="4" 
                           required 
+                          minlength="10"
                           placeholder="Jelaskan secara spesifik kerusakan yang terjadi, misalnya: 'Kabel proyektor HDMI putus dan remote AC tidak merespon saat dinyalakan di baris depan...'" 
                           class="w-full p-3.5 bg-slate-50 rounded-xl text-sm text-slate-800 border {{ $errors->has('description') ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200' }} focus:border-slate-900 focus:bg-white focus:outline-none transition">{{ old('description') }}</textarea>
                 @error('description')
