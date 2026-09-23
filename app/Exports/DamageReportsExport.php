@@ -126,6 +126,9 @@ class DamageReportsExport
             // Menulis UTF-8 BOM agar Microsoft Excel langsung mengenali format dan encoding tanpa error
             fputs($handle, "\xEF\xBB\xBF");
 
+            // Menyisipkan instruksi pemisah kolom agar Microsoft Excel otomatis memetakan kolom A, B, C, dst.
+            fputs($handle, "sep=,\r\n");
+
             // Tulis Header Kolom
             fputcsv($handle, $this->headings());
 
