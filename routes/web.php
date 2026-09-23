@@ -109,6 +109,10 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/reject'
     // FUNGSI: Menolak permohonan reservasi dengan alasan penolakan resmi (PTG-02 / US-9)
     Route::patch('/petugas/reservations/{id}/reject', [ReservationManagementController::class, 'reject'])->name('petugas.reservations.reject');
+
+    // ROUTE: Menerima DELETE request ke '/petugas/reservations/{id}/force-cancel'
+    // FUNGSI: Pembatalan darurat sepihak (override privilege) oleh petugas untuk reservasi yang telah disetujui (PTG-03 / US-10)
+    Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
 });
 
 // ROUTE: Menerima GET request ke '/petugas/report-management'
