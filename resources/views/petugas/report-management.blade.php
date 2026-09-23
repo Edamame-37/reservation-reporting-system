@@ -1,8 +1,8 @@
 {{-- 
   NAMA FILE      : report-management.blade.php
-  FUNGSIONALITAS : Lembar Kerja Manajemen Tiket Kerusakan Fasilitas Petugas Sarpras (PTG-04 / US-11)
-  DESKRIPSI      : Menampilkan seluruh antrean tiket kerusakan fasilitas kampus, mengubah status progres (Baru/Diproses/Selesai/Ditolak), menginput catatan resolusi teknisi, serta mengunci fasilitas ke status 'Dalam Perbaikan' (UR11, UR12).
-  CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="report-management">, mengelola modal pembaruan status dan sinkronisasi kalender maintenance via Alpine.js, serta memicu pengiriman PATCH request ke endpoint operasional petugas.
+  FUNGSIONALITAS : Lembar Kerja Manajemen Tiket Kerusakan Fasilitas & Pemblokiran Ruang Petugas Sarpras (PTG-04 & PTG-05 / US-11 & US-12)
+  DESKRIPSI      : Menampilkan seluruh antrean tiket kerusakan fasilitas kampus, mengubah status progres (Baru/Diproses/Selesai/Ditolak), menginput catatan resolusi teknisi, serta mengunci fasilitas ke status 'Dalam Perbaikan' / Maintenance Mode (UR11, UR12, US-12).
+  CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="report-management">, mengelola modal pembaruan status dan saklar toggle pemblokiran jadwal maintenance via Alpine.js/Blade form, serta memicu pengiriman PATCH request ke endpoint operasional petugas.
 --}}
 
 @php
@@ -13,6 +13,9 @@
     $inProgressCount = $inProgressCount ?? $reports->where('status', 'diproses')->count();
     $resolvedCount = $resolvedCount ?? $reports->where('status', 'selesai')->count();
     $rejectedCount = $rejectedCount ?? $reports->where('status', 'ditolak')->count();
+    $lockedFacilityCount = $lockedFacilityCount ?? $reports->filter(function($r) {
+        return !empty($r->is_facility_locked) || ($r->facility?->status === 'dalam perbaikan');
+    })->pluck('facility_id')->unique()->count();
 @endphp
 
 <x-petugas-layout title="Manajemen Tiket Kerusakan Fasilitas" active="report-management">
@@ -107,6 +110,10 @@
                     <span class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-xs">
                         Total Tiket: <strong class="text-slate-900">{{ $totalCount }} Laporan</strong>
                     </span>
+                    <span class="px-3 py-1.5 rounded-xl {{ $lockedFacilityCount > 0 ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-600' }} border text-xs font-semibold shadow-xs flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[15px] {{ $lockedFacilityCount > 0 ? 'text-rose-600' : 'text-slate-400' }}">lock</span>
+                        <span>Mode Perbaikan: <strong class="{{ $lockedFacilityCount > 0 ? 'text-rose-900' : 'text-slate-800' }}">{{ $lockedFacilityCount }} Fasilitas</strong></span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -152,7 +159,7 @@
                             <th class="py-3 px-4">Fasilitas & Kategori</th>
                             <th class="py-3 px-4">Deskripsi & Bukti Foto</th>
                             <th class="py-3 px-4">Status Tiket</th>
-                            <th class="py-3 px-4">Status Kalender (UR12)</th>
+                            <th class="py-3 px-4">Mode Perbaikan (Lock)</th>
                             <th class="py-3 px-4">Catatan Resolusi (UR11)</th>
                             <th class="py-3 px-4 text-right">Tindakan</th>
                         </tr>
@@ -161,6 +168,8 @@
                         @forelse($reports as $report)
                             @php
                                 $searchContent = ($report->report_code ?? '') . ' ' . ($report->user->name ?? '') . ' ' . ($report->facility->name ?? '') . ' ' . ($report->category ?? '') . ' ' . ($report->description ?? '');
+                                $isFacilityLocked = !empty($report->is_facility_locked) || ($report->facility?->status === 'dalam perbaikan');
+                                $facilityName = $report->facility->name ?? 'Fasilitas Terkait';
                             @endphp
                             <tr x-show="matchesFilter('{{ $report->status }}', '{{ addslashes($searchContent) }}')" class="hover:bg-slate-50/70 transition">
                                 <td class="py-3.5 px-4 align-top whitespace-nowrap">
@@ -208,17 +217,42 @@
                                     <x-cava.status-badge :status="$report->status ?? 'baru'" />
                                 </td>
 
-                                <td class="py-3.5 px-4 align-top">
-                                    @if(!empty($report->is_facility_locked))
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-rose-50 text-rose-700 border border-rose-200 font-semibold">
-                                            <span class="material-symbols-outlined text-[13px]">lock</span>
-                                            <span>Terkunci (Perbaikan)</span>
-                                        </span>
+                                {{-- Kolom Saklar Toggle Mode Perbaikan (Lock PTG-05 / US-12) --}}
+                                <td class="py-3.5 px-4 align-top whitespace-nowrap">
+                                    @if(!empty($report->facility_id))
+                                        <!-- 
+                                          ROUTE: PATCH /petugas/facilities/{id}/toggle-maintenance
+                                          FUNGSI: Mengunci/membuka kunci fasilitas ke mode maintenance (PTG-05 / US-12).
+                                        -->
+                                        <form action="{{ url('/petugas/facilities/' . $report->facility_id . '/toggle-maintenance') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin {{ $isFacilityLocked ? 'MEMBUKA KUNCI dan mengembalikan fasilitas ' . addslashes($facilityName) . ' ke status Aktif' : 'MENGUNCI fasilitas ' . addslashes($facilityName) . ' ke Mode Perbaikan (Maintenance)' }}?');" class="inline-block">
+                                            @csrf
+                                            @method('PATCH')
+                                            <!-- 
+                                              ELEMEN       : Saklar On/Off Mode Perbaikan (Maintenance Switch)
+                                              KEGUNAAN     : Memblokir pemesanan fasilitas di seluruh sistem kalender kampus saat terjadi kerusakan parah.
+                                              CARA KERJA   : Saat diklik, mengirim PATCH request ke endpoint toggle-maintenance dan menimpa status master fasilitas.
+                                            -->
+                                            <button type="submit" title="{{ $isFacilityLocked ? 'Klik untuk membuka kunci (Aktifkan kembali)' : 'Klik untuk mengunci fasilitas (Mode Perbaikan)' }}" class="group flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl border text-left transition shadow-xs {{ $isFacilityLocked ? 'bg-rose-50 hover:bg-rose-100/90 border-rose-200 text-rose-900' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700' }}">
+                                                {{-- Visual Switch Track (Saklar On/Off) --}}
+                                                <div class="relative w-9 h-5 rounded-full transition-colors {{ $isFacilityLocked ? 'bg-rose-600' : 'bg-slate-300 group-hover:bg-slate-400' }}">
+                                                    <div class="absolute top-0.5 {{ $isFacilityLocked ? 'right-0.5' : 'left-0.5' }} w-4 h-4 rounded-full bg-white shadow-xs transition-all flex items-center justify-center">
+                                                        <span class="material-symbols-outlined text-[10px] {{ $isFacilityLocked ? 'text-rose-600' : 'text-slate-400' }}">
+                                                            {{ $isFacilityLocked ? 'lock' : 'check' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-bold leading-tight flex items-center gap-1 {{ $isFacilityLocked ? 'text-rose-800' : 'text-slate-800' }}">
+                                                        <span>{{ $isFacilityLocked ? 'Terkunci (Lock)' : 'Aktif (Normal)' }}</span>
+                                                    </span>
+                                                    <span class="text-[10px] text-slate-500 font-medium leading-tight">
+                                                        {{ $isFacilityLocked ? 'Mode Perbaikan' : 'Kalender Terbuka' }}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        </form>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                                            <span class="material-symbols-outlined text-[13px]">check</span>
-                                            <span>Kalender Terbuka</span>
-                                        </span>
+                                        <span class="text-slate-400 text-xs italic">-</span>
                                     @endif
                                 </td>
 
@@ -233,7 +267,7 @@
                                 </td>
 
                                 <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
-                                    <button type="button" @click="openUpdate('{{ $report->id }}', '{{ $report->report_code }}', '{{ addslashes($report->facility->name ?? 'Fasilitas') }}', '{{ addslashes($report->description ?? '') }}', '{{ $report->status }}', {{ !empty($report->is_facility_locked) ? 'true' : 'false' }}, '{{ addslashes($report->resolution_note ?? '') }}')" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-xs text-xs inline-flex items-center gap-1">
+                                    <button type="button" @click="openUpdate('{{ $report->id }}', '{{ $report->report_code }}', '{{ addslashes($report->facility->name ?? 'Fasilitas') }}', '{{ addslashes($report->description ?? '') }}', '{{ $report->status }}', {{ $isFacilityLocked ? 'true' : 'false' }}, '{{ addslashes($report->resolution_note ?? '') }}')" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-xs text-xs inline-flex items-center gap-1">
                                         <span class="material-symbols-outlined text-[14px]">edit_note</span>
                                         <span>Perbarui Status</span>
                                     </button>
