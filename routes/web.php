@@ -194,7 +194,7 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Rute Navigasi Dashboard Default & Profil Pengguna (Mockup Mode)
+| Rute Navigasi Dashboard Default & Profil Pengguna
 |--------------------------------------------------------------------------
 */
 

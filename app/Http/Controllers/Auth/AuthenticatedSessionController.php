@@ -53,21 +53,6 @@ class AuthenticatedSessionController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Lemparkan kembali jika error karena kredensial salah
             throw $e;
-        } catch (\Throwable $e) {
-            // [MOCKUP FALLBACK] (Client-side Session)
-            // Jika basis data offline/error, simpan sesi statis secara lokal
-            $email = $request->input('email', 'pengguna@kampus.ac.id');
-            $request->session()->put('mock_user', [
-                'name'  => 'Sivitas Akademika (Mock)',
-                'email' => $email,
-                'role'  => 'user'
-            ]);
-            
-            $request->session()->regenerate();
-
-            // Peringatan: Pastikan route '/dashboard' tidak sepenuhnya dikunci oleh middleware 'auth' murni
-            // jika Anda ingin fallback ini bisa menembus halaman.
-            return redirect()->intended(route('dashboard', absolute: false));
         }
     }
 

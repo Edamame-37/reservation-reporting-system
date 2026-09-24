@@ -10,6 +10,26 @@
     'active' => 'dashboard'
 ])
 
+@php
+    $sidebarCounts = [
+        'petugas_reservations' => 0,
+        'petugas_reports' => 0,
+        'admin_users' => 0,
+        'user_reservations' => 0,
+        'user_reports' => 0,
+    ];
+
+    if ($role === 'petugas') {
+        $sidebarCounts['petugas_reservations'] = \App\Models\Reservation::where('status', 'pending')->count();
+        $sidebarCounts['petugas_reports'] = \App\Models\DamageReport::whereIn('status', ['baru', 'diproses'])->count();
+    } elseif ($role === 'admin') {
+        $sidebarCounts['admin_users'] = \App\Models\User::where('status', 'pending')->count();
+    } elseif ($role === 'user' && auth()->check()) {
+        $sidebarCounts['user_reservations'] = auth()->user()->reservations()->count();
+        $sidebarCounts['user_reports'] = auth()->user()->damageReports()->count();
+    }
+@endphp
+
 <!-- 
   ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Top 64px / top-16)
   KEGUNAAN     : Menyediakan akses instan ke modul sistem sesuai otorisasi peran pengguna.
@@ -49,7 +69,9 @@
                     <span class="material-symbols-outlined text-[18px]">approval</span>
                     <span>Antrean Reservasi</span>
                 </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">8</span>
+                @if($sidebarCounts['petugas_reservations'] > 0)
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['petugas_reservations'] }}</span>
+                @endif
             </a>
 
             <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -57,7 +79,9 @@
                     <span class="material-symbols-outlined text-[18px]">build</span>
                     <span>Penanganan Laporan</span>
                 </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">5</span>
+                @if($sidebarCounts['petugas_reports'] > 0)
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">{{ $sidebarCounts['petugas_reports'] }}</span>
+                @endif
             </a>
 
             <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'availability' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -81,7 +105,9 @@
                     <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
                     <span>Manajemen Akun Sivitas</span>
                 </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">5</span>
+                @if($sidebarCounts['admin_users'] > 0)
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['admin_users'] }}</span>
+                @endif
             </a>
 
             <a href="{{ url('/admin/facility-master') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'facility-master' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -119,7 +145,9 @@
                     <span class="material-symbols-outlined text-[18px]">history</span>
                     <span>Riwayat Reservasi</span>
                 </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">12</span>
+                @if($sidebarCounts['user_reservations'] > 0)
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">{{ $sidebarCounts['user_reservations'] }}</span>
+                @endif
             </a>
 
             <a href="{{ url('/user/report-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -134,7 +162,9 @@
                     <span class="material-symbols-outlined text-[18px]">checklist</span>
                     <span>Status Laporan</span>
                 </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">2</span>
+                @if($sidebarCounts['user_reports'] > 0)
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['user_reports'] }}</span>
+                @endif
             </a>
 
         @else
@@ -162,9 +192,14 @@
         @endif
     </nav>
 
-    {{-- Footer Sidebar: Keluar Sesi --}}
+    {{-- Footer Sidebar: Akses Profil & Keluar Sesi --}}
     <div class="p-3 border-t border-slate-100 bg-slate-50/50">
         @if($role !== 'public')
+            <a href="{{ route('profile.edit') }}" class="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+                <span>Pengaturan Profil</span>
+            </a>
+            
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition">

@@ -21,29 +21,19 @@ class ProfileController extends Controller
     /**
      * FUNCTION/PROCEDURE : edit()
      * KEGUNAAN           : Menampilkan formulir profil pengguna.
-     * CARA KERJA         : [MODE MOCKUP] Jika belum ada autentikasi database, menyediakan data objek User tiruan (dummy user) agar view profil dapat dibuka dengan sempurna.
+     * CARA KERJA         : Mengirimkan objek user terotentikasi ke view profile.edit.
      */
     public function edit(Request $request): View
     {
-        // [MOCKUP MODE] Sediakan dummy user jika request->user() null
-        $user = $request->user();
-        if (!$user) {
-            $mockSession = $request->session()->get('mock_user', []);
-            $user = new User([
-                'name'  => $mockSession['name'] ?? 'Sivitas Pengguna CAVA',
-                'email' => $mockSession['email'] ?? 'pengguna@kampus.ac.id',
-            ]);
-        }
-
         return view('profile.edit', [
-            'user' => $user,
+            'user' => $request->user(),
         ]);
     }
 
     /**
      * FUNCTION/PROCEDURE : update()
      * KEGUNAAN           : Memperbarui informasi profil pengguna.
-     * CARA KERJA         : [MODE MOCKUP] Operasi $user->save() ke database dinonaktifkan sementara dan dialihkan ke pembaruan session mock.
+     * CARA KERJA         : Menerima data tervalidasi, mengosongkan status verifikasi email jika email berubah, dan menyimpannya.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -60,8 +50,8 @@ class ProfileController extends Controller
 
     /**
      * FUNCTION/PROCEDURE : destroy()
-     * KEGUNAAN           : Menghapus akun pengguna dari sistem.
-     * CARA KERJA         : [MODE MOCKUP] Operasi $user->delete() dinonaktifkan sementara dan hanya membersihkan session.
+     * KEGUNAAN           : Menghapus akun pengguna dari sistem secara permanen.
+     * CARA KERJA         : Memvalidasi kata sandi, menghapus objek pengguna, melogoutkan dari session, dan meredirect ke halaman utama.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -70,10 +60,10 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        if ($user) {
-            Auth::logout();
-            $user->delete();
-        }
+        
+        Auth::logout();
+        
+        $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
