@@ -33,8 +33,8 @@
             <select id="role_type" name="role_type" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
                 <option value="" disabled {{ old('role_type') ? '' : 'selected' }}>-- Pilih Kategori --</option>
                 <option value="mahasiswa" {{ old('role_type') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
-                <option value="dosen" {{ old('role_type') == 'dosen' ? 'selected' : '' }}>Dosen Tetap</option>
-                <option value="staf" {{ old('role_type') == 'staf' ? 'selected' : '' }}>Staf Akademik / BEM</option>
+                <option value="dosen" {{ old('role_type') == 'dosen' ? 'selected' : '' }}>Dosen</option>
+                <option value="staf" {{ old('role_type') == 'staf' ? 'selected' : '' }}>Staf</option>
             </select>
             <x-input-error :messages="$errors->get('role_type')" class="mt-2" />
         </div>
