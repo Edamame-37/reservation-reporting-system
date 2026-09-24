@@ -53,10 +53,6 @@ class ReportController extends Controller
         $validated = $request->validated();
 
         $userId = Auth::id();
-        if (!$userId) {
-            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
-            $userId = $defaultUser ? $defaultUser->id : 1;
-        }
 
         // 1. Generate Kode Tiket Laporan Unik (BR-USR04-03)
         $datePrefix = Carbon::now()->format('Ymd');
@@ -101,10 +97,6 @@ class ReportController extends Controller
     public function history(Request $request): View
     {
         $userId = Auth::id();
-        if (!$userId) {
-            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
-            $userId = $defaultUser ? $defaultUser->id : 1;
-        }
 
         // 1. Hitung badge akumulasi status dengan agregasi tunggal (BR-USR05-02)
         $rawCounts = DamageReport::where('user_id', $userId)
