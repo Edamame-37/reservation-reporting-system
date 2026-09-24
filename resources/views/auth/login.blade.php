@@ -14,12 +14,19 @@
         </div>
     @endif
 
+    <div class="mb-6">
+        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Kembali</span>
+        </a>
+    </div>
+
     <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-4">
         @csrf
 
         <div class="text-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Masuk ke CAVA</h2>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Silakan masuk menggunakan kredensial Anda.</p>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Masuk</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-2">Silakan masuk menggunakan kredensial Anda.</p>
         </div>
 
         <!-- Email Address -->
@@ -47,20 +54,20 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-between mt-6 gap-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    Lupa<br>password?
-                </a>
-            @endif
-
-            <x-primary-button class="w-full flex-1 max-w-[200px]">
+        <div class="flex flex-col items-center mt-6 gap-4">
+            <x-primary-button class="w-full justify-center max-w-[200px]">
                 Masuk
             </x-primary-button>
+
+            @if (Route::has('password.request'))
+                <a class="underline text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 dark:focus:ring-offset-slate-800" href="{{ route('password.request') }}">
+                    Lupa password?
+                </a>
+            @endif
         </div>
         
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-[#7C3AED] hover:text-[#6D28D9]">Daftar sekarang</a></p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-slate-900 hover:text-slate-700">Daftar sekarang</a></p>
         </div>
     </form>
 </x-guest-layout>
