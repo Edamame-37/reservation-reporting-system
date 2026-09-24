@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
