@@ -124,16 +124,21 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     })->name('petugas.dashboard');
 
     // ROUTE: Menerima GET request ke '/petugas/reservation-management'
-    // FUNGSI: Menampilkan antarmuka persetujuan (approval) dan penolakan reservasi ruang
-    Route::get('/petugas/reservation-management', function () {
-        return view('petugas.reservation-management');
-    })->name('petugas.reservation-management');
+    // FUNGSI: Menampilkan lembar kerja manajemen dan seluruh antrean persetujuan reservasi (PTG-02 / US-9)
+    Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
+    Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
 
-    // ROUTE: Menerima GET request ke '/petugas/report-management'
-    // FUNGSI: Menampilkan daftar tiket keluhan kerusakan aset/fasilitas untuk tindak lanjut
-    Route::get('/petugas/report-management', function () {
-        return view('petugas.report-management');
-    })->name('petugas.report-management');
+    // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/approve'
+    // FUNGSI: Menyetujui permohonan reservasi dengan validasi anti-bentrok jadwal (PTG-02 / US-9)
+    Route::patch('/petugas/reservations/{id}/approve', [ReservationManagementController::class, 'approve'])->name('petugas.reservations.approve');
+
+    // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/reject'
+    // FUNGSI: Menolak permohonan reservasi dengan alasan penolakan resmi (PTG-02 / US-9)
+    Route::patch('/petugas/reservations/{id}/reject', [ReservationManagementController::class, 'reject'])->name('petugas.reservations.reject');
+
+    // ROUTE: Menerima DELETE request ke '/petugas/reservations/{id}/force-cancel'
+    // FUNGSI: Pembatalan darurat sepihak (override privilege) oleh petugas untuk reservasi yang telah disetujui (PTG-03 / US-10)
+    Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
 });
 
 /*
