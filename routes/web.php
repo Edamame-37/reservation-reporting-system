@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationManagementController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Http\Request;
@@ -37,7 +38,6 @@ Route::get('/public/availability', function () { return view('public.availabilit
 Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
 
 // Mockup Routes - Petugas
-Route::get('/petugas/reservation-management', function () { return view('petugas.reservation-management'); })->name('petugas.reservation-management');
 Route::get('/petugas/report-management', function () { return view('petugas.report-management'); })->name('petugas.report-management');
 
 // Mockup Routes - Admin
