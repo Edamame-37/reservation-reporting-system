@@ -27,9 +27,11 @@ class ExportReportTest extends TestCase
             'status'          => 'active',
             'identity_number' => 'ADM-001',
         ]);
+        $this->admin->syncRoles(['admin']);
 
-        $this->facility = Facility::create([
+        $this->facility = Facility::firstOrCreate([
             'code'           => 'AUD-H01',
+        ], [
             'name'           => 'Auditorium B.J. Habibie',
             'category'       => 'auditorium',
             'building'       => 'Gedung Rektorat',
