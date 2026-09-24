@@ -6,33 +6,7 @@
 --}}
 
 <x-public-layout title="Katalog Lengkap Fasilitas Kampus" active="catalog">
-    <div x-data="{
-        search: '',
-        selectedCategory: 'semua',
-        selectedBuilding: 'semua',
-        modalDetail: false,
-        activeVenue: null,
-        venues: [
-            { id: 'AUD-H01', name: 'Auditorium Utama B.J. Habibie', category: 'auditorium', building: 'Gedung Rektorat (Lt. 1 & 2)', capacity: 450, status: 'approved', availableSlots: 14, totalSlots: 27, equipment: ['AC Central', 'Dual Laser Projector', 'Sound Yamaha 5000W', '8 Mic Wireless', 'Podium VIP'], desc: 'Auditorium utama universitas berstandar internasional untuk wisuda, seminar internasional, dan orasi ilmiah.' },
-            { id: 'LAB-C204', name: 'Lab Komputasi Cloud & Jaringan', category: 'lab', building: 'Gedung Lab Terpadu C (Lt. 2)', capacity: 45, status: 'approved', availableSlots: 19, totalSlots: 27, equipment: ['45 PC Core i7 RTX 4060', 'Gigabit Switch Cisco', 'AC Dual 2PK', 'Smart Display', 'Whiteboard'], desc: 'Laboratorium riset jaringan, cloud virtualization, dan praktikum mahasiswa informatika.' },
-            { id: 'CLS-B302', name: 'Smart Classroom 302', category: 'kelas', building: 'Gedung Kuliah Bersama B (Lt. 3)', capacity: 60, status: 'approved', availableSlots: 11, totalSlots: 27, equipment: ['Interactive Whiteboard', 'Video Conference Cam', 'Collab Desks', 'Audio Mic'], desc: 'Ruang kelas multimedia modern dengan meja kolaborasi ergonomis dan sistem video conference untuk kuliah hybrid.' },
-            { id: 'SPT-PKM01', name: 'Aula Serbaguna & Olahraga PKM', category: 'olahraga', building: 'Pusat Kegiatan Mahasiswa (Lt. 1)', capacity: 500, status: 'approved', availableSlots: 8, totalSlots: 27, equipment: ['Lapangan Futsal Vinyl', '2 Lapangan Badminton', 'Sound System', 'Ruang Ganti', 'Tribun'], desc: 'Fasilitas serbaguna untuk kegiatan ormawa kampus, turnamen olahraga antar fakultas, dan pameran kewirausahaan.' },
-            { id: 'SEM-A301', name: 'Ruang Seminar Lantai 3', category: 'kelas', building: 'Gedung Kuliah Terpadu A (Lt. 3)', capacity: 120, status: 'approved', availableSlots: 16, totalSlots: 27, equipment: ['Acoustic Wall Panel', 'Sound System', 'Wireless Mic', 'Dual Screen Projector'], desc: 'Ruang teater bertingkat untuk presentasi seminar skripsi, kuliah umum fakultas, dan lokakarya.' },
-            { id: 'RPT-SENAT', name: 'Ruang Rapat Senat Akademik', category: 'rapat', building: 'Gedung Rektorat (Lt. 3)', capacity: 35, status: 'locked', availableSlots: 0, totalSlots: 27, equipment: ['Meja Oval Konferensi', 'Delegate Mic Units', 'Display LCD 85 Inch', 'Executive Chairs'], desc: 'Ruang sidang formal para pimpinan universitas dan dewan senat. Saat ini sedang dalam perbaikan tata suara.' }
-        ],
-        get filteredVenues() {
-            return this.venues.filter(v => {
-                const matchSearch = v.name.toLowerCase().includes(this.search.toLowerCase()) || v.id.toLowerCase().includes(this.search.toLowerCase()) || v.building.toLowerCase().includes(this.search.toLowerCase());
-                const matchCat = this.selectedCategory === 'semua' || v.category === this.selectedCategory;
-                const matchBld = this.selectedBuilding === 'semua' || v.building.includes(this.selectedBuilding);
-                return matchSearch && matchCat && matchBld;
-            });
-        },
-        openDetail(v) {
-            this.activeVenue = v;
-            this.modalDetail = true;
-        }
-    }">
+    <div x-data="catalogData()">
 
         {{-- Header Breadcrumb & Judul Halaman --}}
         <div class="mb-6">
@@ -192,10 +166,13 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                            <button type="button" @click="modalDetail = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
-                                Tutup
+                        <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                            <button type="button" @click="modalDetail = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-500 text-xs font-semibold hover:bg-slate-50">
+                                Batal
                             </button>
+                            <a :href="'{{ url('/public/availability') }}?facility=' + activeVenue.id" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">calendar_month</span> Cek Jadwal
+                            </a>
                             <a href="{{ route('login') }}" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-xs">
                                 Masuk untuk Reservasi
                             </a>
@@ -206,4 +183,29 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('catalogData', () => ({
+                search: '',
+                selectedCategory: 'semua',
+                selectedBuilding: 'semua',
+                modalDetail: false,
+                activeVenue: null,
+                venues: @json($facilities),
+                get filteredVenues() {
+                    return this.venues.filter(v => {
+                        const matchSearch = v.name.toLowerCase().includes(this.search.toLowerCase()) || String(v.code).toLowerCase().includes(this.search.toLowerCase()) || v.building.toLowerCase().includes(this.search.toLowerCase());
+                        const matchCat = this.selectedCategory === 'semua' || v.category === this.selectedCategory;
+                        const matchBld = this.selectedBuilding === 'semua' || v.building.includes(this.selectedBuilding);
+                        return matchSearch && matchCat && matchBld;
+                    });
+                },
+                openDetail(v) {
+                    this.activeVenue = v;
+                    this.modalDetail = true;
+                }
+            }));
+        });
+    </script>
 </x-public-layout>

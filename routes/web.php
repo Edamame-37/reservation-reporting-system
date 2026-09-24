@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportManagementController;
 use App\Http\Controllers\ReservationManagementController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\PublicFacilityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,15 +40,17 @@ Route::get('/admin/export-report', function () { return view('admin.export-repor
 
 // ROUTE: Menerima GET request ke '/public/catalog'
 // FUNGSI: Menampilkan katalog daftar fasilitas dan ruang kampus beserta filter
-Route::get('/public/catalog', function () {
-    return view('public.catalog');
-})->name('public.catalog');
+Route::get('/public/catalog', [PublicFacilityController::class, 'index'])->name('public.catalog');
 
 // ROUTE: Menerima GET request ke '/public/availability'
 // FUNGSI: Menampilkan matriks jadwal slot ketersediaan ruang 30 menit
-Route::get('/public/availability', function () {
-    return view('public.availability');
-})->name('public.availability');
+Route::get('/public/availability', [PublicFacilityController::class, 'availability'])->name('public.availability');
+
+// API ROUTE: Menarik matriks slot waktu terpakai untuk seluruh fasilitas pada tanggal tertentu
+Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMatrixAvailability'])->name('api.availability.matrix');
+
+// API ROUTE: Menarik status ketersediaan spesifik 1 fasilitas pada tanggal tertentu (Sesuai Blueprint PUB-01)
+Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
 /*
 |--------------------------------------------------------------------------
