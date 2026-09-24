@@ -50,6 +50,33 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // [ADM-01 / US-15] Cegah akun pending atau rejected membuat sesi login
+        // DICOMMENT UNTUK TESTING: Akun bisa login tanpa perlu disetujui
+        /*
+        $user = Auth::user();
+        if ($user && $user->status !== 'active') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            if ($user->status === 'pending') {
+                throw ValidationException::withMessages([
+                    'email' => 'Akun Anda masih berstatus pending dan menunggu verifikasi dari Admin.',
+                ]);
+            }
+
+            if ($user->status === 'rejected') {
+                $reason = $user->rejection_reason ? ' Alasan: ' . $user->rejection_reason : '';
+                throw ValidationException::withMessages([
+                    'email' => 'Pendaftaran akun Anda ditolak oleh Admin.' . $reason,
+                ]);
+            }
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda tidak aktif.',
+            ]);
+        }
+        */
+
         RateLimiter::clear($this->throttleKey());
     }
 

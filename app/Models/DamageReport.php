@@ -84,4 +84,14 @@ class DamageReport extends Model
     {
         return $this->belongsTo(User::class, 'handled_by');
     }
+
+    /**
+     * FUNCTION/PROCEDURE : handledBy()
+     * KEGUNAAN           : Alias relasi handler() untuk teknisi atau petugas yang menangani tiket.
+     * CARA KERJA         : Meneruskan ke relasi handler().
+     */
+    public function handledBy(): BelongsTo
+    {
+        return $this->handler();
+    }
 }

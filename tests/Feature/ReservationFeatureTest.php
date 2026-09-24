@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 
 beforeEach(function () {
+    // Pastikan terdapat data user dan fasilitas aktif
     $this->user = User::firstOrCreate(
         ['email' => 'dimas@mahasiswa.ac.id'],
         [
