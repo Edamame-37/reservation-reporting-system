@@ -51,8 +51,6 @@ class LoginRequest extends FormRequest
         }
 
         // [ADM-01 / US-15] Cegah akun pending atau rejected membuat sesi login
-        // DICOMMENT UNTUK TESTING: Akun bisa login tanpa perlu disetujui
-        /*
         $user = Auth::user();
         if ($user && $user->status !== 'active') {
             Auth::logout();
@@ -75,7 +73,6 @@ class LoginRequest extends FormRequest
                 'email' => 'Akun Anda tidak aktif.',
             ]);
         }
-        */
 
         RateLimiter::clear($this->throttleKey());
     }
