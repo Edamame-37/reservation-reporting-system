@@ -65,7 +65,6 @@
         </footer>
     </div>
 
-    {{-- Role Switcher Floating Widget (Testing & Reviewer Helper) --}}
-    <x-cava.role-switcher activeRole="user" />
+
 </body>
 </html>

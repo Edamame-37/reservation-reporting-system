@@ -30,7 +30,6 @@
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-slate-900 text-base leading-tight tracking-tight group-hover:text-blue-900 transition-colors">{{ $title }}</span>
-                        <span class="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">v2.4</span>
                     </div>
                     <span class="text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
                 </div>
@@ -46,16 +45,16 @@
             </div>
 
             @if($showProfile)
-                {{-- Profil Pengguna Aktif --}}
-                <div class="flex items-center gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+                {{-- Profil Pengguna Aktif (Bisa Diklik menuju Pengaturan Profil) --}}
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 pl-2 sm:pl-3 py-1 pr-1 border-l border-slate-200 hover:bg-slate-50 rounded-xl transition cursor-pointer group">
                     <div class="hidden sm:flex flex-col text-right">
-                        <span class="text-sm font-semibold text-slate-800 leading-tight">{{ $userName }}</span>
+                        <span class="text-sm font-semibold text-slate-800 leading-tight group-hover:text-blue-900 transition-colors">{{ $userName }}</span>
                         <span class="text-[11px] text-slate-500 font-mono">{{ $userIdentifier }}</span>
                     </div>
-                    <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm" title="{{ $userName }}">
+                    <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition-transform" title="Buka Pengaturan Profil">
                         <span class="material-symbols-outlined text-[18px]">person</span>
                     </div>
-                </div>
+                </a>
             @else
                 {{-- Tombol Masuk SSO untuk Pengunjung --}}
                 <div class="flex items-center gap-2">

@@ -7,48 +7,30 @@
 
 <x-app-layout title="Dasbor Mahasiswa & Dosen" active="dashboard">
     <!-- 
-      ELEMEN       : Banner Informasi Kebijakan Reservasi & Kuota
-      KEGUNAAN     : Mengingatkan batas waktu reservasi minimal 2x24 jam dan batas pembatalan mandiri H-1.
-    -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[22px]">info</span>
-            </div>
-            <div>
-                <h2 class="text-sm font-bold text-slate-900 leading-snug">Kebijakan Pemesanan Fasilitas Kampus (SK Rektor No. 428/2024)</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Reservasi diajukan minimal H-2 sebelum kegiatan. Pembatalan mandiri hanya diizinkan maksimal H-1 sebelum jadwal.</p>
-            </div>
-        </div>
-        <div class="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 whitespace-nowrap self-stretch md:self-auto text-center">
-            Kuota Bulanan: <span class="text-slate-900 font-bold">4 / 5 Terpakai</span>
-        </div>
-    </section>
-
-    <!-- 
       ELEMEN       : Spotlight Jadwal Terdekat (Upcoming Reservation Highlight)
       KEGUNAAN     : Memanjakan pengguna dengan menyajikan jadwal kegiatan paling mendesak dalam kartu hero fokus.
     -->
     <section class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-md mb-8">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            @if($upcomingReservation)
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-emerald-300 mb-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     <span>Reservasi Aktif Disetujui</span>
                 </div>
-                <h3 class="text-xl font-bold tracking-tight text-white">Seminar Nasional Cloud Architecture Himpunan TI</h3>
+                <h3 class="text-xl font-bold tracking-tight text-white">{{ $upcomingReservation->purpose }}</h3>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 mt-2">
                     <span class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">location_on</span>
-                        Auditorium B.J. Habibie (Gedung Rektorat Lt. 1)
+                        {{ $upcomingReservation->facility->name ?? 'Fasilitas' }} ({{ $upcomingReservation->facility->building ?? 'Gedung' }})
                     </span>
                     <span>•</span>
                     <span class="flex items-center gap-1 text-emerald-300 font-medium">
                         <span class="material-symbols-outlined text-[16px]">schedule</span>
-                        Rabu, 24 April 2024 • 09:00 - 12:00 WIB
+                        {{ \Carbon\Carbon::parse($upcomingReservation->reservation_date)->isoFormat('dddd, D MMMM Y') }} • {{ substr($upcomingReservation->start_time, 0, 5) }} - {{ substr($upcomingReservation->end_time, 0, 5) }} WIB
                     </span>
                     <span>•</span>
-                    <span class="font-mono text-slate-400">TKT-20240424-001</span>
+                    <span class="font-mono text-slate-400">{{ $upcomingReservation->ticket_code }}</span>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto">
@@ -56,6 +38,17 @@
                     Buka Detail Tiket
                 </a>
             </div>
+            @else
+            <div>
+                <h3 class="text-xl font-bold tracking-tight text-white">Belum Ada Jadwal Terdekat</h3>
+                <p class="text-xs text-slate-300 mt-2">Anda tidak memiliki permohonan reservasi yang telah disetujui untuk waktu dekat.</p>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <a href="{{ url('/user/reservation-form') }}" class="w-full md:w-auto px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 transition shadow-xs text-center">
+                    Ajukan Reservasi
+                </a>
+            </div>
+            @endif
         </div>
     </section>
 
@@ -113,11 +106,11 @@
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
             <div>
                 <h3 class="text-base font-bold text-slate-900">Riwayat Reservasi Terkini</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Menampilkan 3 pengajuan terakhir dari total 12 reservasi Anda.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $recentReservations->count() }} pengajuan terakhir dari total {{ $totalReservations }} reservasi Anda.</p>
             </div>
             {{-- Tombol Lihat Selengkapnya --}}
             <a href="{{ url('/user/reservation-history') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                <span>Lihat Semua Riwayat Reservasi (12 Data)</span>
+                <span>Lihat Semua Riwayat Reservasi ({{ $totalReservations }} Data)</span>
                 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </a>
         </div>
@@ -135,20 +128,20 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    {{-- Row 1: Menunggu Konfirmasi --}}
+                    @forelse($recentReservations as $reservation)
                     <tr class="hover:bg-slate-50/70 transition">
-                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">TKT-20240428-009</td>
+                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">{{ $reservation->ticket_code }}</td>
                         <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-900">Lab Komputasi Cloud</div>
-                            <div class="text-[11px] text-slate-500">Gedung C, Lt. 2</div>
+                            <div class="font-bold text-slate-900">{{ $reservation->facility->name ?? 'Dihapus' }}</div>
+                            <div class="text-[11px] text-slate-500">{{ $reservation->facility->building ?? '-' }}</div>
                         </td>
                         <td class="py-3.5 px-4">
-                            <div class="text-slate-800 font-medium">28 Apr 2024</div>
-                            <div class="text-[11px] text-slate-500 font-mono">13:00 - 15:30 WIB</div>
+                            <div class="text-slate-800 font-medium">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</div>
+                            <div class="text-[11px] text-slate-500 font-mono">{{ substr($reservation->start_time, 0, 5) }} - {{ substr($reservation->end_time, 0, 5) }} WIB</div>
                         </td>
-                        <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">Praktikum Mandiri Pemrograman Web Lanjut</td>
+                        <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">{{ $reservation->purpose }}</td>
                         <td class="py-3.5 px-4">
-                            <x-cava.status-badge status="pending" label="Menunggu Konfirmasi" />
+                            <x-cava.status-badge :status="$reservation->status" label="{{ ucfirst($reservation->status) }}" />
                         </td>
                         <td class="py-3.5 px-4 text-right">
                             <a href="{{ url('/user/reservation-history') }}" class="px-3 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
@@ -156,50 +149,11 @@
                             </a>
                         </td>
                     </tr>
-
-                    {{-- Row 2: Disetujui Petugas --}}
-                    <tr class="hover:bg-slate-50/70 transition">
-                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">TKT-20240424-001</td>
-                        <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-900">Auditorium B.J. Habibie</div>
-                            <div class="text-[11px] text-slate-500">Gedung Rektorat, Lt. 1</div>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <div class="text-slate-800 font-medium">24 Apr 2024</div>
-                            <div class="text-[11px] text-slate-500 font-mono">09:00 - 12:00 WIB</div>
-                        </td>
-                        <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">Seminar Cloud Computing Himpunan Mahasiswa TI</td>
-                        <td class="py-3.5 px-4">
-                            <x-cava.status-badge status="approved" label="Disetujui Petugas" />
-                        </td>
-                        <td class="py-3.5 px-4 text-right">
-                            <a href="{{ url('/user/reservation-history') }}" class="px-3 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                                Detail
-                            </a>
-                        </td>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-500">Belum ada riwayat permohonan reservasi.</td>
                     </tr>
-
-                    {{-- Row 3: Ditolak Petugas --}}
-                    <tr class="hover:bg-slate-50/70 transition">
-                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">TKT-20240410-012</td>
-                        <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-900">Aula Serbaguna PKM</div>
-                            <div class="text-[11px] text-slate-500">Gedung PKM, Lt. 1</div>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <div class="text-slate-800 font-medium">10 Apr 2024</div>
-                            <div class="text-[11px] text-slate-500 font-mono">08:00 - 17:00 WIB</div>
-                        </td>
-                        <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">Festival Musik Dies Natalis BEM Universitas</td>
-                        <td class="py-3.5 px-4">
-                            <x-cava.status-badge status="rejected" label="Ditolak" />
-                        </td>
-                        <td class="py-3.5 px-4 text-right">
-                            <a href="{{ url('/user/reservation-history') }}" class="px-3 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                                Detail
-                            </a>
-                        </td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -213,7 +167,7 @@
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
             <div>
                 <h3 class="text-base font-bold text-slate-900">Status Laporan Kerusakan Terkini</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Pantau tindak lanjut perbaikan sarana yang Anda laporkan di kampus.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $activeDamageReports->count() }} laporan aktif dari total {{ $totalDamageReports }} laporan Anda.</p>
             </div>
             <a href="{{ url('/user/report-history') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
                 <span>Lihat Semua Laporan Kerusakan</span>
@@ -222,43 +176,30 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {{-- Laporan 1 --}}
+            @forelse($activeDamageReports as $report)
             <div class="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-slate-800">TKT-RPT-20240419-03</span>
-                        <x-cava.status-badge status="diproses" label="Sedang Ditangani Teknisi" />
+                        <span class="font-mono text-xs font-bold text-slate-800">{{ $report->ticket_code }}</span>
+                        <x-cava.status-badge :status="$report->status" label="{{ ucfirst($report->status) }}" />
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">Proyektor Berkedip & Tidak Muncul Gambar</h4>
+                    <h4 class="text-sm font-bold text-slate-900">{{ $report->title ?? 'Laporan Kerusakan' }}</h4>
                     <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <span class="material-symbols-outlined text-[15px]">location_on</span>
-                        Smart Classroom 302 • Gedung B Lt. 3
+                        {{ $report->facility->name ?? 'Fasilitas' }} • {{ $report->facility->building ?? 'Gedung' }}
                     </p>
                 </div>
                 <div class="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
-                    <span>Dilaporkan 19 Apr 2024</span>
+                    <span>Diperbarui {{ $report->updated_at->diffForHumans() }}</span>
                     <a href="{{ url('/user/report-history') }}" class="font-semibold text-slate-800 hover:underline">Pantau Log →</a>
                 </div>
             </div>
-
-            {{-- Laporan 2 --}}
-            <div class="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-slate-800">TKT-RPT-20240415-01</span>
-                        <x-cava.status-badge status="selesai" label="Selesai Diperbaiki" />
-                    </div>
-                    <h4 class="text-sm font-bold text-slate-900">Kabel LAN Meja 12 & 13 Putus Digigit Hewan</h4>
-                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                        <span class="material-symbols-outlined text-[15px]">location_on</span>
-                        Lab Komputasi Cloud • Gedung C Lt. 2
-                    </p>
-                </div>
-                <div class="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
-                    <span>Selesai 16 Apr 2024</span>
-                    <a href="{{ url('/user/report-history') }}" class="font-semibold text-slate-800 hover:underline">Pantau Log →</a>
-                </div>
+            @empty
+            <div class="col-span-full p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
+                <span class="material-symbols-outlined text-[32px] text-slate-400 mb-2">task_alt</span>
+                <p class="text-sm font-medium">Tidak ada laporan kerusakan yang sedang aktif ditangani teknisi.</p>
             </div>
+            @endforelse
         </div>
     </section>
 </x-app-layout>
