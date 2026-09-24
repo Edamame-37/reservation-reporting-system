@@ -6,6 +6,7 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\DashboardPetugasController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ExportController;
@@ -36,7 +37,6 @@ Route::get('/public/availability', function () { return view('public.availabilit
 Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
 
 // Mockup Routes - Petugas
-Route::get('/petugas/dashboard', function () { return view('petugas.dashboard'); })->name('petugas.dashboard');
 Route::get('/petugas/reservation-management', function () { return view('petugas.reservation-management'); })->name('petugas.reservation-management');
 Route::get('/petugas/report-management', function () { return view('petugas.report-management'); })->name('petugas.report-management');
 
