@@ -270,46 +270,78 @@ Saat pengguna sedang menyaring tab *Pending* di halaman 2 (`?status=pending&page
 
 ---
 
-## 🧪 Bagian 3: Bedah Pengujian Otomatis (`tests/Feature/ReservationFeatureTest.php`)
+## 📂 Bagian 3: Bedah Fitur USR-03 (Pembatalan Reservasi Mandiri Batas H-1)
+
+### 3.1. Logika Bisnis: `ReservationController@cancel`
+
+```php
+public function cancel(Request $request, int|string $id): RedirectResponse
+{
+    $userId = Auth::id() ?? 1;
+    $reservation = Reservation::findOrFail($id);
+
+    // 1. Otorisasi Kepemilikan (Strict Ownership - BR-USR03-01)
+    if ((int) $reservation->user_id !== (int) $userId) {
+        abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk membatalkan tiket reservasi ini.');
+    }
+
+    // 2. Validasi Kelayakan Status (BR-USR03-03)
+    if (!in_array($reservation->status, ['pending', 'approved'])) {
+        return back()->withErrors([
+            'error' => 'Reservasi ini tidak dapat dibatalkan karena sudah dalam status ' . $reservation->status . '.',
+        ]);
+    }
+
+    // 3. Validasi Batas Waktu H-1 / 24 Jam (BR-USR03-02)
+    $resDateTime = Carbon::parse($reservation->reservation_date)->setTimeFromTimeString($reservation->start_time);
+    if (now()->diffInSeconds($resDateTime, false) < 86400) {
+        return back()->withErrors([
+            'error' => 'Pembatalan mandiri ditolak. Batas waktu pembatalan maksimal adalah H-1 (minimal 24 jam) sebelum acara dimulai.',
+        ]);
+    }
+
+    // 4. Update Status dan Alasan Pembatalan (BR-USR03-04 & BR-USR03-05)
+    $inputReason = trim($request->input('cancellation_reason', ''));
+    $reservation->status = 'cancelled';
+    $reservation->cancellation_reason = !empty($inputReason) ? $inputReason : 'Dibatalkan mandiri oleh pemohon.';
+    $reservation->save();
+
+    return redirect()->route('user.reservation-history')
+        ->with('success', "Tiket reservasi {$reservation->ticket_code} berhasil dibatalkan. Fasilitas telah dilepas kembali ke kalender ketersediaan.");
+}
+```
+
+#### Bedah Logika Kritis:
+1. **Otorisasi Ketat (`abort(403)`):**
+   - Mencegah serangan *Insecure Direct Object Reference* (IDOR). Jika Mahasiswa A sengaja mengubah form action ke ID tiket milik Mahasiswa B (`/user/reservations/99/cancel`), server akan menolak akses dengan kode HTTP 403 Forbidden.
+2. **Perhitungan Presisi H-1 via Carbon:**
+   - `$resDateTime = Carbon::parse($res->reservation_date)->setTimeFromTimeString($res->start_time);`
+   - `now()->diffInSeconds($resDateTime, false) < 86400`:
+     - 86.400 detik = 24 jam. Parameter `false` memastikan selisih bertanda positif/negatif (jika waktu acara sudah lewat, hasilnya negatif sehingga otomatis $< 86400$ dan ditolak).
+3. **Pelepasan Slot Otomatis (*Auto Release*):**
+   - Karena kueri anti-bentrok pada USR-01 hanya mengunci status `approved`, ketika status berubah menjadi `cancelled`, secara otomatis slot ruangan tersebut langsung bebas dan dapat dipesan oleh sivitas lain tanpa perlu intervensi admin.
+
+---
+
+## 🧪 Bagian 4: Bedah Pengujian Otomatis (`tests/Feature/ReservationFeatureTest.php`)
 
 Pengujian otomatis (*Automated Testing*) menjamin bahwa fitur yang kita buat tidak akan rusak di kemudian hari saat anggota tim lain mengedit kode.
 
 ```php
-test('USR-01: Pengguna berhasil mengajukan reservasi dengan data valid (TC-USR01-01)', function () {
-    $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+test('USR-03: Pengguna berhasil membatalkan reservasi status pending lebih dari 24 jam (TC-USR03-01)', function () {
+    $futureDate = Carbon::now()->addDays(3)->format('Y-m-d');
+    $reservation = Reservation::create([...]);
 
-    $payload = [
-        'facility_id'        => $this->facility->id,
-        'reservation_date'   => $tomorrow,
-        'start_time'         => '09:00',
-        'end_time'           => '11:00',
-        'participants_count' => 50,
-        'purpose'            => 'Seminar Nasional Web Development dan Cloud Architecture',
-    ];
-
-    $response = $this->actingAs($this->user)->post(route('user.reservations.store'), $payload);
+    $response = $this->actingAs($this->user)->delete(route('user.reservations.cancel', $reservation->id));
 
     $response->assertRedirect(route('user.reservation-history'));
     $response->assertSessionHas('success');
-
     $this->assertDatabaseHas('reservations', [
-        'user_id'          => $this->user->id,
-        'facility_id'      => $this->facility->id,
-        'reservation_date' => $tomorrow,
-        'start_time'       => '09:00',
-        'end_time'         => '11:00',
-        'status'           => 'pending',
+        'id'     => $reservation->id,
+        'status' => 'cancelled',
     ]);
 });
 ```
-
-### Penjelasan Assertion Kunci:
-1. **`actingAs($this->user)`**: Mensimulasikan pengguna terautentikasi (login) tanpa perlu membuka browser dan mengisi form login sungguhan.
-2. **`assertRedirect(...)`**: Memastikan kontroler mengarahkan pengguna ke halaman riwayat setelah berhasil submit.
-3. **`assertSessionHas('success')`**: Memastikan pesan flash sukses benar-benar diterbitkan untuk pengguna.
-4. **`assertDatabaseHas('reservations', [...])`**: Memeriksa langsung ke tabel MySQL bahwa baris baru benar-benar tersimpan dengan nilai kolom yang sesuai.
-5. **`assertSessionHasErrors('start_time')`**: Digunakan pada uji kasus negatif untuk memastikan server berhasil menggagalkan input yang bentrok atau tidak valid.
-6. **`DatabaseTransactions` di `tests/Pest.php`**: Membungkus setiap eksekusi unit test di dalam transaksi SQL. Sesaat setelah tes selesai, seluruh data uji otomatis di-*rollback*, sehingga basis data pengembangan lokal Anda tetap bersih dan tidak tercemar data sampah pengujian.
 
 ---
 
@@ -319,5 +351,6 @@ test('USR-01: Pengguna berhasil mengajukan reservasi dengan data valid (TC-USR01
 |---|---|
 | *"Bagaimana sistem Anda mencegah dua orang meminjam ruangan yang sama di jam yang sama (double-booking)?"* | "Sistem menerapkan validasi ganda. Pada level basis data, kami menggunakan transaksi `DB::transaction()` dan mengeksekusi kueri overlap matematis: `start_time < req_end AND end_time > req_start` terhadap seluruh reservasi berstatus `approved`. Jika kueri menemukan singgungan jadwal, transaksi langsung digagalkan sebelum data tersimpan." |
 | *"Mengapa validasi jam 07:00-20:00 dan kelipatan 30 menit tidak cukup divalidasi di form HTML saja?"* | "Validasi klien (HTML) hanya untuk kenyamanan pengguna (*User Experience*), tetapi sangat mudah dimanipulasi melalui inspect element browser atau tools seperti Postman. Oleh karena itu, sistem menerapkan kebijakan *Zero Trust* dengan memvalidasi ulang secara mutlak di sisi server menggunakan *Regular Expression* pada `StoreReservationRequest`." |
-| *"Bagaimana Anda menjamin mahasiswa A tidak bisa melihat riwayat peminjaman mahasiswa B?"* | "Kami menerapkan isolasi data ketat (*Data Scoping*) pada method `history()`. Kueri penarikan data tabel `reservations` secara mutlak dibatasi oleh klausa `where('user_id', Auth::id())`, sehingga data yang ditarik dari database dijamin 100% eksklusif milik akun pengguna yang sedang login." |
+| *"Bagaimana Anda menjamin mahasiswa A tidak bisa membatalkan tiket reservasi milik mahasiswa B?"* | "Kami menerapkan validasi kepemilikan mutlak (*Strict Ownership*) pada `ReservationController@cancel`. Sistem memeriksa apakah `reservation->user_id === Auth::id()`. Jika terjadi ketidakcocokan, sistem langsung melempar exception `abort(403, 'Akses Ditolak')`." |
+| *"Bagaimana cara kerja validasi batas H-1 pembatalan reservasi?"* | "Kami menggabungkan `reservation_date` dan `start_time` menjadi satu objek `Carbon`, kemudian menghitung selisih waktu detik dengan `now()`. Jika sisa waktu menuju jam mulai acara kurang dari 86.400 detik (24 jam), sistem menolak pembatalan dengan pesan validasi bahwa batas waktu pembatalan mandiri telah berakhir." |
 | *"Apa strategi Anda untuk mencegah aplikasi lambat saat data reservasi mencapai ribuan?"* | "Pertama, kami menerapkan *Eager Loading* `with(['facility', 'reviewer'])` untuk mengeliminasi masalah *N+1 query*. Kedua, tabel `reservations` telah dipasangi indeks komposit `idx_res_facility_date_status` pada migrasi database. Ketiga, antarmuka riwayat dibatasi menggunakan paginasi 10 baris per halaman." |
