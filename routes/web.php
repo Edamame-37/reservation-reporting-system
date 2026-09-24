@@ -74,6 +74,10 @@ Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagemen
 // FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
 Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
+// ROUTE: Menerima POST request pendaftaran internal oleh Admin
+Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-pengguna');
+
 // ROUTE: Menerima GET request ke '/admin/facility-master'
 // FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
 Route::get('/admin/facility-master', function () {
