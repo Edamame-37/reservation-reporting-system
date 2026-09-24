@@ -76,7 +76,7 @@ Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagement
 
 // ROUTE: Menerima POST request pendaftaran internal oleh Admin
 Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
-Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-pengguna');
+Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
 
 // ROUTE: Menerima GET request ke '/admin/facility-master'
 // FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
