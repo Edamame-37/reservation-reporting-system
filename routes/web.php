@@ -54,6 +54,8 @@ Route::get('/public/availability', function () {
 |--------------------------------------------------------------------------
 */
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
 // ROUTE: Menerima GET request ke '/admin/dashboard'
 // FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -101,6 +103,7 @@ Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'expo
 // ROUTE ALIAS: Kompatibilitas tautan mockup ekspor laporan statuter pada antarmuka admin
 Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.reports.export-excel');
 Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
+});
 
 /*
 |--------------------------------------------------------------------------
