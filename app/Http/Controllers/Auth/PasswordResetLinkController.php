@@ -40,14 +40,14 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        /*
-        // [MOCKUP MODE] Kueri database dinonaktifkan sementara:
         $status = Password::sendResetLink(
             $request->only('email')
         );
-        */
 
-        return back()->with('status', 'Tautan simulasi reset password berhasil dikirim ke email Anda (Mode Mockup).');
+        return $status == Password::RESET_LINK_SENT
+                    ? back()->with('status', __($status))
+                    : back()->withInput($request->only('email'))
+                            ->withErrors(['email' => __($status)]);
     }
 }
 

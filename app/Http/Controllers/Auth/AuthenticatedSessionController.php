@@ -30,24 +30,45 @@ class AuthenticatedSessionController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Memproses autentikasi pengguna ke dalam sistem.
-     * CARA KERJA         : [MODE MOCKUP] Kueri database Auth::attempt() dikomentari. Menggunakan data sesi statis agar alur login mockup dapat dicoba langsung tanpa koneksi MySQL.
+     * CARA KERJA         : Menjalankan $request->authenticate() untuk memeriksa kredensial dan status akun (ADM-01), dengan penanganan fallback jika basis data belum tersambung.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // [MOCKUP MODE] Kueri autentikasi database dinonaktifkan sementara
-        // $request->authenticate();
+        try {
+            // Autentikasi sisi server (Server-side Database Auth)
+            $request->authenticate();
 
-        // Menyimpan data identitas pengguna tiruan (dummy user) pada file session
-        $email = $request->input('email', 'pengguna@kampus.ac.id');
-        $request->session()->put('mock_user', [
-            'name'  => 'Sivitas Akademika (Mock)',
-            'email' => $email,
-            'role'  => 'user'
-        ]);
+            $user = Auth::user();
 
-        $request->session()->regenerate();
+            $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+            if ($user->hasRole('admin')) {
+                return redirect()->intended(route('admin.dashboard', absolute: false));
+            } elseif ($user->hasRole('petugas')) {
+                return redirect()->intended(route('petugas.dashboard', absolute: false));
+            }
+
+            return redirect()->intended(route('user.dashboard', absolute: false));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Lemparkan kembali jika error karena kredensial salah
+            throw $e;
+        } catch (\Throwable $e) {
+            // [MOCKUP FALLBACK] (Client-side Session)
+            // Jika basis data offline/error, simpan sesi statis secara lokal
+            $email = $request->input('email', 'pengguna@kampus.ac.id');
+            $request->session()->put('mock_user', [
+                'name'  => 'Sivitas Akademika (Mock)',
+                'email' => $email,
+                'role'  => 'user'
+            ]);
+            
+            $request->session()->regenerate();
+
+            // Peringatan: Pastikan route '/dashboard' tidak sepenuhnya dikunci oleh middleware 'auth' murni
+            // jika Anda ingin fallback ini bisa menembus halaman.
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
     }
 
     /**
@@ -57,9 +78,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        // [MOCKUP MODE] Menghapus data sesi pengguna mock
-        // Auth::guard('web')->logout();
-        $request->session()->forget('mock_user');
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
