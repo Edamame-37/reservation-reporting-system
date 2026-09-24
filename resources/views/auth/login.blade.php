@@ -47,20 +47,20 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center justify-between mt-6 gap-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    Lupa password?
+                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
+                    Lupa<br>password?
                 </a>
             @endif
 
-            <x-primary-button class="ms-3 w-full">
+            <x-primary-button class="w-full flex-1 max-w-[200px]">
                 Masuk
             </x-primary-button>
         </div>
         
-        <div class="mt-4 text-center">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">Daftar sekarang</a></p>
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-[#7C3AED] hover:text-[#6D28D9]">Daftar sekarang</a></p>
         </div>
     </form>
 </x-guest-layout>

@@ -77,13 +77,13 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-6">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Sudah punya akun?') }}
+        <div class="flex flex-row items-center justify-between mt-8 gap-4">
+            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
+                Sudah punya<br>akun?
             </a>
 
-            <x-primary-button class="ms-4">
-                {{ __('Daftar & Ajukan Verifikasi') }}
+            <x-primary-button class="w-full flex-1 max-w-[240px] text-center">
+                <span class="w-full block text-center">DAFTAR & AJUKAN<br>VERIFIKASI</span>
             </x-primary-button>
         </div>
     </form>
