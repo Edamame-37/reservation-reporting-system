@@ -9,7 +9,6 @@
     <div x-data="{
         currentTab: 'verification',
         searchQuery: '',
-        roleFilter: 'all',
         showAddPetugasModal: false,
         showAddPenggunaModal: false,
         showRejectModal: false,
@@ -33,11 +32,11 @@
             </div>
 
             <div class="flex items-center gap-2.5">
-                <button type="button" @click="showAddPetugasModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm transition-all">
+                <button type="button" @click="showAddPetugasModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">badge</span>
                     <span>+ Akun Petugas (UR13)</span>
                 </button>
-                <button type="button" @click="showAddPenggunaModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light shadow-sm transition-all">
+                <button type="button" @click="showAddPenggunaModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-sm transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">person_add</span>
                     <span>+ Akun Pengguna (UR14)</span>
                 </button>
@@ -77,7 +76,7 @@
 
         {{-- Stat Summary Pills --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button @click="currentTab = 'verification'" class="p-4 rounded-2xl border text-left transition-all" :class="currentTab === 'verification' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
+            <button @click="currentTab = 'verification'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'verification' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-semibold uppercase tracking-wider text-amber-800">Antrean Verifikasi (UR15)</span>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-200 text-amber-900">Perlu Tindakan</span>
@@ -86,7 +85,7 @@
                 <p class="text-xs text-amber-700 mt-1">Registrasi mandiri mahasiswa & dosen menunggu validasi berkas identitas</p>
             </button>
 
-            <button @click="currentTab = 'sivitas'" class="p-4 rounded-2xl border text-left transition-all" :class="currentTab === 'sivitas' ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
+            <button @click="currentTab = 'sivitas'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'sivitas' ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-semibold uppercase tracking-wider text-blue-800">Total Sivitas Terdaftar</span>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800">Aktif</span>
@@ -95,7 +94,7 @@
                 <p class="text-xs text-slate-500 mt-1">Akun mahasiswa, dosen, dan staf aktif yang terotorisasi di sistem</p>
             </button>
 
-            <button @click="currentTab = 'petugas'" class="p-4 rounded-2xl border text-left transition-all" :class="currentTab === 'petugas' ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
+            <button @click="currentTab = 'petugas'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'petugas' ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-semibold uppercase tracking-wider text-emerald-800">Petugas Sarpras (UR13)</span>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Zona Aktif</span>
@@ -111,15 +110,15 @@
             <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 {{-- Segmented Tabs --}}
                 <div class="inline-flex p-1 rounded-xl bg-slate-100 text-xs font-semibold">
-                    <button @click="currentTab = 'verification'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5" :class="currentTab === 'verification' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <button @click="currentTab = 'verification'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'verification' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">how_to_reg</span>
                         <span>Verifikasi Akun ({{ $pendingCount }})</span>
                     </button>
-                    <button @click="currentTab = 'sivitas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5" :class="currentTab === 'sivitas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <button @click="currentTab = 'sivitas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'sivitas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">group</span>
                         <span>Sivitas Terdaftar ({{ $sivitasCount }})</span>
                     </button>
-                    <button @click="currentTab = 'petugas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5" :class="currentTab === 'petugas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <button @click="currentTab = 'petugas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'petugas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">badge</span>
                         <span>Petugas Sarpras ({{ $petugasCount }})</span>
                     </button>
@@ -129,7 +128,7 @@
                 <div class="flex items-center gap-2.5">
                     <div class="relative w-full sm:w-64">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
-                        <input type="text" x-model="searchQuery" placeholder="Cari nama, NIM, email..." class="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-navy focus:outline-none transition-colors">
+                        <input type="text" x-model="searchQuery" placeholder="Cari nama, NIM/NIP, email..." class="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-navy focus:outline-none transition-colors">
                     </div>
                 </div>
             </div>
@@ -216,9 +215,9 @@
                             <th class="py-3 px-4">Role Sivitas</th>
                             <th class="py-3 px-4">NIM / NIP</th>
                             <th class="py-3 px-4">Email Kampus</th>
-                            <th class="py-3 px-4">Reservasi Dibuat</th>
+                            <th class="py-3 px-4">Departemen / Prodi</th>
                             <th class="py-3 px-4">Status Akun</th>
-                            <th class="py-3 px-5 text-right">Aksi</th>
+                            <th class="py-3 px-5 text-right">Otorisasi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -266,9 +265,9 @@
                             <th class="py-3 px-4">NIP</th>
                             <th class="py-3 px-4">Zona Penugasan</th>
                             <th class="py-3 px-4">Email Resmi</th>
-                            <th class="py-3 px-4">Beban Tiket Kerusakan</th>
+                            <th class="py-3 px-4">Tanggal Pendaftaran</th>
                             <th class="py-3 px-4">Status Akun</th>
-                            <th class="py-3 px-5 text-right">Aksi</th>
+                            <th class="py-3 px-5 text-right">Otorisasi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -307,7 +306,7 @@
                 </table>
             </div>
 
-            {{-- Footer Pagination / Info --}}
+            {{-- Footer Info --}}
             <div class="p-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-slate-500 gap-2">
                 <div>Menampilkan data dinamis terverifikasi dari basis data</div>
             </div>
@@ -319,34 +318,34 @@
           KEGUNAAN     : Menyediakan formulir pembuatan akun petugas oleh Super Admin.
         -->
         <div x-show="showAddPetugasModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-            <div @click.away="showAddPetugasModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-slate-200 flex flex-col gap-4">
+            <div @click.away="showAddPetugasModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 flex flex-col gap-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div class="flex items-center gap-2 text-navy">
+                    <div class="flex items-center gap-2 text-slate-900">
                         <span class="material-symbols-outlined text-[22px]">badge</span>
                         <h3 class="font-bold text-base">Daftarkan Petugas Sarpras Baru (UR13)</h3>
                     </div>
-                    <button type="button" @click="showAddPetugasModal = false" class="text-slate-400 hover:text-slate-600">
+                    <button type="button" @click="showAddPetugasModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                         <span class="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
 
                 {{-- ROUTE: POST /admin/users/create-petugas (UR13) --}}
-                <form action="{{ url('/admin/users/create-petugas') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.users.create-petugas') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
                         <div class="font-semibold mb-0.5">Ketentuan Sistem UR13:</div>
-                        Petugas sarpras mutlak didaftarkan langsung oleh Super Admin dan tidak membuka pendaftaran mandiri publik demi integritas validasi gedung.
+                        Petugas sarpras didaftarkan langsung oleh Super Admin tanpa jalur pendaftaran publik demi integritas keamanan fasilitas kampus.
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-name">Nama Lengkap Petugas</label>
-                        <input type="text" id="pet-name" name="name" required placeholder="Contoh: Bambang Setyawan, A.Md." class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <input type="text" id="pet-name" name="name" required placeholder="Contoh: Bambang Setyawan, A.Md." class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-nip">NIP Petugas</label>
-                            <input type="text" id="pet-nip" name="nip" required placeholder="198402122010011002" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                            <input type="text" id="pet-nip" name="nip" required placeholder="198402122010011002" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-zone">Zona Penugasan</label>
@@ -360,12 +359,24 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-email">Email Resmi Sarpras</label>
-                        <input type="email" id="pet-email" name="email" required placeholder="bambang.sarpras@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <input type="email" id="pet-email" name="email" required placeholder="bambang.sarpras@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="pet-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="pet-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
                     </div>
 
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" @click="showAddPetugasModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light shadow-sm transition-colors">Simpan Akun Petugas</button>
+                        <button type="button" @click="showAddPetugasModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-md transition-all cursor-pointer">Simpan Akun Petugas</button>
                     </div>
                 </form>
             </div>
@@ -377,19 +388,19 @@
           KEGUNAAN     : Menyediakan formulir pembuatan akun mahasiswa/dosen langsung oleh Admin tanpa antrean pending.
         -->
         <div x-show="showAddPenggunaModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-            <div @click.away="showAddPenggunaModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-slate-200 flex flex-col gap-4">
+            <div @click.away="showAddPenggunaModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 flex flex-col gap-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div class="flex items-center gap-2 text-navy">
+                    <div class="flex items-center gap-2 text-slate-900">
                         <span class="material-symbols-outlined text-[22px]">person_add</span>
                         <h3 class="font-bold text-base">Daftarkan Akun Pengguna Langsung (UR14)</h3>
                     </div>
-                    <button type="button" @click="showAddPenggunaModal = false" class="text-slate-400 hover:text-slate-600">
+                    <button type="button" @click="showAddPenggunaModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                         <span class="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
 
                 {{-- ROUTE: POST /admin/users/create-user (UR14) --}}
-                <form action="{{ url('/admin/users/create-user') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.users.create-user') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs text-blue-800">
                         <div class="font-semibold mb-0.5">Bypass Verifikasi (UR14):</div>
@@ -398,32 +409,49 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-name">Nama Lengkap Sivitas</label>
-                        <input type="text" id="usr-name" name="name" required placeholder="Contoh: Dimas Pratama" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <input type="text" id="usr-name" name="name" required placeholder="Contoh: Dimas Pratama" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-role">Peran Sivitas</label>
-                            <select id="usr-role" name="role_type" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                            <select id="usr-role" name="role_type" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
                                 <option value="mahasiswa">Mahasiswa</option>
                                 <option value="dosen">Dosen Tetap</option>
-                                <option value="staf">Staf Akademik / BEM</option>
+                                <option value="staf">Staf Akademik / Tendik</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-id">NIM / NIP</label>
-                            <input type="text" id="usr-id" name="identifier" required placeholder="2110512044" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                            <input type="text" id="usr-id" name="identifier" required placeholder="2110512044" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
                         </div>
                     </div>
 
                     <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-department">Fakultas / Program Studi (Opsional)</label>
+                        <input type="text" id="usr-department" name="department" placeholder="Contoh: Fakultas Teknik / Informatika" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-email">Email Kampus (@univ.ac.id)</label>
-                        <input type="email" id="usr-email" name="email" required placeholder="pengguna@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <input type="email" id="usr-email" name="email" required placeholder="pengguna@univ.ac.id" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="usr-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-slate-900 focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-password">Password Sementara (Opsional)</label>
+                        <input type="password" id="usr-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
                     </div>
 
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" @click="showAddPenggunaModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light shadow-sm transition-colors">Simpan Akun Langsung</button>
+                        <button type="button" @click="showAddPenggunaModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-md transition-all cursor-pointer">Simpan Akun Langsung</button>
                     </div>
                 </form>
             </div>
@@ -470,8 +498,8 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                        <button type="button" @click="showRejectModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-sm transition-colors">Tolak Pendaftaran</button>
+                        <button type="button" @click="showRejectModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-sm transition-colors cursor-pointer">Tolak Pendaftaran</button>
                     </div>
                 </form>
             </div>

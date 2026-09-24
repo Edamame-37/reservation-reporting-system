@@ -1,17 +1,19 @@
 <?php
 /**
  * NAMA FILE    : AdminUserManagementController.php
- * FUNGSI       : Controller pengelola otorisasi dan verifikasi akun sivitas kampus (Konsol Admin)
- * DESKRIPSI    : Bertanggung jawab menangani antrean verifikasi akun baru status pending (UR15 / ADM-01), persetujuan aktivasi, penolakan registrasi, dan penyediaan dataset pengguna.
- * CARA KERJA   : Menerima HTTP Request terotentikasi Admin, berkomunikasi dengan Model User untuk membaca dan mengubah kolom status ('pending' -> 'active' / 'rejected').
+ * FUNGSI       : Controller pengelola otorisasi dan pembuatan akun internal (Konsol Admin)
+ * DESKRIPSI    : Bertanggung jawab menangani antrean verifikasi (ADM-01), persetujuan aktivasi, dan pendaftaran akun internal langsung aktif tanpa verifikasi mandiri (ADM-02).
+ * CARA KERJA   : Menerima HTTP Request terotentikasi Admin, memvalidasi payload, menyimpan kredensial ke database, dan mengubah status atau peran Spatie.
  */
 
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\RejectUserRequest;
+use App\Http\Requests\Admin\StoreInternalUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AdminUserManagementController extends Controller
@@ -126,5 +128,78 @@ class AdminUserManagementController extends Controller
         $user->save();
 
         return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : storeUser()
+     * KEGUNAAN           : Mendaftarkan akun internal baru (petugas atau pengguna) secara langsung oleh Super Admin (ADM-02).
+     * CARA KERJA         : Memvalidasi payload via StoreInternalUserRequest, memproteksi agar role admin dilarang, mengenkripsi password, menyimpan ke tabel users dengan status 'active' (bypass verifikasi), dan menyematkan peran Spatie.
+     */
+    public function storeUser(StoreInternalUserRequest $request): RedirectResponse
+    {
+        $roleInput = $request->input('role', $request->input('role_type', 'pengguna'));
+        $role = strtolower($roleInput);
+
+        // Edge Case: Proteksi larangan membuat akun Admin tambahan
+        if ($role === 'admin') {
+            return back()->withErrors(['role' => 'Pembuatan akun dengan peran Admin dilarang demi keamanan sistem.']);
+        }
+
+        $isPetugas = ($role === 'petugas');
+
+        // Pemetaan nomor identitas (NIP / NIM / Identifier)
+        $identityNumber = $request->input('identity_number', 
+            $isPetugas ? $request->input('nip') : $request->input('identifier')
+        );
+
+        // Pemetaan zona penugasan khusus petugas
+        $zone = $isPetugas ? $request->input('assignment_zone', $request->input('zone')) : null;
+
+        // Pemetaan peran basis data enum users
+        $dbRole = $isPetugas ? 'petugas' : (in_array($role, ['mahasiswa', 'dosen', 'staf']) ? $role : 'mahasiswa');
+
+        // Penentuan password (default 'password' jika tidak diisi)
+        $rawPassword = $request->filled('password') ? $request->input('password') : 'password';
+
+        // Pembuatan akun langsung aktif (bypass verifikasi)
+        $user = User::create([
+            'name'            => $request->input('name'),
+            'email'           => $request->input('email'),
+            'password'        => Hash::make($rawPassword),
+            'identity_number' => $identityNumber,
+            'role'            => $dbRole,
+            'department'      => $request->input('department', $isPetugas ? 'Unit Pelaksana Teknis Sarpras' : null),
+            'assignment_zone' => $zone,
+            'status'          => 'active',
+        ]);
+
+        // Penyematan peran otorisasi Spatie
+        $spatieRole = $isPetugas ? 'petugas' : 'pengguna';
+        $user->assignRole($spatieRole);
+
+        return back()->with('success', "Akun internal {$user->name} ({$spatieRole}) berhasil didaftarkan dan langsung aktif.");
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : storePetugas()
+     * KEGUNAAN           : Endpoint khusus penangkap formulir pendaftaran Petugas Sarpras (US-13).
+     * CARA KERJA         : Menginjeksi role 'petugas' ke request lalu mengeksekusi logika storeUser().
+     */
+    public function storePetugas(StoreInternalUserRequest $request): RedirectResponse
+    {
+        $request->merge(['role' => 'petugas']);
+        return $this->storeUser($request);
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : storePengguna()
+     * KEGUNAAN           : Endpoint khusus penangkap formulir pendaftaran Sivitas Langsung (US-14).
+     * CARA KERJA         : Mengambil role_type (mahasiswa/dosen/staf) lalu mengeksekusi logika storeUser().
+     */
+    public function storePengguna(StoreInternalUserRequest $request): RedirectResponse
+    {
+        $roleType = $request->input('role_type', 'mahasiswa');
+        $request->merge(['role' => $roleType]);
+        return $this->storeUser($request);
     }
 }

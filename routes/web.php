@@ -9,8 +9,10 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserManagementController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,7 +43,6 @@ Route::get('/petugas/report-management', function () { return view('petugas.repo
 
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
-Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -116,23 +117,25 @@ Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReserva
 |--------------------------------------------------------------------------
 */
 
-// ROUTE: Menerima GET request ke '/petugas/dashboard'
-// FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi
-Route::get('/petugas/dashboard', function () {
-    return view('petugas.dashboard');
-})->name('petugas.dashboard');
+Route::middleware(['auth', 'role:petugas'])->group(function () {
+    // ROUTE: Menerima GET request ke '/petugas/dashboard'
+    // FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi
+    Route::get('/petugas/dashboard', function () {
+        return view('petugas.dashboard');
+    })->name('petugas.dashboard');
 
-// ROUTE: Menerima GET request ke '/petugas/reservation-management'
-// FUNGSI: Menampilkan antarmuka persetujuan (approval) dan penolakan reservasi ruang
-Route::get('/petugas/reservation-management', function () {
-    return view('petugas.reservation-management');
-})->name('petugas.reservation-management');
+    // ROUTE: Menerima GET request ke '/petugas/reservation-management'
+    // FUNGSI: Menampilkan antarmuka persetujuan (approval) dan penolakan reservasi ruang
+    Route::get('/petugas/reservation-management', function () {
+        return view('petugas.reservation-management');
+    })->name('petugas.reservation-management');
 
-// ROUTE: Menerima GET request ke '/petugas/report-management'
-// FUNGSI: Menampilkan daftar tiket keluhan kerusakan aset/fasilitas untuk tindak lanjut
-Route::get('/petugas/report-management', function () {
-    return view('petugas.report-management');
-})->name('petugas.report-management');
+    // ROUTE: Menerima GET request ke '/petugas/report-management'
+    // FUNGSI: Menampilkan daftar tiket keluhan kerusakan aset/fasilitas untuk tindak lanjut
+    Route::get('/petugas/report-management', function () {
+        return view('petugas.report-management');
+    })->name('petugas.report-management');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -140,35 +143,37 @@ Route::get('/petugas/report-management', function () {
 |--------------------------------------------------------------------------
 */
 
-// ROUTE: Menerima GET request ke '/user/dashboard'
-// FUNGSI: Menampilkan dasbor riwayat aktif dan pintasan reservasi untuk mahasiswa/dosen
-Route::get('/user/dashboard', function () {
-    return view('user.dashboard');
-})->name('user.dashboard');
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
+    // ROUTE: Menerima GET request ke '/user/dashboard'
+    // FUNGSI: Menampilkan dasbor riwayat aktif dan pintasan reservasi untuk mahasiswa/dosen
+    Route::get('/user/dashboard', function () {
+        return view('user.dashboard');
+    })->name('user.dashboard');
 
-// ROUTE: Menerima GET request ke '/user/reservation-form'
-// FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru dengan data fasilitas aktif
-Route::get('/user/reservation-form', [ReservationController::class, 'create'])->name('user.reservation-form');
+    // ROUTE: Menerima GET request ke '/user/reservation-form'
+    // FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru dengan data fasilitas aktif
+    Route::get('/user/reservation-form', [ReservationController::class, 'create'])->name('user.reservation-form');
 
-// ROUTE: Menerima POST request ke '/user/reservations'
-// FUNGSI: Memproses penyimpanan pengajuan reservasi baru dan validasi anti-bentrok
-Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
+    // ROUTE: Menerima POST request ke '/user/reservations'
+    // FUNGSI: Memproses penyimpanan pengajuan reservasi baru dan validasi anti-bentrok
+    Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
 
-// ROUTE: Menerima GET request ke '/user/reservation-history'
-// FUNGSI: Menampilkan daftar riwayat pengajuan reservasi dan status verifikasi
-Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
+    // ROUTE: Menerima GET request ke '/user/reservation-history'
+    // FUNGSI: Menampilkan daftar riwayat pengajuan reservasi dan status verifikasi
+    Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
 
-// ROUTE: Menerima GET request ke '/user/report-form'
-// FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
-Route::get('/user/report-form', function () {
-    return view('user.report-form');
-})->name('user.report-form');
+    // ROUTE: Menerima GET request ke '/user/report-form'
+    // FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
+    Route::get('/user/report-form', function () {
+        return view('user.report-form');
+    })->name('user.report-form');
 
-// ROUTE: Menerima GET request ke '/user/report-history'
-// FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
-Route::get('/user/report-history', function () {
-    return view('user.report-history');
-})->name('user.report-history');
+    // ROUTE: Menerima GET request ke '/user/report-history'
+    // FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
+    Route::get('/user/report-history', function () {
+        return view('user.report-history');
+    })->name('user.report-history');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -177,14 +182,22 @@ Route::get('/user/report-history', function () {
 */
 
 // ROUTE: Menerima GET request ke '/dashboard'
-// FUNGSI: Mengarahkan pengguna langsung ke dasbor mockup tanpa hambatan middleware auth database
+// FUNGSI: Redirect dinamis berdasarkan role
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->hasRole('petugas')) {
+        return redirect()->route('petugas.dashboard');
+    }
     return redirect()->route('user.dashboard');
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
-// Rute Profil Pengguna (Disediakan opsi mock tanpa kueri database aktif)
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Rute Profil Pengguna
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 require __DIR__.'/auth.php';
