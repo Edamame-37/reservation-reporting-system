@@ -16,9 +16,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-slate-800 antialiased selection:bg-slate-800 selection:text-white">
-        <div class="min-h-screen flex w-full bg-slate-50 dark:bg-slate-900">
+        <div class="min-h-screen flex lg:justify-end w-full bg-slate-50 dark:bg-slate-900">
             <!-- Left Side: Cover Image & Branding (Hidden on mobile) -->
-            <div class="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
+            <div class="hidden lg:flex lg:w-1/2 lg:fixed lg:inset-y-0 lg:left-0 bg-slate-900 overflow-hidden items-center justify-center z-0">
                 <!-- Background Image -->
                 <div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay" style="background-image: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');"></div>
                 <!-- Gradient Overlay -->
