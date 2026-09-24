@@ -1,9 +1,9 @@
 <?php
 /**
  * NAMA FILE    : ReservationController.php
- * FUNGSI       : Controller Manajemen Pengajuan & Riwayat Reservasi Ruang Kampus
- * DESKRIPSI    : Menangani formulir permohonan reservasi sivitas (USR-01) serta penyajian dasbor riwayat peminjaman terisolasi per akun pengguna (USR-02).
- * CARA KERJA   : Menyediakan method create() untuk formulir, store() dengan validasi anti-bentrok, dan history() dengan kueri Eager Loading, filter status, pencarian, dan paginasi.
+ * FUNGSI       : Controller Manajemen Pengajuan & Transaksi Reservasi Ruang Kampus
+ * DESKRIPSI    : Menangani formulir pengajuan reservasi sivitas (Mahasiswa/Dosen/Staf), validasi bentrok jadwal (anti double-booking), dan pencatatan transaksi peminjaman.
+ * CARA KERJA   : Mengambil katalog fasilitas aktif untuk form, memvalidasi rentang waktu 30 menit (07:00-20:00 WIB), memeriksa overlap kueri pada database, dan menyimpan reservasi berstatus pending secara aman.
  */
 
 namespace App\Http\Controllers;
@@ -79,6 +79,7 @@ class ReservationController extends Controller
 
         // 5. Eksekusi Pengecekan Bentrok Jadwal dan Penyimpanan dalam Transaksi Database
         return DB::transaction(function () use ($validated, $facility, $userId, $totalSlots, $ticketCode, $request) {
+            // Cek apakah ada jadwal bersinggungan (overlap) yang TELAH DISETUJUI (status = approved)
             $overlapExists = Reservation::where('facility_id', $validated['facility_id'])
                 ->where('reservation_date', $validated['reservation_date'])
                 ->where('status', 'approved')
@@ -94,6 +95,7 @@ class ReservationController extends Controller
                     ->withErrors(['start_time' => 'Jadwal bentrok! Fasilitas "' . $facility->name . '" telah terisi oleh reservasi lain yang telah disetujui pada jam tersebut. Silakan pilih slot waktu lain.']);
             }
 
+            // Simpan data reservasi baru dengan status default 'pending'
             Reservation::create([
                 'ticket_code'        => $ticketCode,
                 'user_id'            => $userId,
@@ -115,12 +117,11 @@ class ReservationController extends Controller
 
     /**
      * FUNCTION/PROCEDURE : history()
-     * KEGUNAAN           : Menampilkan riwayat permohonan reservasi milik pengguna aktif secara dinamis (USR-02).
-     * CARA KERJA         : Mengisolasi kueri berdasarkan user_id, menjalankan Eager Loading relasi facility dan reviewer, menyaring status & kata kunci pencarian, serta menghitung badge count untuk tab filter.
+     * KEGUNAAN           : Menampilkan riwayat permohonan reservasi milik pengguna aktif.
+     * CARA KERJA         : Mengambil reservasi milik user yang sedang aktif beserta relasi fasilitas, diurutkan dari yang terbaru.
      */
-    public function history(Request $request): View
+    public function history(): View
     {
-        // 1. Tentukan ID Pengguna Pemohon (Isolasi Data Pribadi - BR-USR02-01)
         $userId = Auth::id();
         if (!$userId) {
             $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
