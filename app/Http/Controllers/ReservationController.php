@@ -23,8 +23,8 @@ class ReservationController extends Controller
 {
     /**
      * FUNCTION/PROCEDURE : create()
-     * KEGUNAAN           : Menampilkan halaman formulir pengajuan reservasi ruangan kampus.
-     * CARA KERJA         : Mengambil seluruh fasilitas aktif dari database, menangkap parameter facility_id dari URL (jika datang dari katalog), dan merender view user.reservation-form.
+     * KEGUNAAN           : Menampilkan halaman formulir pengajuan reservasi ruangan kampus (USR-01).
+     * CARA KERJA         : Mengambil seluruh fasilitas aktif dari database dan merender view user.reservation-form.
      */
     public function create(Request $request): View
     {
@@ -39,8 +39,8 @@ class ReservationController extends Controller
 
     /**
      * FUNCTION/PROCEDURE : store()
-     * KEGUNAAN           : Memvalidasi dan menyimpan transaksi permohonan reservasi baru ke basis data.
-     * CARA KERJA         : Menerapkan StoreReservationRequest, memastikan fasilitas aktif, memeriksa bentrok jadwal overlap dengan transaksi approved, membungkus penyimpanan dalam DB::transaction(), dan menerbitkan kode tiket unik.
+     * KEGUNAAN           : Memvalidasi dan menyimpan transaksi permohonan reservasi baru ke basis data (USR-01).
+     * CARA KERJA         : Menerapkan StoreReservationRequest, memastikan fasilitas aktif, memeriksa kueri bentrok overlap dengan jadwal approved, membungkus penyimpanan dalam DB::transaction(), dan menerbitkan kode tiket unik.
      */
     public function store(StoreReservationRequest $request): RedirectResponse
     {
@@ -128,11 +128,93 @@ class ReservationController extends Controller
             $userId = $defaultUser ? $defaultUser->id : 1;
         }
 
-        $reservations = Reservation::with(['facility', 'reviewer'])
-            ->where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // 2. Hitung Ringkasan Jumlah Tiket per Kategori Status (Untuk Tab Badges)
+        $counts = [
+            'all'       => Reservation::where('user_id', $userId)->count(),
+            'pending'   => Reservation::where('user_id', $userId)->where('status', 'pending')->count(),
+            'approved'  => Reservation::where('user_id', $userId)->where('status', 'approved')->count(),
+            'rejected'  => Reservation::where('user_id', $userId)->where('status', 'rejected')->count(),
+            'cancelled' => Reservation::where('user_id', $userId)->where('status', 'cancelled')->count(),
+        ];
 
-        return view('user.reservation-history', compact('reservations'));
+        // 3. Bangun Kueri dengan Eager Loading (Pencegahan Masalah N+1 - BR-USR02-06)
+        $query = Reservation::with(['facility', 'reviewer'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc');
+
+        // 4. Filter Berdasarkan Tab Status Aktif
+        $activeStatus = $request->query('status', 'all');
+        if ($activeStatus !== 'all' && in_array($activeStatus, ['pending', 'approved', 'rejected', 'cancelled', 'completed'])) {
+            $query->where('status', $activeStatus);
+        }
+
+        // 5. Filter Berdasarkan Pencarian Kata Kunci
+        $keyword = trim($request->query('search', ''));
+        if (!empty($keyword)) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('ticket_code', 'LIKE', '%' . $keyword . '%')
+                  ->orWhere('purpose', 'LIKE', '%' . $keyword . '%')
+                  ->orWhereHas('facility', function ($fQuery) use ($keyword) {
+                      $fQuery->where('name', 'LIKE', '%' . $keyword . '%')
+                             ->orWhere('building', 'LIKE', '%' . $keyword . '%');
+                  });
+            });
+        }
+
+        // 6. Paginasi Hasil Kueri (Maksimal 10 Baris per Halaman - BR-USR02-05)
+        $reservations = $query->paginate(10)->withQueryString();
+
+        return view('user.reservation-history', compact('reservations', 'counts', 'activeStatus', 'keyword'));
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : cancel()
+     * FITUR              : USR-03 - Pembatalan Reservasi Mandiri oleh Pengguna
+     * KEGUNAAN           : Membatalkan tiket permohonan reservasi dengan validasi batas waktu minimal H-1 (24 jam).
+     * CARA KERJA         :
+     *   1. Autentikasi & Otorisasi Kepemilikan (BR-USR03-01): Memastikan tiket milik pengguna aktif.
+     *   2. Validasi Kelayakan Status (BR-USR03-03): Hanya status 'pending' atau 'approved' yang boleh dibatalkan.
+     *   3. Validasi Batas Waktu H-1 (BR-USR03-02): Menghitung selisih waktu mulai kegiatan dengan waktu saat ini (>= 24 jam).
+     *   4. Mengubah status menjadi 'cancelled' dan mencatat keterangan pembatalan (BR-USR03-04 & BR-USR03-05).
+     *   5. Mengalihkan kembali pengguna dengan pesan notifikasi sukses.
+     */
+    public function cancel(Request $request, int|string $id): RedirectResponse
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
+            $userId = $defaultUser ? $defaultUser->id : 1;
+        }
+
+        $reservation = Reservation::findOrFail($id);
+
+        // 1. Otorisasi Kepemilikan (Strict Ownership - BR-USR03-01)
+        if ((int) $reservation->user_id !== (int) $userId) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk membatalkan tiket reservasi ini.');
+        }
+
+        // 2. Validasi Kelayakan Status (BR-USR03-03)
+        if (!in_array($reservation->status, ['pending', 'approved'])) {
+            return back()->withErrors([
+                'error' => 'Reservasi ini tidak dapat dibatalkan karena sudah dalam status ' . $reservation->status . '.',
+            ]);
+        }
+
+        // 3. Validasi Batas Waktu H-1 / 24 Jam (BR-USR03-02)
+        $resDateTime = Carbon::parse($reservation->reservation_date)->setTimeFromTimeString($reservation->start_time);
+        if (now()->diffInSeconds($resDateTime, false) < 86400) {
+            return back()->withErrors([
+                'error' => 'Pembatalan mandiri ditolak. Batas waktu pembatalan maksimal adalah H-1 (minimal 24 jam) sebelum acara dimulai.',
+            ]);
+        }
+
+        // 4. Update Status dan Alasan Pembatalan (BR-USR03-04 & BR-USR03-05)
+        $inputReason = trim($request->input('cancellation_reason', ''));
+        $reservation->status = 'cancelled';
+        $reservation->cancellation_reason = !empty($inputReason) ? $inputReason : 'Dibatalkan mandiri oleh pemohon.';
+        $reservation->save();
+
+        return redirect()->route('user.reservation-history')
+            ->with('success', "Tiket reservasi {$reservation->ticket_code} berhasil dibatalkan. Fasilitas telah dilepas kembali ke kalender ketersediaan.");
     }
 }

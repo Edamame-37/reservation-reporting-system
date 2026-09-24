@@ -86,4 +86,74 @@ class ReportController extends Controller
         return redirect()->route('user.report-history')
             ->with('success', "Laporan kerusakan berhasil dikirim dengan kode tiket {$reportCode}. Petugas sarpras akan segera menindaklanjuti pengaduan Anda.");
     }
+
+    /**
+     * FUNCTION/PROCEDURE : history()
+     * FITUR              : USR-05 - Pelacakan Status & Riwayat Laporan Pengguna
+     * KEGUNAAN           : Menampilkan daftar riwayat tiket kerusakan sarpras milik pengguna aktif dengan filter status dan pencarian dinamis.
+     * CARA KERJA         :
+     *   1. Mengidentifikasi ID pengguna aktif (dengan fallback ke pengguna default untuk pengujian/mockup).
+     *   2. Menghitung rekapitulasi status tiket (all, baru, diproses, selesai, ditolak) secara agregat.
+     *   3. Memfilter tiket berdasarkan status terpilih dan kata kunci pencarian (kode tiket, fasilitas, kategori, deskripsi).
+     *   4. Melakukan eager loading pada relasi 'facility' dan 'handler' untuk mengeliminasi problem kueri N+1.
+     *   5. Menyajikan data terpaginasi (10 baris per halaman) dengan mempertahankan query string URL.
+     */
+    public function history(Request $request): View
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
+            $userId = $defaultUser ? $defaultUser->id : 1;
+        }
+
+        // 1. Hitung badge akumulasi status dengan agregasi tunggal (BR-USR05-02)
+        $rawCounts = DamageReport::where('user_id', $userId)
+            ->selectRaw("
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'baru' THEN 1 END) as baru,
+                COUNT(CASE WHEN status = 'diproses' THEN 1 END) as diproses,
+                COUNT(CASE WHEN status = 'selesai' THEN 1 END) as selesai,
+                COUNT(CASE WHEN status = 'ditolak' THEN 1 END) as ditolak
+            ")->first();
+
+        $counts = [
+            'all'      => (int) ($rawCounts->total ?? 0),
+            'baru'     => (int) ($rawCounts->baru ?? 0),
+            'diproses' => (int) ($rawCounts->diproses ?? 0),
+            'selesai'  => (int) ($rawCounts->selesai ?? 0),
+            'ditolak'  => (int) ($rawCounts->ditolak ?? 0),
+        ];
+
+        // 2. Kueri data riwayat tiket laporan dengan isolasi user_id (BR-USR05-01)
+        $activeStatus = $request->query('status', 'all');
+        $keyword = $request->query('search', $request->query('keyword'));
+
+        $query = DamageReport::with(['facility', 'handler'])
+            ->where('user_id', $userId);
+
+        // Filter Status Tab (BR-USR05-02)
+        if ($activeStatus && $activeStatus !== 'all' && in_array($activeStatus, ['baru', 'diproses', 'selesai', 'ditolak'])) {
+            $query->where('status', $activeStatus);
+        }
+
+        // Filter Pencarian Kata Kunci (BR-USR05-04)
+        if (!empty($keyword)) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('report_code', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhere('category', 'like', "%{$keyword}%")
+                  ->orWhereHas('facility', function ($fq) use ($keyword) {
+                      $fq->where('name', 'like', "%{$keyword}%");
+                  });
+            });
+        }
+
+        // 3. Urutkan dari yang paling baru dan paginasi 10 baris (BR-USR05-03)
+        $reports = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('user.report-history', compact('reports', 'counts', 'activeStatus'));
+    }
 }
+

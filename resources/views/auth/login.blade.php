@@ -1,72 +1,73 @@
 <x-guest-layout>
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
     @if (session('success'))
         <div class="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 flex items-start gap-3">
             <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-                <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Pendaftaran Berhasil</h3>
+                <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Informasi</h3>
                 <p class="text-sm text-emerald-600 dark:text-emerald-400 mt-1">{{ session('success') }}</p>
             </div>
         </div>
     @endif
 
-    <!-- MOCKUP LOGIN INTERAKTIF BERBASIS ROLE (TANPA BACKEND) -->
-    <div x-data="{
-        selectedRole: 'user',
-        login() {
-            window.location.href = '/' + this.selectedRole + '/dashboard';
-        }
-    }" class="flex flex-col gap-space-md">
-
-    <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Mockup Login</h2>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">Pilih jenis *user* untuk masuk ke pratinjau dasbor.</p>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4">
-        <!-- Pengunjung -->
-        <a href="{{ route('home') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
-            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-            </div>
-            <div class="ms-4 text-left">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Pengunjung</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Lihat halaman publik & katalog fasilitas.</p>
-            </div>
-        </a>
-
-        <!-- Pengguna -->
-        <a href="{{ route('user.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
-            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            </div>
-            <div class="ms-4 text-left">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Pengguna (Sivitas)</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ajukan reservasi & laporkan kerusakan.</p>
-            </div>
-        </a>
-
-        <!-- Petugas -->
-        <a href="{{ route('petugas.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
-            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-            </div>
-            <div class="ms-4 text-left">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Petugas Sarpras</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Verifikasi antrean & ubah status kerusakan.</p>
-            </div>
-        </a>
-
-        <!-- Admin -->
-        <a href="{{ route('admin.dashboard') }}" class="group flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 cursor-pointer">
-            <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </div>
-            <div class="ms-4 text-left">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Administrator</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Kelola master data & ekspor laporan.</p>
-            </div>
+    <div class="mb-6">
+        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Kembali</span>
         </a>
     </div>
+
+    <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-4">
+        @csrf
+
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Masuk</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-2">Silakan masuk menggunakan kredensial Anda.</p>
+        </div>
+
+        <!-- Email Address -->
+        <div>
+            <x-input-label for="email" value="Email" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 font-medium" />
+        </div>
+
+        <!-- Password -->
+        <div class="mt-2">
+            <x-input-label for="password" value="Password" />
+            <x-text-input id="password" class="block mt-1 w-full"
+                            type="password"
+                            name="password"
+                            required autocomplete="current-password" />
+            <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 font-medium" />
+        </div>
+
+        <!-- Remember Me -->
+        <div class="block mt-2">
+            <label for="remember_me" class="inline-flex items-center">
+                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Ingat Saya</span>
+            </label>
+        </div>
+
+        <div class="flex flex-col items-center mt-6 gap-4">
+            <x-primary-button class="w-full justify-center max-w-[200px]">
+                Masuk
+            </x-primary-button>
+
+            @if (Route::has('password.request'))
+                <a class="underline text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 dark:focus:ring-offset-slate-800" href="{{ route('password.request') }}">
+                    Lupa password?
+                </a>
+            @endif
+        </div>
+        
+        <div class="mt-6 text-center">
+            <p class="text-sm text-slate-600 dark:text-slate-400">Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-slate-900 hover:text-slate-700">Daftar sekarang</a></p>
+        </div>
+    </form>
 </x-guest-layout>

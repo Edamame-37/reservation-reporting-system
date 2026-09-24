@@ -15,27 +15,107 @@
             '19:00', '19:30', '20:00'
         ];
 
-        // Format data fasilitas ke JSON untuk interaktivitas ringkasan instan via Alpine
+        // Format data fasilitas ke JSON untuk interaktivitas ringkasan instan dan 3 dropdown bertingkat
         $facilitiesMap = [];
+        $hierarchy = [];
+
         foreach ($facilities as $f) {
             $facilitiesMap[$f->id] = [
-                'name' => $f->name,
-                'building' => $f->building . ($f->floor_location ? ' - ' . $f->floor_location : ''),
+                'id'       => $f->id,
+                'code'     => $f->code,
+                'name'     => $f->name,
+                'building' => $f->building,
+                'floor'    => $f->floor_location ?? 'Lantai 1',
                 'capacity' => $f->capacity,
                 'category' => ucfirst($f->category),
+            ];
+
+            $bName = $f->building;
+            $floorName = 'Lantai 1';
+            if (preg_match('/Lantai\s*(\d+)/i', $f->floor_location ?? '', $matches)) {
+                $floorName = 'Lantai ' . $matches[1];
+            } elseif (!empty($f->floor_location)) {
+                $floorName = $f->floor_location;
+            }
+
+            if (!isset($hierarchy[$bName])) {
+                $hierarchy[$bName] = [];
+            }
+            if (!isset($hierarchy[$bName][$floorName])) {
+                $hierarchy[$bName][$floorName] = [];
+            }
+
+            $hierarchy[$bName][$floorName][] = [
+                'id'       => $f->id,
+                'code'     => $f->code,
+                'name'     => $f->name,
+                'capacity' => $f->capacity,
             ];
         }
 
         $initFacilityId = old('facility_id', $selectedFacilityId ?? ($facilities->first()->id ?? '1'));
+        $initFacility = $facilities->firstWhere('id', $initFacilityId) ?? $facilities->first();
+        $initBuilding = $initFacility ? $initFacility->building : (array_key_first($hierarchy) ?? '');
+
+        $initFloor = 'Lantai 1';
+        if ($initFacility && preg_match('/Lantai\s*(\d+)/i', $initFacility->floor_location ?? '', $matches)) {
+            $initFloor = 'Lantai ' . $matches[1];
+        } elseif ($initFacility && !empty($initFacility->floor_location)) {
+            $initFloor = $initFacility->floor_location;
+        }
     @endphp
 
     <div x-data="{
         submitting: false,
+        hierarchy: {{ json_encode($hierarchy) }},
+        facilitiesData: {{ json_encode($facilitiesMap) }},
+        selectedBuilding: '{{ $initBuilding }}',
+        selectedFloor: '{{ $initFloor }}',
         selectedFacilityId: '{{ $initFacilityId }}',
         selectedDate: '{{ old('reservation_date', date('Y-m-d', strtotime('+1 day'))) }}',
         selectedStart: '{{ old('start_time', '09:00') }}',
         selectedEnd: '{{ old('end_time', '11:00') }}',
-        facilitiesData: {{ json_encode($facilitiesMap) }},
+
+        get availableBuildings() {
+            return Object.keys(this.hierarchy);
+        },
+
+        get availableFloors() {
+            if (!this.selectedBuilding || !this.hierarchy[this.selectedBuilding]) {
+                return [];
+            }
+            return Object.keys(this.hierarchy[this.selectedBuilding]);
+        },
+
+        get availableRooms() {
+            if (!this.selectedBuilding || !this.selectedFloor || 
+                !this.hierarchy[this.selectedBuilding] || 
+                !this.hierarchy[this.selectedBuilding][this.selectedFloor]) {
+                return [];
+            }
+            return this.hierarchy[this.selectedBuilding][this.selectedFloor];
+        },
+
+        onBuildingChange() {
+            const floors = this.availableFloors;
+            if (floors.length > 0) {
+                this.selectedFloor = floors[0];
+                this.onFloorChange();
+            } else {
+                this.selectedFloor = '';
+                this.selectedFacilityId = '';
+            }
+        },
+
+        onFloorChange() {
+            const rooms = this.availableRooms;
+            if (rooms.length > 0) {
+                this.selectedFacilityId = String(rooms[0].id);
+            } else {
+                this.selectedFacilityId = '';
+            }
+        },
+
         get currentVenue() {
             return this.facilitiesData[this.selectedFacilityId] || {
                 name: 'Pilih Fasilitas Kampus',
@@ -102,18 +182,65 @@
             <div class="lg:col-span-7 flex flex-col gap-6">
                 {{-- Card Input Utama --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col gap-5">
-                    {{-- Pilihan Fasilitas --}}
+                    {{-- Pemilihan Fasilitas Bertingkat (Gedung -> Lantai -> Ruangan) --}}
                     <div>
-                        <label for="venue-select" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                            Pilih Fasilitas & Ruang Akademik <span class="text-rose-500">*</span>
-                        </label>
-                        <select name="facility_id" id="venue-select" x-model="selectedFacilityId" required class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border @error('facility_id') border-rose-400 bg-rose-50/50 @else border-slate-200 @enderror focus:border-slate-900 focus:bg-white focus:outline-none transition">
-                            @foreach ($facilities as $facility)
-                                <option value="{{ $facility->id }}" {{ (string)$initFacilityId === (string)$facility->id ? 'selected' : '' }}>
-                                    {{ $facility->name }} - {{ $facility->building }} (Kapasitas: {{ $facility->capacity }} Orang)
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                Pilih Fasilitas & Ruang Akademik <span class="text-rose-500">*</span>
+                            </label>
+                            <span class="text-[11px] text-slate-500 font-medium">Hierarki: Gedung ➔ Lantai ➔ Ruangan</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {{-- Dropdown 1: Pilih Gedung --}}
+                            <div>
+                                <label for="building-select" class="block text-[11px] font-bold text-slate-600 mb-1">
+                                    1. Gedung
+                                </label>
+                                <select id="building-select" 
+                                        x-model="selectedBuilding" 
+                                        @change="onBuildingChange()" 
+                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                    <template x-for="b in availableBuildings" :key="b">
+                                        <option :value="b" x-text="b" :selected="b === selectedBuilding"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Dropdown 2: Pilih Lantai --}}
+                            <div>
+                                <label for="floor-select" class="block text-[11px] font-bold text-slate-600 mb-1">
+                                    2. Lantai
+                                </label>
+                                <select id="floor-select" 
+                                        x-model="selectedFloor" 
+                                        @change="onFloorChange()" 
+                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                    <template x-for="fl in availableFloors" :key="fl">
+                                        <option :value="fl" x-text="fl" :selected="fl === selectedFloor"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Dropdown 3: Pilih Ruangan (Mengikat facility_id ke Form Request) --}}
+                            <div>
+                                <label for="venue-select" class="block text-[11px] font-bold text-slate-600 mb-1">
+                                    3. Ruangan
+                                </label>
+                                <select name="facility_id" 
+                                        id="venue-select" 
+                                        x-model="selectedFacilityId" 
+                                        required 
+                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-bold text-slate-900 border @error('facility_id') border-rose-400 bg-rose-50/50 @else border-slate-200 @enderror focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                    <template x-for="room in availableRooms" :key="room.id">
+                                        <option :value="String(room.id)" 
+                                                x-text="room.code + ' - ' + room.name + ' (' + room.capacity + ' org)'" 
+                                                :selected="String(room.id) === String(selectedFacilityId)">
+                                        </option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
                         @error('facility_id')
                             <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
                         @enderror
