@@ -77,12 +77,15 @@ Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagement
 // ROUTE: Menerima POST request pendaftaran internal oleh Admin
 Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
 Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
 
-// ROUTE: Menerima GET request ke '/admin/facility-master'
-// FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
-Route::get('/admin/facility-master', function () {
-    return view('admin.facility-master');
-})->name('admin.facility-master');
+// Master Fasilitas Routes
+Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
+Route::get('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
+Route::post('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'store'])->name('facilities.store');
+Route::put('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'update'])->name('facilities.update');
+Route::delete('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'destroy'])->name('facilities.destroy');
+Route::post('/admin/facilities/{facility}/toggle', [App\Http\Controllers\FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
 
 // ROUTE: Menerima GET request ke '/admin/export-report'
 // FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
