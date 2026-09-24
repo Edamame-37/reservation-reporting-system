@@ -28,16 +28,35 @@
         </div>
 
         {{-- Parameter Filter & Pencarian --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="relative w-full md:w-80">
+        <form method="GET" action="{{ route('public.catalog') }}" class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="relative w-full md:w-80" @click.away="showSuggestions = false">
                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
-                <input type="text" x-model="search" placeholder="Cari nama ruang, kode, gedung..." class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
+                <input type="text" name="search" x-model="search" @input.debounce.300ms="fetchSuggestions" @focus="search.length > 0 ? fetchSuggestions() : null" placeholder="Cari nama ruang, kode, gedung..." class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition" autocomplete="off">
+                
+                {{-- Dropdown Autocomplete --}}
+                <div x-show="showSuggestions" style="display: none;" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    <template x-if="isSearching">
+                        <div class="p-3 text-xs text-slate-500 text-center">Mencari...</div>
+                    </template>
+                    <template x-if="!isSearching && suggestions.length === 0 && search.trim() !== ''">
+                        <div class="p-3 text-xs text-slate-500 text-center">Tidak ditemukan.</div>
+                    </template>
+                    <template x-for="item in suggestions" :key="item.id">
+                        <div @click="openDetail(item)" class="p-3 border-b border-slate-50 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition">
+                            <div class="overflow-hidden">
+                                <div class="text-sm font-bold text-slate-800 truncate" x-text="item.name"></div>
+                                <div class="text-xs text-slate-500 truncate" x-text="item.building"></div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-semibold text-slate-600 uppercase ml-2 whitespace-nowrap" x-text="item.category"></span>
+                        </div>
+                    </template>
+                </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <div class="flex items-center gap-2">
                     <label for="filter-cat" class="text-xs font-semibold text-slate-500">Tipe:</label>
-                    <select id="filter-cat" x-model="selectedCategory" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
+                    <select id="filter-cat" name="category" x-model="selectedCategory" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
                         <option value="semua">Semua Tipe</option>
                         <option value="auditorium">Auditorium & Hall</option>
                         <option value="lab">Laboratorium</option>
@@ -49,7 +68,7 @@
 
                 <div class="flex items-center gap-2">
                     <label for="filter-bld" class="text-xs font-semibold text-slate-500">Gedung:</label>
-                    <select id="filter-bld" x-model="selectedBuilding" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
+                    <select id="filter-bld" name="building" x-model="selectedBuilding" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
                         <option value="semua">Semua Gedung</option>
                         <option value="Rektorat">Gedung Rektorat</option>
                         <option value="Lab Terpadu C">Gedung Lab Terpadu C</option>
@@ -58,21 +77,32 @@
                     </select>
                 </div>
 
-                <button type="button" @click="search = ''; selectedCategory = 'semua'; selectedBuilding = 'semua';" class="text-xs font-medium text-slate-500 hover:text-slate-900 underline px-1">
-                    Reset
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition">
+                    Cari
                 </button>
+                <a href="{{ route('public.catalog') }}" class="text-xs font-medium text-slate-500 hover:text-slate-900 underline px-1">
+                    Reset
+                </a>
             </div>
-        </div>
+        </form>
 
         {{-- Indikator Jumlah Data --}}
         <div class="flex items-center justify-between text-xs text-slate-500 mb-4 px-1">
-            <span>Menampilkan <strong class="text-slate-900" x-text="filteredVenues.length"></strong> fasilitas kampus</span>
+            <span>Menampilkan <strong class="text-slate-900" x-text="venues.length"></strong> fasilitas kampus</span>
             <span>Jam Operasional: 07:00 - 20:00 WIB</span>
         </div>
 
+        <template x-if="venues.length === 0">
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-12 shadow-xs text-center">
+                <span class="material-symbols-outlined text-[48px] text-slate-300 mb-3">search_off</span>
+                <h3 class="text-lg font-bold text-slate-800 mb-1">Fasilitas tidak ditemukan</h3>
+                <p class="text-sm text-slate-500">Tidak ada fasilitas yang cocok dengan kriteria pencarian Anda.</p>
+            </div>
+        </template>
+
         {{-- Grid Seluruh Fasilitas Kampus --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <template x-for="venue in filteredVenues" :key="venue.id">
+            <template x-for="venue in venues" :key="venue.id">
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2">
@@ -187,23 +217,44 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('catalogData', () => ({
-                search: '',
-                selectedCategory: 'semua',
-                selectedBuilding: 'semua',
+                search: '{{ request('search', '') }}',
+                selectedCategory: '{{ request('category', 'semua') }}',
+                selectedBuilding: '{{ request('building', 'semua') }}',
                 modalDetail: false,
                 activeVenue: null,
-                venues: @json($facilities),
-                get filteredVenues() {
-                    return this.venues.filter(v => {
-                        const matchSearch = v.name.toLowerCase().includes(this.search.toLowerCase()) || String(v.code).toLowerCase().includes(this.search.toLowerCase()) || v.building.toLowerCase().includes(this.search.toLowerCase());
-                        const matchCat = this.selectedCategory === 'semua' || v.category === this.selectedCategory;
-                        const matchBld = this.selectedBuilding === 'semua' || v.building.includes(this.selectedBuilding);
-                        return matchSearch && matchCat && matchBld;
-                    });
+                venues: @json($facilities), // Backend mem-filter ini
+                
+                // Autocomplete
+                suggestions: [],
+                showSuggestions: false,
+                isSearching: false,
+
+                async fetchSuggestions() {
+                    if (this.search.trim() === '') {
+                        this.suggestions = [];
+                        this.showSuggestions = false;
+                        return;
+                    }
+
+                    this.isSearching = true;
+                    this.showSuggestions = true;
+
+                    try {
+                        const response = await fetch(`/api/facilities/search?q=${encodeURIComponent(this.search)}`);
+                        if (response.ok) {
+                            this.suggestions = await response.json();
+                        }
+                    } catch (e) {
+                        console.error('Error fetching autocomplete', e);
+                    } finally {
+                        this.isSearching = false;
+                    }
                 },
+
                 openDetail(v) {
                     this.activeVenue = v;
                     this.modalDetail = true;
+                    this.showSuggestions = false;
                 }
             }));
         });
