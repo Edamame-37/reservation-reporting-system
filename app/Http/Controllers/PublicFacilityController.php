@@ -18,14 +18,36 @@ class PublicFacilityController extends Controller
     /**
      * Menampilkan katalog daftar fasilitas aktif.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil fasilitas kecuali yang berstatus nonaktif
-        $facilities = Facility::where('status', '!=', 'nonaktif')
-            ->orderBy('name', 'asc')
+        $query = Facility::where('status', '!=', 'nonaktif');
+
+        // Filter berdasarkan kata kunci multi-kolom
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('code', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('description', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('building', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('equipment', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Filter tipe ruangan
+        if ($request->filled('category') && $request->category !== 'semua') {
+            $query->where('category', $request->category);
+        }
+
+        // Filter gedung
+        if ($request->filled('building') && $request->building !== 'semua') {
+            $query->where('building', 'LIKE', '%' . $request->building . '%');
+        }
+
+        // Ambil data yang lolos filter
+        $facilities = $query->orderBy('name', 'asc')
             ->get()
             ->map(function ($f) {
-                // Sesuaikan format data untuk Alpine.js Frontend (mirip dengan mockup sebelumnya)
                 return [
                     'id' => $f->id,
                     'code' => $f->code,
@@ -141,5 +163,42 @@ class PublicFacilityController extends Controller
             'status' => 'success',
             'data' => $bookedSlots
         ]);
+    }
+
+    /**
+     * Endpoint API: Mencari fasilitas secara spesifik untuk fitur autocomplete
+     */
+    public function autocomplete(Request $request)
+    {
+        $query = Facility::where('status', '!=', 'nonaktif');
+
+        if ($request->filled('q')) {
+            $searchTerm = $request->q;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('code', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('description', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('building', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('equipment', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Limit data to prevent huge payload on live search
+        $results = $query->take(5)->get()->map(function($f) {
+            return [
+                'id' => $f->id,
+                'code' => $f->code,
+                'name' => $f->name,
+                'category' => strtolower($f->category ?? 'umum'),
+                'building' => $f->building . ($f->floor_location ? ' (Lt. ' . $f->floor_location . ')' : ''),
+                'capacity' => $f->capacity,
+                'status' => $f->status === 'dalam perbaikan' ? 'locked' : 'approved',
+                'equipment' => is_array($f->equipment) ? $f->equipment : (json_decode($f->equipment, true) ?? []),
+                'desc' => $f->description,
+                'image' => $f->image_path
+            ];
+        });
+
+        return response()->json($results);
     }
 }

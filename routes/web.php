@@ -52,6 +52,9 @@ Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMat
 // API ROUTE: Menarik status ketersediaan spesifik 1 fasilitas pada tanggal tertentu (Sesuai Blueprint PUB-01)
 Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
+// API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
+Route::get('/api/facilities/search', [PublicFacilityController::class, 'autocomplete'])->name('api.facilities.search');
+
 /*
 |--------------------------------------------------------------------------
 | Konsol Biro Sarpras (Super Admin)
