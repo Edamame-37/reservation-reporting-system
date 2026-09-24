@@ -30,8 +30,8 @@ beforeEach(function () {
     $this->facility = Facility::firstOrCreate(
         ['name' => 'Lab Komputasi Cloud & Jaringan'],
         [
-            'facility_code'   => 'FAC-LAB-01',
-            'type'            => 'laboratorium',
+            'code'            => 'FAC-LAB-01',
+            'category'        => 'laboratorium',
             'building'        => 'Gedung C Lt. 2',
             'floor_location'  => 'Lantai 2 Ruang 204',
             'capacity'        => 35,
