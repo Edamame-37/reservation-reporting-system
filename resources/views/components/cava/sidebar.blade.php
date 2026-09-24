@@ -162,9 +162,14 @@
         @endif
     </nav>
 
-    {{-- Footer Sidebar: Keluar Sesi --}}
+    {{-- Footer Sidebar: Akses Profil & Keluar Sesi --}}
     <div class="p-3 border-t border-slate-100 bg-slate-50/50">
         @if($role !== 'public')
+            <a href="{{ route('profile.edit') }}" class="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+                <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+                <span>Pengaturan Profil</span>
+            </a>
+            
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition">
