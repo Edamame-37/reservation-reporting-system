@@ -47,8 +47,6 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed'],
         ]);
 
-        /*
-        // [MOCKUP MODE] Kueri database dinonaktifkan sementara:
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -60,9 +58,11 @@ class NewPasswordController extends Controller
                 event(new PasswordReset($user));
             }
         );
-        */
 
-        return redirect()->route('login')->with('status', 'Kata sandi berhasil diperbarui (Mode Mockup). Silakan masuk.');
+        return $status == Password::PASSWORD_RESET
+                    ? redirect()->route('login')->with('status', __($status))
+                    : back()->withInput($request->only('email'))
+                            ->withErrors(['email' => __($status)]);
     }
 }
 

@@ -102,10 +102,10 @@ Gunakan dokumen ini sebagai daftar periksa (*checklist*) progres pengerjaan sist
 ## Tahap 7: Modul Pelaporan & Ekspor Data (*Analytics*)
 *Fitur untuk kebutuhan dokumen manajemen.*
 
-- [ ] `[Frontend]` **Dasbor Statistik Admin:** Merancang tampilan *chart* atau angka rekapitulasi okupansi (jumlah peminjaman per fasilitas) dan frekuensi kerusakan.
-- [ ] `[Backend]` **Fitur Unduh (Export):**
-  - [ ] `[Backend]` Logika integrasi *Laravel Excel* untuk mencetak data CSV.
-  - [ ] `[Backend]` Logika integrasi *DomPDF* untuk mencetak tampilan tabel HTML menjadi *file* PDF laporan resmi.
+- [x] `[Frontend]` **Dasbor Statistik Admin:** Merancang tampilan *chart* atau angka rekapitulasi okupansi (jumlah peminjaman per fasilitas) dan frekuensi kerusakan.
+- [x] `[Backend]` **Fitur Unduh (Export):**
+  - [x] `[Backend]` Logika integrasi *Laravel Excel* untuk mencetak data CSV.
+  - [x] `[Backend]` Logika integrasi *DomPDF* untuk mencetak tampilan tabel HTML menjadi *file* PDF laporan resmi.
 
 ---
 

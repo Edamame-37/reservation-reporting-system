@@ -15,6 +15,7 @@
             '19:00', '19:30', '20:00'
         ];
 
+        // Format data fasilitas ke JSON untuk interaktivitas ringkasan instan via Alpine
         $facilitiesMap = [];
         foreach ($facilities as $f) {
             $facilitiesMap[$f->id] = [
