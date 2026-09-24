@@ -1,4 +1,4 @@
-# 04. Package Diagram
+# Package Diagram
 
 ## Tujuan
 Memberikan ilustrasi kepada *programmer* baru mengenai hierarki sistem map folder, khususnya pada arsitektur MVC (Model-View-Controller) Laravel yang digunakan di CAVA.

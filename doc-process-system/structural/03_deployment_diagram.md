@@ -1,4 +1,4 @@
-# 03. Deployment Diagram
+# Deployment Diagram
 
 ## Tujuan
 Memetakan topologi fisik atau arsitektur eksekusi di lingkungan produksi. Ini menunjukkan *di mana* tepatnya komponen (*artifacts*) di-deploy pada perangkat keras (*nodes*).

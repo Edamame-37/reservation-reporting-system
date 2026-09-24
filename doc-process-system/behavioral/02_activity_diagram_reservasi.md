@@ -1,4 +1,4 @@
-# 06. Activity Diagram (Alur Reservasi CAVA)
+# Activity Diagram (Alur Reservasi CAVA)
 
 ## Tujuan
 Memodelkan logika prosedural, *workflow* operasional, dan arah pergerakan aktivitas dari awal pengguna masuk hingga reservasi selesai.

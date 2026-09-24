@@ -1,4 +1,4 @@
-# 11. BPMN: Verifikasi Keanggotaan Pendaftar (Admin Process)
+# BPMN: Verifikasi Keanggotaan Pendaftar (Admin Process)
 
 ## Tujuan
 Memvisualisasikan alur bisnis pendaftaran (*onboarding*) pengguna baru ke dalam platform CAVA. Karena sistem ini terbatas pada lingkup internal kampus, pendaftaran mandiri wajib di-validasi agar orang luar tidak menyusup.

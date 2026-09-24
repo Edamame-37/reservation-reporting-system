@@ -1,4 +1,4 @@
-# 10. Communication Diagram: Persetujuan Reservasi
+# Communication Diagram: Persetujuan Reservasi
 
 ## Tujuan
 Berbeda dengan Sequence Diagram yang memanjang ke bawah berdasarkan waktu, Communication Diagram fokus memetakan jarak koneksi spasial antar objek secara struktural (seperti jaring laba-laba).

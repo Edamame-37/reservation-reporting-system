@@ -1,4 +1,4 @@
-# 07. State Machine Diagram: Objek Reservasi
+# State Machine Diagram: Objek Reservasi
 
 ## Tujuan
 Memvisualisasikan seluruh kemungkinan fase (*states*) dari satu tiket Reservasi di *database*, serta kejadian/pemicu (*triggers*) apa saja yang mampu mengubah fase tersebut.

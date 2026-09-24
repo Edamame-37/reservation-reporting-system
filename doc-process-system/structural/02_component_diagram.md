@@ -1,4 +1,4 @@
-# 02. Component Diagram
+# Component Diagram
 
 ## Tujuan
 Memvisualisasikan pemecahan modul perangkat lunak (modularity) dalam sistem CAVA dan bagaimana tiap-tiap komponen berinteraksi atau bergantung pada komponen lainnya.

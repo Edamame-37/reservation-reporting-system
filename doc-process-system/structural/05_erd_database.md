@@ -1,4 +1,4 @@
-# 05. Entity Relationship Diagram (ERD)
+# Entity Relationship Diagram (ERD)
 
 ## Tujuan
 Memvisualisasikan struktur tabel, kolom, tipe data, dan hubungan (relasi/kardinalitas) antar entitas persisten di dalam basis data MySQL CAVA, sesuai dengan skema migrasi aktual.

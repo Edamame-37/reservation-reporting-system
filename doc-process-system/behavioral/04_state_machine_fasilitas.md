@@ -1,4 +1,4 @@
-# 08. State Machine Diagram: Objek Fasilitas
+# State Machine Diagram: Objek Fasilitas
 
 ## Tujuan
 Memetakan pergerakan status pada *Master Data* Ruangan/Aset, dan bagaimana aktivitas eksternal (seperti pelaporan kerusakan) mempengaruhi ketersediaan ruangan tersebut di kalender publik.

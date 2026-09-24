@@ -1,4 +1,4 @@
-# 01. Class Diagram (Sistem Reservasi & Pelaporan CAVA)
+# Class Diagram (Sistem Reservasi & Pelaporan CAVA)
 
 ## Tujuan
 Class diagram ini memetakan secara detail setiap model (entitas) utama yang digunakan di dalam sistem backend Laravel, beserta relasi dan hak akses pada atributnya. 

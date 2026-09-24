@@ -1,4 +1,4 @@
-# 05. Use Case Diagram
+# Use Case Diagram
 
 ## Tujuan
 Memvisualisasikan interaksi fungsionalitas (*Use Case*) dari sudut pandang para pengguna akhir (*Actors*) di batas sistem yang kita bangun.

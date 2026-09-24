@@ -1,4 +1,4 @@
-# 11. Interaction Overview Diagram: Pelaporan Kerusakan
+# Interaction Overview Diagram: Pelaporan Kerusakan
 
 ## Tujuan
 Menyatukan gambaran besar proses operasional bisnis (mirip Activity Diagram) namun menekankan bahwa tiap kotak proses tersebut adalah sebuah rangkaian "Interaction" atau komunikasi antar kelas di baliknya.

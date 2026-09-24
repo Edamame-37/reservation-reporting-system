@@ -1,4 +1,4 @@
-# 09. BPMN: Manajemen Reservasi Fasilitas (Core Process)
+# BPMN: Manajemen Reservasi Fasilitas (Core Process)
 
 ## Tujuan
 Memvisualisasikan alur bisnis (Business Process Model and Notation) paling utama di CAVA menggunakan partisi pihak yang terlibat (Pools & Lanes) dari awal form di-submit hingga tiket diterbitkan/ditolak.

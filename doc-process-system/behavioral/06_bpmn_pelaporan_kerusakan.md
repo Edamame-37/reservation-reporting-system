@@ -1,4 +1,4 @@
-# 10. BPMN: Pelaporan & Penanganan Kerusakan (Support Process)
+# BPMN: Pelaporan & Penanganan Kerusakan (Support Process)
 
 ## Tujuan
 Memvisualisasikan alur bisnis (Business Process Model and Notation) operasional lapangan, yang meliputi pelaporan insiden oleh mahasiswa dan penindaklanjutan perbaikan oleh teknisi (Petugas) sambil mengotomatisasikan status ketersediaan fasilitas (maintenance mode).

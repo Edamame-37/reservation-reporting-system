@@ -1,4 +1,4 @@
-# 09. Sequence Diagram: Reservasi Anti-Bentrok
+# Sequence Diagram: Reservasi Anti-Bentrok
 
 ## Tujuan
 Membedah alur waktu berjalannya kode secara sekuensial. Diagram ini dirancang sangat teknis khusus untuk *Backend Developer*, yang menyoroti pergerakan pesan dari lapisan `View` ke `Database` dan kembali.
