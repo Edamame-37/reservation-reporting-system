@@ -9,6 +9,7 @@
 use App\Http\Controllers\DashboardPetugasController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserManagementController;
+use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
@@ -122,9 +123,7 @@ Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReserva
 Route::middleware(['auth', 'role:petugas'])->group(function () {
     // ROUTE: Menerima GET request ke '/petugas/dashboard'
     // FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi
-    Route::get('/petugas/dashboard', function () {
-        return view('petugas.dashboard');
-    })->name('petugas.dashboard');
+    Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
 
     // ROUTE: Menerima GET request ke '/petugas/reservation-management'
     // FUNGSI: Menampilkan lembar kerja manajemen dan seluruh antrean persetujuan reservasi (PTG-02 / US-9)
@@ -162,9 +161,7 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
 Route::middleware(['auth', 'role:pengguna'])->group(function () {
     // ROUTE: Menerima GET request ke '/user/dashboard'
     // FUNGSI: Menampilkan dasbor riwayat aktif dan pintasan reservasi untuk mahasiswa/dosen
-    Route::get('/user/dashboard', function () {
-        return view('user.dashboard');
-    })->name('user.dashboard');
+    Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard');
 
     // ROUTE: Menerima GET request ke '/user/reservation-form'
     // FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru dengan data fasilitas aktif
