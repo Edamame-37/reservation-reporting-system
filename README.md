@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <h1>CAVA - Sistem Cerdas Reservasi</h1>
+  <h1>CAVA - Campus Venue Access</h1>
   <p>
     <strong>Platform terpadu untuk mengelola peminjaman ruang, fasilitas kampus, dan pelaporan kerusakan sarana prasarana secara cepat dan transparan.</strong>
   </p>
