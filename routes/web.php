@@ -6,7 +6,9 @@
  * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
  */
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserManagementController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
@@ -61,68 +63,53 @@ Route::get('/public/availability', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    // ROUTE: Menerima GET request ke '/admin/dashboard'
-    // FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+// ROUTE: Menerima GET request ke '/admin/dashboard'
+// FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-    // ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
-    // FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras
-    Route::get('/admin/user-management', [\App\Http\Controllers\AdminUserManagementController::class, 'index'])->name('admin.user-management');
-    Route::get('/admin/users', [\App\Http\Controllers\AdminUserManagementController::class, 'index'])->name('admin.users.index');
+// ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
+// FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras via AdminUserManagementController
+Route::get('/admin/user-management', [AdminUserManagementController::class, 'index'])->name('admin.user-management');
+Route::get('/admin/users', [AdminUserManagementController::class, 'index'])->name('admin.users.index');
 
-    // ROUTE: Menerima POST request ke '/admin/users'
-    // FUNGSI: Mendaftarkan akun internal (petugas/pengguna) secara langsung oleh Admin (ADM-02)
-    Route::post('/admin/users', [\App\Http\Controllers\AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
+// FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
+Route::match(['post', 'patch'], '/admin/users/{id}/verify', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
+Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.approve');
 
-    // ROUTE: Menerima POST request ke '/admin/users/create-petugas' (US-13 / ADM-02)
-    // FUNGSI: Endpoint penangkap modal pendaftaran akun Petugas Sarpras dengan zona penugasan
-    Route::post('/admin/users/create-petugas', [\App\Http\Controllers\AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/reject' beserta payload FormRequest (reason & notes)
+// FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
+Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
-    // ROUTE: Menerima POST request ke '/admin/users/create-user' (US-14 / ADM-02)
-    // FUNGSI: Endpoint penangkap modal pendaftaran akun Sivitas Akademika langsung aktif
-    Route::post('/admin/users/create-user', [\App\Http\Controllers\AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+// ROUTE: Menerima GET request ke '/admin/facility-master'
+// FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
+Route::get('/admin/facility-master', function () {
+    return view('admin.facility-master');
+})->name('admin.facility-master');
 
-    // ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
-    // FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
-    Route::match(['post', 'patch'], '/admin/users/{id}/verify', [\App\Http\Controllers\AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
-    Route::match(['post', 'patch'], '/admin/users/{id}/approve', [\App\Http\Controllers\AdminUserManagementController::class, 'verifyUser'])->name('admin.users.approve');
+// ROUTE: Menerima GET request ke '/admin/export-report'
+// FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
+Route::get('/admin/export-report', [ExportController::class, 'index'])->name('admin.export-report');
 
-    // ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/reject' beserta payload FormRequest (reason & notes)
-    // FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
-    Route::match(['post', 'patch'], '/admin/users/{id}/reject', [\App\Http\Controllers\AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
+// ROUTE: Menerima GET request ke '/admin/export/reservations/pdf'
+// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi reservasi format PDF landscape A4 (ADM-04 / UR17)
+Route::get('/admin/export/reservations/pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.export.reservations.pdf');
 
-    // ROUTE: Menerima GET request ke '/admin/facility-master'
-    // FUNGSI: Menampilkan tabel master data fasilitas dan agregat statistik inventaris kampus (ADM-03 / US-16)
-    Route::get('/admin/facility-master', [FacilityController::class, 'index'])->name('admin.facility-master');
+// ROUTE: Menerima GET request ke '/admin/export/reservations/excel'
+// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi peminjaman ruang format Excel/CSV (ADM-04 / UR17)
+Route::get('/admin/export/reservations/excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.export.reservations.excel');
 
-    // ROUTE: Rute resource manajemen fasilitas (index, create, store, edit, update, destroy)
-    // FUNGSI: Menyediakan endpoint RESTful siklus CRUD master data fasilitas kampus (ADM-03 / US-16)
-    Route::resource('admin/facilities', FacilityController::class)->except(['show']);
+// ROUTE: Menerima GET request ke '/admin/export/damage-reports/pdf'
+// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi kerusakan aset kampus format PDF landscape A4 (ADM-04 / UR17)
+Route::get('/admin/export/damage-reports/pdf', [ExportController::class, 'exportDamageReportsPdf'])->name('admin.export.damage-reports.pdf');
 
-    // ROUTE: Menerima POST request ke '/admin/facilities/{id}/toggle'
-    // FUNGSI: Mengubah status operasional fasilitas (aktif <-> dalam perbaikan) secara cepat (ADM-03 / US-16)
-    Route::post('/admin/facilities/{id}/toggle', [FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
+// ROUTE: Menerima GET request ke '/admin/export/damage-reports/excel'
+// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi keluhan kerusakan fasilitas format Excel/CSV (ADM-04 / UR17)
+Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'exportDamageReportsExcel'])->name('admin.export.damage-reports.excel');
 
-    // ROUTE: Menerima POST request ke '/admin/facilities/save' (Kompatibilitas Form Modal Mockup)
-    // FUNGSI: Menangani penyimpanan dari formulir modal yang mengirimkan ID tersembunyi (ADM-03 / US-16)
-    Route::post('/admin/facilities/save', function (Request $request, FacilityController $controller) {
-        if ($request->filled('id')) {
-            $updateRequest = app(\App\Http\Requests\Admin\UpdateFacilityRequest::class);
-            return $controller->update($updateRequest, $request->input('id'));
-        }
-        $storeRequest = app(\App\Http\Requests\Admin\StoreFacilityRequest::class);
-        return $controller->store($storeRequest);
-    })->name('admin.facilities.save');
-
-    // ROUTE: Menerima GET request ke '/admin/export-report'
-    // FUNGSI: Menampilkan antarmuka ekspor laporan resmi sarpras (PDF/Excel)
-    Route::get('/admin/export-report', function () {
-        return view('admin.export-report');
-    })->name('admin.export-report');
-});
+// ROUTE ALIAS: Kompatibilitas tautan mockup ekspor laporan statuter pada antarmuka admin
+Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.reports.export-excel');
+Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
 
 /*
 |--------------------------------------------------------------------------
