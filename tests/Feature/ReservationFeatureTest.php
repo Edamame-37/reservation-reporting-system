@@ -24,6 +24,7 @@ beforeEach(function () {
             'status'          => 'active',
         ]
     );
+    $this->user->syncRoles(['pengguna']);
 
     // Ambil atau buat fasilitas terstruktur A104
     $this->roomA104 = Facility::firstOrCreate(
@@ -73,9 +74,9 @@ test('USR-01: Pengguna berhasil mengajukan reservasi ruangan A104 (TC-USR01-02)'
     $this->assertDatabaseHas('reservations', [
         'user_id'          => $this->user->id,
         'facility_id'      => $this->roomA104->id,
-        'reservation_date' => $date,
-        'start_time'       => '09:00:00',
-        'end_time'         => '11:00:00',
+        'reservation_date' => $date . ' 00:00:00',
+        'start_time'       => '09:00',
+        'end_time'         => '11:00',
         'status'           => 'pending',
     ]);
 });
@@ -89,8 +90,8 @@ test('USR-01: Penolakan reservasi jika slot waktu jadwal bentrok dengan peminjam
         'user_id'            => $this->user->id,
         'facility_id'        => $this->roomA104->id,
         'reservation_date'   => $date,
-        'start_time'         => '09:00:00',
-        'end_time'           => '11:00:00',
+        'start_time'         => '09:00',
+        'end_time'           => '11:00',
         'total_slots'        => 4,
         'purpose'            => 'Kegiatan sebelumnya yang sudah disetujui',
         'participants_count' => 30,

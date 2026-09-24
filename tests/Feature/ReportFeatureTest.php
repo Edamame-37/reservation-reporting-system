@@ -25,13 +25,14 @@ beforeEach(function () {
             'status'          => 'active',
         ]
     );
+    $this->user->syncRoles(['pengguna']);
 
     // 2. Inisialisasi atau temukan fasilitas uji
     $this->facility = Facility::firstOrCreate(
         ['name' => 'Lab Komputasi Cloud & Jaringan'],
         [
-            'facility_code'   => 'FAC-LAB-01',
-            'type'            => 'laboratorium',
+            'code'            => 'FAC-LAB-01',
+            'category'        => 'lab',
             'building'        => 'Gedung C Lt. 2',
             'floor_location'  => 'Lantai 2 Ruang 204',
             'capacity'        => 35,
@@ -159,6 +160,8 @@ test('USR-04: Pengguna berhasil mengirim laporan tanpa memilih kategori / opsion
         'description' => 'Kaca jendela retak dan bergoyang saat tertiup angin kencang.',
         'status'      => 'baru',
     ]);
+});
+
 test('USR-05: Pengguna dapat mengakses riwayat laporan dan melihat tiket miliknya (TC-USR05-01)', function () {
     $report = DamageReport::create([
         'report_code'        => 'RPT-20260924-TEST',

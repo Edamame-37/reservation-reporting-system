@@ -31,12 +31,6 @@ Route::get('/', function () {
     return view('public.home');
 })->name('home');
 
-// Mockup Routes - Public
-Route::get('/public/catalog', function () { return view('public.catalog'); })->name('public.catalog');
-Route::get('/public/availability', function () { return view('public.availability'); })->name('public.availability');
-
-// Mockup Routes - User
-Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
 
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
@@ -60,6 +54,8 @@ Route::get('/public/availability', function () {
 |--------------------------------------------------------------------------
 */
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
 // ROUTE: Menerima GET request ke '/admin/dashboard'
 // FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -78,11 +74,19 @@ Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagemen
 // FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
 Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
-// ROUTE: Menerima GET request ke '/admin/facility-master'
-// FUNGSI: Menampilkan halaman pengelolaan master data fasilitas kampus
-Route::get('/admin/facility-master', function () {
-    return view('admin.facility-master');
-})->name('admin.facility-master');
+// ROUTE: Menerima POST request pendaftaran internal oleh Admin
+Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+
+// Master Fasilitas Routes
+Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
+Route::get('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
+Route::post('/admin/facilities/save', [App\Http\Controllers\FacilityController::class, 'saveAlias'])->name('facilities.save');
+Route::post('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'store'])->name('facilities.store');
+Route::put('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'update'])->name('facilities.update');
+Route::delete('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'destroy'])->name('facilities.destroy');
+Route::post('/admin/facilities/{facility}/toggle', [App\Http\Controllers\FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
 
 // ROUTE: Menerima GET request ke '/admin/export-report'
 // FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
@@ -107,6 +111,7 @@ Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'expo
 // ROUTE ALIAS: Kompatibilitas tautan mockup ekspor laporan statuter pada antarmuka admin
 Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.reports.export-excel');
 Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -173,17 +178,21 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
     // FUNGSI: Menampilkan daftar riwayat pengajuan reservasi dan status verifikasi
     Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
 
+    // ROUTE: Menerima DELETE request ke '/user/reservations/{id}/cancel'
+    // FUNGSI: Membatalkan pengajuan reservasi secara mandiri
+    Route::delete('/user/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('user.reservations.cancel');
+
     // ROUTE: Menerima GET request ke '/user/report-form'
     // FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
-    Route::get('/user/report-form', function () {
-        return view('user.report-form');
-    })->name('user.report-form');
+    Route::get('/user/report-form', [ReportController::class, 'create'])->name('user.report-form');
+
+    // ROUTE: Menerima POST request ke '/user/reports'
+    // FUNGSI: Menyimpan laporan kerusakan fasilitas
+    Route::post('/user/reports', [ReportController::class, 'store'])->name('user.reports.store');
 
     // ROUTE: Menerima GET request ke '/user/report-history'
     // FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
-    Route::get('/user/report-history', function () {
-        return view('user.report-history');
-    })->name('user.report-history');
+    Route::get('/user/report-history', [ReportController::class, 'history'])->name('user.report-history');
 });
 
 /*

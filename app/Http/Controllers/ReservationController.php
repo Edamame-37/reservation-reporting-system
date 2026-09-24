@@ -54,12 +54,8 @@ class ReservationController extends Controller
                 ->withErrors(['facility_id' => 'Fasilitas "' . $facility->name . '" sedang dalam masa perbaikan atau non-aktif sehingga tidak dapat dipesan.']);
         }
 
-        // 2. Tentukan ID Pengguna Pemohon (Dukungan Auth dan Fallback Mode Mockup)
+        // 2. Tentukan ID Pengguna Pemohon
         $userId = Auth::id();
-        if (!$userId) {
-            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
-            $userId = $defaultUser ? $defaultUser->id : 1;
-        }
 
         // 3. Hitung Total Slot Durasi (Kelipatan 30 Menit)
         $startTime = Carbon::createFromFormat('H:i', $validated['start_time']);
@@ -81,7 +77,7 @@ class ReservationController extends Controller
         return DB::transaction(function () use ($validated, $facility, $userId, $totalSlots, $ticketCode, $request) {
             // Cek apakah ada jadwal bersinggungan (overlap) yang TELAH DISETUJUI (status = approved)
             $overlapExists = Reservation::where('facility_id', $validated['facility_id'])
-                ->where('reservation_date', $validated['reservation_date'])
+                ->whereDate('reservation_date', $validated['reservation_date'])
                 ->where('status', 'approved')
                 ->where(function ($query) use ($validated) {
                     $query->where('start_time', '<', $validated['end_time'])
@@ -120,13 +116,9 @@ class ReservationController extends Controller
      * KEGUNAAN           : Menampilkan riwayat permohonan reservasi milik pengguna aktif.
      * CARA KERJA         : Mengambil reservasi milik user yang sedang aktif beserta relasi fasilitas, diurutkan dari yang terbaru.
      */
-    public function history(): View
+    public function history(Request $request): View
     {
         $userId = Auth::id();
-        if (!$userId) {
-            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
-            $userId = $defaultUser ? $defaultUser->id : 1;
-        }
 
         // 2. Hitung Ringkasan Jumlah Tiket per Kategori Status (Untuk Tab Badges)
         $counts = [
@@ -181,10 +173,6 @@ class ReservationController extends Controller
     public function cancel(Request $request, int|string $id): RedirectResponse
     {
         $userId = Auth::id();
-        if (!$userId) {
-            $defaultUser = User::where('email', 'dimas@mahasiswa.ac.id')->first() ?? User::first();
-            $userId = $defaultUser ? $defaultUser->id : 1;
-        }
 
         $reservation = Reservation::findOrFail($id);
 
