@@ -1,5 +1,8 @@
 <?php
 
+use Spatie\Permission\Models\Role;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 
 test('registration screen can be rendered', function () {
@@ -8,30 +11,58 @@ test('registration screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
-test('new users can register and their status is pending without auto-login', function () {
-    \Illuminate\Support\Facades\Storage::fake('public');
-    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'pengguna', 'guard_name' => 'web']);
+test('new users can register and get pending status', function () {
+    Storage::fake('public');
+    
+    // Pastikan role exist di database testing
+    Role::firstOrCreate(['name' => 'pengguna', 'guard_name' => 'web']);
+
+    $file = UploadedFile::fake()->create('ktm.pdf', 100, 'application/pdf');
 
     $response = $this->post('/register', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'identifier' => '12345678',
+        'name' => 'Siswa Baru',
+        'identifier' => '2108561000',
         'role_type' => 'mahasiswa',
-        'identity_proof' => \Illuminate\Http\UploadedFile::fake()->create('ktm.jpg', 100, 'image/jpeg'),
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'email' => 'siswa@kampus.ac.id',
+        'password' => 'passwordaman',
+        'password_confirmation' => 'passwordaman',
+        'identity_proof' => $file,
     ]);
 
-    // Berdasarkan AUTH-01, pengguna di-redirect ke halaman login dengan pesan sukses (belum ada pesan sukses diuji, tapi pastikan redirect ke login)
-    $response->assertRedirect(route('login', absolute: false));
-    $response->assertSessionHas('success', 'Akun terdaftar, menunggu persetujuan Admin.');
-
-    // Pastikan pengguna TIDAK login secara otomatis (Breeze default login, kita harus mematikannya)
+    // Memastikan user TIDAK login otomatis
     $this->assertGuest();
+    
+    // Memastikan dialihkan ke login dengan pesan sukses
+    $response->assertRedirect(route('login', absolute: false));
+    $response->assertSessionHas('success');
 
-    $user = tap(User::where('email', 'test@example.com')->first(), function (User $user) {
-        $this->assertEquals('pending', $user->status);
-        $this->assertTrue($user->hasRole('pengguna'));
-        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($user->id_card_path);
-    });
+    // Memastikan data tersimpan sebagai pending
+    $this->assertDatabaseHas('users', [
+        'email' => 'siswa@kampus.ac.id',
+        'status' => 'pending',
+        'role' => 'mahasiswa'
+    ]);
+
+    $user = User::where('email', 'siswa@kampus.ac.id')->first();
+    
+    // Memastikan mendapat role Spatie 'pengguna'
+    expect($user->hasRole('pengguna'))->toBeTrue();
+    
+    // Memastikan file tersimpan dengan benar
+    Storage::disk('public')->assertExists($user->id_card_path);
+});
+
+test('registration fails on invalid inputs', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test Gagal',
+        'identifier' => '123',
+        'role_type' => 'bukan_sivitas', // Error (not in:mahasiswa,dosen,staf)
+        'email' => 'email_salah', // Error (not email format)
+        'password' => 'pendek', // Error (min 8)
+        'password_confirmation' => 'pendek',
+        'identity_proof' => UploadedFile::fake()->create('bahaya.exe', 100, 'application/x-msdownload'), // Error (mimes)
+    ]);
+
+    $response->assertInvalid(['role_type', 'email', 'password', 'identity_proof']);
+    $this->assertGuest();
 });
