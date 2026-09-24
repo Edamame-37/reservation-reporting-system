@@ -67,7 +67,8 @@ class RegisteredUserController extends Controller
             'identity_number' => $request->identifier,
             'role'            => $request->role_type,
             'id_card_path'    => $idCardPath,
-            'status'          => 'pending',
+            // 'status'          => 'pending', // DICOMMENT UNTUK TESTING
+            'status'          => 'active', // Langsung aktif agar bisa login
         ]);
 
         // Berikan role Spatie "pengguna" kepada pendaftar
@@ -76,8 +77,9 @@ class RegisteredUserController extends Controller
         // Panggil event Registered (Opsional, untuk trigger notifikasi jika ada)
         event(new Registered($user));
 
-        // Redirect ke halaman login dengan flash message
-        return redirect()->route('login')->with('success', 'Akun terdaftar, menunggu persetujuan Admin.');
+        // Redirect ke halaman login dengan flash message (Tidak ada auto-login)
+        // return redirect()->route('login')->with('success', 'Akun terdaftar, menunggu persetujuan Admin.'); // DICOMMENT UNTUK TESTING
+        return redirect()->route('login')->with('success', 'Akun terdaftar dan sudah bisa digunakan untuk login.');
     }
 }
 
