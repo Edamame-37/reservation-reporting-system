@@ -31,7 +31,7 @@ beforeEach(function () {
         ['name' => 'Lab Komputasi Cloud & Jaringan'],
         [
             'code'            => 'FAC-LAB-01',
-            'category'        => 'laboratorium',
+            'category'        => 'lab',
             'building'        => 'Gedung C Lt. 2',
             'floor_location'  => 'Lantai 2 Ruang 204',
             'capacity'        => 35,
