@@ -1,4 +1,11 @@
 <x-guest-layout>
+    <div class="mb-6">
+        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Kembali</span>
+        </a>
+    </div>
+
     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
         @csrf
 
@@ -77,14 +84,14 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex flex-row items-center justify-between mt-8 gap-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                Sudah punya<br>akun?
-            </a>
-
-            <x-primary-button class="w-full flex-1 max-w-[240px] text-center">
+        <div class="flex flex-col items-center mt-8 gap-4">
+            <x-primary-button class="w-full justify-center max-w-[240px] text-center">
                 <span class="w-full block text-center">DAFTAR & AJUKAN<br>VERIFIKASI</span>
             </x-primary-button>
+
+            <a class="underline text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 dark:focus:ring-offset-slate-800" href="{{ route('login') }}">
+                Sudah punya akun?
+            </a>
         </div>
     </form>
 </x-guest-layout>
