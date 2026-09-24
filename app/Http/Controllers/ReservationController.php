@@ -77,7 +77,7 @@ class ReservationController extends Controller
         return DB::transaction(function () use ($validated, $facility, $userId, $totalSlots, $ticketCode, $request) {
             // Cek apakah ada jadwal bersinggungan (overlap) yang TELAH DISETUJUI (status = approved)
             $overlapExists = Reservation::where('facility_id', $validated['facility_id'])
-                ->where('reservation_date', $validated['reservation_date'])
+                ->whereDate('reservation_date', $validated['reservation_date'])
                 ->where('status', 'approved')
                 ->where(function ($query) use ($validated) {
                     $query->where('start_time', '<', $validated['end_time'])
