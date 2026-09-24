@@ -30,6 +30,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'mahasiswa',
+            'status' => 'active',
         ];
     }
 
@@ -41,5 +43,24 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Configure the model factory.
+     * Secara otomatis menyinkronkan Spatie Role setelah User terbuat.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $roleToAssign = $user->role;
+            if (in_array($user->role, ['mahasiswa', 'dosen', 'staf'])) {
+                $roleToAssign = 'pengguna';
+            }
+
+            // Pastikan role exist di Spatie sebelum sync
+            \Spatie\Permission\Models\Role::firstOrCreate(['name' => $roleToAssign, 'guard_name' => 'web']);
+            
+            $user->syncRoles([$roleToAssign]);
+        });
     }
 }
