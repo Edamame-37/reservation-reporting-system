@@ -54,7 +54,7 @@
                 </a>
             @endif
 
-            <x-primary-button class="ms-3 bg-indigo-600 hover:bg-indigo-700 w-full justify-center text-center">
+            <x-primary-button class="ms-3 w-full">
                 Masuk
             </x-primary-button>
         </div>
