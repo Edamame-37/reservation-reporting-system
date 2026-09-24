@@ -6,26 +6,7 @@
 --}}
 
 <x-public-layout title="Katalog Lengkap Fasilitas Kampus" active="catalog">
-    <div x-data="{
-        search: '',
-        selectedCategory: 'semua',
-        selectedBuilding: 'semua',
-        modalDetail: false,
-        activeVenue: null,
-        venues: @json($facilities),
-        get filteredVenues() {
-            return this.venues.filter(v => {
-                const matchSearch = v.name.toLowerCase().includes(this.search.toLowerCase()) || v.id.toLowerCase().includes(this.search.toLowerCase()) || v.building.toLowerCase().includes(this.search.toLowerCase());
-                const matchCat = this.selectedCategory === 'semua' || v.category === this.selectedCategory;
-                const matchBld = this.selectedBuilding === 'semua' || v.building.includes(this.selectedBuilding);
-                return matchSearch && matchCat && matchBld;
-            });
-        },
-        openDetail(v) {
-            this.activeVenue = v;
-            this.modalDetail = true;
-        }
-    }">
+    <div x-data="catalogData()">
 
         {{-- Header Breadcrumb & Judul Halaman --}}
         <div class="mb-6">
@@ -202,4 +183,29 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('catalogData', () => ({
+                search: '',
+                selectedCategory: 'semua',
+                selectedBuilding: 'semua',
+                modalDetail: false,
+                activeVenue: null,
+                venues: @json($facilities),
+                get filteredVenues() {
+                    return this.venues.filter(v => {
+                        const matchSearch = v.name.toLowerCase().includes(this.search.toLowerCase()) || String(v.code).toLowerCase().includes(this.search.toLowerCase()) || v.building.toLowerCase().includes(this.search.toLowerCase());
+                        const matchCat = this.selectedCategory === 'semua' || v.category === this.selectedCategory;
+                        const matchBld = this.selectedBuilding === 'semua' || v.building.includes(this.selectedBuilding);
+                        return matchSearch && matchCat && matchBld;
+                    });
+                },
+                openDetail(v) {
+                    this.activeVenue = v;
+                    this.modalDetail = true;
+                }
+            }));
+        });
+    </script>
 </x-public-layout>
