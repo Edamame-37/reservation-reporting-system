@@ -38,7 +38,8 @@ Ketika sivitas akademika sedang beraktivitas di lingkungan kampus (perkuliahan d
 | **BR-USR04-02** | **Validitas Fasilitas Terdaftar** | Nilai `facility_id` wajib terdaftar pada kolom `id` tabel `facilities` dan berstatus aktif. Manipulasi ID ruangan yang tidak ada akan digagalkan validasi `exists:facilities,id`. | Server-side (FormRequest) |
 | **BR-USR04-03** | **Format Kode Tiket Laporan Unik** | Sistem wajib menghasilkan kode tiket pelaporan acak unik otomatis dengan format: `RPT-YYYYMMDD-XXXX` (contoh: `RPT-20260924-A1B2`). Kode ini dijamin tidak akan pernah duplikat di tabel `damage_reports`. | Controller / Database |
 | **BR-USR04-04** | **Status Awal Tiket Pengaduan** | Setiap tiket pengaduan baru yang berhasil dikirimkan secara mutlak memiliki status awal `baru` (belum ditangani oleh petugas/teknisi). | Controller / Database Default |
-| **BR-USR04-05** | **Kelayakan Deskripsi Kerusakan** | Kolom deskripsi masalah wajib diisi dengan teks bermakna **minimal 10 karakter** dan maksimal 1.000 karakter untuk mencegah laporan kosong atau tidak jelas (*spam*). | Client-side & Server-side |
+| **BR-USR04-05** | **Kelayakan Deskripsi Kerusakan Wajib** | Kolom deskripsi masalah **mutlak wajib diisi** dengan teks bermakna **minimal 10 karakter** dan maksimal 1.000 karakter untuk menguraikan kendala secara jelas (*mandatory*). | Client-side & Server-side |
+| **BR-USR04-06** | **Kategori Kerusakan Bersifat Opsional** | Pemilihan kategori kerusakan bersifat **opsional** (*nullable*). Jika pengguna tidak memilih kategori yang ada di daftar opsi, sistem di backend secara otomatis menetapkan nilai *fallback* **`'Lainnya'`** ke database. | Client-side & Controller |
 
 ---
 
@@ -48,7 +49,7 @@ Ketika sivitas akademika sedang beraktivitas di lingkungan kampus (perkuliahan d
 |---|---|---|
 | **FR-USR04-001** | Pemuatan Formulir Dinamis | Sistem harus menampilkan halaman formulir di `/user/report-form` dengan dropdown fasilitas kampus yang ditarik secara dinamis dari database (`Facility::where('status', 'aktif')`). |
 | **FR-USR04-002** | Penanganan Pre-selected Fasilitas | Jika URL memuat parameter `?facility_id=...`, sistem harus otomatis menandai fasilitas tersebut sebagai opsi terpilih pada dropdown. |
-| **FR-USR04-003** | Pilihan Kategori Kerusakan Interaktif | Sistem harus menyediakan tombol-tombol pill kategori kerusakan yang terhubung dengan input tersembunyi (*hidden input*) untuk dikirim ke server. |
+| **FR-USR04-003** | Pilihan Kategori Opsional & Toggleable | Sistem harus menyediakan tombol-tombol pill kategori kerusakan yang bersifat opsional (dapat dipilih atau dibatalkan kliknya) dan otomatis mengisi 'Lainnya' jika dilewati. |
 | **FR-USR04-004** | Pratinjau Foto Bukti (*Client Preview*) | Sistem harus menampilkan pratinjau gambar instan saat pengguna memilih berkas foto, serta menyediakan tombol hapus/ganti foto. |
 | **FR-USR04-005** | Validasi Klien Ukuran Berkas | Sistem harus menolak dan memperingatkan pengguna melalui JavaScript jika berkas yang dipilih melebihi ukuran 2 MB sebelum request dikirimkan ke jaringan. |
 | **FR-USR04-006** | Penyimpanan Aman & Pembuatan Tiket | Kontroler backend wajib memvalidasi data via `StoreDamageReportRequest`, menyimpan foto ke disk storage publik, menyimpan record ke tabel `damage_reports`, dan mengalihkan pengguna dengan notifikasi sukses. |

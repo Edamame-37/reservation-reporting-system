@@ -29,7 +29,7 @@ class StoreDamageReportRequest extends FormRequest
     {
         return [
             'facility_id'      => ['required', 'integer', 'exists:facilities,id'],
-            'category'         => ['required', 'string', 'max:100'],
+            'category'         => ['nullable', 'string', 'max:100'],
             'description'      => ['required', 'string', 'min:10', 'max:1000'],
             'attachment_photo' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], // 2048 KB = 2 MB
         ];
@@ -45,7 +45,6 @@ class StoreDamageReportRequest extends FormRequest
         return [
             'facility_id.required'      => 'Silakan pilih fasilitas atau ruangan yang mengalami kerusakan.',
             'facility_id.exists'        => 'Fasilitas yang dipilih tidak terdaftar di dalam sistem.',
-            'category.required'         => 'Kategori kerusakan sarana wajib dipilih.',
             'description.required'      => 'Deskripsi masalah kerusakan wajib diisi secara rinci.',
             'description.min'           => 'Deskripsi masalah minimal harus berisi 10 karakter.',
             'description.max'           => 'Deskripsi masalah tidak boleh melebihi 1.000 karakter.',

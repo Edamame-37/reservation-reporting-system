@@ -47,7 +47,9 @@ test('USR-04: Form pelaporan kerusakan dapat diakses dan memuat data fasilitas a
     $response = $this->actingAs($this->user)->get(route('user.report-form'));
 
     $response->assertStatus(200);
-    $response->assertSee('Form Lapor Kerusakan');
+    $response->assertSee('Pelaporan Kerusakan Sarana');
+    $response->assertSee('Opsional');
+    $response->assertSee('Wajib Diisi (Min. 10 karakter)');
     $response->assertSee($this->facility->name);
 });
 
@@ -135,6 +137,28 @@ test('USR-04: Penolakan laporan jika facility_id tidak terdaftar di sistem (TC-U
     $response->assertSessionHasErrors('facility_id');
 });
 
+test('USR-04: Pengguna berhasil mengirim laporan tanpa memilih kategori / opsional (TC-USR04-07)', function () {
+    $fakeImage = UploadedFile::fake()->create('bukti_kerusakan_opsional.jpg', 400, 'image/jpeg');
+
+    $payload = [
+        'facility_id'      => $this->facility->id,
+        'category'         => null, // Sengaja dikosongkan oleh pengguna
+        'description'      => 'Kaca jendela retak dan bergoyang saat tertiup angin kencang.',
+        'attachment_photo' => $fakeImage,
+    ];
+
+    $response = $this->actingAs($this->user)->post(route('user.reports.store'), $payload);
+
+    $response->assertRedirect(route('user.report-history'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('damage_reports', [
+        'user_id'     => $this->user->id,
+        'facility_id' => $this->facility->id,
+        'category'    => 'Lainnya', // Otomatis fallback ke 'Lainnya'
+        'description' => 'Kaca jendela retak dan bergoyang saat tertiup angin kencang.',
+        'status'      => 'baru',
+    ]);
 test('USR-05: Pengguna dapat mengakses riwayat laporan dan melihat tiket miliknya (TC-USR05-01)', function () {
     $report = DamageReport::create([
         'report_code'        => 'RPT-20260924-TEST',
