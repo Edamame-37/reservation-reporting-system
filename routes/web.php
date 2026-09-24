@@ -34,8 +34,6 @@ Route::get('/public/availability', function () { return view('public.availabilit
 
 // Mockup Routes - User
 Route::get('/user/dashboard', function () { return view('user.dashboard'); })->name('user.dashboard');
-Route::get('/user/report-form', function () { return view('user.report-form'); })->name('user.report-form');
-Route::get('/user/report-history', function () { return view('user.report-history'); })->name('user.report-history');
 
 // Mockup Routes - Petugas
 Route::get('/petugas/dashboard', function () { return view('petugas.dashboard'); })->name('petugas.dashboard');

@@ -537,6 +537,157 @@ test('USR-03: Pengguna berhasil membatalkan reservasi status pending lebih dari 
 | *"Bagaimana Anda mencegah celah keamanan unggah berkas (misal ada yang mencoba mengunggah shell PHP)?"* | "Pertama, kami menerapkan validasi aturan `image` dan `mimes:jpeg,png,jpg` pada `StoreDamageReportRequest` yang memeriksa header biner (*Magic Bytes*) berkas, bukan sekadar melihat ekstensi nama file. Kedua, method `store()` Laravel mengacak nama file menjadi string *hash* unik di direktori terisolasi, sehingga file tidak dapat dieksekusi langsung oleh penyerang." |
 | *"Mengapa validasi ukuran maksimal 2 MB dilakukan di dua tempat (JavaScript dan PHP Laravel)?"* | "Ini adalah penerapan prinsip *Defense in Depth*. Validasi di sisi peramban (JavaScript) ditujukan untuk *User Experience* agar pengguna langsung tahu bahwa file-nya kebesaran tanpa harus menunggu proses upload yang lama. Sedangkan validasi di sisi server (Laravel) adalah benteng pertahanan mutlak (*Zero Trust*) yang tidak bisa di-bypass meskipun pengguna mematikan JavaScript atau mengirim request via cURL/Postman." |
 | *"Apa arti status awal 'baru' pada tiket laporan kerusakan?"* | "Status `'baru'` adalah status awal (*Initial State*) pada alur kerja *ticketing*. Status ini menandakan bahwa laporan telah berhasil dicatat oleh sistem namun belum diinspeksi atau dialokasikan oleh Petugas Sarpras ke teknisi lapangan." |
+
+---
+
+# Panduan Pembelajaran Kode: Fitur USR-05
+*(Pelacakan Status & Riwayat Laporan Kerusakan - CAVA)*
+
+Dokumen ini melengkapi bab sebelumnya untuk memahami secara tuntas alur kerja, logika kueri efisien, dan rendering dinamis dari fitur:
+**USR-05: Pelacakan Status Laporan (Tiket) Pengguna**.
+
+---
+
+## 🗺️ Peta Konsep: Alur Pelacakan Tiket Kerusakan (*Query Lifecycle*)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Pengguna (Mahasiswa/Dosen)
+    participant Route as routes/web.php
+    participant Controller as ReportController@history
+    participant DB as MySQL Database
+    participant View as Blade (report-history)
+
+    User->>Route: GET /user/report-history?status=diproses&search=AC
+    Route->>Controller: Panggil history(request)
+    Controller->>Controller: Ambil user_id dari sesi login (Auth::id())
+    
+    rect rgb(240, 248, 255)
+        Note over Controller,DB: 1. Hitung Rekapitulasi Badge (1 Kali Kueri Agregasi)
+        Controller->>DB: SELECT COUNT(*) as total, COUNT(CASE WHEN status='baru'...) FROM damage_reports WHERE user_id = :id
+        DB-->>Controller: Return counts [all, baru, diproses, selesai, ditolak]
+    end
+
+    rect rgb(245, 255, 250)
+        Note over Controller,DB: 2. Kueri Tiket Terisolasi & Eager Loading
+        Controller->>DB: SELECT * FROM damage_reports WHERE user_id = :id AND status = 'diproses' AND (deskripsi LIKE '%AC%' OR facility.name LIKE '%AC%')
+        Controller->>DB: Eager load facilities & users (handlers)
+        DB-->>Controller: Return data terpaginasi (10 baris)
+    end
+
+    Controller->>View: Render view('user.report-history', compact('reports', 'counts', 'activeStatus'))
+    View-->>User: Tampilkan tabel riwayat tiket dinamis, tab counter, modal foto & catatan resolusi
+```
+
+---
+
+## 📂 Bagian 1: Bedah Logika Backend & Optimalisasi Kueri (`ReportController.php`)
+
+### 1.1. Agregasi Tunggal (*Single-Query Conditional Aggregation*)
+Menghitung jumlah tiket pada masing-masing tab status (`Semua`, `Baru`, `Diproses`, `Selesai`, `Ditolak`) sering kali dilakukan dengan 5 kali pemanggilan `count()`. Hal ini memicu 5 kali round-trip ke database:
+
+```php
+// ❌ KURANG OPTIMAL: Memicu 5 kali kueri kueri ke MySQL
+$all      = DamageReport::where('user_id', $userId)->count();
+$baru     = DamageReport::where('user_id', $userId)->where('status', 'baru')->count();
+$diproses = DamageReport::where('user_id', $userId)->where('status', 'diproses')->count();
+$selesai  = DamageReport::where('user_id', $userId)->where('status', 'selesai')->count();
+$ditolak  = DamageReport::where('user_id', $userId)->where('status', 'ditolak')->count();
+```
+
+Di CAVA, kita mengoptimalkannya menjadi **1 kueri tunggal yang sangat cepat**:
+```php
+// ✅ SANGAT OPTIMAL: Hanya 1 kali kueri dengan CASE WHEN
+$rawCounts = DamageReport::where('user_id', $userId)
+    ->selectRaw("
+        COUNT(*) as total,
+        COUNT(CASE WHEN status = 'baru' THEN 1 END) as baru,
+        COUNT(CASE WHEN status = 'diproses' THEN 1 END) as diproses,
+        COUNT(CASE WHEN status = 'selesai' THEN 1 END) as selesai,
+        COUNT(CASE WHEN status = 'ditolak' THEN 1 END) as ditolak
+    ")->first();
+```
+
+### 1.2. Pencegahan Kebocoran Data (*Security: IDOR Prevention*)
+Klausul `where('user_id', $userId)` dipasang secara mutlak pada kueri utama. Pengguna hanya dapat memantau tiket yang diajukan oleh akunnya sendiri. Hal ini mencegah kerentanan **IDOR (*Insecure Direct Object Reference*)**.
+
+### 1.3. Eliminasi *N+1 Query Problem* via Eager Loading
+Setiap baris laporan memerlukan nama fasilitas (`$report->facility->name`) dan nama petugas penangan (`$report->handler->name`).
+- Jika tanpa Eager Loading (Lazy Loading), menampilkan 10 baris laporan akan menghasilkan **1 + 10 + 10 = 21 kueri database**!
+- Dengan Eager Loading:
+  ```php
+  $query = DamageReport::with(['facility', 'handler'])->where('user_id', $userId);
+  ```
+  MySQL hanya mengeksekusi **3 kueri**: 1 kueri utama laporan, 1 kueri untuk mengambil fasilitas terkait (`WHERE id IN (...)`), dan 1 kueri untuk mengambil data teknisi.
+
+### 1.4. Pencarian Lintas Tabel Menggunakan `whereHas`
+Ketika pengguna mencari fasilitas (misal: "Lab Jaringan"), kata kunci tidak berada di tabel `damage_reports`, melainkan di tabel `facilities`. Eloquent `whereHas` menyatukan kueri secara elegan:
+```php
+$query->where(function ($q) use ($keyword) {
+    $q->where('report_code', 'like', "%{$keyword}%")
+      ->orWhere('description', 'like', "%{$keyword}%")
+      ->orWhere('category', 'like', "%{$keyword}%")
+      ->orWhereHas('facility', function ($fq) use ($keyword) {
+          $fq->where('name', 'like', "%{$keyword}%");
+      });
+});
+```
+
+---
+
+## 📂 Bagian 2: Bedah Antarmuka Dinamis (`report-history.blade.php`)
+
+### 2.1. Mempertahankan Parameter URL Saat Pindah Tab atau Paging
+Ketika pengguna memfilter status ke `"diproses"` lalu melakukan pencarian, URL yang terbentuk adalah:
+`/user/report-history?status=diproses&search=proyektor`
+
+Di Blade, link tab status dibuat menggunakan helper pintar:
+```blade
+$url = request()->fullUrlWithQuery(['status' => $key, 'page' => 1]);
+```
+Dan pada controller, paginasi dilengkapi dengan:
+```php
+$reports = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+```
+`withQueryString()` memastikan bahwa saat pengguna mengklik tombol halaman 2 atau 3, parameter `status` dan `search` **tidak hilang**.
+
+### 2.2. Modal Pratinjau Foto Riil (Alpine.js)
+Foto yang tersimpan di disk publik dipanggil dengan helper `asset('storage/' . $report->attachment_photo)`. Objek data dikirimkan ke fungsi Alpine.js:
+```blade
+@php
+    $photoData = [
+        'id'       => $report->report_code,
+        'venue'    => $report->facility->name ?? 'Fasilitas Kampus',
+        'desc'     => $report->description,
+        'photoUrl' => $report->attachment_photo ? asset('storage/' . $report->attachment_photo) : null,
+    ];
+@endphp
+<button @click="openPhoto({{ json_encode($photoData) }})">Lihat</button>
+```
+Sehingga tidak ada lagi foto palsu dummy Unsplash di dalam kode!
+
+---
+
+## 🧪 Bagian 3: Bedah Pengujian Otomatis (`ReportFeatureTest.php`)
+
+10 pengujian otomatis dijalankan secara terisolasi menggunakan transaksi basis data:
+1. **TC-USR05-01:** Verifikasi bahwa tiket pelapor tampil lengkap dengan kode tiket, nama fasilitas, deskripsi, dan badge status.
+2. **TC-USR05-02:** Verifikasi isolasi keamanan (`assertDontSee`), memastikan laporan mahasiswa lain tidak bocor.
+3. **TC-USR05-03:** Verifikasi tab filter status (`?status=baru`, `?status=selesai`).
+4. **TC-USR05-04:** Verifikasi pencarian kata kunci (`?search=...`).
+
+---
+
+## 🎓 Tanya Jawab Kunci USR-05 (Persiapan Sidang / Evaluasi)
+
+| Pertanyaan Penguji | Jawaban Teknis Terbaik Anda |
+|---|---|
+| *"Bagaimana Anda menjamin mahasiswa tidak bisa mengintip laporan kerusakan yang diajukan oleh pengguna lain?"* | "Pada method `history()` di `ReportController`, kueri database secara absolut dibatasi dengan `where('user_id', Auth::id())`. Dengan begitu, meskipun pengguna mencoba memanipulasi parameter URL atau request query, kueri SQL di tingkat server hanya akan mengambil data milik pengguna yang sedang terautentikasi." |
+| *"Apa itu problem N+1 kueri dan bagaimana Anda mengatasinya di halaman riwayat ini?"* | "Problem N+1 terjadi jika kita me-looping relasi (seperti `$report->facility->name`) di dalam Blade tanpa memuat relasi terlebih dahulu, sehingga database dipaksa melakukan 1 kueri tambahan untuk setiap baris data yang ditampilkan. Kami mengatasinya menggunakan fitur Eager Loading Eloquent: `DamageReport::with(['facility', 'handler'])`, sehingga puluhan baris data hanya membutuhkan 3 kueri SQL." |
+| *"Mengapa Anda menggunakan conditional aggregation (CASE WHEN) untuk badge counter?"* | "Untuk menghindari *round-trip overhead* ke database server. Jika menggunakan 5 pemanggilan `count()` terpisah, aplikasi membuka dan menunggu 5 koneksi kueri ke MySQL. Dengan agregasi berkondisi tunggal `COUNT(CASE WHEN status = ... THEN 1 END)`, seluruh total rekapitulasi status selesai dihitung dalam satu kali eksekusi kueri berkecepatan tinggi." |
+| *"Bagaimana cara mempertahankan kata kunci pencarian ketika pengguna mengklik pagination ke halaman berikutnya?"* | "Kami menambahkan method berantai `->withQueryString()` pada pemanggilan `paginate(10)` di Controller. Method ini secara otomatis menyalin seluruh *query string parameters* yang ada di URL saat ini ke dalam tautan link tombol pagination yang dihasilkan oleh Laravel." |
+
 | *"Bagaimana sistem Anda mencegah dua orang meminjam ruangan yang sama di jam yang sama (double-booking)?"* | "Sistem menerapkan validasi ganda. Pada level basis data, kami menggunakan transaksi `DB::transaction()` dan mengeksekusi kueri overlap matematis: `start_time < req_end AND end_time > req_start` terhadap seluruh reservasi berstatus `approved`. Jika kueri menemukan singgungan jadwal, transaksi langsung digagalkan sebelum data tersimpan." |
 | *"Mengapa validasi jam 07:00-20:00 dan kelipatan 30 menit tidak cukup divalidasi di form HTML saja?"* | "Validasi klien (HTML) hanya untuk kenyamanan pengguna (*User Experience*), tetapi sangat mudah dimanipulasi melalui inspect element browser atau tools seperti Postman. Oleh karena itu, sistem menerapkan kebijakan *Zero Trust* dengan memvalidasi ulang secara mutlak di sisi server menggunakan *Regular Expression* pada `StoreReservationRequest`." |
 | *"Bagaimana Anda menjamin mahasiswa A tidak bisa membatalkan tiket reservasi milik mahasiswa B?"* | "Kami menerapkan validasi kepemilikan mutlak (*Strict Ownership*) pada `ReservationController@cancel`. Sistem memeriksa apakah `reservation->user_id === Auth::id()`. Jika terjadi ketidakcocokan, sistem langsung melempar exception `abort(403, 'Akses Ditolak')`." |
