@@ -30,7 +30,6 @@
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-slate-900 text-base leading-tight tracking-tight group-hover:text-blue-900 transition-colors">{{ $title }}</span>
-                        <span class="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">v2.4</span>
                     </div>
                     <span class="text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
                 </div>
