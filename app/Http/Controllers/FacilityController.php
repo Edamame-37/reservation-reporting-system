@@ -165,6 +165,22 @@ class FacilityController extends Controller
     }
 
     /**
+     * FUNCTION/PROCEDURE : saveAlias()
+     * KEGUNAAN           : Endpoint alias untuk menangani submit form modal gabungan (create & update).
+     * CARA KERJA         : Memeriksa keberadaan parameter ID. Jika ada, teruskan ke method update. Jika tidak, ke store.
+     */
+    public function saveAlias(Request $request): RedirectResponse|JsonResponse
+    {
+        if ($request->filled('id')) {
+            $updateRequest = app(UpdateFacilityRequest::class);
+            return $this->update($updateRequest, $request->input('id'));
+        }
+        
+        $storeRequest = app(StoreFacilityRequest::class);
+        return $this->store($storeRequest);
+    }
+
+    /**
      * FUNCTION/PROCEDURE : edit()
      * KEGUNAAN           : Mengambil data satu fasilitas spesifik untuk kebutuhan formulir penyuntingan (modal edit).
      * CARA KERJA         : Mencari data fasilitas berdasarkan ID, mengembalikan respons JSON untuk konsumsi modal Alpine.js frontend.

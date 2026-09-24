@@ -82,6 +82,7 @@ Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])
 // Master Fasilitas Routes
 Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
 Route::get('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
+Route::post('/admin/facilities/save', [App\Http\Controllers\FacilityController::class, 'saveAlias'])->name('facilities.save');
 Route::post('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'store'])->name('facilities.store');
 Route::put('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'update'])->name('facilities.update');
 Route::delete('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'destroy'])->name('facilities.destroy');
