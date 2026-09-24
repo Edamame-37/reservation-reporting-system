@@ -159,6 +159,8 @@ test('USR-04: Pengguna berhasil mengirim laporan tanpa memilih kategori / opsion
         'description' => 'Kaca jendela retak dan bergoyang saat tertiup angin kencang.',
         'status'      => 'baru',
     ]);
+});
+
 test('USR-05: Pengguna dapat mengakses riwayat laporan dan melihat tiket miliknya (TC-USR05-01)', function () {
     $report = DamageReport::create([
         'report_code'        => 'RPT-20260924-TEST',
