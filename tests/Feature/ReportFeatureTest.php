@@ -25,6 +25,7 @@ beforeEach(function () {
             'status'          => 'active',
         ]
     );
+    $this->user->syncRoles(['pengguna']);
 
     // 2. Inisialisasi atau temukan fasilitas uji
     $this->facility = Facility::firstOrCreate(
