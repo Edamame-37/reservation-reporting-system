@@ -41,7 +41,6 @@ Route::get('/petugas/report-management', function () { return view('petugas.repo
 
 // Mockup Routes - Admin
 Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
-Route::get('/admin/facility-master', function () { return view('admin.facility-master'); })->name('admin.facility-master');
 Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
 
 // ROUTE: Menerima GET request ke '/public/catalog'
