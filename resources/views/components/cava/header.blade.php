@@ -23,7 +23,7 @@
     <div class="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {{-- Sisi Kiri: Brand & Nama Sistem --}}
         <div class="flex items-center gap-3 sm:gap-4">
-            <button type="button" @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1">
+            <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1">
                 <span class="material-symbols-outlined text-[24px]">menu</span>
             </button>
             <a href="{{ url('/') }}" class="flex items-center gap-3 group">

@@ -38,7 +38,7 @@
         }
     </style>
 </head>
-<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: window.innerWidth >= 768 }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
     {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="false" 
@@ -50,7 +50,7 @@
     <x-cava.sidebar role="public" :active="$active" />
 
     {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-16">
+    <div :class="{'md:pl-64': sidebarOpen}" class="flex-1 flex flex-col pt-16 transition-all duration-300">
         <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ $slot ?? '' }}
             @yield('content')
