@@ -52,7 +52,7 @@
         <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
             <a href="{{ url('/') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'home' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Beranda</a>
             <a href="{{ url('/public/catalog') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'catalog' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Katalog Fasilitas</a>
-            <a href="{{ url('/public/schedule') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'schedule' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Matriks Jadwal</a>
+            <a href="{{ url('/public/availability') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'availability' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Matriks Jadwal</a>
         </nav>
         @endif
 
@@ -96,7 +96,7 @@
         <a href="{{ url('/public/catalog') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'catalog' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
             <span class="material-symbols-outlined text-[18px]">search</span> Katalog Fasilitas
         </a>
-        <a href="{{ url('/public/schedule') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'schedule' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
+        <a href="{{ url('/public/availability') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'availability' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
             <span class="material-symbols-outlined text-[18px]">calendar_month</span> Matriks Jadwal
         </a>
     </div>
