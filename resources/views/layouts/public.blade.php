@@ -43,7 +43,7 @@
     <x-cava.header 
         :showProfile="false" 
         title="CAVA" 
-        subtitle="Portal Informasi Fasilitas & Jadwal Kampus"
+        subtitle="Campus Venue Access"
         role="public"
         :active="$active"
     />

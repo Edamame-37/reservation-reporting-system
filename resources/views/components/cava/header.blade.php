@@ -58,11 +58,6 @@
 
         {{-- Sisi Kanan: Status Kampus, Notifikasi, & Profil --}}
         <div class="flex items-center gap-3 sm:gap-4">
-            {{-- Indikator Semester Aktif --}}
-            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs font-medium text-slate-600">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>TA 2024/2025 Ganjil</span>
-            </div>
 
             @if($showProfile)
                 {{-- Profil Pengguna Aktif (Bisa Diklik menuju Pengaturan Profil) --}}
