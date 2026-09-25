@@ -17,7 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title }} | CAVA Administration Console</title>
+    <title>{{ $title }} | CAVA</title>
+    <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
     {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +38,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
     {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="true" 
