@@ -34,20 +34,27 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // [MOCKUP MODE] Kueri autentikasi database dinonaktifkan sementara
-        // $request->authenticate();
+        // 1. Eksekusi Autentikasi Kredensial Database
+        $request->authenticate();
 
-        // Menyimpan data identitas pengguna tiruan (dummy user) pada file session
-        $email = $request->input('email', 'pengguna@kampus.ac.id');
-        $request->session()->put('mock_user', [
-            'name'  => 'Sivitas Akademika (Mock)',
-            'email' => $email,
-            'role'  => 'user'
-        ]);
+        $user = Auth::user();
+
+        // 2. Validasi status akun (ADM-01)
+        if ($user->status !== 'active') {
+            Auth::guard('web')->logout();
+            return back()->withErrors(['email' => 'Akun Anda belum aktif atau belum disetujui Admin.']);
+        }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // 3. Pengalihan cerdas sesuai Role
+        if ($user->hasRole('admin') || $user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif ($user->hasRole('petugas') || $user->role === 'petugas') {
+            return redirect()->intended(route('petugas.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('user.dashboard', absolute: false));
     }
 
     /**
@@ -57,9 +64,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        // [MOCKUP MODE] Menghapus data sesi pengguna mock
-        // Auth::guard('web')->logout();
-        $request->session()->forget('mock_user');
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
