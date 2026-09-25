@@ -145,11 +145,11 @@
         </div>
 
         {{-- 4. Tabel Tiket Kerusakan Lengkap --}}
-        <!-- 
+        {{-- 
           ELEMEN       : Tabel Daftar Tiket Kerusakan Fasilitas
           KEGUNAAN     : Menyajikan daftar tiket keluhan sarana kampus dengan informasi foto, status penanganan, dan catatan resolusi teknisi.
-          CARA KERJA   : Melakukan perulangan Blade dinamis @forelse($reports as $report) dengan filter reaktif via Alpine.js.
-        -->
+          CARA KERJA   : Melakukan perulangan Blade dinamis forelse ($reports as $report) dengan filter reaktif via Alpine.js.
+        --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs border-collapse">
