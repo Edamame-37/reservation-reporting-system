@@ -38,7 +38,7 @@
 {{-- Sidebar Overlay (Mobile) --}}
 <div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-20 md:hidden" @click="sidebarOpen = false"></div>
 
-<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-40 transition-transform duration-300">
+<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'transition-transform duration-300': isLoaded}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-40">
     {{-- Header Sidebar --}}
     <div class="p-5 border-b border-slate-100 bg-slate-50/30">
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
