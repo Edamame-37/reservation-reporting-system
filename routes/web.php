@@ -156,6 +156,10 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     // ROUTE: Menerima PATCH request ke '/petugas/reports/{id}'
     // FUNGSI: Memperbarui status penanganan tiket keluhan kerusakan dan mencatat resolusi teknisi (PTG-04 / US-11)
     Route::patch('/petugas/reports/{id}', [ReportManagementController::class, 'updateStatus'])->name('petugas.reports.update');
+
+    // ROUTE: Menerima PATCH request ke '/petugas/facilities/{id}/toggle-maintenance'
+    // FUNGSI: Mengunci/membuka kunci fasilitas ke status pemeliharaan / Mode Perbaikan (PTG-05 / US-12)
+    Route::patch('/petugas/facilities/{id}/toggle-maintenance', [ReportManagementController::class, 'toggleMaintenance'])->name('petugas.facilities.toggle-maintenance');
 });
 
 /*

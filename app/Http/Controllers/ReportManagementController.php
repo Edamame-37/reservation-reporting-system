@@ -1,9 +1,9 @@
 <?php
 /**
  * NAMA FILE    : ReportManagementController.php
- * FUNGSI       : Controller manajemen tiket keluhan kerusakan fasilitas kampus (PTG-04 / US-11 / UR12)
- * DESKRIPSI    : Menangani penarikan seluruh laporan kerusakan sarana, pembaruan status penanganan teknisi (Baru/Diproses/Selesai/Ditolak), pencatatan resolusi perbaikan, serta sinkronisasi gembok pemeliharaan fasilitas di kalender.
- * CARA KERJA   : Menerima HTTP request petugas, melakukan query eager loading (with) untuk meniadakan problem N+1, memvalidasi payload via UpdateReportStatusRequest, memperbarui entitas DamageReport & Facility, serta mengembalikan respon view atau redirect dengan notifikasi sukses.
+ * FUNGSI       : Controller manajemen tiket keluhan kerusakan fasilitas & blokir pemeliharaan ruang petugas (PTG-04 & PTG-05 / US-11 & US-12 / UR12)
+ * DESKRIPSI    : Menangani penarikan seluruh laporan kerusakan sarana, pembaruan status penanganan teknisi (Baru/Diproses/Selesai/Ditolak), pencatatan resolusi perbaikan, sinkronisasi gembok fasilitas di kalender, serta saklar toggle Mode Perbaikan (Maintenance Mode).
+ * CARA KERJA   : Menerima HTTP request petugas, melakukan query eager loading (with) untuk meniadakan problem N+1, memvalidasi payload, memperbarui entitas DamageReport & Facility dalam DB::transaction() dengan lockForUpdate(), serta mengembalikan respon view atau redirect dengan notifikasi sukses.
  */
 
 namespace App\Http\Controllers;
@@ -103,6 +103,48 @@ class ReportManagementController extends Controller
             return back()->with('success', 'Status tiket laporan kerusakan dan catatan resolusi berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui status tiket: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : toggleMaintenance()
+     * KEGUNAAN           : Mengubah status saklar operasional fasilitas antara 'aktif' dan 'dalam perbaikan' (PTG-05 / US-12).
+     * CARA KERJA         : Membuka DB::transaction() dengan lockForUpdate() pada data Facility; jika berstatus 'dalam perbaikan' dikembalikan ke 'aktif' dan membuka flag kunci pada laporan kerusakan terkait, jika berstatus 'aktif' diubah ke 'dalam perbaikan' dan menandai laporan aktif terkait menjadi terkunci.
+     */
+    public function toggleMaintenance(int|string $id): RedirectResponse
+    {
+        try {
+            $message = DB::transaction(function () use ($id) {
+                // 1. Ambil data fasilitas dengan penguncian baris transaksi (Pessimistic Locking)
+                $facility = Facility::lockForUpdate()->findOrFail($id);
+
+                // 2. Logika Saklar (Toggle) Status Master Fasilitas
+                if ($facility->status === 'dalam perbaikan') {
+                    $facility->status = 'aktif';
+                    $facility->save();
+
+                    // Buka penguncian laporan kerusakan fasilitas ini
+                    DamageReport::where('facility_id', $facility->id)
+                        ->where('is_facility_locked', true)
+                        ->update(['is_facility_locked' => false]);
+
+                    return "Fasilitas {$facility->name} berhasil dibuka dan dikembalikan ke status Aktif.";
+                } else {
+                    $facility->status = 'dalam perbaikan';
+                    $facility->save();
+
+                    // Sinkronkan penguncian pada laporan aktif yang belum selesai
+                    DamageReport::where('facility_id', $facility->id)
+                        ->whereIn('status', ['baru', 'diproses'])
+                        ->update(['is_facility_locked' => true]);
+
+                    return "Fasilitas {$facility->name} berhasil diblokir (Masuk Mode Perbaikan / Maintenance).";
+                }
+            });
+
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengubah status pemeliharaan fasilitas: ' . $e->getMessage());
         }
     }
 }
