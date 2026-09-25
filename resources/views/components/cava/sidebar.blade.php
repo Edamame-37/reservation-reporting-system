@@ -35,7 +35,10 @@
   KEGUNAAN     : Menyediakan akses instan ke modul sistem sesuai otorisasi peran pengguna.
   CARA KERJA     : Menerapkan kelas aktif bg-slate-900 text-white pada rute yang sesuai props 'active'.
 -->
-<aside class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-30">
+{{-- Sidebar Overlay (Mobile) --}}
+<div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-20 md:hidden" @click="sidebarOpen = false"></div>
+
+<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-30 transition-transform duration-300 md:translate-x-0">
     {{-- Header Sidebar --}}
     <div class="p-5 border-b border-slate-100">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
