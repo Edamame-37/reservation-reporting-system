@@ -15,23 +15,30 @@
 ])
 
 <!-- 
-  ELEMEN       : Sticky Header (Tinggi 64px / h-16)
-  KEGUNAAN     : Header dalam layout App Shell, posisinya bergeser mengikuti Sidebar.
-  CARA KERJA   : Berada di dalam main flex wrapper (sticky top-0 z-40).
+  ELEMEN       : Fixed Top Header (Tinggi 64px / h-16)
+  KEGUNAAN     : Header membentang penuh (Full-width), menaungi konten dan sidebar.
+  CARA KERJA   : fixed top-0 left-0 right-0 z-50
 -->
-<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 h-16 shrink-0">
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 h-16">
     <div class="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {{-- Sisi Kiri: Breadcrumb / Halaman Aktif --}}
-        <div class="flex items-center gap-3 sm:gap-4">
+        {{-- Sisi Kiri: Brand & Toggle Sidebar --}}
+        <div class="flex items-center gap-4">
+            {{-- Logo CAVA yang selalu tampil --}}
+            <a href="{{ url('/') }}" class="flex items-center gap-3 group">
+                <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-9 w-auto">
+                <div class="flex flex-col hidden sm:flex">
+                    <span class="font-bold text-slate-900 text-sm sm:text-base leading-tight tracking-tight group-hover:text-blue-900 transition-colors">{{ $title }}</span>
+                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
+                </div>
+            </a>
+            
+            {{-- Garis Pemisah --}}
+            <div class="hidden sm:block w-px h-6 bg-slate-200 mx-1"></div>
+
+            {{-- Tombol Toggle Sidebar --}}
             <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
                 <span class="material-symbols-outlined text-[24px]">menu</span>
             </button>
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-slate-900 text-sm sm:text-base leading-tight tracking-tight">{{ $title }}</span>
-                </div>
-                <span class="text-[10px] sm:text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
-            </div>
         </div>
 
         {{-- Sisi Kanan: Status Kampus, Notifikasi, & Profil --}}

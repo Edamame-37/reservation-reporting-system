@@ -39,20 +39,21 @@
     </style>
 </head>
 <body x-data="{ sidebarOpen: window.innerWidth >= 768 }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
-    {{-- 1. Sidebar Navigasi Kiri (Role: Petugas) --}}
+    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
+    <x-cava.header 
+        :showProfile="true" 
+        userName="{{ auth()->user()->name ?? 'Bambang Setyawan' }}"
+        userRole="Petugas Sarpras Zona A"
+        userIdentifier="NIP. {{ auth()->user()->nip ?? '197804122005011002' }}"
+        title="CAVA Operasional" 
+        subtitle="Sistem Verifikasi & Pemeliharaan Sarpras"
+    />
+
+    {{-- 2. Sidebar Navigasi Kiri (Role: Petugas) --}}
     <x-cava.sidebar role="petugas" :active="$active" />
 
-    {{-- 2. Area Konten Utama Halaman (Offset md:pl-64 untuk Sidebar) --}}
-    <div :class="{'md:pl-64': sidebarOpen}" class="flex-1 flex flex-col min-h-screen transition-all duration-300">
-        {{-- 3. Top Header CAVA (Tinggi 64px) --}}
-        <x-cava.header 
-            :showProfile="true" 
-            userName="{{ auth()->user()->name ?? 'Bambang Setyawan' }}"
-            userRole="Petugas Sarpras Zona A"
-            userIdentifier="NIP. {{ auth()->user()->nip ?? '197804122005011002' }}"
-            title="CAVA Operasional" 
-            subtitle="Sistem Verifikasi & Pemeliharaan Sarpras"
-        />
+    {{-- 3. Area Konten Utama Halaman (Offset md:pl-64 untuk Sidebar) --}}
+    <div :class="{'md:pl-64': sidebarOpen}" class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
 
         <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
             {{-- Context Officer Info Bar (Sleek Single Strip) --}}
