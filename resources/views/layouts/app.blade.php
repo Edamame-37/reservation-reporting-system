@@ -46,7 +46,7 @@
         userRole="Mahasiswa TI"
         userIdentifier="NIM: {{ auth()->user()->nim ?? '2110512044' }}"
         title="CAVA Portal" 
-        subtitle="Sistem Reservasi Ruang & Pelaporan Mandiri"
+        subtitle="Campus Venue Access"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: User) --}}

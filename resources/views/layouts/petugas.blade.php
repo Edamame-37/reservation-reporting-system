@@ -46,7 +46,7 @@
         userRole="Petugas Sarpras Zona A"
         userIdentifier="NIP. {{ auth()->user()->nip ?? '197804122005011002' }}"
         title="CAVA Operasional" 
-        subtitle="Sistem Verifikasi & Pemeliharaan Sarpras"
+        subtitle="Campus Venue Access"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Petugas) --}}

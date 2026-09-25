@@ -46,7 +46,7 @@
         userRole="Super Admin Biro TIK"
         userIdentifier="Biro TIK & Rektorat"
         title="CAVA Admin" 
-        subtitle="Konsol Tata Kelola & Analitik Statuter Kampus"
+        subtitle="Campus Venue Access"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Admin) --}}
