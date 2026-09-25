@@ -38,19 +38,18 @@
         }
     </style>
 </head>
-<body x-data="{ sidebarOpen: window.innerWidth >= 768 }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
     {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="false" 
         title="CAVA" 
         subtitle="Portal Informasi Fasilitas & Jadwal Kampus"
+        role="public"
+        :active="$active"
     />
 
-    {{-- 2. Sidebar Navigasi Kiri (Role: Publik) --}}
-    <x-cava.sidebar role="public" :active="$active" />
-
-    {{-- 3. Area Konten Utama Halaman (Offset md:pl-64 untuk Sidebar) --}}
-    <div :class="{'md:pl-64': sidebarOpen}" class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
+    {{-- 2. Area Konten Utama Halaman (Tanpa Sidebar) --}}
+    <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
 
         <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ $slot ?? '' }}

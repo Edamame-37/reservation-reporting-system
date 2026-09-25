@@ -11,7 +11,9 @@
     'userRole' => 'Petugas Sarpras Zona A',
     'userIdentifier' => 'NIP 198402112009121003',
     'title' => 'CAVA',
-    'subtitle' => 'Campus Venue Access'
+    'subtitle' => 'Campus Venue Access',
+    'role' => 'user',
+    'active' => ''
 ])
 
 <!-- 
@@ -23,10 +25,17 @@
     <div class="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {{-- Sisi Kiri: Brand & Toggle Sidebar --}}
         <div class="flex items-center gap-2 sm:gap-3">
-            {{-- Tombol Toggle Sidebar --}}
-            <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
-                <span class="material-symbols-outlined text-[24px]">menu</span>
-            </button>
+            {{-- Tombol Toggle Sidebar / Mobile Menu --}}
+            @if($role !== 'public')
+                <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">menu</span>
+                </button>
+            @else
+                {{-- Hamburger khusus mobile untuk public --}}
+                <button type="button" @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">menu</span>
+                </button>
+            @endif
             
             {{-- Logo CAVA yang selalu tampil --}}
             <a href="{{ url('/') }}" class="flex items-center gap-3 group ml-1 sm:ml-2">
@@ -37,6 +46,15 @@
                 </div>
             </a>
         </div>
+
+        {{-- Navigasi Publik Tengah (Desktop) --}}
+        @if($role === 'public')
+        <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+            <a href="{{ url('/') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'home' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Beranda</a>
+            <a href="{{ url('/public/catalog') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'catalog' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Katalog Fasilitas</a>
+            <a href="{{ url('/public/schedule') }}" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'schedule' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">Matriks Jadwal</a>
+        </nav>
+        @endif
 
         {{-- Sisi Kanan: Status Kampus, Notifikasi, & Profil --}}
         <div class="flex items-center gap-3 sm:gap-4">
@@ -68,4 +86,19 @@
             @endif
         </div>
     </div>
+
+    {{-- Menu Publik Mobile (Dropdown) --}}
+    @if($role === 'public')
+    <div x-show="sidebarOpen" x-transition.opacity style="display: none;" class="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-slate-200/80 shadow-lg px-4 py-4 flex flex-col gap-2 z-40">
+        <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'home' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="material-symbols-outlined text-[18px]">home</span> Beranda
+        </a>
+        <a href="{{ url('/public/catalog') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'catalog' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="material-symbols-outlined text-[18px]">search</span> Katalog Fasilitas
+        </a>
+        <a href="{{ url('/public/schedule') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ $active == 'schedule' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="material-symbols-outlined text-[18px]">calendar_month</span> Matriks Jadwal
+        </a>
+    </div>
+    @endif
 </header>
