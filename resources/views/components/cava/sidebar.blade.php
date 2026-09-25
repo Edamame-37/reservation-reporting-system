@@ -38,11 +38,20 @@
 {{-- Sidebar Overlay (Mobile) --}}
 <div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-20 md:hidden" @click="sidebarOpen = false"></div>
 
-<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-30 transition-transform duration-300">
-    {{-- Header Sidebar --}}
-    <div class="p-5 border-b border-slate-100">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
-        <div class="mt-1 text-sm font-bold text-slate-900">
+<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-50 transition-transform duration-300">
+    {{-- Header Sidebar (Logo Area) --}}
+    <div class="h-16 flex items-center gap-3 px-5 border-b border-slate-100">
+        <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-8 w-auto">
+        <div class="flex flex-col">
+            <span class="font-bold text-slate-900 text-sm leading-tight tracking-tight">CAVA</span>
+            <span class="text-[10px] text-slate-500 font-medium">Sistem Reservasi Ruang</span>
+        </div>
+    </div>
+    
+    {{-- Info Role User --}}
+    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/30">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
+        <div class="mt-1 text-xs font-bold text-slate-900">
             @if($role === 'admin')
                 Konsol Biro Sarpras & TIK
             @elseif($role === 'petugas')
