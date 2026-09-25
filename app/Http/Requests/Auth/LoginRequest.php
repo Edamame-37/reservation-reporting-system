@@ -50,6 +50,29 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user && $user->status !== 'active') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            if ($user->status === 'pending') {
+                throw ValidationException::withMessages([
+                    'email' => 'Akun Anda masih berstatus pending dan menunggu verifikasi dari Admin.',
+                ]);
+            }
+
+            if ($user->status === 'rejected') {
+                $reason = $user->rejection_reason ? ' Alasan: ' . $user->rejection_reason : '';
+                throw ValidationException::withMessages([
+                    'email' => 'Pendaftaran akun Anda ditolak oleh Admin.' . $reason,
+                ]);
+            }
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda tidak aktif.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

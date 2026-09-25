@@ -99,7 +99,6 @@
         </footer>
     </div>
 
-    {{-- Role Switcher Floating Widget (Testing Helper) --}}
-    <x-cava.role-switcher activeRole="petugas" />
+
 </body>
 </html>

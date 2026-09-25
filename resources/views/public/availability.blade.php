@@ -6,66 +6,7 @@
 --}}
 
 <x-public-layout title="Matriks Jadwal Ketersediaan Ruang" active="availability">
-    <div x-data="{
-        selectedDate: '{{ date('Y-m-d') }}',
-        selectedBuilding: 'semua',
-        timeSlots: [
-            '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30',
-            '11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30',
-            '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30',
-            '19:00','19:30','20:00'
-        ],
-        rooms: [
-            {
-                id: 'AUD-H01',
-                name: 'Auditorium Utama B.J. Habibie',
-                building: 'Gedung Rektorat (Lt. 1 & 2)',
-                capacity: 450,
-                occupied: ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','15:30','16:00','16:30','17:00'],
-                locked: false
-            },
-            {
-                id: 'LAB-C204',
-                name: 'Lab Komputasi Cloud & Jaringan',
-                building: 'Gedung Lab Terpadu C (Lt. 2)',
-                capacity: 45,
-                occupied: ['08:00','08:30','13:00','13:30','14:00','14:30'],
-                locked: false
-            },
-            {
-                id: 'CLS-B302',
-                name: 'Smart Classroom 302',
-                building: 'Gedung Kuliah Bersama B (Lt. 3)',
-                capacity: 60,
-                occupied: ['07:30','08:00','08:30','09:00','09:30','10:00','13:30','14:00','14:30'],
-                locked: false
-            },
-            {
-                id: 'SPT-PKM01',
-                name: 'Aula Serbaguna & Olahraga PKM',
-                building: 'Pusat Kegiatan Mahasiswa (Lt. 1)',
-                capacity: 500,
-                occupied: ['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'],
-                locked: false
-            },
-            {
-                id: 'RPT-SENAT',
-                name: 'Ruang Rapat Senat Akademik',
-                building: 'Gedung Rektorat (Lt. 3)',
-                capacity: 35,
-                occupied: [],
-                locked: true
-            }
-        ],
-        get filteredRooms() {
-            return this.rooms.filter(r => {
-                return this.selectedBuilding === 'semua' || r.building.includes(this.selectedBuilding);
-            });
-        },
-        isBooked(room, slot) {
-            return room.occupied.includes(slot);
-        }
-    }">
+    <div x-data="availabilityData()">
 
         {{-- Breadcrumb & Judul --}}
         <div class="mb-6">
@@ -184,4 +125,62 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('availabilityData', () => ({
+                selectedDate: '{{ date('Y-m-d') }}',
+                selectedBuilding: 'semua',
+                timeSlots: [
+                    '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30',
+                    '11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30',
+                    '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30',
+                    '19:00','19:30','20:00'
+                ],
+                rooms: @json($facilities),
+                isLoading: false,
+                
+                async fetchAvailability() {
+                    this.isLoading = true;
+                    try {
+                        const response = await fetch(`/api/availability/${this.selectedDate}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.rooms = this.rooms.map(room => {
+                                room.occupied = data[room.id] || [];
+                                return room;
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error fetching availability:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                init() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const facilityId = urlParams.get('facility');
+                    if (facilityId) {
+                        // Opsi untuk filter hanya fasilitas tersebut
+                    }
+
+                    this.fetchAvailability();
+                    
+                    this.$watch('selectedDate', value => {
+                        this.fetchAvailability();
+                    });
+                },
+
+                get filteredRooms() {
+                    return this.rooms.filter(r => {
+                        return this.selectedBuilding === 'semua' || r.building.includes(this.selectedBuilding);
+                    });
+                },
+                isBooked(room, slot) {
+                    return room.occupied && room.occupied.includes(slot);
+                }
+            }));
+        });
+    </script>
 </x-public-layout>
