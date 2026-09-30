@@ -34,26 +34,27 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        try {
-            // Autentikasi sisi server (Server-side Database Auth)
-            $request->authenticate();
+        // 1. Eksekusi Autentikasi Kredensial Database
+        $request->authenticate();
 
-            $user = Auth::user();
+        $user = Auth::user();
+
+        // 2. Validasi status akun (ADM-01)
+        if ($user->status !== 'active') {
+            Auth::guard('web')->logout();
+            return back()->withErrors(['email' => 'Akun Anda belum aktif atau belum disetujui Admin.']);
+        }
 
             $request->session()->regenerate();
 
-            if ($user->hasRole('admin')) {
-                return redirect()->intended(route('admin.dashboard', absolute: false));
-            } elseif ($user->hasRole('petugas')) {
-                return redirect()->intended(route('petugas.dashboard', absolute: false));
-            }
-
-            return redirect()->intended(route('user.dashboard', absolute: false));
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Lemparkan kembali jika error karena kredensial salah
-            throw $e;
+        // 3. Pengalihan cerdas sesuai Role
+        if ($user->hasRole('admin') || $user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif ($user->hasRole('petugas') || $user->role === 'petugas') {
+            return redirect()->intended(route('petugas.dashboard', absolute: false));
         }
+
+        return redirect()->intended(route('user.dashboard', absolute: false));
     }
 
     /**

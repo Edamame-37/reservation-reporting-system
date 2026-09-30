@@ -129,11 +129,11 @@
         </div>
 
         {{-- 4. Tabel Antrean Lengkap --}}
-        <!-- 
+        {{-- 
           ELEMEN       : Tabel Antrean Reservasi Komprehensif
           KEGUNAAN     : Menyajikan daftar pemesanan ruang dengan slot waktu, surat izin, status, tombol approval, dan tuas pembatalan darurat.
-          CARA KERJA   : Melakukan perulangan Blade dinamis @forelse($reservations as $reservation) dengan kontrol filter reaktif via Alpine.js.
-        -->
+          CARA KERJA   : Melakukan perulangan Blade dinamis forelse ($reservations as $reservation) dengan kontrol filter reaktif via Alpine.js.
+        --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs border-collapse">

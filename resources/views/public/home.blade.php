@@ -13,11 +13,7 @@
     -->
     <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 rounded-3xl p-6 sm:p-10 text-white shadow-md mb-10 relative overflow-hidden">
         <div class="max-w-2xl relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-blue-200 border border-white/10 mb-4">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Sistem Otomasi Reservasi Fasilitas Kampus Terpadu</span>
-            </div>
-            <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
+           <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
                 Temukan & Cek Ketersediaan Fasilitas Akademik Kampus
             </h1>
             <p class="text-sm sm:text-base text-slate-300 mb-6 font-normal leading-relaxed">

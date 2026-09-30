@@ -17,7 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title }} | CAVA - Campus Venue Access</title>
+    <title>{{ $title }} | CAVA</title>
+    <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
     {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,29 +38,26 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
     {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="false" 
         title="CAVA" 
-        subtitle="Portal Informasi Fasilitas & Jadwal Kampus"
+        subtitle="Campus Venue Access"
+        role="public"
+        :active="$active"
     />
 
-    {{-- 2. Sidebar Navigasi Kiri (Role: Publik) --}}
-    <x-cava.sidebar role="public" :active="$active" />
+    {{-- 2. Area Konten Utama Halaman (Tanpa Sidebar) --}}
+    <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
 
-    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-16">
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
 
-        {{-- Footer Minimalis --}}
-        <footer class="px-6 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
-            <span>&copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus. Terbuka untuk Umum.</span>
-            <span class="text-slate-400">Mode Privasi: Data Pemohon Dirahasiakan</span>
-        </footer>
+        {{-- Footer --}}
+        <x-cava.footer />
     </div>
 
 

@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ForceCancelReservationRequest;
 use App\Http\Requests\RejectReservationRequest;
+use App\Models\Facility;
 use App\Models\Reservation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -64,6 +65,12 @@ class ReservationManagementController extends Controller
                 // 2. Validasi Keabsahan Status Antrean
                 if ($res->status !== 'pending') {
                     throw new \Exception('Reservasi ini sudah diproses sebelumnya dan tidak dapat disetujui ulang.');
+                }
+
+                // 3. Validasi Pemblokiran Fasilitas (Maintenance Mode / PTG-05)
+                $facility = Facility::find($res->facility_id);
+                if ($facility && $facility->status === 'dalam perbaikan') {
+                    throw new \Exception('Gagal menyetujui! Fasilitas ini sedang dalam Mode Perbaikan (Maintenance Mode) dan diblokir untuk pemesanan.');
                 }
 
                 // 3. Kueri Validasi Anti-Bentrok Jadwal (Overlap SQL Formula)
