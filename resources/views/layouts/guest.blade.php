@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'CAVA - Reservasi') }}</title>
+        <title>{{ config('app.name', 'CAVA - Reservasi') }} | CAVA</title>
+        <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +25,8 @@
                 <!-- Gradient Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-br from-slate-800/90 to-slate-900/90"></div>
                 
-                <div class="relative z-10 p-12 text-center text-white max-w-xl">
+                <div class="relative z-10 p-12 text-center text-white max-w-xl flex flex-col items-center">
+                    <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-16 w-auto mb-6 drop-shadow-md">
                     <h1 class="text-4xl font-extrabold tracking-tight mb-4 text-white">Sistem Cerdas Reservasi</h1>
                     <p class="text-lg text-slate-200 font-medium leading-relaxed">Platform terpadu untuk mengelola peminjaman ruang, fasilitas kampus, dan pelaporan kerusakan sarana prasarana secara cepat dan transparan.</p>
                 </div>
@@ -33,8 +35,9 @@
             <!-- Right Side: Auth Form -->
             <div class="flex flex-col justify-center items-center w-full lg:w-1/2 p-6 sm:p-12 relative">
                 <div class="w-full max-w-md">
-                    <!-- Mobile Logo (Removed CAVA Logo) -->
-                    <div class="flex justify-center mb-8 lg:hidden">
+                    <!-- Mobile Logo -->
+                    <div class="flex flex-col justify-center items-center mb-8 lg:hidden gap-4">
+                        <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-12 w-auto">
                         <h1 class="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white text-center">Sistem Cerdas Reservasi</h1>
                     </div>
 

@@ -17,7 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title }} | CAVA Student & Faculty Portal</title>
+    <title>{{ $title }} | CAVA</title>
+    <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
     {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,23 +38,23 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA dengan Profil Pengguna (Tinggi 64px) --}}
+<body x-data="{ sidebarOpen: window.innerWidth >= 768, isLoaded: false }" x-init="$nextTick(() => { isLoaded = true })" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="true" 
         userName="{{ auth()->user()->name ?? 'Dimas Pratama' }}"
         userRole="Mahasiswa TI"
         userIdentifier="NIM: {{ auth()->user()->nim ?? '2110512044' }}"
         title="CAVA Portal" 
-        subtitle="Sistem Reservasi Ruang & Pelaporan Mandiri"
+        subtitle="Campus Venue Access"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: User) --}}
     <x-cava.sidebar role="user" :active="$active" />
 
-    {{-- 3. Area Konten Utama Halaman (Offset pl-64 untuk Sidebar & Header 64px) --}}
-    <div class="pl-64 flex-1 flex flex-col pt-16">
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {{-- 3. Area Konten Utama Halaman (Offset md:pl-64 untuk Sidebar) --}}
+    <div :class="{'md:pl-64': sidebarOpen, 'transition-all duration-300': isLoaded}" class="flex-1 flex flex-col min-h-screen pt-16">
+        <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
