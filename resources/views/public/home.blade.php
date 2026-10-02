@@ -178,4 +178,96 @@
             <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
         </a>
     </section>
+
+    <!-- 
+      ELEMEN       : Seksi Pusat Regulasi & Layanan CAVA (Kebijakan, Syarat & Ketentuan, Bantuan)
+      KEGUNAAN     : Menyajikan 3 pilar panduan resmi kampus di bagian bawah landing page agar sivitas memahami tata tertib sebelum melakukan peminjaman.
+      CARA KERJA   : Merender 3 kartu interaktif yang mengarahkan pengguna secara langsung ke tab terkait pada halaman informasi.
+    -->
+    <section class="mt-12 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-6 border-b border-slate-200">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight">Regulasi, Tata Tertib & Pusat Layanan</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Informasi resmi tata kelola sarana & prasarana kampus terpadu untuk sivitas akademika.</p>
+            </div>
+            <a href="{{ route('public.information') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-900 hover:underline">
+                <span>Buka Seluruh Pusat Informasi</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Kartu 1: Kebijakan Privasi & Operasional --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-[26px]">shield</span>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100/70 text-emerald-800">Privasi & Keamanan</span>
+                    <h3 class="text-base font-bold text-slate-900 mt-2 mb-1.5">Kebijakan Fasilitas & Data</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Jaminan perlindungan data pribadi sivitas, kerahasiaan identitas pelapor kerusakan fasilitas, serta akuntabilitas aset BMN universitas.
+                    </p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <!-- 
+                      ROUTE: Menuju /informasi/kebijakan
+                      FUNGSI: Membuka tab kebijakan privasi dan operasional sarpras
+                    -->
+                    <a href="{{ route('public.information', ['section' => 'kebijakan']) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
+                        <span>Baca Kebijakan Lengkap</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+            </article>
+
+            {{-- Kartu 2: Syarat & Ketentuan --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-900 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-[26px]">gavel</span>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100/70 text-blue-800">Tata Tertib Kampus</span>
+                    <h3 class="text-base font-bold text-slate-900 mt-2 mb-1.5">Syarat & Ketentuan</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Ketentuan peminjaman H-2, durasi kelipatan 30 menit, kewajiban menjaga fasilitas & kebersihan, serta sanksi keterlambatan/pembatalan.
+                    </p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <!-- 
+                      ROUTE: Menuju /informasi/syarat-ketentuan
+                      FUNGSI: Membuka tab syarat dan ketentuan peminjaman
+                    -->
+                    <a href="{{ route('public.information', ['section' => 'syarat-ketentuan']) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
+                        <span>Pelajari Ketentuan</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+            </article>
+
+            {{-- Kartu 3: Pusat Bantuan & FAQ --}}
+            <article class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-900 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-[26px]">help</span>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-100/70 text-purple-800">Pusat Layanan</span>
+                    <h3 class="text-base font-bold text-slate-900 mt-2 mb-1.5">Bantuan & FAQ</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Panduan praktis langkah reservasi, tanya jawab seputar akun pending atau bentrok, serta kontak helpdesk resmi Biro Sarpras.
+                    </p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <!-- 
+                      ROUTE: Menuju /informasi/bantuan
+                      FUNGSI: Membuka tab panduan, FAQ, dan kontak helpdesk
+                    -->
+                    <a href="{{ route('public.information', ['section' => 'bantuan']) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
+                        <span>Akses Pusat Bantuan</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+            </article>
+        </div>
+    </section>
 </x-public-layout>
