@@ -88,7 +88,7 @@
 
         {{-- Indikator Jumlah Data --}}
         <div class="flex items-center justify-between text-xs text-slate-500 mb-4 px-1">
-            <span>Menampilkan <strong class="text-slate-900" x-text="venues.length"></strong> fasilitas kampus</span>
+            <span>Menampilkan <strong class="text-slate-900" x-text="paginatedVenues().length"></strong> dari <strong class="text-slate-900" x-text="venues.length"></strong> fasilitas kampus</span>
             <span>Jam Operasional: 07:00 - 20:00 WIB</span>
         </div>
 
@@ -100,13 +100,13 @@
             </div>
         </template>
 
-        {{-- Grid Seluruh Fasilitas Kampus --}}
+        {{-- Grid Fasilitas Kampus (Maksimal 6 Item per Halaman) --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <template x-for="venue in venues" :key="venue.id">
+            <template x-for="venue in paginatedVenues()" :key="venue.id">
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700" x-text="venue.id"></span>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700" x-text="venue.code || venue.id"></span>
                             <span x-show="venue.status === 'approved'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-semibold">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 Tersedia
@@ -126,19 +126,19 @@
                         <div class="flex items-center gap-2 text-xs text-slate-600 pb-3 mb-3 border-b border-slate-100">
                             <span class="font-semibold text-slate-800" x-text="venue.capacity + ' Kursi'"></span>
                             <span>•</span>
-                            <span class="truncate" x-text="venue.equipment.slice(0, 2).join(', ') + '...'"></span>
+                            <span class="truncate" x-text="(venue.equipment && venue.equipment.length ? venue.equipment.slice(0, 2).join(', ') : 'Standar') + '...'"></span>
                         </div>
                     </div>
 
                     <div>
                         <div class="flex items-center justify-between text-xs text-slate-600 mb-1">
                             <span>Okupansi Hari Ini:</span>
-                            <span class="font-semibold" x-text="venue.status === 'approved' ? (venue.availableSlots + ' / ' + venue.totalSlots + ' Slot Bebas') : 'Terkunci'"></span>
+                            <span class="font-semibold" x-text="venue.status === 'approved' ? ((venue.availableSlots ?? 26) + ' / ' + (venue.totalSlots ?? 26) + ' Slot Bebas') : 'Terkunci'"></span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-4">
                             <div class="h-full rounded-full transition-all"
                                  :class="venue.status === 'approved' ? 'bg-emerald-500' : 'bg-slate-400'"
-                                 :style="`width: ${(venue.availableSlots / venue.totalSlots) * 100}%`"></div>
+                                 :style="`width: ${((venue.availableSlots ?? 26) / (venue.totalSlots ?? 26)) * 100}%`"></div>
                         </div>
 
                         <div class="flex items-center gap-2">
@@ -154,6 +154,84 @@
                 </div>
             </template>
         </div>
+
+        {{-- Opsi Login untuk Pengunjung (Guest) Jika Data Lebih dari 6 --}}
+        @guest
+        <template x-if="venues.length > 6">
+            <!-- 
+              ELEMEN       : Banner Ajakan Masuk / Opsi Login untuk Melihat Seluruh Fasilitas
+              KEGUNAAN     : Membatasi pengunjung hanya melihat 6 fasilitas unggulan dan mengarahkan untuk login agar dapat melihat seluruh 78 ruang.
+              CARA KERJA   : Ditampilkan untuk pengunjung yang belum login di bawah 6 fasilitas pertama.
+            -->
+            <div class="mt-8 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 rounded-2xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700/50">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[28px] text-blue-300">lock</span>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Ingin Melihat Lebih Banyak Fasilitas Kampus?</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+                            Saat ini Anda melihat 6 fasilitas pilihan. Masuk (Login) menggunakan akun sivitas untuk mengakses katalog lengkap seluruh <span class="font-bold text-white" x-text="venues.length"></span> fasilitas dan mengajukan reservasi.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+                    <a href="{{ route('login') }}" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-slate-100 transition text-center shadow-xs">
+                        Masuk Sekarang
+                    </a>
+                    <a href="{{ route('register') }}" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/20 transition text-center">
+                        Daftar Akun
+                    </a>
+                </div>
+            </div>
+        </template>
+        @endguest
+
+        {{-- Navigasi Paginasi Interaktif (6 Fasilitas per Halaman) --}}
+        <template x-if="totalPages() > 1">
+            <!-- 
+              ELEMEN       : Navigasi Paginasi Interaktif (6 Fasilitas per Halaman)
+              KEGUNAAN     : Menampilkan navigasi halaman per 6 item. Jika pengunjung belum login, klik halaman berikutnya akan mengarahkan ke form login.
+              CARA KERJA   : Alpine.js menghitung total halaman secara dinamis dan memperbarui data aktif saat nomor halaman diklik.
+            -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 text-xs text-slate-600">
+                <div>
+                    <span>Menampilkan <strong class="text-slate-900" x-text="paginatedVenues().length"></strong> dari <strong class="text-slate-900" x-text="venues.length"></strong> fasilitas kampus (Halaman <span x-text="currentPage"></span> dari <span x-text="totalPages()"></span>)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button 
+                        type="button" 
+                        @click="prevPage()" 
+                        :disabled="currentPage === 1"
+                        :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'hover:bg-slate-100 text-slate-700 bg-white'"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                        <span>Sebelumnya</span>
+                    </button>
+
+                    <template x-for="p in totalPages()" :key="p">
+                        <button 
+                            type="button" 
+                            @click="setPage(p)"
+                            x-show="p === 1 || p === totalPages() || Math.abs(p - currentPage) <= 1"
+                            :class="currentPage === p ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700'"
+                            class="w-8 h-8 rounded-lg border border-slate-200 text-xs transition flex items-center justify-center font-medium"
+                            x-text="p">
+                        </button>
+                    </template>
+
+                    <button 
+                        type="button" 
+                        @click="nextPage()" 
+                        :disabled="currentPage === totalPages()"
+                        :class="currentPage === totalPages() ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'hover:bg-slate-100 text-slate-700 bg-white'"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-medium flex items-center gap-1">
+                        <span>Selanjutnya</span>
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </template>
 
         {{-- Modal Detail Spesifikasi Fasilitas --}}
         <div x-show="modalDetail" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -223,6 +301,46 @@
                 modalDetail: false,
                 activeVenue: null,
                 venues: @json($facilities), // Backend mem-filter ini
+                isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+
+                // Logika Paginasi 6 Item per Halaman
+                currentPage: 1,
+                perPage: 6,
+
+                totalPages() {
+                    return Math.max(1, Math.ceil(this.venues.length / this.perPage));
+                },
+
+                paginatedVenues() {
+                    if (!this.isAuthenticated) {
+                        return this.venues.slice(0, this.perPage);
+                    }
+                    const start = (this.currentPage - 1) * this.perPage;
+                    return this.venues.slice(start, start + this.perPage);
+                },
+
+                setPage(p) {
+                    if (!this.isAuthenticated && p > 1) {
+                        window.location.href = "{{ route('login') }}";
+                        return;
+                    }
+                    if (p >= 1 && p <= this.totalPages()) {
+                        this.currentPage = p;
+                        window.scrollTo({ top: 200, behavior: 'smooth' });
+                    }
+                },
+
+                prevPage() {
+                    if (this.currentPage > 1) {
+                        this.setPage(this.currentPage - 1);
+                    }
+                },
+
+                nextPage() {
+                    if (this.currentPage < this.totalPages()) {
+                        this.setPage(this.currentPage + 1);
+                    }
+                },
                 
                 // Autocomplete
                 suggestions: [],
