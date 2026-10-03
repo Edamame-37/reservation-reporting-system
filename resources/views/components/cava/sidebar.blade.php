@@ -128,7 +128,7 @@
             </a>
 
         @elseif($role === 'user')
-            {{-- Menu Mahasiswa / Dosen --}}
+            {{-- Menu Mahasiswa / Dosen (Modul Terpadu 1-Page) --}}
             <a href="{{ url('/user/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">home</span>
@@ -136,34 +136,20 @@
                 </span>
             </a>
 
-            <a href="{{ url('/user/reservation-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['reservation-history', 'reservation-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span>Ajukan Reservasi</span>
-                </span>
-            </a>
-
-            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">history</span>
-                    <span>Riwayat Reservasi</span>
+                    <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                    <span>Reservasi Ruangan</span>
                 </span>
                 @if($sidebarCounts['user_reservations'] > 0)
                     <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">{{ $sidebarCounts['user_reservations'] }}</span>
                 @endif
             </a>
 
-            <a href="{{ url('/user/report-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['report-history', 'report-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">report_problem</span>
-                    <span>Lapor Kerusakan</span>
-                </span>
-            </a>
-
-            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">checklist</span>
-                    <span>Status Laporan</span>
+                    <span class="material-symbols-outlined text-[18px]">handyman</span>
+                    <span>Pelaporan Kerusakan</span>
                 </span>
                 @if($sidebarCounts['user_reports'] > 0)
                     <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['user_reports'] }}</span>
