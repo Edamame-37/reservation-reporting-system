@@ -126,22 +126,15 @@
         }
     }">
 
-        {{-- Breadcrumb & Header --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Form Pengajuan Reservasi</span>
+        {{-- Header Judul --}}
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Form Permohonan Reservasi Fasilitas</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih fasilitas, tanggal pelaksanaan, dan rentang slot waktu operasional (07:00 - 20:00 WIB).</p>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Form Permohonan Reservasi Fasilitas</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih fasilitas, tanggal pelaksanaan, dan rentang slot waktu operasional (07:00 - 20:00 WIB).</p>
-                </div>
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Pengecekan Bentrok Jadwal: Aktif</span>
-                </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Pengecekan Bentrok Jadwal: Aktif</span>
             </div>
         </div>
 
