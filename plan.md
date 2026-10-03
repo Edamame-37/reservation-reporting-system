@@ -1,102 +1,129 @@
-# Rencana Implementasi: Halaman Informasi (Kebijakan, Syarat & Ketentuan, dan Bantuan)
+# Rencana Implementasi: Unifikasi Halaman Reservasi & Pelaporan Kerusakan (Bento UI Layout)
 
-**Branch Target**: `feature/information-page`  
-**Fitur**: Portal Pusat Informasi Publik CAVA (Campus Venue Access)  
-**Dokumen Terkait**: `CASE_PROJECT.md`, `RULE_FRONTEND.md`, `TECHSTACK.md`, `GUIDE_GITHUB.md`
+**Branch Target**: `refactor/refine-layout`  
+**Fitur & Modul**:
+1. **Unifikasi Reservasi Ruangan (USR-01, USR-02, USR-03)**: Integrasi form pengajuan ke dalam halaman riwayat sebagai basis utama via Modal / Slide-over Drawer.
+2. **Unifikasi Pelaporan Kerusakan (USR-04, USR-05)**: Integrasi form pelaporan ke dalam halaman riwayat sebagai basis utama via Modal / Slide-over Drawer.
+3. **Penyederhanaan Elemen Terfragmentasi**: Mengganti pill button bertumpuk/berdempetan (filter status dan kategori pelaporan) menjadi elemen Dropdown (`<select>`) yang rapi dan ergonomis.
+4. **Transformasi Tabel Padat Menjadi Bento List**: Mengubah format tabel lebar yang ramai menjadi daftar kartu interaktif modern dilengkapi tombol *"Lihat Detail"*.
+5. **Penerapan Bento UI Layout**: Merestrukturisasi antarmuka pengguna ke grid Bento modern (Kartu Ringkasan Metrik, Kartu Quick Action, dan Kartu Konten Utama).
+6. **Perampingan Navigasi Sidebar**: Meringkas menu portal mahasiswa/dosen dari 4 tautan terpisah menjadi 2 modul terpadu.
 
----
-
-## 1. Latar Belakang & Tujuan
-Pada bagian bawah *landing page* dan komponen *footer* (`<x-cava.footer>`) terdapat tiga tautan krusial:
-1. **Kebijakan** (*Kebijakan Privasi & Operasional Sarpras*)
-2. **Syarat dan Ketentuan** (*Aturan Peminjaman Fasilitas & Pelaporan Kerusakan*)
-3. **Bantuan** (*Pusat Bantuan, Panduan Alur, FAQ, & Kontak Helpdesk Sarpras*)
-
-Sebelumnya, tautan-tautan tersebut masih berupa placeholder (`href="#"`) tanpa halaman tujuan. Fitur ini bertujuan untuk:
-- Merumuskan isi konten resmi yang komprehensif, kredibel, dan sesuai konteks birokrasi universitas.
-- Membangun antarmuka terpadu (*Information Hub*) dengan navigasi tab dinamis (Alpine.js) dan URL parameter/hash sinkron.
-- Memperbarui komponen footer global dan menambahkan seksi *quick-access card* di bagian bawah *landing page*.
+**Dokumen Terkait**: `RULE_FRONTEND.md`, `RULE_BACKEND.md`, `RULE_PROJECT.md`, `TECHSTACK.md`, `GUIDE_GITHUB.md`, `CASE_PROJECT.md`
 
 ---
 
-## 2. Rincian Muatan Konten (3 Pilar Informasi)
+## 1. Analisis Kebutuhan & Permasalahan Saat Ini
 
-### A. Kebijakan (Privacy & Asset Operational Policy)
-- **Perlindungan Data Pribadi Sivitas**: Menjamin data identitas akun (NIM/NIP, email institusi, program studi, kontak) dienkripsi dan hanya dipakai untuk verifikasi administrasi perizinan kampus.
-- **Kerahasiaan Identitas Pelapor (*Whistleblower Protection*)**: Melindungi privasi pelapor kerusakan fasilitas dari intimidasi pihak mana pun; hanya diproses oleh Petugas Sarpras terkait.
-- **Kebijakan Hak Pembatalan Darurat (*Force Majeure / Rektorat Override*)**: Hak prerogatif Rektorat dan Petugas Sarpras membatalkan reservasi secara darurat demi agenda kenegaraan atau pimpinan kampus (sesuai modul `PTG-03`).
-- **Kebijakan Mode Pemeliharaan (*Maintenance Lock*)**: Ketentuan penguncian otomatis fasilitas jika sarpras mengalami kerusakan fatal (sesuai modul `PTG-05`).
-- **Audit Jejak Digital & BMN**: Pencatatan log seluruh riwayat peminjaman dan aduan untuk pelaporan aset Barang Milik Negara/Universitas secara transparan.
+Berdasarkan instruksi perbaikan antarmuka dari pengguna dan evaluasi visual pada tangkapan layar `report-history.blade.php`:
 
-### B. Syarat dan Ketentuan (Terms of Service & Rules of Use - 4 Bagian Terpadu)
-- **Kelayakan Akun Pemohon**: Pengguna wajib memiliki akun terdaftar dan berstatus aktif (`active`) yang disetujui Admin. Dilarang memindahtangankan akun ke pihak luar.
-- **Tata Cara & Waktu Pengajuan Reservasi**:
-  - Reservasi wajib diajukan paling lambat H-2 (48 jam) sebelum kegiatan dan maksimal 30 hari ke depan.
-  - Slot waktu dihitung per kelipatan 30 menit dalam rentang operasional 07:00 – 20:00 WIB.
-- **Kewajiban Pengguna Fasilitas**:
-  - Wajib menjaga ketertiban, kebersihan ruangan, dan tidak memindahkan aset tetap.
-  - Mematikan AC, proyektor, serta lampu sebelum meninggalkan ruangan.
-  - Dilarang merokok dan dilarang makan berat di laboratorium komputer atau smart classroom.
-- **Ketentuan Pelaporan Kerusakan**:
-  - Laporan wajib melampirkan foto bukti kondisi fisik kerusakan yang valid dan keterangan lokasi yang jelas.
-  - Dilarang membuat tiket pengaduan palsu atau tidak bertanggung jawab.
-*(Catatan revisi: Bagian sanksi & konsekuensi dihilangkan sesuai permintaan, sehingga murni 4 ketentuan pokok).*
+1. **Fragmentasi Halaman (Form vs Riwayat Terpisah)**:
+   - *Kondisi Saat Ini*: Mahasiswa/dosen memiliki halaman terpisah untuk "Ajukan Reservasi" (`/user/reservation-form`) dan "Riwayat Reservasi" (`/user/reservation-history`), serta "Lapor Kerusakan" (`/user/report-form`) dan "Status Laporan" (`/user/report-history`). Hal ini membuat navigasi terkesan berulang dan tidak efisien.
+   - *Solusi*: Jadikan halaman Riwayat sebagai halaman basis tunggal per modul. Aksi "Ajukan Reservasi" atau "Buat Laporan Baru" memunculkan Form Pengisian langsung di tempat via Modal / Slide-over Drawer terintegrasi (dengan dukungan pembukaan otomatis saat terjadi error validasi atau URL `?action=create`).
 
-### C. Bantuan (Help Center, FAQ, & Helpdesk Sarpras)
-- **Panduan Singkat Alur Sistem (Step-by-Step Guide)**:
-  - *Alur Reservasi*: Katalog Ruang ➔ Cek Slot ➔ Login/Daftar ➔ Isi Form Reservasi ➔ Persetujuan Petugas ➔ Unduh Bukti Reservasi.
-  - *Alur Lapor Kerusakan*: Temukan Kerusakan ➔ Ambil Foto ➔ Unggah Tiket ➔ Penanganan Teknisi ➔ Selesai Diperbaiki.
-- **Frequently Asked Questions (FAQ)**:
-  - *Berapa lama waktu verifikasi akun pendaftaran mandiri?* (Maksimal 1x24 jam kerja).
-  - *Mengapa slot waktu tertentu di kalender berwarna merah/terkunci?* (Ruang sedang dibooking orang lain atau dalam status perbaikan/maintenance).
-  - *Apakah saya bisa membatalkan reservasi yang sudah disetujui?* (Bisa, melalui tombol 'Batalkan' di riwayat reservasi sebelum hari-H).
-- **Kontak & Layanan Helpdesk**:
-  - **Lokasi Kantor**: Gedung Rektorat Sayap Timur, Lantai 1, Ruang Biro Sarana & Prasarana Kampus.
-  - **Jam Operasional**: Senin – Jumat, pukul 08:00 – 16:00 WIB.
-  - **Hotline WhatsApp**: +62 811-2233-4455.
-  - **Email Resmi**: `sarpras@kampus.ac.id`.
+2. **Elemen Kecil Berdempetan (*Cluttered UI*)**:
+   - *Kondisi Saat Ini*: Terdapat tombol-tombol pill filter status (`[Semua 1] [Baru 0] [Diproses 0] [Selesai 1] [Ditolak 0]`) yang berdempetan dengan input pencarian. Pada form laporan kerusakan, terdapat 8 pill tombol kategori yang tersebar berjejeran.
+   - *Solusi*: Ganti pemilihan berdempetan tersebut menjadi komponen Dropdown (`<select>`) standar yang bersih, lapang, dan mudah digunakan sesuai kaidah *Ponytail Methodology*.
+
+3. **Tabel Data Terlalu Ramai & Penuh Kolom**:
+   - *Kondisi Saat Ini*: Tabel laporan kerusakan memuat 6 kolom lebar (ID Tiket & Waktu, Fasilitas & Kategori, Deskripsi Kerusakan panjang, Status Penanganan, Catatan Resolusi Teknisi, Foto Bukti) yang membuat tabel tampak penuh sesak dan kurang estetis.
+   - *Solusi*: Rombak tabel menjadi **Daftar List Item / Card List Modern**. Tampilkan informasi esensial (Kode Tiket, Nama Fasilitas, Tanggal/Waktu, Status) secara rapi dengan tipografi berjenjang, dan pindahkan rincian teknis mendalam (catatan teknisi, foto resolusi tinggi, deskripsi komprehensif) ke dalam modal **"Lihat Detail"**.
+
+4. **Kebutuhan Layout Bento UI**:
+   - *Solusi*: Implementasikan layout Bento Box Grid yang membagi ruang halaman secara hierarkis:
+     - **Bento Top Card 1 (Statistik & Metrik Cepat)**: Menampilkan rekapitulasi status tiket dalam kartu-kartu metrik yang bersih.
+     - **Bento Top Card 2 (Quick Action & SLA Info)**: Kartu ringkas dengan tombol aksi utama (*Call to Action*) dan informasi operasional/SLA kampus.
+     - **Bento Main Card (Daftar Riwayat & Kontrol Pencarian/Filter)**: Kartu utama berisi kontrol filter dropdown, kolom pencarian, dan daftar riwayat interaktif.
 
 ---
 
-## 3. Rencana Arsitektur Teknis
+## 2. Rencana Arsitektur & Perubahan Teknis
 
-### A. Routing (`routes/web.php`)
-Menambahkan rute publik baru:
-- `Route::get('/informasi/{section?}', [PublicInformationController::class, 'index'])->name('public.information');`
-- Alias rute praktis:
-  - `Route::get('/kebijakan', fn() => redirect()->route('public.information', ['section' => 'kebijakan']))->name('public.kebijakan');`
-  - `Route::get('/syarat-ketentuan', fn() => redirect()->route('public.information', ['section' => 'syarat-ketentuan']))->name('public.syarat-ketentuan');`
-  - `Route::get('/bantuan', fn() => redirect()->route('public.information', ['section' => 'bantuan']))->name('public.bantuan');`
+### A. Backend (`app/Http/Controllers/`)
 
-### B. Controller Baru (`app/Http/Controllers/PublicInformationController.php`)
-Membuat controller ramping untuk merender view `public.information` dengan validasi parameter seksi aktif (`kebijakan`, `syarat-ketentuan`, `bantuan`).
+1. **`ReservationController.php`**:
+   - Pada method `history(Request $request)`:
+     - Tambahkan pemuatan data fasilitas aktif:
+       ```php
+       $facilities = Facility::where('status', 'aktif')->orderBy('name')->get();
+       ```
+     - Sertakan `$facilities` ke dalam `compact('reservations', 'counts', 'activeStatus', 'keyword', 'facilities')`.
+     - Ini memungkinkan formulir modal pengajuan reservasi di `reservation-history.blade.php` memiliki data gedung, lantai, dan ruangan secara langsung tanpa perlu fetch AJAX terpisah.
+   - Pada method `create(Request $request)`:
+     - Pertahankan agar tetap mengembalikan `view('user.reservation-form', ...)` untuk menjaga kompatibilitas rute lama dan kelulusan pengujian otomatis pest (`ReservationFeatureTest.php`).
 
-### C. View Blade (`resources/views/public/information.blade.php`)
-- Memakai layout master `<x-public-layout active="informasi">`.
-- Header Banner sederhana dan bersih tanpa ornamen berlebih atau emotikon.
-- Navigasi Tab Interaktif ditenagai oleh Alpine.js (`x-data="{ activeTab: '{{ $section }}' }"`).
-- **Tab Kebijakan**: Dibuat 1 wadah kontainer terpadu (*single container*) dengan 5 poin berurutan yang dipisahkan garis batas halus (*subtle divider*).
-- **Tab Syarat & Ketentuan**: Dibuat 1 wadah kontainer terpadu (*single container*) murni 4 bagian ketentuan (bagian sanksi & konsekuensi dihilangkan).
-- **Tab Bantuan**: Dibuat lebih simpel mencakup alur 4 langkah dalam kotak sederhana, accordion FAQ ringkas, dan kontak Biro Sarpras bersih.
-- Menghindari penggunaan emotikon di seluruh bagian antarmuka demi kesan profesional.
-
-
-### D. Pembaruan Komponen Footer (`resources/views/components/cava/footer.blade.php`)
-Mengubah tautan mati:
-- `Kebijakan Privasi` ➔ `href="{{ route('public.information', ['section' => 'kebijakan']) }}"`
-- `Syarat & Ketentuan` ➔ `href="{{ route('public.information', ['section' => 'syarat-ketentuan']) }}"`
-- `Bantuan` ➔ `href="{{ route('public.information', ['section' => 'bantuan']) }}"`
-
-### E. Penambahan Bagian Informasi di Bagian Bawah Landing Page (`resources/views/public/home.blade.php`)
-Menambahkan seksi visual sebelum footer di `home.blade.php` berisi 3 kartu ringkas (*Kebijakan, Syarat & Ketentuan, Pusat Bantuan*) yang mengajak pengguna memahami aturan kampus sebelum melakukan reservasi, lengkap dengan tombol langsung ke tab terkait.
+2. **`ReportController.php`**:
+   - Pada method `history(Request $request)`:
+     - Tambahkan pemuatan fasilitas aktif:
+       ```php
+       $facilities = Facility::where('status', 'aktif')->orderBy('name')->get();
+       ```
+     - Sertakan `$facilities` ke dalam `compact('reports', 'counts', 'activeStatus', 'facilities')`.
+     - Ini memungkinkan modal formulir pelaporan kerusakan di `report-history.blade.php` memuat dropdown fasilitas secara langsung.
+   - Pada method `create(Request $request)`:
+     - Pertahankan agar tetap merender `view('user.report-form', ...)` demi kompatibilitas pengujian otomatis pest (`ReportFeatureTest.php`).
 
 ---
 
-## 4. Tahapan Pengerjaan (Step-by-Step Execution)
-1. **Tahap 1**: Buat Controller `PublicInformationController.php`.
-2. **Tahap 2**: Daftarkan rute `/informasi/{section?}` dan aliasnya pada `routes/web.php`.
-3. **Tahap 3**: Buat view `resources/views/public/information.blade.php` lengkap dengan desain responsif, header komentar sesuai `RULE_FRONTEND.md`, dan konten 3 pilar.
-4. **Tahap 4**: Perbarui komponen footer `resources/views/components/cava/footer.blade.php`.
-5. **Tahap 5**: Perbarui `resources/views/public/home.blade.php` dengan seksi kartu informasi 3 objek.
-6. **Tahap 6**: Uji coba verifikasi navigasi peramban dan pastikan tidak ada sintaks error.
-7. **Tahap 7**: Buat laporan pasca-eksekusi (*walkthrough*) serta teks perintah Git commit terpisah sesuai panduan `GUIDE_GITHUB.md`.
+### B. Frontend (`resources/views/`)
+
+1. **Halaman Terpadu Status & Riwayat Pelaporan Kerusakan (`user/report-history.blade.php`)**:
+   - **Struktur Bento UI**:
+     - **Hero / Header**: Judul dan subjudul yang elegan dengan ikon modul.
+     - **Bento Grid Atas**:
+       - *Card Metrik Status*: Ringkasan statistik (Total Tiket, Selesai Ditangani, Sedang Diproses, Menunggu).
+       - *Card Aksi Cepat*: Tombol utama *"Buat Laporan Baru"* yang membuka modal formulir, disertai info SLA respon teknisi sarpras (&lt; 24 Jam).
+     - **Bento Grid Utama (Daftar Laporan)**:
+       - *Bar Kontrol*: Input pencarian kata kunci dan **Dropdown Filter Status** (menggantikan pill bertumpuk).
+       - *Modern List View*: Menggantikan tabel HTML ramai dengan baris kartu ringkas:
+         - Badge Tiket & Tanggal Laporan.
+         - Nama Fasilitas & Kategori Sarana.
+         - Ringkasan singkat deskripsi masalah (1-2 baris bersih).
+         - Indikator Status (Baru, Diproses, Selesai, Ditolak).
+         - Tombol *"Lihat Detail"*.
+       - *Paginasi Laravel*: Tetap terintegrasi di bagian bawah.
+   - **Modal Form Laporan Baru (Terintegrasi)**:
+     - Dikelola dengan Alpine.js (`showCreateModal = false`).
+     - Otomatis terbuka jika terdapat error validasi (`{{ $errors->any() ? 'true' : 'false' }}`) atau parameter URL `?action=create`.
+     - Berisi input fasilitas, **Dropdown Kategori Kerusakan** (menggantikan 8 pill berdempetan), textarea deskripsi, dan upload foto bukti dengan pratinjau instan.
+   - **Modal Lihat Detail Tiket**:
+     - Menampilkan rincian penuh kendala, foto bukti kerusakan resolusi penuh, nama petugas penangan, tanggal selesai, dan catatan resolusi teknisi.
+
+2. **Halaman Terpadu Reservasi Ruangan (`user/reservation-history.blade.php`)**:
+   - **Struktur Bento UI**:
+     - **Bento Grid Atas**:
+       - *Card Metrik Reservasi*: Rekap status permohonan (Total, Disetujui, Menunggu, Ditolak/Batal).
+       - *Card Aksi Cepat*: Tombol utama *"Ajukan Reservasi Baru"* yang membuka modal form, disertai ringkasan aturan batas pembatalan H-1.
+     - **Bento Grid Utama (Daftar Reservasi)**:
+       - *Bar Kontrol*: Input pencarian dan **Dropdown Filter Status** yang rapi.
+       - *Modern List View*: Menggantikan tabel ramai dengan kartu list informatif:
+         - Kode Tiket & Waktu Pelaksanaan (Tanggal, Jam Mulai - Selesai, Durasi Slot).
+         - Nama Ruangan & Gedung.
+         - Ringkasan tujuan acara.
+         - Status verifikasi sarpras.
+         - Tombol *"Lihat Detail"* & tombol cepat *"Batalkan"* (jika memenuhi batas minimal H-1).
+       - *Paginasi Laravel*: Bersih di bawah kartu utama.
+   - **Modal Form Reservasi Baru (Terintegrasi)**:
+     - Dikelola via Alpine.js (`showCreateModal = false`).
+     - Otomatis terbuka jika `$errors->any()` atau parameter `action=create`.
+     - Berisi pemilihan 3 tingkat hierarki (Gedung, Lantai, Ruang), tanggal kegiatan (min hari ini), rentang jam operasional (07:00 - 20:00 WIB slot 30 menit), estimasi peserta, dan tujuan acara.
+   - **Modal Lihat Detail Reservasi**:
+     - Menampilkan data lengkap tiket: kapasitas ruang, PIC acara, catatan petugas, reviewer, dan tombol pembatalan mandiri.
+
+3. **Bilah Samping Navigasi (`resources/views/components/cava/sidebar.blade.php`)**:
+   - Ringkas navigasi peran Pengguna (`$role === 'user'`) menjadi:
+     1. **Dasbor Saya** (`/user/dashboard`) - Ikon `home`
+     2. **Reservasi Ruangan** (`/user/reservation-history`) - Ikon `calendar_month` (menyatukan form & riwayat)
+     3. **Pelaporan Kerusakan** (`/user/report-history`) - Ikon `handyman` (menyatukan form & riwayat)
+   - Tautan `reservation-form` dan `report-form` di dasbor atau pintasan diarahkan ke halaman terpadu dengan opsi pembukaan modal instan.
+
+---
+
+## 3. Tahapan Pengerjaan (Step-by-Step Execution)
+
+1. **Langkah 1**: Perbarui `app/Http/Controllers/ReservationController.php` & `app/Http/Controllers/ReportController.php` untuk memuat data `$facilities` pada method `history()`.
+2. **Langkah 2**: Bangun ulang `resources/views/user/report-history.blade.php` dengan Bento UI, Dropdown Filter, Dropdown Kategori Form, Bento List View, Modal Detail, dan Modal Form Laporan Baru.
+3. **Langkah 3**: Bangun ulang `resources/views/user/reservation-history.blade.php` dengan Bento UI, Dropdown Filter, Bento List View, Modal Detail, dan Modal Form Reservasi Baru.
+4. **Langkah 4**: Perbarui `resources/views/components/cava/sidebar.blade.php` untuk merampingkan navigasi menu pengguna menjadi ringkas dan terpadu.
+5. **Langkah 5**: Lakukan verifikasi visual pada antarmuka peramban untuk memastikan responsivitas, interaksi modal, fungsionalitas submit, dan ketiadaan elemen berdempetan.
+6. **Langkah 6**: Buat laporan pasca-eksekusi `walkthrough.md` serta cetak instruksi Git commit terstandarisasi untuk dieksekusi oleh programmer manusia.

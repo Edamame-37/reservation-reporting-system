@@ -156,7 +156,12 @@ class ReservationController extends Controller
         // 6. Paginasi Hasil Kueri (Maksimal 10 Baris per Halaman - BR-USR02-05)
         $reservations = $query->paginate(10)->withQueryString();
 
-        return view('user.reservation-history', compact('reservations', 'counts', 'activeStatus', 'keyword'));
+        // 7. Ambil Seluruh Fasilitas Aktif untuk Form Pengajuan Reservasi Terpadu (Modal / Drawer)
+        $facilities = Facility::where('status', 'aktif')
+            ->orderBy('name')
+            ->get();
+
+        return view('user.reservation-history', compact('reservations', 'counts', 'activeStatus', 'keyword', 'facilities'));
     }
 
     /**
