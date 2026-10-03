@@ -1,32 +1,32 @@
 {{-- 
   NAMA FILE      : information.blade.php
-  FUNGSIONALITAS : Pusat Informasi Publik CAVA (Kebijakan, Syarat & Ketentuan, dan Bantuan)
-  DESKRIPSI      : Menyajikan dokumentasi resmi tata tertib peminjaman fasilitas kampus, kebijakan privasi dan operasional sarpras, panduan alur, FAQ ringkas, serta kontak resmi helpdesk.
+  FUNGSIONALITAS : Pusat Informasi Publik CAVA (Kebijakan, Syarat & Ketentuan, dan Bantuan) - Bento UI Modern
+  DESKRIPSI      : Menyajikan dokumentasi resmi tata tertib peminjaman fasilitas kampus, kebijakan privasi dan operasional sarpras, panduan alur, FAQ ringkas, serta kontak resmi helpdesk dengan tata letak Bento UI modern.
   CARA KERJA     : Memanfaatkan master layout <x-public-layout active="informasi">, menyediakan navigasi tab dinamis berbasis Alpine.js dengan tampilan bersih dan terpadu.
 --}}
 
 <x-public-layout title="Pusat Informasi & Bantuan" active="informasi">
     <!-- 
-      ELEMEN       : Hero Banner Pusat Informasi CAVA
+      ELEMEN       : Bento Hero Banner Pusat Informasi CAVA
       KEGUNAAN     : Menyambut sivitas dengan tajuk resmi pusat regulasi dan layanan sarpras.
-      CARA KERJA   : Merender visual bersih bernuansa biru gelap konsisten dengan tema CAVA tanpa elemen dekoratif berlebihan.
     -->
-    <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 rounded-3xl p-6 sm:p-10 text-white shadow-xs mb-8">
+    <section class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-white shadow-xs mb-6">
         <div class="max-w-3xl">
-            <span class="inline-block px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold uppercase tracking-wider mb-3">
-                Pusat Informasi Sarpras
-            </span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold mb-3">
+                <span class="material-symbols-outlined text-[14px] text-blue-300">info</span>
+                <span>Pusat Informasi & Regulasi Sarpras CAVA</span>
+            </div>
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
                 Kebijakan, Ketentuan & Bantuan Layanan
             </h1>
-            <p class="text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+            <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
                 Informasi resmi tata kelola pemanfaatan fasilitas kampus, perlindungan data sivitas, tata tertib peminjaman ruang, serta layanan bantuan Biro Sarana & Prasarana.
             </p>
         </div>
     </section>
 
     <!-- 
-      ELEMEN       : Wadah Navigasi Tab Interaktif (Alpine.js)
+      ELEMEN       : Wadah Navigasi Tab Interaktif (Bento Tabs)
       KEGUNAAN     : Memungkinkan pengguna beralih antara Kebijakan, Syarat & Ketentuan, dan Bantuan secara instan.
       CARA KERJA   : Menyimpan status aktif pada variabel 'activeTab' dan memperbarui URL browser dengan History API tanpa reload.
     -->
@@ -40,9 +40,9 @@
         }
     }" class="space-y-6">
 
-        {{-- Navigasi Tab Bar --}}
-        <div class="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div class="grid grid-cols-3 gap-1.5 w-full">
+        {{-- Navigasi Tab Bar Bento --}}
+        <div class="bg-white p-2 rounded-3xl border border-slate-200/80 shadow-xs">
+            <div class="grid grid-cols-3 gap-2 w-full">
                 {{-- Tab 1: Kebijakan --}}
                 <button 
                     type="button" 
@@ -50,7 +50,7 @@
                     :class="activeTab === 'kebijakan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="material-symbols-outlined text-[18px]">shield</span>
                     <span class="truncate">Kebijakan Privasi</span>
                 </button>
@@ -62,7 +62,7 @@
                     :class="activeTab === 'syarat-ketentuan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="material-symbols-outlined text-[18px]">gavel</span>
                     <span class="truncate">Syarat & Ketentuan</span>
                 </button>
@@ -74,7 +74,7 @@
                     :class="activeTab === 'bantuan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="material-symbols-outlined text-[18px]">help</span>
                     <span class="truncate">Pusat Bantuan & FAQ</span>
                 </button>
@@ -82,10 +82,10 @@
         </div>
 
         {{-- ========================================================================= --}}
-        {{-- TAB 1: KEBIJAKAN PRIVASI (DIBUAT 1 WADAH TERPADU)                          --}}
+        {{-- TAB 1: KEBIJAKAN PRIVASI (BENTO CONTAINER)                                --}}
         {{-- ========================================================================= --}}
         <div x-show="activeTab === 'kebijakan'" x-cloak class="space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
                 {{-- Header Kebijakan --}}
                 <div class="pb-6 border-b border-slate-100">
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900">Kebijakan Privasi & Operasional Fasilitas Kampus</h2>
@@ -99,7 +99,7 @@
                     {{-- Poin 1 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-900 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">1</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Perlindungan & Privasi Data Pribadi</h3>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
@@ -110,7 +110,7 @@
                     {{-- Poin 2 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-900 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">2</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Kerahasiaan Identitas Pelapor Kerusakan</h3>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
@@ -121,7 +121,7 @@
                     {{-- Poin 3 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-900 flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">3</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Hak Pembatalan Darurat (Force Majeure)</h3>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
@@ -132,7 +132,7 @@
                     {{-- Poin 4 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-900 flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">4</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Mode Pemeliharaan Fasilitas</h3>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
@@ -143,7 +143,7 @@
                     {{-- Poin 5 --}}
                     <div class="pt-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-900 flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">5</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Pencatatan Riwayat & Akuntabilitas Aset</h3>
                         </div>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
@@ -155,10 +155,10 @@
         </div>
 
         {{-- ========================================================================= --}}
-        {{-- TAB 2: SYARAT & KETENTUAN (DIBUAT 1 WADAH TERPADU, 4 BAGIAN)              --}}
+        {{-- TAB 2: SYARAT & KETENTUAN (BENTO CONTAINER)                               --}}
         {{-- ========================================================================= --}}
         <div x-show="activeTab === 'syarat-ketentuan'" x-cloak class="space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
                 {{-- Header Syarat & Ketentuan --}}
                 <div class="pb-6 border-b border-slate-100">
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900">Syarat & Ketentuan Peminjaman Ruang dan Pelaporan</h2>
@@ -172,7 +172,7 @@
                     {{-- Bagian 1 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">1</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Kelayakan Akun Pengguna</h3>
                         </div>
                         <ul class="space-y-1.5 text-xs sm:text-sm text-slate-600 list-disc list-inside pl-8">
@@ -185,7 +185,7 @@
                     {{-- Bagian 2 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">2</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Batas Waktu & Slot Reservasi</h3>
                         </div>
                         <ul class="space-y-1.5 text-xs sm:text-sm text-slate-600 list-disc list-inside pl-8">
@@ -199,7 +199,7 @@
                     {{-- Bagian 3 --}}
                     <div class="py-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">3</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Tata Tertib Penggunaan Ruangan</h3>
                         </div>
                         <ul class="space-y-1.5 text-xs sm:text-sm text-slate-600 list-disc list-inside pl-8">
@@ -213,13 +213,13 @@
                     {{-- Bagian 4 --}}
                     <div class="pt-5">
                         <div class="flex items-center gap-2.5 mb-2">
-                            <span class="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 font-mono">4</span>
                             <h3 class="text-sm sm:text-base font-bold text-slate-800">Ketentuan Pelaporan Kerusakan Aset</h3>
                         </div>
                         <ul class="space-y-1.5 text-xs sm:text-sm text-slate-600 list-disc list-inside pl-8">
                             <li>Pelapor wajib menyertakan foto kondisi fisik aset yang rusak dan keterangan lokasi yang jelas.</li>
                             <li>Dilarang membuat laporan keluhan palsu atau informasi yang tidak dapat dipertanggungjawabkan.</li>
-                            <li>Kerusakan yang terjadi saat kegiatan berlangsung wajib segera dilaporkan kepada petugas jaga agar dapat ditangani.</li>
+                            <li>Kerusakan yang terjadi saat kegiatan berlangsung wajib segera dilaporkan agar dapat ditangani teknisi sarpras dalam &lt; 24 jam.</li>
                         </ul>
                     </div>
                 </div>
@@ -227,16 +227,16 @@
         </div>
 
         {{-- ========================================================================= --}}
-        {{-- TAB 3: BANTUAN & FAQ (LEBIH SIMPEL & RINGKAS)                             --}}
+        {{-- TAB 3: BANTUAN & FAQ (BENTO CONTAINER)                                    --}}
         {{-- ========================================================================= --}}
         <div x-show="activeTab === 'bantuan'" x-cloak class="space-y-6">
             {{-- Panduan Alur 4 Langkah --}}
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
                 <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-1">Tata Cara Peminjaman Ruangan</h2>
                 <p class="text-xs sm:text-sm text-slate-500 mb-6">Alur mudah penggunaan fasilitas kampus dari pengecekan hingga pemakaian.</p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
                         <div>
                             <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900">Langkah 1</span>
                             <h3 class="text-sm font-bold text-slate-800 mt-1">Cek Ketersediaan</h3>
@@ -248,7 +248,7 @@
                         </a>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
                         <div>
                             <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900">Langkah 2</span>
                             <h3 class="text-sm font-bold text-slate-800 mt-1">Masuk ke Akun</h3>
@@ -260,13 +260,13 @@
                         </a>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                         <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900">Langkah 3</span>
                         <h3 class="text-sm font-bold text-slate-800 mt-1">Ajukan Reservasi</h3>
                         <p class="text-xs text-slate-500 mt-1 leading-relaxed">Pilih ruangan, tentukan tanggal, rentang jam, dan tujuan kegiatan.</p>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                         <span class="text-[11px] font-bold uppercase tracking-wider text-blue-900">Langkah 4</span>
                         <h3 class="text-sm font-bold text-slate-800 mt-1">Persetujuan Petugas</h3>
                         <p class="text-xs text-slate-500 mt-1 leading-relaxed">Petugas meninjau permohonan dan menyetujui pemakaian ruangan.</p>
@@ -274,8 +274,8 @@
                 </div>
             </div>
 
-            {{-- Accordion FAQ --}}
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+            {{-- Accordion FAQ Bento --}}
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
                 <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-1">Pertanyaan yang Sering Diajukan (FAQ)</h2>
                 <p class="text-xs sm:text-sm text-slate-500 mb-4">Jawaban ringkas seputar status akun dan peminjaman fasilitas.</p>
 
@@ -318,7 +318,7 @@
                             <span class="material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-200" :class="openFaq === 3 ? 'rotate-180 text-blue-900' : ''">expand_more</span>
                         </button>
                         <div x-show="openFaq === 3" x-cloak class="mt-2 text-xs text-slate-600 leading-relaxed pr-6">
-                            Bisa. Anda dapat membatalkan reservasi secara mandiri melalui menu Riwayat Reservasi pada portal pengguna sebelum jadwal kegiatan dimulai.
+                            Bisa. Anda dapat membatalkan reservasi secara mandiri melalui menu Riwayat Reservasi pada portal pengguna sebelum batas minimal H-1 dari jadwal pelaksanaan.
                         </div>
                     </div>
 
@@ -332,19 +332,19 @@
                             <span class="material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-200" :class="openFaq === 4 ? 'rotate-180 text-blue-900' : ''">expand_more</span>
                         </button>
                         <div x-show="openFaq === 4" x-cloak class="mt-2 text-xs text-slate-600 leading-relaxed pr-6">
-                            Masuk ke portal pengguna dan buka menu Form Lapor Kerusakan. Ambil foto kerusakan, cantumkan nama ruangan dan deskripsi singkat, lalu kirimkan laporan agar segera ditindaklanjuti teknisi.
+                            Masuk ke portal pengguna dan buka menu Pelaporan Kerusakan. Ambil foto kerusakan, cantumkan nama ruangan dan deskripsi singkat, lalu kirimkan laporan agar segera ditinjau dan ditangani teknisi sarpras dalam waktu kurang dari 24 jam.
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Kontak Biro Sarpras --}}
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+            {{-- Kontak Biro Sarpras Bento --}}
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
                 <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-1">Kontak & Layanan Sarpras</h2>
                 <p class="text-xs sm:text-sm text-slate-500 mb-5">Hubungi kami jika memerlukan bantuan administrasi atau perizinan kegiatan khusus.</p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
                         <span class="material-symbols-outlined text-slate-600 text-[20px] shrink-0">location_on</span>
                         <div>
                             <span class="font-bold text-slate-800 block">Kantor Layanan</span>
@@ -352,7 +352,7 @@
                         </div>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
                         <span class="material-symbols-outlined text-slate-600 text-[20px] shrink-0">schedule</span>
                         <div>
                             <span class="font-bold text-slate-800 block">Jam Operasional</span>
@@ -360,7 +360,7 @@
                         </div>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
                         <span class="material-symbols-outlined text-slate-600 text-[20px] shrink-0">call</span>
                         <div>
                             <span class="font-bold text-slate-800 block">WhatsApp Helpdesk</span>
@@ -370,7 +370,7 @@
                         </div>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
                         <span class="material-symbols-outlined text-slate-600 text-[20px] shrink-0">mail</span>
                         <div>
                             <span class="font-bold text-slate-800 block">Surel Resmi</span>
