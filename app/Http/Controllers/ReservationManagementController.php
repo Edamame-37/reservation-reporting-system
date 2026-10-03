@@ -21,32 +21,68 @@ class ReservationManagementController extends Controller
 {
     /**
      * FUNCTION/PROCEDURE : index()
-     * KEGUNAAN           : Menampilkan lembar kerja manajemen reservasi dan daftar seluruh antrean permohonan.
-     * CARA KERJA         : Mengambil seluruh data reservasi beserta relasi user dan facility menggunakan eager loading (with) guna mengeliminasi problem N+1, menghitung metrik counter, dan mengembalikan view 'petugas.reservation-management'.
+     * KEGUNAAN           : Menampilkan lembar kerja manajemen reservasi dan daftar antrean permohonan.
+     * CARA KERJA         : Menerima HTTP request petugas, memfilter berdasarkan status (default 'pending' untuk antrean belum di-acc), memproses pencarian, dan melakukan paginasi server-side (paginate).
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        // 1. Penarikan Data Reservasi dengan Eager Loading & Prioritas Status Pending (FIFO)
-        $reservations = Reservation::with(['facility', 'user'])
-            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
-            ->orderBy('created_at', 'asc')
-            ->get();
+        // 1. Parameter Filter Status (Default: 'pending' untuk menampilkan antrean belum di-acc saat pertama dibuka)
+        $currentStatus = $request->query('status', 'pending');
+        $search = $request->query('search');
 
-        // 2. Perhitungan Statistik Kuantitas Antrean untuk Filter Tab
-        $totalCount = $reservations->count();
-        $pendingCount = $reservations->where('status', 'pending')->count();
-        $approvedCount = $reservations->where('status', 'approved')->count();
-        $cancelledCount = $reservations->where('status', 'cancelled')->count();
-        $rejectedCount = $reservations->where('status', 'rejected')->count();
+        // 2. Query Utama dengan Eager Loading (Relasi facility, user, reviewer)
+        $query = Reservation::with(['facility', 'user', 'reviewer']);
 
-        // 3. Pengembalian View Antarmuka
+        // Filter berdasarkan Status
+        if ($currentStatus && $currentStatus !== 'semua') {
+            $query->where('status', $currentStatus);
+        }
+
+        // Filter Pencarian Teks
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_code', 'like', "%{$search}%")
+                  ->orWhere('purpose', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('identity_number', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('facility', function ($fq) use ($search) {
+                      $fq->where('name', 'like', "%{$search}%")
+                         ->orWhere('building', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Pengurutan Data: Status pending menggunakan FIFO (created_at asc), status lain kronologis terbalik
+        if ($currentStatus === 'pending') {
+            $query->orderBy('created_at', 'asc');
+        } else {
+            $query->orderBy('reservation_date', 'desc')->orderBy('start_time', 'desc');
+        }
+
+        // 3. Eksekusi Paginasi Server-Side (default 10 data per halaman atau sesuai query per_page)
+        $perPage = (int) $request->query('per_page', 10);
+        $reservations = $query->paginate($perPage)->withQueryString();
+
+        // 4. Perhitungan Statistik Kuantitas Antrean untuk Badge Tab Bento
+        $totalCount = Reservation::count();
+        $pendingCount = Reservation::where('status', 'pending')->count();
+        $approvedCount = Reservation::where('status', 'approved')->count();
+        $cancelledCount = Reservation::where('status', 'cancelled')->count();
+        $rejectedCount = Reservation::where('status', 'rejected')->count();
+
+        // 5. Pengembalian View Antarmuka
         return view('petugas.reservation-management', compact(
             'reservations',
             'totalCount',
             'pendingCount',
             'approvedCount',
             'cancelledCount',
-            'rejectedCount'
+            'rejectedCount',
+            'currentStatus',
+            'search'
         ));
     }
 
