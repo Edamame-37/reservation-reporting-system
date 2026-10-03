@@ -8,23 +8,20 @@
 <x-public-layout title="Katalog Lengkap Fasilitas Kampus" active="catalog">
     <div x-data="catalogData()">
 
-        {{-- Header Breadcrumb & Judul Halaman --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/') }}" class="hover:text-slate-900 transition">Beranda</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Katalog Lengkap Fasilitas Kampus</span>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Katalog Seluruh Fasilitas & Ruang Kampus</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Daftar lengkap inventaris ruang universitas dengan spesifikasi peralatan, kapasitas, dan status terkini.</p>
+        {{-- Header Judul Halaman (Bento UI) --}}
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-2">
+                    <span class="material-symbols-outlined text-[14px] text-blue-900">domain</span>
+                    <span>Inventaris Fasilitas Resmi Kampus</span>
                 </div>
-                <a href="{{ url('/public/availability') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs">
-                    <span class="material-symbols-outlined text-[18px]">calendar_month</span>
-                    <span>Buka Matriks Jadwal 30m</span>
-                </a>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Katalog Seluruh Fasilitas & Ruang Kampus</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Daftar lengkap inventaris ruang universitas dengan spesifikasi peralatan, kapasitas, dan status terkini.</p>
             </div>
+            <a href="{{ url('/public/availability') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-xs shrink-0">
+                <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                <span>Buka Matriks Jadwal 30m</span>
+            </a>
         </div>
 
         {{-- Parameter Filter & Pencarian --}}
@@ -103,10 +100,10 @@
         {{-- Grid Fasilitas Kampus (Maksimal 6 Item per Halaman) --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <template x-for="venue in paginatedVenues()" :key="venue.id">
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                <div class="group bg-white rounded-3xl border border-slate-200/80 hover:border-slate-300 p-6 shadow-xs hover:shadow-md transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700" x-text="venue.code || venue.id"></span>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700" x-text="venue.code || venue.id"></span>
                             <span x-show="venue.status === 'approved'" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-semibold">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 Tersedia
@@ -117,25 +114,25 @@
                             </span>
                         </div>
 
-                        <h3 class="text-base font-bold text-slate-900 leading-snug" x-text="venue.name"></h3>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mt-1 mb-3">
+                        <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-950 transition leading-snug" x-text="venue.name"></h3>
+                        <p class="text-xs text-slate-500 flex items-center gap-1 mt-1 mb-3.5">
                             <span class="material-symbols-outlined text-[15px]">location_on</span>
                             <span x-text="venue.building"></span>
                         </p>
 
                         <div class="flex items-center gap-2 text-xs text-slate-600 pb-3 mb-3 border-b border-slate-100">
-                            <span class="font-semibold text-slate-800" x-text="venue.capacity + ' Kursi'"></span>
+                            <span class="font-bold text-slate-800" x-text="venue.capacity + ' Kursi'"></span>
                             <span>•</span>
-                            <span class="truncate" x-text="(venue.equipment && venue.equipment.length ? venue.equipment.slice(0, 2).join(', ') : 'Standar') + '...'"></span>
+                            <span class="truncate text-slate-500" x-text="(venue.equipment && venue.equipment.length ? venue.equipment.slice(0, 2).join(', ') : 'Standar') + '...'"></span>
                         </div>
                     </div>
 
                     <div>
-                        <div class="flex items-center justify-between text-xs text-slate-600 mb-1">
-                            <span>Okupansi Hari Ini:</span>
-                            <span class="font-semibold" x-text="venue.status === 'approved' ? ((venue.availableSlots ?? 26) + ' / ' + (venue.totalSlots ?? 26) + ' Slot Bebas') : 'Terkunci'"></span>
+                        <div class="flex items-center justify-between text-xs text-slate-600 mb-1.5">
+                            <span>Okupansi Slot Hari Ini:</span>
+                            <span class="font-bold font-mono text-slate-800" x-text="venue.status === 'approved' ? ((venue.availableSlots ?? 26) + ' / ' + (venue.totalSlots ?? 26) + ' Slot Bebas') : 'Terkunci'"></span>
                         </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-4">
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-5">
                             <div class="h-full rounded-full transition-all"
                                  :class="venue.status === 'approved' ? 'bg-emerald-500' : 'bg-slate-400'"
                                  :style="`width: ${((venue.availableSlots ?? 26) / (venue.totalSlots ?? 26)) * 100}%`"></div>
@@ -158,29 +155,21 @@
         {{-- Opsi Login untuk Pengunjung (Guest) Jika Data Lebih dari 6 --}}
         @guest
         <template x-if="venues.length > 6">
-            <!-- 
-              ELEMEN       : Banner Ajakan Masuk / Opsi Login untuk Melihat Seluruh Fasilitas
-              KEGUNAAN     : Membatasi pengunjung hanya melihat 6 fasilitas unggulan dan mengarahkan untuk login agar dapat melihat seluruh 78 ruang.
-              CARA KERJA   : Ditampilkan untuk pengunjung yang belum login di bawah 6 fasilitas pertama.
-            -->
-            <div class="mt-8 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 rounded-2xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700/50">
+            <div class="mt-8 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
                         <span class="material-symbols-outlined text-[28px] text-blue-300">lock</span>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-white">Ingin Melihat Lebih Banyak Fasilitas Kampus?</h3>
+                        <h3 class="text-base font-bold text-white">Ingin Mengajukan Permohonan Reservasi?</h3>
                         <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-                            Saat ini Anda melihat 6 fasilitas pilihan. Masuk (Login) menggunakan akun sivitas untuk mengakses katalog lengkap seluruh <span class="font-bold text-white" x-text="venues.length"></span> fasilitas dan mengajukan reservasi.
+                            Saat ini Anda melihat 6 fasilitas teratas. Masuk menggunakan akun SSO sivitas untuk mengajukan reservasi secara resmi dan bebas bentrok jadwal.
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto">
                     <a href="{{ route('login') }}" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-slate-100 transition text-center shadow-xs">
-                        Masuk Sekarang
-                    </a>
-                    <a href="{{ route('register') }}" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/20 transition text-center">
-                        Daftar Akun
+                        Masuk SSO
                     </a>
                 </div>
             </div>
