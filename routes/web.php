@@ -92,6 +92,15 @@ Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'stor
 Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
 Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
 
+// ROUTE: Mengubah status akun pengguna (Aktif <-> Non-aktif)
+Route::post('/admin/users/{id}/toggle-status', [AdminUserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+
+// ROUTE: Soft delete akun pengguna (Pindahkan ke tab Non-aktif/Dihapus)
+Route::delete('/admin/users/{id}', [AdminUserManagementController::class, 'destroy'])->name('admin.users.destroy');
+
+// ROUTE: Memulihkan akun pengguna yang di-soft delete atau dinonaktifkan
+Route::post('/admin/users/{id}/restore', [AdminUserManagementController::class, 'restore'])->name('admin.users.restore');
+
 // Master Fasilitas Routes
 Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
 Route::get('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
