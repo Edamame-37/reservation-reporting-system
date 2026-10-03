@@ -142,16 +142,6 @@
         }
     }" class="space-y-6">
 
-        {{-- Breadcrumb Navigasi --}}
-        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
-            <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px]">home</span>
-                <span>Dasbor Saya</span>
-            </a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-slate-900 font-semibold">Reservasi Ruangan Kampus</span>
-        </div>
-
         {{-- Header Judul --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -260,7 +250,7 @@
         </div>
 
         {{-- Bento Grid Bagian Utama: Daftar Riwayat Reservasi (Bento List View) --}}
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-7">
+        <div id="daftar-reservasi" class="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-7 scroll-mt-6">
             
             {{-- Toolbar Pencarian & Filter Dropdown (Penyederhanaan Komponen Tanpa Tombol Berdempetan) --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100">
@@ -349,14 +339,12 @@
                         {{-- Kolom Kiri: Kode Tiket, Tanggal & Jam Kegiatan --}}
                         <div class="flex-1 min-w-0">
                             <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 font-mono text-xs font-bold text-slate-800">
-                                    {{ $res->ticket_code }}
-                                </span>
                                 <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[15px] text-slate-400">calendar_today</span>
                                     <span>{{ \Carbon\Carbon::parse($res->reservation_date)->translatedFormat('d M Y') }}</span>
                                 </span>
-                                <span class="text-xs text-slate-500 font-mono">
+                                <span class="text-slate-300">•</span>
+                                <span class="text-xs font-semibold text-slate-700">
                                     {{ substr($res->start_time, 0, 5) }} - {{ substr($res->end_time, 0, 5) }} WIB ({{ $res->total_slots ?? 1 }} Slot)
                                 </span>
                             </div>
@@ -700,8 +688,7 @@
                 <template x-if="selectedTicket">
                     <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 rounded-md bg-slate-100 font-mono text-xs font-bold text-slate-800" x-text="selectedTicket.id"></span>
-                            <span class="text-xs font-semibold text-slate-500">Rincian Reservasi</span>
+                            <span class="text-xs font-semibold text-slate-500">Rincian Reservasi Ruangan</span>
                         </div>
 
                         <h2 class="text-lg font-bold text-slate-900" x-text="selectedTicket.venue"></h2>
@@ -714,7 +701,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-500">Rentang Waktu:</span>
-                                <span class="font-mono font-bold text-slate-900" x-text="selectedTicket.time + ' (' + selectedTicket.slots + ' Slot)'"></span>
+                                <span class="font-semibold text-slate-800" x-text="selectedTicket.time + ' (' + selectedTicket.slots + ' Slot)'"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-500">Jumlah Peserta:</span>
@@ -781,7 +768,7 @@
 
                         <h3 class="text-base font-bold text-slate-900 text-center">Konfirmasi Pembatalan Reservasi</h3>
                         <p class="text-xs text-slate-500 text-center mt-1 mb-4">
-                            Apakah Anda yakin ingin membatalkan peminjaman ruangan <strong class="text-slate-800" x-text="selectedTicket.venue"></strong> (<span class="font-mono" x-text="selectedTicket.id"></span>)?
+                            Apakah Anda yakin ingin membatalkan peminjaman ruangan <strong class="text-slate-800" x-text="selectedTicket.venue"></strong>?
                         </p>
 
                         <div class="bg-rose-50/60 border border-rose-100 rounded-xl p-3 text-xs text-rose-800 mb-5 leading-relaxed">
