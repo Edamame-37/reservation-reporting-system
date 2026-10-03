@@ -51,7 +51,6 @@
                     <div class="flex items-center justify-between gap-2 mb-3">
                         <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Filter Pemantauan</span>
                         <span class="inline-flex items-center gap-1 text-[11px] text-blue-200 bg-white/10 px-2.5 py-0.5 rounded-full font-medium">
-                            <span class="material-symbols-outlined text-[14px]">shield</span>
                             <span>Privasi UR-01 Aktif</span>
                         </span>
                     </div>
@@ -238,9 +237,6 @@
             {{-- Card CTA: Masuk SSO untuk Reservasi --}}
             <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-7 text-white shadow-xs flex flex-col justify-between">
                 <div>
-                    <span class="inline-block px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-[11px] font-semibold mb-3">
-                        Layanan Sivitas Akademika
-                    </span>
                     <h3 class="text-lg font-bold">Sudah Menemukan Slot Waktu yang Cocok?</h3>
                     <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
                         Masuk dengan akun SSO Mahasiswa atau Dosen untuk mengajukan permohonan reservasi secara resmi, bebas bentrok jadwal, dan tercatat otomatis.
@@ -258,9 +254,6 @@
             {{-- Card Info: Regulasi Peminjaman & Pembatalan --}}
             <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs flex flex-col justify-between">
                 <div>
-                    <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-900 text-[11px] font-semibold mb-3">
-                        Ketentuan Pemakaian Sarpras
-                    </span>
                     <h3 class="text-lg font-bold text-slate-900">Tata Tertib Peminjaman Fasilitas</h3>
                     <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
                         Permohonan reservasi diajukan minimal <strong>H-2</strong> sebelum acara. Pembatalan mandiri dapat dilakukan hingga <strong>H-1</strong> sebelum slot waktu dimulai.
