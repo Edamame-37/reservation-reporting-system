@@ -142,6 +142,11 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
     Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
 
+    // ROUTE: Menerima GET request ke '/petugas/schedule-matrix'
+    // FUNGSI: Menampilkan matriks jadwal slot 30m operasional untuk peninjauan detail pemohon & reservasi petugas
+    Route::get('/petugas/schedule-matrix', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'index'])->name('petugas.schedule-matrix');
+    Route::get('/api/petugas/matrix/{date}', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'getMatrixData'])->name('api.petugas.matrix');
+
     // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/approve'
     // FUNGSI: Menyetujui permohonan reservasi dengan validasi anti-bentrok jadwal (PTG-02 / US-9)
     Route::patch('/petugas/reservations/{id}/approve', [ReservationManagementController::class, 'approve'])->name('petugas.reservations.approve');
