@@ -118,30 +118,36 @@
             </div>
         </div>
 
-        {{-- 3. Filter & Search Bar --}}
+        {{-- 3. Filter & Search Bar Server-Side --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium w-full md:w-auto overflow-x-auto">
-                <button type="button" @click="activeTab = 'semua'" :class="activeTab === 'semua' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+            <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold w-full md:w-auto overflow-x-auto">
+                <a href="{{ route('petugas.report-management', ['status' => 'semua', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap {{ ($currentStatus ?? 'semua') === 'semua' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Semua ({{ $totalCount }})
-                </button>
-                <button type="button" @click="activeTab = 'baru'" :class="activeTab === 'baru' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                </a>
+                <a href="{{ route('petugas.report-management', ['status' => 'baru', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap {{ ($currentStatus ?? '') === 'baru' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Baru ({{ $newCount }})
-                </button>
-                <button type="button" @click="activeTab = 'diproses'" :class="activeTab === 'diproses' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                </a>
+                <a href="{{ route('petugas.report-management', ['status' => 'diproses', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap {{ ($currentStatus ?? '') === 'diproses' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Sedang Diproses ({{ $inProgressCount }})
-                </button>
-                <button type="button" @click="activeTab = 'selesai'" :class="activeTab === 'selesai' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                </a>
+                <a href="{{ route('petugas.report-management', ['status' => 'selesai', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap {{ ($currentStatus ?? '') === 'selesai' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Selesai ({{ $resolvedCount }})
-                </button>
-                <button type="button" @click="activeTab = 'ditolak'" :class="activeTab === 'ditolak' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                </a>
+                <a href="{{ route('petugas.report-management', ['status' => 'ditolak', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-lg transition whitespace-nowrap {{ ($currentStatus ?? '') === 'ditolak' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Ditolak ({{ $rejectedCount }})
-                </button>
+                </a>
             </div>
 
-            <div class="relative w-full md:w-64">
+            <form method="GET" action="{{ route('petugas.report-management') }}" class="relative w-full md:w-72">
+                <input type="hidden" name="status" value="{{ $currentStatus ?? 'semua' }}">
                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
-                <input type="text" x-model="search" placeholder="Cari tiket / ruang / pelapor..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
-            </div>
+                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari tiket / ruang / pelapor..." class="w-full pl-9 pr-9 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition">
+                @if(!empty($search))
+                    <a href="{{ route('petugas.report-management', ['status' => $currentStatus ?? 'semua']) }}" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700">
+                        <span class="material-symbols-outlined text-[16px]">close</span>
+                    </a>
+                @endif
+            </form>
         </div>
 
         {{-- 4. Tabel Tiket Kerusakan Lengkap --}}
@@ -171,7 +177,7 @@
                                 $isFacilityLocked = !empty($report->is_facility_locked) || ($report->facility?->status === 'dalam perbaikan');
                                 $facilityName = $report->facility->name ?? 'Fasilitas Terkait';
                             @endphp
-                            <tr x-show="matchesFilter('{{ $report->status }}', '{{ addslashes($searchContent) }}')" class="hover:bg-slate-50/70 transition">
+                            <tr class="hover:bg-slate-50/70 transition">
                                 <td class="py-3.5 px-4 align-top whitespace-nowrap">
                                     <div class="font-mono font-bold text-slate-800">
                                         {{ $report->report_code ?? 'RPT-' . $report->id }}
@@ -295,6 +301,18 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Navigasi Paginasi Server-Side Laravel --}}
+            @if ($reports->total() > 0)
+                <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                    <div class="text-slate-500">
+                        Menampilkan <strong class="text-slate-900">{{ $reports->firstItem() ?? 0 }}</strong> sampai <strong class="text-slate-900">{{ $reports->lastItem() ?? 0 }}</strong> dari total <strong class="text-slate-900">{{ $reports->total() }}</strong> laporan
+                    </div>
+                    <div>
+                        {{ $reports->links() }}
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- 5. Modal Perbarui Status Tiket & Kunci Fasilitas (PTG-04 / US-11 / UR12) --}}

@@ -87,7 +87,7 @@
                 @endif
             </a>
 
-            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'availability' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ route('petugas.schedule-matrix') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'schedule-matrix' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                     <span>Matriks Jadwal 30m</span>
