@@ -35,10 +35,6 @@ Route::get('/', function () {
 })->name('home');
 
 
-// Mockup Routes - Admin
-Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
-Route::get('/admin/export-report', function () { return view('admin.export-report'); })->name('admin.export-report');
-
 // ROUTE: Menerima GET request ke '/public/catalog'
 // FUNGSI: Menampilkan katalog daftar fasilitas dan ruang kampus beserta filter
 Route::get('/public/catalog', [PublicFacilityController::class, 'index'])->name('public.catalog');
