@@ -44,7 +44,7 @@
                 <p class="text-xs text-slate-300 mt-2">Anda tidak memiliki permohonan reservasi yang telah disetujui untuk waktu dekat.</p>
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto">
-                <a href="{{ url('/user/reservation-form') }}" class="w-full md:w-auto px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 transition shadow-xs text-center">
+                <a href="{{ url('/user/reservation-history?action=create') }}" class="w-full md:w-auto px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 transition shadow-xs text-center">
                     Ajukan Reservasi
                 </a>
             </div>
@@ -57,7 +57,7 @@
       KEGUNAAN     : Pintasan cepat menuju aksi utama permohonan dan pemantauan pengguna.
     -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <a href="{{ url('/user/reservation-form') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
+        <a href="{{ url('/user/reservation-history?action=create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
             <div class="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                 <span class="material-symbols-outlined text-[22px]">add_circle</span>
             </div>
@@ -77,7 +77,7 @@
             </div>
         </a>
 
-        <a href="{{ url('/user/report-form') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
+        <a href="{{ url('/user/report-history?action=create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
             <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <span class="material-symbols-outlined text-[22px]">report_problem</span>
             </div>
