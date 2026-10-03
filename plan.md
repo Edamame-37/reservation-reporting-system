@@ -7,6 +7,7 @@
 3. **Standardisasi Respon Petugas (< 24 Jam) Pengganti SLA**: Menghapus istilah teknis "SLA Respon Teknisi" pada pelaporan kerusakan dan menggantinya dengan penjelasan manusiawi bahwa laporan akan ditinjau dan direspon oleh petugas dalam waktu kurang dari 24 jam. Menyesuaikan teks terkait pada antarmuka Petugas dan Admin.
 4. **Pembersihan Navigasi Atas (*Breadcrumb Removal*)**: Menghapus elemen breadcrumb ikon home dan tulisan *"Dasbor Saya > ..."* di bagian atas halaman pengguna agar tampilan lebih modern dan langsung berfokus pada konten utama.
 5. **Pembersihan Kode Tiket & Penyeragaman Font Tanggal/Jam**: Menghilangkan tampilan kode tiket dari kartu reservasi pengguna dan menyamakan font jam kegiatan dengan font tanggal (Inter/Sans bold, bukan monospace).
+6. **Transformasi Bento UI Halaman Publik (Non-Login)**: Mengubah seluruh antarmuka publik (`home.blade.php`, `catalog.blade.php`, `availability.blade.php`, `information.blade.php`) menjadi Bento UI modern yang berkarakter (menghilangkan kesan template/AI slop), serta mengimplementasikan paginasi **hanya 10 ruangan per halaman** pada Matriks Jadwal Ketersediaan 30 Menit.
 
 **Dokumen Terkait**: `RULE_FRONTEND.md`, `RULE_BACKEND.md`, `GUIDE_GITHUB.md`, `TECHSTACK.md`, `CASE_PROJECT.md`
 
