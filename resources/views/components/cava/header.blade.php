@@ -33,7 +33,7 @@
                 </button>
                 @if($pageName)
                     <div class="hidden sm:block ml-1 sm:ml-2 border-l border-slate-200 pl-3 sm:pl-4 py-1">
-                        <h1 class="text-sm font-bold text-slate-800">{{ $pageName }}</h1>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-800">{{ $pageName }}</h1>
                     </div>
                 @endif
             @else
