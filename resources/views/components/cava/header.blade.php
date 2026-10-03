@@ -12,16 +12,17 @@
     'userIdentifier' => 'NIP 198402112009121003',
     'title' => 'CAVA',
     'subtitle' => 'Campus Venue Access',
+    'pageName' => '',
     'role' => 'user',
     'active' => ''
 ])
 
 <!-- 
   ELEMEN       : Fixed Top Header (Tinggi 64px / h-16)
-  KEGUNAAN     : Header membentang penuh (Full-width), menaungi konten dan sidebar.
-  CARA KERJA   : fixed top-0 left-0 right-0 z-50
+  KEGUNAAN     : Header membentang (offset pada desktop), menaungi notifikasi dan profil.
+  CARA KERJA   : fixed top-0 right-0 z-40
 -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 h-16">
+<header :class="{'md:left-64': sidebarOpen && '{{ $role }}' !== 'public', 'left-0': !sidebarOpen || '{{ $role }}' === 'public'}" class="fixed top-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 h-16 transition-all duration-300">
     <div class="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {{-- Sisi Kiri: Brand & Toggle Sidebar --}}
         <div class="flex items-center gap-2 sm:gap-3">
@@ -30,21 +31,26 @@
                 <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
                     <span class="material-symbols-outlined text-[24px]">menu</span>
                 </button>
+                @if($pageName)
+                    <div class="hidden sm:block ml-1 sm:ml-2 border-l border-slate-200 pl-3 sm:pl-4 py-1">
+                        <h1 class="text-sm font-bold text-slate-800">{{ $pageName }}</h1>
+                    </div>
+                @endif
             @else
                 {{-- Hamburger khusus mobile untuk public --}}
                 <button type="button" @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-lg p-1 transition-colors">
                     <span class="material-symbols-outlined text-[24px]">menu</span>
                 </button>
+                
+                {{-- Logo CAVA untuk public (karena tidak ada sidebar di desktop) --}}
+                <a href="{{ url('/') }}" class="flex items-center gap-3 group ml-1 sm:ml-2">
+                    <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-9 w-auto">
+                    <div class="flex flex-col hidden sm:flex">
+                        <span class="font-bold text-slate-900 text-sm sm:text-base leading-tight tracking-tight group-hover:text-blue-900 transition-colors">{{ $title }}</span>
+                        <span class="text-[10px] sm:text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
+                    </div>
+                </a>
             @endif
-            
-            {{-- Logo CAVA yang selalu tampil --}}
-            <a href="{{ url('/') }}" class="flex items-center gap-3 group ml-1 sm:ml-2">
-                <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-9 w-auto">
-                <div class="flex flex-col hidden sm:flex">
-                    <span class="font-bold text-slate-900 text-sm sm:text-base leading-tight tracking-tight group-hover:text-blue-900 transition-colors">{{ $title }}</span>
-                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">{{ $subtitle }}</span>
-                </div>
-            </a>
         </div>
 
         {{-- Navigasi Publik Tengah (Desktop) --}}

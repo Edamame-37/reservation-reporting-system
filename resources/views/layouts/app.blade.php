@@ -47,6 +47,7 @@
         userIdentifier="NIM: {{ auth()->user()->nim ?? '2110512044' }}"
         title="CAVA Portal" 
         subtitle="Campus Venue Access"
+        pageName="{{ $title }}"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: User) --}}

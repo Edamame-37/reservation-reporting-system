@@ -31,16 +31,34 @@
 @endphp
 
 <!-- 
-  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Top 64px / top-16)
+  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Full Height)
   KEGUNAAN     : Menyediakan akses instan ke modul sistem sesuai otorisasi peran pengguna.
   CARA KERJA     : Menerapkan kelas aktif bg-slate-900 text-white pada rute yang sesuai props 'active'.
 -->
 {{-- Sidebar Overlay (Mobile) --}}
-<div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-20 md:hidden" @click="sidebarOpen = false"></div>
+<div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-40 md:hidden" @click="sidebarOpen = false"></div>
 
-<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'transition-transform duration-300': isLoaded}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-40">
-    {{-- Header Sidebar --}}
-    <div class="p-5 border-b border-slate-100 bg-slate-50/30">
+<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'transition-transform duration-300': isLoaded}" class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-50">
+    {{-- Header Sidebar (Logo & Brand) --}}
+    @if($role !== 'public')
+    <div class="h-16 px-4 sm:px-5 flex items-center border-b border-slate-200/80 bg-white/95">
+        <a href="{{ url('/') }}" class="flex items-center gap-3 group">
+            <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-8 sm:h-9 w-auto">
+            <div class="flex flex-col">
+                <span class="font-bold text-slate-900 text-sm leading-tight tracking-tight group-hover:text-blue-900 transition-colors">
+                    @if($role === 'admin') CAVA Admin
+                    @elseif($role === 'petugas') CAVA Operasional
+                    @elseif($role === 'user') CAVA Portal
+                    @else CAVA @endif
+                </span>
+                <span class="text-[10px] text-slate-500 font-medium">Campus Venue Access</span>
+            </div>
+        </a>
+    </div>
+    @endif
+
+    {{-- Kategori Navigasi --}}
+    <div class="p-4 border-b border-slate-100 bg-slate-50/30">
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
         <div class="mt-1 text-xs font-bold text-slate-900">
             @if($role === 'admin')

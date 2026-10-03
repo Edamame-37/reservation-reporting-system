@@ -47,6 +47,7 @@
         userIdentifier="Biro TIK & Rektorat"
         title="CAVA Admin" 
         subtitle="Campus Venue Access"
+        pageName="{{ $title }}"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Admin) --}}

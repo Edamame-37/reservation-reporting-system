@@ -47,6 +47,7 @@
         userIdentifier="NIP. {{ auth()->user()->nip ?? '197804122005011002' }}"
         title="CAVA Operasional" 
         subtitle="Campus Venue Access"
+        pageName="{{ $title }}"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Petugas) --}}
