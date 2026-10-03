@@ -152,29 +152,27 @@
                 @enderror
             </div>
 
-            {{-- Kategori Kerusakan (Opsional) --}}
+            {{-- Kategori Kerusakan (DROPDOWN RAPI MENGGANTIKAN PILL BERDEMPETAN) --}}
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    <label for="rep-category" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
                         Kategori Kerusakan Sarana
                     </label>
                     <span class="text-[11px] text-slate-500 font-medium">Opsional (dapat dilewati)</span>
                 </div>
-                <input type="hidden" name="category" :value="selectedCategory">
 
-                <div class="flex flex-wrap gap-2">
+                <select id="rep-category" 
+                        name="category" 
+                        class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                    <option value="">-- Pilih Kategori Kendala (Atau Kosongkan) --</option>
                     @foreach ($categories as $cat)
-                        <button type="button" 
-                                @click="selectCategory('{{ $cat }}')"
-                                :class="selectedCategory === '{{ $cat }}' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60'"
-                                class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5">
-                            <span x-show="selectedCategory === '{{ $cat }}'" class="material-symbols-outlined text-[14px]">check</span>
-                            <span>{{ $cat }}</span>
-                        </button>
+                        <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>
+                            {{ $cat }}
+                        </option>
                     @endforeach
-                </div>
+                </select>
                 <p class="mt-1.5 text-[11px] text-slate-400">
-                    Jika jenis kerusakan tidak ada pada opsi di atas, Anda dapat melewatinya dan menguraikannya pada deskripsi di bawah.
+                    Pilih kategori kendala yang sesuai atau kosongkan dan uraikan secara mendalam pada deskripsi masalah.
                 </p>
                 @error('category')
                     <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
