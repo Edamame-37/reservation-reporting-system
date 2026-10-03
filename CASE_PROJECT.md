@@ -40,13 +40,13 @@ Berdasarkan analisis kebutuhan dan batasan sistem, berikut adalah asumsi dan atu
 |---|---|
 | **Batasan Waktu Pembatalan** | Pengguna hanya diizinkan membatalkan reservasi yang telah diajukan paling lambat **H-1** sebelum jadwal penggunaan fasilitas. |
 | **Notifikasi Sistem** | Sistem menyediakan mekanisme notifikasi (minimal berupa pemberitahuan di dalam aplikasi atau email) ketika status reservasi atau laporan berubah. |
-| **Tipe Kerusakan** | Fasilitas yang ada diasumsikan dapat mengalami kerusakan tidak terduga, baik karena faktor usia, kesalahan manusia, maupun faktor eksternal (misalnya kabel jaringan digigit tikus atau **kucing** yang masuk ke ruang laboratorium). |
+| **Tipe Kerusakan** | Fasilitas yang ada diasumsikan dapat mengalami kerusakan tidak terduga, baik karena faktor usia, kesalahan manusia, maupun faktor eksternal (misalnya gangguan kelistrikan, kerusakan akibat cuaca, atau bencana alam). |
 | **Standarisasi Media** | Fitur laporan kerusakan dengan unggah foto memiliki pembatasan format (misal JPG/PNG) dan batas maksimal ukuran file (misal 2 MB) untuk menghemat penyimpanan server. |
 | **Proses Registrasi** | Jika fitur registrasi mandiri digunakan oleh Pengguna, status akun mereka diatur sebagai "Pending" secara *default* hingga Admin melakukan verifikasi. |
-| **Kapasitas Konkurensi Sistem** | Sistem harus dirancang tangkas dan responsif ibarat kucing, sanggup menangani penggunaan maksimal oleh **100 *user* secara bersamaan** (*concurrent users*) untuk melakukan tugas pemesanan di detik yang sama, tanpa menyebabkan *server* tumbang atau tembusnya celah *double-booking*. |
+| **Kapasitas Konkurensi Sistem** | Sistem harus dirancang dengan kinerja yang tangkas dan responsif, sanggup menangani penggunaan maksimal oleh **100 *user* secara bersamaan** (*concurrent users*) untuk melakukan tugas pemesanan di detik yang sama, tanpa menyebabkan *server* tumbang atau tembusnya celah *double-booking*. |
 | **Ketentuan Jam Operasional & Slot** | Pemesanan fasilitas mutlak dibatasi pada jam operasional kampus (**07.00 – 20.00**). Rentang waktu wajib menggunakan slot durasi tetap kelipatan **30 menit** (misal 07.30–08.00). Validasi slot waktu ini **wajib diproteksi ketat di sisi *server*** (bukan sekadar di tampilan visual kalender). |
-| **Kewenangan Eksekusi Petugas** | Petugas memiliki hak absolut untuk membatalkan reservasi yang sudah disetujui dalam kondisi mendesak/darurat (misalnya fasilitas mendadak bocor atau kotor dimasuki hewan liar liar seperti kucing), dengan syarat wajib mencantumkan alasan pembatalan. |
-| **Sinkronisasi Pelaporan & Reservasi** | Saat Petugas merespons laporan kerusakan dan menandai fasilitas "Dalam Perbaikan", fasilitas tersebut otomatis berstatus tidak tersedia di kalender utama. Hal ini secara otomatis mencegah pengguna lain tanpa sengaja memesan fasilitas yang sedang rusak, sehingga mereka tidak merasa seperti membeli kucing dalam karung. |
+| **Kewenangan Eksekusi Petugas** | Petugas memiliki hak absolut untuk membatalkan reservasi yang sudah disetujui dalam kondisi mendesak/darurat (misalnya fasilitas mendadak bocor, rusak parah, atau tidak layak guna), dengan syarat wajib mencantumkan alasan pembatalan. |
+| **Sinkronisasi Pelaporan & Reservasi** | Saat Petugas merespons laporan kerusakan dan menandai fasilitas "Dalam Perbaikan", fasilitas tersebut otomatis berstatus tidak tersedia di kalender utama. Hal ini secara otomatis mencegah pengguna lain tanpa sengaja memesan fasilitas yang sedang rusak. |
 
 ## 4. Fitur List (Berdasarkan User Story)
 
@@ -90,7 +90,7 @@ Kebutuhan dari sisi pengguna sistem agar fitur dapat berjalan optimal:
 |---|---|
 | **Pengunjung** | Memerlukan *interface* penanggalan (kalender) yang interaktif untuk mengecek slot waktu secara instan tanpa harus mendaftar. |
 | **Pengguna** | Membutuhkan antarmuka pengisian waktu (start dan end) yang secara otomatis terkunci pada jam operasional (07.00 - 20.00) dan interval 30 menit. |
-| **Pengguna** | Memerlukan form pelaporan yang responsif, sehingga saat mereka menemukan masalah di lapangan (contohnya kursi patah atau ada kotoran **kucing** di lapangan), mereka dapat langsung memfoto dan melaporkannya lewat ponsel. |
+| **Pengguna** | Memerlukan form pelaporan yang responsif, sehingga saat mereka menemukan masalah di lapangan (contohnya kursi patah atau kondisi fasilitas sangat kotor), mereka dapat langsung memfoto dan melaporkannya lewat ponsel. |
 | **Petugas** | Membutuhkan pandangan terpusat (dashboard) yang menampilkan indikator atau notifikasi *real-time* jika ada antrian reservasi atau laporan baru, sehingga SLA terjaga. |
 | **Admin** | Memerlukan halaman *user management* yang terstruktur untuk memudahkan pencarian pengguna *pending* dan pengunduhan laporan secara periodik. |
 
@@ -105,7 +105,7 @@ Kebutuhan dari sisi pengguna sistem agar fitur dapat berjalan optimal:
 | **Functional** | Sistem **harus** menyediakan dukungan format *export* file (CSV/Excel/PDF) menggunakan *library* terkait di sisi *backend* atau *frontend*. |
 | **Functional** | Sistem **harus** menerapkan pengelolaan file gambar (unggah, simpan di server, dan tampilkan) pada modul laporan kerusakan. |
 | **Non-Functional** | **Architecture:** Kode sistem harus dipisahkan menjadi minimal 3 bagian utama (koneksi DB, MVC, dan HTML) dan terorganisir (contoh: `/public`, `/app`, `/views`, `/config`). |
-| **Non-Functional** | **Usability (UI/UX):** Antarmuka harus sangat mudah dipahami dengan visualisasi kalender yang jelas, sehingga siapa pun, bahkan petugas yang sedang asyik memberi makan **kucing** di kampus, dapat mengoperasikannya tanpa kebingungan di perangkat *mobile* maupun *desktop*. |
+| **Non-Functional** | **Usability (UI/UX):** Antarmuka harus sangat mudah dipahami dengan visualisasi kalender yang jelas, sehingga pengguna awam maupun petugas lapangan dapat mengoperasikannya tanpa kebingungan di perangkat *mobile* maupun *desktop*. |
 | **Non-Functional** | **Reliability & Data Integrity:** Sistem harus menjamin bahwa status persetujuan yang dieksekusi secara bersamaan (*race condition*) dapat ditangani dengan baik agar tidak terjadi bentrok. |
 | **Non-Functional** | **Security:** Perlindungan ganda pada form penting dengan validasi di *client-side* maupun *server-side*. Password di *database* harus di-hash (*bcrypt*). |
 | **Non-Functional** | **Collaboration:** Pengembangan sistem wajib menggunakan *version control* (GitHub/GitLab) dengan standar komit yang deskriptif oleh setiap anggota. |

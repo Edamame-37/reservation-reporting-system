@@ -125,7 +125,33 @@
           KEGUNAAN     : Menyajikan daftar rincian utilisasi setiap ruang pada periode berjalan.
           CARA KERJA   : Melakukan perulangan data pada $facilityUtilization dengan data permohonan, persetujuan, dan rasio jam.
         -->
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg border border-outline-variant/50 flex flex-col gap-space-md">
+        <section x-data="{
+            allRows: @json($facilityUtilization),
+            currentPage: 1,
+            perPage: 10,
+            get totalPages() {
+                return Math.max(1, Math.ceil(this.allRows.length / this.perPage));
+            },
+            get displayedRows() {
+                const start = (this.currentPage - 1) * this.perPage;
+                return this.allRows.slice(start, start + this.perPage);
+            },
+            setPage(p) {
+                if (p >= 1 && p <= this.totalPages) {
+                    this.currentPage = p;
+                }
+            },
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                }
+            },
+            nextPage() {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                }
+            }
+        }" class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg border border-outline-variant/50 flex flex-col gap-space-md">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-sm border-b border-outline-variant gap-2">
                 <div class="flex items-center gap-space-xs">
                     <span class="material-symbols-outlined text-primary text-[20px]">table_chart</span>
@@ -150,32 +176,84 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-container-high/40">
-                        @forelse($facilityUtilization as $row)
-                        <tr class="hover:bg-surface-container-low transition-colors">
-                            <td class="py-space-md px-space-md font-bold text-primary">{{ $row['code'] }} • {{ $row['name'] }}</td>
-                            <td class="py-space-md px-space-md text-on-surface-variant">{{ $row['building'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono">{{ $row['total_applications'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono text-secondary font-bold">{{ $row['approved_count'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono text-error">{{ $row['rejected_count'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono">{{ number_format($row['total_hours'], 1) }} Jam</td>
-                            <td class="py-space-md px-space-md text-right">
-                                <span class="px-2 py-0.5 rounded-full {{ $row['utilization_rate'] >= 70 ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-primary' }} font-data-mono font-bold text-[11px]">{{ $row['utilization_rate'] }}%</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="py-8 text-center text-on-surface-variant">
-                                <div class="flex flex-col items-center justify-center gap-1.5">
-                                    <span class="material-symbols-outlined text-outline-variant text-[28px]">event_busy</span>
-                                    <p class="font-medium text-xs">Belum ada rekaman permohonan reservasi fasilitas pada rentang tanggal ini.</p>
-                                    <p class="text-[11px] text-outline">Gunakan filter periode di atas untuk memuat tanggal lainnya.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
+                        <template x-for="row in displayedRows" :key="row.id">
+                            <tr class="hover:bg-surface-container-low transition-colors">
+                                <td class="py-space-md px-space-md font-bold text-primary" x-text="row.code + ' • ' + row.name"></td>
+                                <td class="py-space-md px-space-md text-on-surface-variant" x-text="row.building"></td>
+                                <td class="py-space-md px-space-md font-data-mono" x-text="row.total_applications"></td>
+                                <td class="py-space-md px-space-md font-data-mono text-secondary font-bold" x-text="row.approved_count"></td>
+                                <td class="py-space-md px-space-md font-data-mono text-error" x-text="row.rejected_count"></td>
+                                <td class="py-space-md px-space-md font-data-mono" x-text="parseFloat(row.total_hours).toFixed(1) + ' Jam'"></td>
+                                <td class="py-space-md px-space-md text-right">
+                                    <span class="px-2 py-0.5 rounded-full font-data-mono font-bold text-[11px]"
+                                          :class="row.utilization_rate >= 70 ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-primary'"
+                                          x-text="row.utilization_rate + '%'"></span>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="allRows.length === 0">
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-on-surface-variant">
+                                    <div class="flex flex-col items-center justify-center gap-1.5">
+                                        <span class="material-symbols-outlined text-outline-variant text-[28px]">event_busy</span>
+                                        <p class="font-medium text-xs">Belum ada rekaman permohonan reservasi fasilitas pada rentang tanggal ini.</p>
+                                        <p class="text-[11px] text-outline">Gunakan filter periode di atas untuk memuat tanggal lainnya.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                 </table>
             </div>
+
+            <!-- 
+              ELEMEN       : Kontrol Navigasi Paginasi Interaktif (10 Baris per Halaman)
+              KEGUNAAN     : Memungkinkan Super Admin berpindah halaman data rekapitulasi secara dinamis tanpa reload layar.
+              CARA KERJA   : Alpine.js membagi data menjadi halaman-halaman berukuran 10 baris, menghitung total halaman secara dinamis, dan merender baris sesuai halaman aktif.
+            -->
+            <template x-if="allRows.length > 0">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-space-sm border-t border-outline-variant text-xs text-on-surface-variant font-body-sm">
+                    <div>
+                        <span>Menampilkan <strong class="text-primary font-bold" x-text="((currentPage - 1) * perPage) + 1"></strong> s.d. <strong class="text-primary font-bold" x-text="Math.min(currentPage * perPage, allRows.length)"></strong> dari <strong class="text-primary font-bold" x-text="allRows.length"></strong> fasilitas kampus</span>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        {{-- Tombol Sebelumnya --}}
+                        <button 
+                            type="button" 
+                            @click="prevPage()" 
+                            :disabled="currentPage === 1"
+                            :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-surface-container text-on-surface-variant' : 'hover:bg-surface-container text-primary bg-surface-container-low'"
+                            class="px-2.5 py-1 rounded border border-outline-variant/60 font-semibold transition flex items-center gap-1 text-[11px]">
+                            <span class="material-symbols-outlined text-[14px]">chevron_left</span>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        {{-- Nomor Halaman Dinamis --}}
+                        <template x-for="p in totalPages" :key="p">
+                            <button 
+                                type="button" 
+                                @click="setPage(p)"
+                                x-show="p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1"
+                                :class="currentPage === p ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low hover:bg-surface-container text-primary'"
+                                class="w-7 h-7 rounded border border-outline-variant/60 text-[11px] transition flex items-center justify-center font-medium"
+                                x-text="p">
+                            </button>
+                        </template>
+
+                        {{-- Tombol Selanjutnya --}}
+                        <button 
+                            type="button" 
+                            @click="nextPage()" 
+                            :disabled="currentPage === totalPages"
+                            :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed bg-surface-container text-on-surface-variant' : 'hover:bg-surface-container text-primary bg-surface-container-low'"
+                            class="px-2.5 py-1 rounded border border-outline-variant/60 font-semibold transition flex items-center gap-1 text-[11px]">
+                            <span>Selanjutnya</span>
+                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </template>
         </section>
 
         <!-- 

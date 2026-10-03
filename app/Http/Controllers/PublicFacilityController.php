@@ -45,9 +45,21 @@ class PublicFacilityController extends Controller
         }
 
         // Ambil data yang lolos filter
+        $today = Carbon::today()->toDateString();
+        $todayReservations = Reservation::where('reservation_date', $today)
+            ->where('status', 'approved')
+            ->get()
+            ->groupBy('facility_id');
+
         $facilities = $query->orderBy('name', 'asc')
             ->get()
-            ->map(function ($f) {
+            ->map(function ($f) use ($todayReservations) {
+                $occupiedSlots = isset($todayReservations[$f->id])
+                    ? $todayReservations[$f->id]->sum('total_slots')
+                    : 0;
+                $totalSlots = 26; // 13 jam operasional * 2 slot (07:00 - 20:00 WIB)
+                $availableSlots = $f->status === 'dalam perbaikan' ? 0 : max(0, $totalSlots - $occupiedSlots);
+
                 return [
                     'id' => $f->id,
                     'code' => $f->code,
@@ -58,7 +70,9 @@ class PublicFacilityController extends Controller
                     'status' => $f->status === 'dalam perbaikan' ? 'locked' : 'approved',
                     'equipment' => is_array($f->equipment) ? $f->equipment : (json_decode($f->equipment, true) ?? []),
                     'desc' => $f->description,
-                    'image' => $f->image_path
+                    'image' => $f->image_path,
+                    'totalSlots' => $totalSlots,
+                    'availableSlots' => $availableSlots,
                 ];
             });
 
@@ -101,7 +115,7 @@ class PublicFacilityController extends Controller
 
         // 2. Ambil seluruh reservasi berstatus approved pada tanggal tersebut
         $reservations = Reservation::where('status', 'approved')
-            ->whereDate('start_time', $parsedDate)
+            ->whereDate('reservation_date', $parsedDate)
             ->get(['facility_id', 'start_time', 'end_time']);
 
         $matrix = [];
@@ -156,7 +170,7 @@ class PublicFacilityController extends Controller
 
         $bookedSlots = Reservation::where('facility_id', $id)
             ->where('status', 'approved')
-            ->whereDate('start_time', $parsedDate)
+            ->whereDate('reservation_date', $parsedDate)
             ->get(['start_time', 'end_time']);
 
         return response()->json([
