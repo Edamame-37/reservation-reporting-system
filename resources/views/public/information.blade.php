@@ -12,8 +12,7 @@
     -->
     <section class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-white shadow-xs mb-6">
         <div class="max-w-3xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold mb-3">
-                <span class="material-symbols-outlined text-[14px] text-blue-300">info</span>
+            <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold mb-3">
                 <span>Pusat Informasi & Regulasi Sarpras CAVA</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
@@ -50,8 +49,7 @@
                     :class="activeTab === 'kebijakan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
-                    <span class="material-symbols-outlined text-[18px]">shield</span>
+                    class="flex items-center justify-center px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="truncate">Kebijakan Privasi</span>
                 </button>
 
@@ -62,8 +60,7 @@
                     :class="activeTab === 'syarat-ketentuan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
-                    <span class="material-symbols-outlined text-[18px]">gavel</span>
+                    class="flex items-center justify-center px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="truncate">Syarat & Ketentuan</span>
                 </button>
 
@@ -74,8 +71,7 @@
                     :class="activeTab === 'bantuan' 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                    class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
-                    <span class="material-symbols-outlined text-[18px]">help</span>
+                    class="flex items-center justify-center px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
                     <span class="truncate">Pusat Bantuan & FAQ</span>
                 </button>
             </div>
