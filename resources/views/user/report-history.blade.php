@@ -72,16 +72,6 @@
         }
     }" class="space-y-6">
 
-        {{-- Breadcrumb Navigasi --}}
-        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
-            <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px]">home</span>
-                <span>Dasbor Saya</span>
-            </a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-slate-900 font-semibold">Pelaporan Kerusakan Fasilitas</span>
-        </div>
-
         {{-- Header Judul --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -165,20 +155,16 @@
                 </div>
             </div>
 
-            {{-- Bento Card 2: Quick Action & Jaminan SLA (5 Kolom di Desktop) --}}
+            {{-- Bento Card 2: Quick Action & Penanganan Sarpras (5 Kolom di Desktop) --}}
             <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col justify-between relative overflow-hidden">
                 <div class="relative z-10">
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/90 text-[11px] font-semibold mb-3 backdrop-blur-xs">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>SLA Respon Teknisi: &lt; 24 Jam</span>
-                    </div>
                     <h3 class="text-base sm:text-lg font-bold">Temukan Sarana Rusak?</h3>
                     <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-                        Kirimkan laporan kerusakan AC, proyektor, kelistrikan, atau fasilitas kampus lainnya untuk segera diperbaiki oleh tim sarpras.
+                        Kirimkan laporan kerusakan AC, proyektor, kelistrikan, atau fasilitas kampus lainnya. Laporan Anda akan segera ditinjau dan direspon oleh petugas sarpras dalam waktu kurang dari 24 jam.
                     </p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-white/10 relative z-10 flex items-center justify-between">
-                    <span class="text-[11px] text-slate-400">Gratis & terintegrasi sistem</span>
+                    <span class="text-[11px] text-slate-400">Respon petugas &lt; 24 jam</span>
                     <button type="button" 
                             @click="showCreateModal = true" 
                             class="px-4 py-2 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition shadow-xs flex items-center gap-1.5">
@@ -282,18 +268,6 @@
                             <h3 class="text-sm sm:text-base font-bold text-slate-900 group-hover:text-blue-950 transition truncate">
                                 {{ $report->facility->name ?? 'Fasilitas Kampus' }}
                             </h3>
-
-                            <p class="text-xs text-slate-600 mt-1 line-clamp-1">
-                                {{ $report->description }}
-                            </p>
-
-                            {{-- Catatan Resolusi Singkat Jika Ada --}}
-                            @if ($report->resolution_note)
-                                <div class="mt-2 text-[11px] text-emerald-800 bg-emerald-50/70 border border-emerald-100 rounded-lg px-2.5 py-1 inline-flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px] text-emerald-600">task_alt</span>
-                                    <span><strong>Resolusi:</strong> {{ $report->resolution_note }}</span>
-                                </div>
-                            @endif
                         </div>
 
                         {{-- Kolom Kanan: Status & Tombol Aksi "Lihat Detail" --}}
