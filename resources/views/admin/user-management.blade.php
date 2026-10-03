@@ -1,25 +1,31 @@
 {{-- 
   NAMA FILE      : user-management.blade.php
   FUNGSIONALITAS : Halaman Manajemen Pengguna, Otorisasi Akun Sivitas & Pembuatan Akun Petugas (Super Admin)
-  DESKRIPSI      : Menampilkan antrean verifikasi akun registrasi mandiri mahasiswa/dosen (UR15 / ADM-01), daftar seluruh sivitas terdaftar, direktori petugas sarpras, serta modal penolakan pendaftaran.
-  CARA KERJA     : Menggunakan layout <x-admin-layout active="user-management"> dengan Alpine.js state untuk tab switching (verifikasi, sivitas, petugas), filter pencarian data dinamis, dan dialog modal penolakan.
+  DESKRIPSI      : Menampilkan antrean verifikasi akun registrasi mandiri (UR15), daftar sivitas terdaftar, direktori petugas sarpras, direktori akun nonaktif/dihapus, serta modal detail profil komprehensif.
+  CARA KERJA     : Menggunakan layout <x-admin-layout active="user-management"> dengan Alpine.js state untuk 4 tab navigasi, filter pencarian dinamis, modal penolakan, dan modal profil + deaktivasi akun.
 --}}
 
 <x-admin-layout title="Manajemen Pengguna & Otorisasi Akun" active="user-management">
     <div x-data="{
-        currentTab: 'verification',
+        currentTab: 'sivitas',
         searchQuery: '',
+        showDetailModal: false,
         showAddPetugasModal: false,
         showAddPenggunaModal: false,
         showRejectModal: false,
         selectedUser: { id: null, name: '', nim: '', role: '' },
+        detailUser: {},
+        openDetailModal(u) {
+            this.detailUser = u;
+            this.showDetailModal = true;
+        },
         openRejectModal(id, name, nim, role) {
             this.selectedUser = { id, name, nim, role };
             this.showRejectModal = true;
         }
     }" class="space-y-6">
 
-        {{-- Page Header & Top Stats Summary --}}
+        {{-- Page Header & Action Buttons --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <nav class="flex items-center gap-2 text-xs text-slate-500 mb-1">
@@ -28,12 +34,12 @@
                     <span class="text-slate-800 font-medium">Manajemen Pengguna</span>
                 </nav>
                 <h1 class="text-2xl font-bold text-navy tracking-tight">Otorisasi & Manajemen Sivitas Kampus</h1>
-                <p class="text-sm text-slate-500 mt-0.5">Kelola verifikasi registrasi mandiri (UR15 / ADM-01), hak akses sivitas, dan pembagian zona tugas petugas sarpras (UR13).</p>
+                <p class="text-sm text-slate-500 mt-0.5">Kelola verifikasi registrasi mandiri, direktori sivitas, penugasan petugas, dan pembekuan akun.</p>
             </div>
 
             <div class="flex items-center gap-2.5">
-                <button type="button" @click="showAddPetugasModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-[16px]">badge</span>
+                <button type="button" @click="showAddPetugasModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px] text-emerald-600">badge</span>
                     <span>+ Akun Petugas (UR13)</span>
                 </button>
                 <button type="button" @click="showAddPenggunaModal = true" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-sm transition-all cursor-pointer">
@@ -45,11 +51,7 @@
 
         {{-- Session Flash Notifications --}}
         @if (session('success'))
-            <!-- 
-              ELEMEN   : Alert Notifikasi Sukses
-              KEGUNAAN : Memberikan umpan balik visual saat verifikasi atau penolakan akun berhasil diproses.
-            -->
-            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between shadow-xs">
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
                     <span class="font-medium">{{ session('success') }}</span>
@@ -57,12 +59,8 @@
             </div>
         @endif
 
-        @if ($errors->any())
-            <!-- 
-              ELEMEN   : Alert Notifikasi Kesalahan Validasi
-              KEGUNAAN : Memberikan informasi penolakan sistem jika aturan bisnis dilanggar.
-            -->
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between shadow-xs">
+        @if (isset($errors) && $errors->any())
+            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[20px] text-rose-600">error</span>
                     <div>
@@ -74,61 +72,70 @@
             </div>
         @endif
 
-        {{-- Stat Summary Pills --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button @click="currentTab = 'verification'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'verification' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-amber-800">Antrean Verifikasi (UR15)</span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-200 text-amber-900">Perlu Tindakan</span>
+        {{-- Stat Summary Cards (Clean & Balanced, Poin 3) --}}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div class="text-xs font-medium text-slate-500 mb-1">Antrean Verifikasi</div>
+                <div class="text-2xl font-bold text-amber-600">{{ $pendingCount }} <span class="text-xs font-normal text-slate-400">pemohon</span></div>
+                <div class="text-[11px] text-amber-700 mt-1 font-medium flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">pending</span> Menunggu evaluasi
                 </div>
-                <div class="text-2xl font-bold text-slate-800">{{ $pendingCount }} <span class="text-xs font-normal text-slate-500">pemohon pending</span></div>
-                <p class="text-xs text-amber-700 mt-1">Registrasi mandiri mahasiswa & dosen menunggu validasi berkas identitas</p>
-            </button>
+            </div>
 
-            <button @click="currentTab = 'sivitas'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'sivitas' ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-800">Total Sivitas Terdaftar</span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800">Aktif</span>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div class="text-xs font-medium text-slate-500 mb-1">Sivitas Aktif</div>
+                <div class="text-2xl font-bold text-slate-800">{{ $sivitasCount }} <span class="text-xs font-normal text-slate-400">pengguna</span></div>
+                <div class="text-[11px] text-emerald-600 mt-1 font-medium flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">check_circle</span> Terotorisasi sistem
                 </div>
-                <div class="text-2xl font-bold text-slate-800">{{ $sivitasCount }} <span class="text-xs font-normal text-slate-500">akun pengguna</span></div>
-                <p class="text-xs text-slate-500 mt-1">Akun mahasiswa, dosen, dan staf aktif yang terotorisasi di sistem</p>
-            </button>
+            </div>
 
-            <button @click="currentTab = 'petugas'" class="p-4 rounded-2xl border text-left transition-all cursor-pointer" :class="currentTab === 'petugas' ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/20' : 'bg-white border-slate-200/80 hover:bg-slate-50'">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-800">Petugas Sarpras (UR13)</span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Zona Aktif</span>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div class="text-xs font-medium text-slate-500 mb-1">Petugas Sarpras</div>
+                <div class="text-2xl font-bold text-slate-800">{{ $petugasCount }} <span class="text-xs font-normal text-slate-400">personel</span></div>
+                <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">badge</span> Bertugas aktif
                 </div>
-                <div class="text-2xl font-bold text-slate-800">{{ $petugasCount }} <span class="text-xs font-normal text-slate-500">petugas zona</span></div>
-                <p class="text-xs text-slate-500 mt-1">Didaftarkan otoritas Super Admin untuk verifikasi venue dan laporan</p>
-            </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div class="text-xs font-medium text-slate-500 mb-1">Non-aktif / Dihapus</div>
+                <div class="text-2xl font-bold text-rose-600">{{ $inactiveCount }} <span class="text-xs font-normal text-slate-400">akun</span></div>
+                <div class="text-[11px] text-rose-700 mt-1 font-medium flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">block</span> Arsip pembekuan
+                </div>
+            </div>
         </div>
 
-        {{-- Main Content Container with Tabs & Search --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        {{-- Main Content Container with 4 Segmented Tabs & Search Bar --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
             {{-- Tabs Navigation & Filter Bar --}}
             <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                {{-- Segmented Tabs --}}
-                <div class="inline-flex p-1 rounded-xl bg-slate-100 text-xs font-semibold">
-                    <button @click="currentTab = 'verification'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'verification' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                {{-- 4 Segmented Tabs (Termasuk Tab Non-aktif/Dihapus, Poin 7) --}}
+                <div class="inline-flex p-1 rounded-xl bg-slate-100 text-xs font-semibold flex-wrap">
+                    <button type="button" @click="currentTab = 'verification'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'verification' ? 'bg-white text-navy shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">how_to_reg</span>
                         <span>Verifikasi Akun ({{ $pendingCount }})</span>
                     </button>
-                    <button @click="currentTab = 'sivitas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'sivitas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <button type="button" @click="currentTab = 'sivitas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'sivitas' ? 'bg-white text-navy shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">group</span>
                         <span>Sivitas Terdaftar ({{ $sivitasCount }})</span>
                     </button>
-                    <button @click="currentTab = 'petugas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'petugas' ? 'bg-white text-navy shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <button type="button" @click="currentTab = 'petugas'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer" :class="currentTab === 'petugas' ? 'bg-white text-navy shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'">
                         <span class="material-symbols-outlined text-[16px]">badge</span>
                         <span>Petugas Sarpras ({{ $petugasCount }})</span>
                     </button>
+                    <button type="button" @click="currentTab = 'inactive'" class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer text-rose-700" :class="currentTab === 'inactive' ? 'bg-white shadow-2xs font-bold' : 'text-slate-600 hover:text-rose-700'">
+                        <span class="material-symbols-outlined text-[16px]">person_off</span>
+                        <span>Non-aktif / Dihapus ({{ $inactiveCount }})</span>
+                    </button>
                 </div>
 
-                {{-- Search Filters --}}
+                {{-- Search Filter --}}
                 <div class="flex items-center gap-2.5">
                     <div class="relative w-full sm:w-64">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
-                        <input type="text" x-model="searchQuery" placeholder="Cari nama, NIM/NIP, email..." class="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-navy focus:outline-none transition-colors">
+                        <input type="text" x-model="searchQuery" placeholder="Cari nama, NIM/NIP, email..." class="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-slate-900 focus:outline-none transition-colors">
                     </div>
                 </div>
             </div>
@@ -175,19 +182,15 @@
                                 </td>
                                 <td class="py-3.5 px-5 text-right">
                                     <div class="inline-flex items-center gap-1.5 justify-end">
-                                        <!-- 
-                                          ROUTE: Mengirimkan form verifikasi via POST ke /admin/users/{id}/verify (UR15 / ADM-01)
-                                          FUNGSI: Mengesahkan pendaftaran akun dan mengubah status menjadi 'active'
-                                        -->
                                         <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline">
                                             @csrf
-                                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-xs transition-colors">
+                                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-2xs transition-colors cursor-pointer">
                                                 <span class="material-symbols-outlined text-[14px]">check</span>
                                                 <span>Setujui</span>
                                             </button>
                                         </form>
 
-                                        <button type="button" @click="openRejectModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->identity_number ?? '-') }}', '{{ ucfirst($user->role) }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 text-rose-600 font-medium hover:bg-rose-50 transition-colors">
+                                        <button type="button" @click="openRejectModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->identity_number ?? '-') }}', '{{ ucfirst($user->role) }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 text-rose-600 font-medium hover:bg-rose-50 transition-colors cursor-pointer">
                                             <span class="material-symbols-outlined text-[14px]">close</span>
                                             <span>Tolak</span>
                                         </button>
@@ -206,18 +209,18 @@
                 </table>
             </div>
 
-            {{-- TAB 2: Sivitas Terdaftar --}}
+            {{-- TAB 2: Sivitas Terdaftar (Status Akun Dihapus [Poin 6], Tombol Lihat Detail Ditambahkan [Poin 4]) --}}
             <div x-show="currentTab === 'sivitas'" class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead>
                         <tr class="bg-slate-50/80 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-100">
                             <th class="py-3 px-5">Nama Lengkap</th>
-                            <th class="py-3 px-4">Role Sivitas</th>
+                            <th class="py-3 px-4">Kategori Sivitas</th>
                             <th class="py-3 px-4">NIM / NIP</th>
                             <th class="py-3 px-4">Email Kampus</th>
-                            <th class="py-3 px-4">Departemen / Prodi</th>
-                            <th class="py-3 px-4">Status Akun</th>
-                            <th class="py-3 px-5 text-right">Otorisasi</th>
+                            <th class="py-3 px-4">Program Studi / Unit</th>
+                            <th class="py-3 px-4">Total Reservasi</th>
+                            <th class="py-3 px-5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -226,7 +229,7 @@
                                 x-show="!searchQuery || '{{ strtolower($sivitas->name . ' ' . $sivitas->identity_number . ' ' . $sivitas->email . ' ' . $sivitas->department) }}'.includes(searchQuery.toLowerCase())">
                                 <td class="py-3.5 px-5">
                                     <div class="font-semibold text-slate-800 text-sm">{{ $sivitas->name }}</div>
-                                    <div class="text-[11px] text-slate-500">{{ $sivitas->department ?? 'Sivitas Terdaftar' }}</div>
+                                    <div class="text-[11px] text-slate-400">Terdaftar {{ $sivitas->created_at ? $sivitas->created_at->format('d M Y') : '-' }}</div>
                                 </td>
                                 <td class="py-3.5 px-4">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
@@ -235,14 +238,31 @@
                                 </td>
                                 <td class="py-3.5 px-4 font-mono text-slate-700">{{ $sivitas->identity_number ?? '-' }}</td>
                                 <td class="py-3.5 px-4 font-mono text-slate-600">{{ $sivitas->email }}</td>
-                                <td class="py-3.5 px-4 text-slate-700 font-medium">{{ $sivitas->reservations->count() }} kali</td>
-                                <td class="py-3.5 px-4">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif
-                                    </span>
+                                <td class="py-3.5 px-4 text-slate-700 font-medium">{{ $sivitas->department ?? '-' }}</td>
+                                <td class="py-3.5 px-4 font-mono text-slate-700 font-semibold">
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700">{{ $sivitas->reservations_count ?? $sivitas->reservations->count() }} kali</span>
                                 </td>
                                 <td class="py-3.5 px-5 text-right">
-                                    <span class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-xs font-medium">Terverifikasi</span>
+                                    {{-- Tombol Lihat Detail (Poin 4) --}}
+                                    <button type="button" 
+                                            @click="openDetailModal({
+                                                id: {{ $sivitas->id }},
+                                                name: '{{ addslashes($sivitas->name) }}',
+                                                role: '{{ ucfirst($sivitas->role) }}',
+                                                identity_number: '{{ addslashes($sivitas->identity_number ?? '-') }}',
+                                                email: '{{ addslashes($sivitas->email) }}',
+                                                department: '{{ addslashes($sivitas->department ?? '-') }}',
+                                                phone_number: '{{ addslashes($sivitas->phone_number ?? '-') }}',
+                                                id_card_path: '{{ $sivitas->id_card_path ? asset('storage/' . $sivitas->id_card_path) : '' }}',
+                                                status: '{{ $sivitas->status }}',
+                                                created_at: '{{ $sivitas->created_at ? $sivitas->created_at->format('d M Y, H:i') : '-' }}',
+                                                reservations_count: {{ $sivitas->reservations_count ?? $sivitas->reservations->count() }},
+                                                reports_count: {{ $sivitas->damage_reports_count ?? $sivitas->damageReports->count() }}
+                                            })" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer border border-slate-200/60">
+                                        <span class="material-symbols-outlined text-[16px] text-slate-600">visibility</span>
+                                        <span>Lihat Detail</span>
+                                    </button>
                                 </td>
                             </tr>
                         @empty
@@ -265,9 +285,8 @@
                             <th class="py-3 px-4">NIP</th>
                             <th class="py-3 px-4">Zona Penugasan</th>
                             <th class="py-3 px-4">Email Resmi</th>
-                            <th class="py-3 px-4">Tanggal Pendaftaran</th>
-                            <th class="py-3 px-4">Status Akun</th>
-                            <th class="py-3 px-5 text-right">Otorisasi</th>
+                            <th class="py-3 px-4">Tiket Ditangani</th>
+                            <th class="py-3 px-5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -285,20 +304,124 @@
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-4 font-mono text-slate-600">{{ $petugas->email }}</td>
-                                <td class="py-3.5 px-4 text-slate-700 font-medium">{{ $petugas->handledReports->count() }} tiket</td>
-                                <td class="py-3.5 px-4">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Bertugas
-                                    </span>
+                                <td class="py-3.5 px-4 font-mono text-slate-700 font-semibold">
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700">{{ $petugas->handledReports->count() }} tiket</span>
                                 </td>
                                 <td class="py-3.5 px-5 text-right">
-                                    <span class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-xs font-medium">Aktif</span>
+                                    <button type="button" 
+                                            @click="openDetailModal({
+                                                id: {{ $petugas->id }},
+                                                name: '{{ addslashes($petugas->name) }}',
+                                                role: 'Petugas Sarpras',
+                                                identity_number: '{{ addslashes($petugas->identity_number ?? '-') }}',
+                                                email: '{{ addslashes($petugas->email) }}',
+                                                department: '{{ addslashes($petugas->department ?? 'UPT Sarpras') }}',
+                                                phone_number: '{{ addslashes($petugas->phone_number ?? '-') }}',
+                                                id_card_path: '',
+                                                status: '{{ $petugas->status }}',
+                                                created_at: '{{ $petugas->created_at ? $petugas->created_at->format('d M Y, H:i') : '-' }}',
+                                                reservations_count: {{ $petugas->reviewedReservations->count() }},
+                                                reports_count: {{ $petugas->handledReports->count() }}
+                                            })" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer border border-slate-200/60">
+                                        <span class="material-symbols-outlined text-[16px] text-slate-600">visibility</span>
+                                        <span>Lihat Detail</span>
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-12 px-5 text-center text-slate-400 text-xs">
+                                <td colspan="6" class="py-12 px-5 text-center text-slate-400 text-xs">
                                     Belum ada data petugas sarpras terdaftar.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- TAB 4: Akun Non-aktif & Dihapus (Poin 7) --}}
+            <div x-show="currentTab === 'inactive'" class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="bg-rose-50/50 text-slate-500 uppercase tracking-wider font-semibold border-b border-rose-100">
+                            <th class="py-3 px-5">Nama & Identitas</th>
+                            <th class="py-3 px-4">Kategori Akun</th>
+                            <th class="py-3 px-4">Status Arsip</th>
+                            <th class="py-3 px-4">Catatan / Alasan</th>
+                            <th class="py-3 px-4">Waktu Pembaruan</th>
+                            <th class="py-3 px-5 text-right">Otorisasi Pemulihan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($inactiveUsers as $inactive)
+                            <tr class="hover:bg-slate-50/60 transition-colors"
+                                x-show="!searchQuery || '{{ strtolower($inactive->name . ' ' . $inactive->identity_number . ' ' . $inactive->email . ' ' . $inactive->department) }}'.includes(searchQuery.toLowerCase())">
+                                <td class="py-3.5 px-5">
+                                    <div class="font-semibold text-slate-800 text-sm">{{ $inactive->name }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ $inactive->email }} • ID: {{ $inactive->identity_number ?? '-' }}</div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                        {{ ucfirst($inactive->role) }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    @if($inactive->trashed())
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800 border border-rose-200">
+                                            Dihapus (Soft Delete)
+                                        </span>
+                                    @elseif($inactive->status === 'inactive')
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                            Dinonaktifkan
+                                        </span>
+                                    @elseif($inactive->status === 'rejected')
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-800 border border-slate-300">
+                                            Ditolak Verifikasi
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-500 max-w-xs truncate">
+                                    {{ $inactive->rejection_reason ?? '-' }}
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-500 font-mono">
+                                    {{ $inactive->deleted_at ? $inactive->deleted_at->format('d M Y') : $inactive->updated_at->format('d M Y') }}
+                                </td>
+                                <td class="py-3.5 px-5 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" 
+                                                @click="openDetailModal({
+                                                    id: {{ $inactive->id }},
+                                                    name: '{{ addslashes($inactive->name) }}',
+                                                    role: '{{ ucfirst($inactive->role) }}',
+                                                    identity_number: '{{ addslashes($inactive->identity_number ?? '-') }}',
+                                                    email: '{{ addslashes($inactive->email) }}',
+                                                    department: '{{ addslashes($inactive->department ?? '-') }}',
+                                                    phone_number: '{{ addslashes($inactive->phone_number ?? '-') }}',
+                                                    id_card_path: '{{ $inactive->id_card_path ? asset('storage/' . $inactive->id_card_path) : '' }}',
+                                                    status: '{{ $inactive->status }}',
+                                                    created_at: '{{ $inactive->created_at ? $inactive->created_at->format('d M Y, H:i') : '-' }}',
+                                                    reservations_count: {{ $inactive->reservations ? $inactive->reservations->count() : 0 }},
+                                                    reports_count: {{ $inactive->damageReports ? $inactive->damageReports->count() : 0 }}
+                                                })" 
+                                                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition cursor-pointer">
+                                            Detail
+                                        </button>
+
+                                        <form action="{{ route('admin.users.toggle-status', $inactive->id) }}" method="POST" class="inline" onsubmit="return confirm('Aktifkan kembali akun {{ addslashes($inactive->name) }}?')">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+                                                <span class="material-symbols-outlined text-[15px]">restart_alt</span>
+                                                <span>Aktifkan Kembali</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-12 px-5 text-center text-slate-400 text-xs">
+                                    Tidak ada rekaman akun yang dinonaktifkan atau dihapus.
                                 </td>
                             </tr>
                         @endforelse
@@ -308,15 +431,117 @@
 
             {{-- Footer Info --}}
             <div class="p-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-slate-500 gap-2">
-                <div>Menampilkan data dinamis terverifikasi dari basis data</div>
+                <div>Menampilkan data dinamis terverifikasi dari basis data CAVA.</div>
             </div>
         </div>
 
-        {{-- MODAL 1: Daftarkan Akun Petugas Sarpras (UR13) --}}
-        <!-- 
-          ELEMEN       : Modal Registrasi Petugas Sarpras Langsung (UR13)
-          KEGUNAAN     : Menyediakan formulir pembuatan akun petugas oleh Super Admin.
-        -->
+        {{-- MODAL DETAIL PROFIL + TOMBOL NONAKTIFKAN AKUN (Poin 4 & 5) --}}
+        <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div @click.away="showDetailModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 flex flex-col gap-5">
+                {{-- Header Modal --}}
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[22px] text-slate-700">account_circle</span>
+                        <h3 class="font-bold text-base text-slate-900">Detail Lengkap Profil Sivitas</h3>
+                    </div>
+                    <button type="button" @click="showDetailModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+
+                {{-- Profil Header Card --}}
+                <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl font-bold font-mono shrink-0 shadow-2xs">
+                        <span x-text="detailUser.name ? detailUser.name.charAt(0).toUpperCase() : 'U'"></span>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-slate-900" x-text="detailUser.name"></h4>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800" x-text="detailUser.role"></span>
+                            <span class="text-xs text-slate-500 font-mono" x-text="'ID: ' + detailUser.identity_number"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Detail Atribut Grid --}}
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                        <span class="text-slate-400 block text-[11px] mb-0.5">Email Resmi Kampus</span>
+                        <span class="font-semibold text-slate-800 break-all font-mono" x-text="detailUser.email"></span>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                        <span class="text-slate-400 block text-[11px] mb-0.5">Nomor Telepon / WhatsApp</span>
+                        <span class="font-semibold text-slate-800" x-text="detailUser.phone_number || '-'"></span>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                        <span class="text-slate-400 block text-[11px] mb-0.5">Departemen / Program Studi</span>
+                        <span class="font-semibold text-slate-800" x-text="detailUser.department || '-'"></span>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                        <span class="text-slate-400 block text-[11px] mb-0.5">Waktu Registrasi</span>
+                        <span class="font-semibold text-slate-800 font-mono" x-text="detailUser.created_at"></span>
+                    </div>
+                </div>
+
+                {{-- Aktivitas Peminjaman & Pelaporan --}}
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 rounded-xl border border-emerald-100 bg-emerald-50/50 flex items-center justify-between">
+                        <span class="text-emerald-800 font-medium">Reservasi Fasilitas</span>
+                        <span class="text-sm font-bold text-emerald-700 font-mono" x-text="(detailUser.reservations_count || 0) + ' Kali'"></span>
+                    </div>
+                    <div class="p-3 rounded-xl border border-amber-100 bg-amber-50/50 flex items-center justify-between">
+                        <span class="text-amber-800 font-medium">Laporan Kerusakan</span>
+                        <span class="text-sm font-bold text-amber-700 font-mono" x-text="(detailUser.reports_count || 0) + ' Tiket'"></span>
+                    </div>
+                </div>
+
+                {{-- Foto Kartu Identitas / KTM (Poin 4) --}}
+                <div class="p-3 rounded-xl border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-700 block mb-2">Dokumen Berkas Identitas (KTM / SK):</span>
+                    <template x-if="detailUser.id_card_path">
+                        <div class="space-y-2">
+                            <img :src="detailUser.id_card_path" alt="Dokumen Identitas" class="w-full max-h-48 object-contain rounded-lg border border-slate-100 bg-slate-50">
+                            <a :href="detailUser.id_card_path" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
+                                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                <span>Buka gambar di tab baru</span>
+                            </a>
+                        </div>
+                    </template>
+                    <template x-if="!detailUser.id_card_path">
+                        <div class="p-4 text-center text-xs text-slate-400 bg-slate-50 rounded-lg">
+                            Tidak ada lampiran berkas identitas tersimpan.
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Footer Modal & Tombol Aksi Nonaktifkan (Poin 5) --}}
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <button type="button" @click="showDetailModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                        Tutup
+                    </button>
+                    
+                    {{-- Form Nonaktifkan / Aktifkan Kembali --}}
+                    <form :action="'{{ url('/admin/users') }}/' + detailUser.id + '/toggle-status'" method="POST" 
+                          onsubmit="return confirm('Apakah Anda yakin ingin memperbarui status akun ini?')">
+                        @csrf
+                        <template x-if="detailUser.status === 'active'">
+                            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">block</span>
+                                <span>Nonaktifkan Akun Ini</span>
+                            </button>
+                        </template>
+                        <template x-if="detailUser.status !== 'active'">
+                            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                <span>Aktifkan Kembali Akun</span>
+                            </button>
+                        </template>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL 1: Daftarkan Akun Petugas Sarpras (UR13, Bersih Tanpa Duplikasi Field) --}}
         <div x-show="showAddPetugasModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <div @click.away="showAddPetugasModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 flex flex-col gap-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -329,7 +554,6 @@
                     </button>
                 </div>
 
-                {{-- ROUTE: POST /admin/users/create-petugas (UR13) --}}
                 <form action="{{ route('admin.users.create-petugas') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
@@ -368,12 +592,6 @@
                         <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="pet-password">Password Sementara (Opsional)</label>
-                        <input type="password" id="pet-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
-                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
-                    </div>
-
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                         <button type="button" @click="showAddPetugasModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-md transition-all cursor-pointer">Simpan Akun Petugas</button>
@@ -382,11 +600,7 @@
             </div>
         </div>
 
-        {{-- MODAL 2: Daftarkan Akun Pengguna Langsung (UR14) --}}
-        <!-- 
-          ELEMEN       : Modal Registrasi Pengguna Langsung (UR14)
-          KEGUNAAN     : Menyediakan formulir pembuatan akun mahasiswa/dosen langsung oleh Admin tanpa antrean pending.
-        -->
+        {{-- MODAL 2: Daftarkan Akun Pengguna Langsung (UR14, Bersih Tanpa Duplikasi Field) --}}
         <div x-show="showAddPenggunaModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <div @click.away="showAddPenggunaModal = false" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 flex flex-col gap-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -399,7 +613,6 @@
                     </button>
                 </div>
 
-                {{-- ROUTE: POST /admin/users/create-user (UR14) --}}
                 <form action="{{ route('admin.users.create-user') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs text-blue-800">
@@ -443,12 +656,6 @@
                         <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="usr-password">Password Sementara (Opsional)</label>
-                        <input type="password" id="usr-password" name="password" placeholder="Kosongkan untuk kata sandi default: 'password'" class="w-full h-9 px-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:bg-white focus:border-navy focus:outline-none">
-                        <span class="text-[10px] text-slate-400 mt-1 block">Minimal 8 karakter jika diisi. Default: password</span>
-                    </div>
-
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                         <button type="button" @click="showAddPenggunaModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Batal</button>
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-md transition-all cursor-pointer">Simpan Akun Langsung</button>
@@ -458,11 +665,6 @@
         </div>
 
         {{-- MODAL 3: Konfirmasi Penolakan Verifikasi (UR15 / ADM-01) --}}
-        <!-- 
-          ELEMEN       : Modal Konfirmasi Penolakan Verifikasi Akun (UR15 / ADM-01)
-          KEGUNAAN     : Memberikan layar dialog konfirmasi penolakan pendaftaran beserta pemilihan alasan resmi.
-          CARA KERJA   : Tersembunyi secara default (x-show="showRejectModal"). Ketika dibuka via openRejectModal(), mengisi data target dan mengirim form ke endpoint penolakan.
-        -->
         <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <div @click.away="showRejectModal = false" class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200 flex flex-col gap-4">
                 <div class="flex items-center gap-3">
@@ -475,10 +677,6 @@
                     </div>
                 </div>
 
-                <!-- 
-                  ROUTE: Mengirimkan form penolakan via POST ke /admin/users/{id}/reject (UR15 / ADM-01)
-                  FUNGSI: Membatalkan permohonan pendaftaran akun pengguna dan menyimpan alasan penolakan ke basis data.
-                -->
                 <form :action="'{{ url('/admin/users') }}/' + selectedUser.id + '/reject'" method="POST" class="space-y-3">
                     @csrf
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
