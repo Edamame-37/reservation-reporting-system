@@ -154,6 +154,12 @@ class ReservationManagementController extends Controller
                     throw new \Exception('Hanya reservasi yang telah disetujui yang dapat dibatalkan paksa.');
                 }
 
+                // 2b. Validasi Waktu: Tidak boleh membatalkan kegiatan yang waktu selesainya sudah terlewat
+                $resEnd = \Carbon\Carbon::parse($res->reservation_date)->setTimeFromTimeString($res->end_time);
+                if (now()->greaterThan($resEnd)) {
+                    throw new \Exception('Gagal membatalkan! Waktu reservasi acara ini telah berlalu.');
+                }
+
                 // 3. Eksekusi Pembatalan Darurat dan Pencatatan Alasan Resmi
                 $res->status = 'cancelled';
                 $res->cancellation_reason = $request->input('alasan_batal') ?? $request->input('cancellation_reason');

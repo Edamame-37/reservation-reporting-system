@@ -251,16 +251,26 @@
                                             </button>
                                         </div>
                                     @elseif($reservation->status === 'approved')
-                                        <div class="flex items-center justify-end">
-                                            <!-- 
-                                              ELEMEN       : Tombol Pembatalan Darurat (Override) oleh Petugas (PTG-03 / US-10)
-                                              KEGUNAAN     : Membuka modal pembatalan darurat sepihak untuk reservasi yang telah berstatus disetujui.
-                                            -->
-                                            <button type="button" @click="openCancel('{{ $reservation->id }}', '{{ $reservation->ticket_code }}', '{{ addslashes($reservation->facility->name ?? 'Fasilitas') }}', '{{ addslashes($reservation->user->name ?? 'Pemohon') }}')" class="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-400 transition font-semibold text-xs inline-flex items-center gap-1 shadow-xs" title="Pembatalan Darurat Petugas (US-10)">
-                                                <span class="material-symbols-outlined text-[15px]">event_busy</span>
-                                                <span>Batalkan Paksa</span>
-                                            </button>
-                                        </div>
+                                        @php
+                                            $endTime = \Carbon\Carbon::parse($reservation->reservation_date)->setTimeFromTimeString($reservation->end_time);
+                                        @endphp
+                                        @if(now()->greaterThan($endTime))
+                                            <div class="flex items-center justify-end">
+                                                <span class="text-slate-400 text-[11px] italic">Waktu Telah Terlewat (Selesai)</span>
+                                            </div>
+                                        @else
+                                            <div class="flex items-center justify-end">
+                                                <!-- 
+                                                  ELEMEN       : Tombol Pembatalan Darurat (Override) oleh Petugas (PTG-03 / US-10)
+                                                  KEGUNAAN     : Membuka modal pembatalan darurat sepihak untuk reservasi yang telah berstatus disetujui.
+                                                -->
+                                                <button type="button" @click="openCancel('{{ $reservation->id }}', '{{ $reservation->ticket_code }}', '{{ addslashes($reservation->facility->name ?? 'Fasilitas') }}', '{{ addslashes($reservation->user->name ?? 'Pemohon') }}')" class="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-400 transition font-semibold text-xs inline-flex items-center gap-1 shadow-xs" title="Pembatalan Darurat Petugas (US-10)">
+                                                    <span class="material-symbols-outlined text-[15px]">event_busy</span>
+                                                    <span>Batalkan Paksa</span>
+                                                </button>
+                                            </div>
+                                        @endif
+
                                     @else
                                         <span class="text-slate-400 text-xs italic">Selesai Ditinjau</span>
                                     @endif
