@@ -91,7 +91,7 @@ class PublicFacilityController extends Controller
                 return [
                     'id' => $f->id,
                     'name' => $f->name,
-                    'building' => $f->building . ($f->floor_location ? ' (Lt. ' . $f->floor_location . ')' : ''),
+                    'building' => str_contains($f->building, 'Lt.') ? $f->building : ($f->building . ($f->floor_location ? ' (' . $f->floor_location . ')' : '')),
                     'capacity' => $f->capacity,
                     'occupied' => [], // Akan diisi dinamis via Fetch API Alpine.js
                     'locked' => $f->status === 'dalam perbaikan',
