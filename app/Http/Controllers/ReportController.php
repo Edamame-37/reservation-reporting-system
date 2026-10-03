@@ -145,7 +145,12 @@ class ReportController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('user.report-history', compact('reports', 'counts', 'activeStatus'));
+        // 4. Ambil Fasilitas Aktif untuk Form Pelaporan Kerusakan Terpadu (Modal)
+        $facilities = Facility::where('status', 'aktif')
+            ->orderBy('name')
+            ->get();
+
+        return view('user.report-history', compact('reports', 'counts', 'activeStatus', 'facilities'));
     }
 }
 
