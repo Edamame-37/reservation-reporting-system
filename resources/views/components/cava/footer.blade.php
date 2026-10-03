@@ -9,10 +9,10 @@
             <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-6 w-auto grayscale opacity-70">
             <span class="text-xs text-slate-500 font-medium">&copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus.</span>
         </div>
-        <div class="flex gap-4 text-xs text-slate-400">
-            <a href="#" class="hover:text-slate-600 transition">Kebijakan Privasi</a>
-            <a href="#" class="hover:text-slate-600 transition">Syarat & Ketentuan</a>
-            <a href="#" class="hover:text-slate-600 transition">Bantuan</a>
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-500">
+            <a href="{{ route('public.information', ['section' => 'kebijakan']) }}" class="hover:text-blue-900 transition font-medium">Kebijakan Privasi</a>
+            <a href="{{ route('public.information', ['section' => 'syarat-ketentuan']) }}" class="hover:text-blue-900 transition font-medium">Syarat & Ketentuan</a>
+            <a href="{{ route('public.information', ['section' => 'bantuan']) }}" class="hover:text-blue-900 transition font-medium">Pusat Bantuan & FAQ</a>
         </div>
     </div>
 </footer>

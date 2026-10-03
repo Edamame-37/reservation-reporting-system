@@ -115,7 +115,7 @@ class PublicFacilityController extends Controller
 
         // 2. Ambil seluruh reservasi berstatus approved pada tanggal tersebut
         $reservations = Reservation::where('status', 'approved')
-            ->whereDate('start_time', $parsedDate)
+            ->whereDate('reservation_date', $parsedDate)
             ->get(['facility_id', 'start_time', 'end_time']);
 
         $matrix = [];
@@ -170,7 +170,7 @@ class PublicFacilityController extends Controller
 
         $bookedSlots = Reservation::where('facility_id', $id)
             ->where('status', 'approved')
-            ->whereDate('start_time', $parsedDate)
+            ->whereDate('reservation_date', $parsedDate)
             ->get(['start_time', 'end_time']);
 
         return response()->json([

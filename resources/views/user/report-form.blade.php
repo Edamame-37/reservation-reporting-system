@@ -219,6 +219,13 @@
                 </div>
 
                 <div class="border-2 border-dashed {{ $errors->has('attachment_photo') ? 'border-rose-300 bg-rose-50/20' : 'border-slate-200 bg-slate-50/50' }} rounded-2xl p-6 text-center hover:border-slate-400 transition">
+                    <input type="file" 
+                           id="photo-file" 
+                           name="attachment_photo" 
+                           accept="image/png, image/jpeg, image/jpg" 
+                           required
+                           @change="handleFile" 
+                           class="hidden">
                     <template x-if="!imagePreview">
                         <div class="flex flex-col items-center">
                             <span class="material-symbols-outlined text-slate-400 text-[36px] mb-2">add_photo_alternate</span>
@@ -227,13 +234,6 @@
                             <label for="photo-file" class="mt-3 px-4 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer transition">
                                 Telusuri Berkas
                             </label>
-                            <input type="file" 
-                                   id="photo-file" 
-                                   name="attachment_photo" 
-                                   accept="image/png, image/jpeg, image/jpg" 
-                                   required
-                                   @change="handleFile" 
-                                   class="hidden">
                         </div>
                     </template>
 

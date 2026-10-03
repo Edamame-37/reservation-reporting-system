@@ -18,6 +18,7 @@ use App\Http\Controllers\ReservationManagementController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PublicFacilityController;
+use App\Http\Controllers\PublicInformationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,15 @@ Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 's
 
 // API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
 Route::get('/api/facilities/search', [PublicFacilityController::class, 'autocomplete'])->name('api.facilities.search');
+
+// ROUTE: Menerima GET request ke '/informasi/{section?}'
+// FUNGSI: Menampilkan pusat informasi publik (Kebijakan, Syarat & Ketentuan, dan Bantuan)
+Route::get('/informasi/{section?}', [PublicInformationController::class, 'index'])->name('public.information');
+
+// ROUTE ALIAS: Tautan cepat langsung menuju tab spesifik informasi publik
+Route::get('/kebijakan', fn() => redirect()->route('public.information', ['section' => 'kebijakan']))->name('public.kebijakan');
+Route::get('/syarat-ketentuan', fn() => redirect()->route('public.information', ['section' => 'syarat-ketentuan']))->name('public.syarat-ketentuan');
+Route::get('/bantuan', fn() => redirect()->route('public.information', ['section' => 'bantuan']))->name('public.bantuan');
 
 /*
 |--------------------------------------------------------------------------
