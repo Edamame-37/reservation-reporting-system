@@ -70,22 +70,15 @@
         }
     }">
 
-        {{-- Breadcrumb & Header --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Form Lapor Kerusakan</span>
+        {{-- Header Judul --}}
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pelaporan Kerusakan Sarana & Fasilitas</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Sampaikan kendala fasilitas rusak atau malfungsi agar segera ditindaklanjuti oleh staf sarpras.</p>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pelaporan Kerusakan Sarana & Fasilitas</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Sampaikan kendala fasilitas rusak atau malfungsi agar segera ditindaklanjuti oleh staf sarpras.</p>
-                </div>
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
-                    <span class="material-symbols-outlined text-[16px] text-amber-600">timer</span>
-                    <span>Target Respon SLA: &lt; 24 Jam</span>
-                </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">timer</span>
+                <span>Respon Petugas: &lt; 24 Jam</span>
             </div>
         </div>
 

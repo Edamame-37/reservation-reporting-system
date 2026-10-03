@@ -26,7 +26,7 @@
             :value="$pendingReservationsCount"
             subtitle="Permohonan Masuk"
             :tagText="$pendingReservationsCount > 0 ? $pendingReservationsCount . ' Menunggu Review' : 'Antrean Bersih'"
-            footerText="SLA Respon < 2 Jam"
+            footerText="Respon Cepat Petugas < 2 Jam"
             icon="pending_actions"
             variant="primary"
         />
@@ -141,7 +141,7 @@
                                     </div>
                                     <h4 class="text-sm font-bold text-slate-900">Semua Antrean Beres!</h4>
                                     <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                        Tidak ada permohonan reservasi yang menunggu persetujuan saat ini. SLA operasional dalam kondisi optimal.
+                                        Tidak ada permohonan reservasi yang menunggu persetujuan saat ini. Penanganan operasional dalam kondisi optimal.
                                     </p>
                                 </div>
                             </td>

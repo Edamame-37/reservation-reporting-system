@@ -29,8 +29,6 @@
                         <span class="material-symbols-outlined text-[16px]">schedule</span>
                         {{ \Carbon\Carbon::parse($upcomingReservation->reservation_date)->isoFormat('dddd, D MMMM Y') }} • {{ substr($upcomingReservation->start_time, 0, 5) }} - {{ substr($upcomingReservation->end_time, 0, 5) }} WIB
                     </span>
-                    <span>•</span>
-                    <span class="font-mono text-slate-400">{{ $upcomingReservation->ticket_code }}</span>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto">
@@ -99,63 +97,68 @@
     </div>
 
     <!-- 
-      ELEMEN       : Section Riwayat Reservasi Terkini (Hanya 3 Data Preview + Tombol Lihat Semua)
-      KEGUNAAN     : Menampilkan ringkasan ringkas tanpa tabel raksasa yang memenuhi layar.
+      ELEMEN       : Section Riwayat Reservasi Terkini (Bento UI List - Maksimal 3 Data)
+      KEGUNAAN     : Menampilkan ringkasan kartu riwayat dengan animasi mikro pop-up saat kursor diarahkan.
     -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs mb-8">
-        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+    <section class="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-xs mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
             <div>
                 <h3 class="text-base font-bold text-slate-900">Riwayat Reservasi Terkini</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $recentReservations->count() }} pengajuan terakhir dari total {{ $totalReservations }} reservasi Anda.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $recentReservations->take(3)->count() }} pengajuan terakhir dari total {{ $totalReservations }} reservasi Anda.</p>
             </div>
-            {{-- Tombol Lihat Selengkapnya --}}
-            <a href="{{ url('/user/reservation-history') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
+            {{-- Tombol Lihat Selengkapnya (Mengarahkan langsung ke section daftar reservasi) --}}
+            <a href="{{ url('/user/reservation-history#daftar-reservasi') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
                 <span>Lihat Semua Riwayat Reservasi ({{ $totalReservations }} Data)</span>
                 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </a>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                        <th class="py-3 px-4">Kode Tiket</th>
-                        <th class="py-3 px-4">Fasilitas</th>
-                        <th class="py-3 px-4">Jadwal Sesi</th>
-                        <th class="py-3 px-4">Tujuan Kegiatan</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($recentReservations as $reservation)
-                    <tr class="hover:bg-slate-50/70 transition">
-                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">{{ $reservation->ticket_code }}</td>
-                        <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-900">{{ $reservation->facility->name ?? 'Dihapus' }}</div>
-                            <div class="text-[11px] text-slate-500">{{ $reservation->facility->building ?? '-' }}</div>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <div class="text-slate-800 font-medium">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</div>
-                            <div class="text-[11px] text-slate-500 font-mono">{{ substr($reservation->start_time, 0, 5) }} - {{ substr($reservation->end_time, 0, 5) }} WIB</div>
-                        </td>
-                        <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">{{ $reservation->purpose }}</td>
-                        <td class="py-3.5 px-4">
+        {{-- Bento List Cards (Maksimal 3 item dengan Micro-Animation Pop-Up saat Hover) --}}
+        <div class="space-y-3">
+            @forelse($recentReservations->take(3) as $reservation)
+                <a href="{{ url('/user/reservation-history#daftar-reservasi') }}" 
+                   class="group block bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 p-4 sm:p-5 transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 hover:shadow-md cursor-pointer">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        
+                        {{-- Kolom Kiri: Kode Tiket, Tanggal & Jam Sesi --}}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px] text-slate-400">calendar_today</span>
+                                    <span>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</span>
+                                </span>
+                                <span class="text-slate-300">•</span>
+                                <span class="text-xs font-semibold text-slate-700">
+                                    {{ substr($reservation->start_time, 0, 5) }} - {{ substr($reservation->end_time, 0, 5) }} WIB
+                                </span>
+                            </div>
+
+                            <h4 class="text-sm font-bold text-slate-900 group-hover:text-blue-950 transition truncate">
+                                {{ $reservation->facility->name ?? 'Fasilitas Kampus' }}
+                            </h4>
+
+                            <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span>
+                                <span>{{ $reservation->facility->building ?? 'Gedung Kampus' }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Kolom Kanan: Status & Aksi --}}
+                        <div class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                             <x-cava.status-badge :status="$reservation->status" label="{{ ucfirst($reservation->status) }}" />
-                        </td>
-                        <td class="py-3.5 px-4 text-right">
-                            <a href="{{ url('/user/reservation-history') }}" class="px-3 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                                Detail
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-slate-500">Belum ada riwayat permohonan reservasi.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition shadow-2xs">
+                                <span>Buka Riwayat</span>
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            @empty
+                <div class="py-8 text-center text-slate-500 text-xs rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
+                    Belum ada riwayat permohonan reservasi.
+                </div>
+            @endforelse
         </div>
     </section>
 

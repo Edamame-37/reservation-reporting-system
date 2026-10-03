@@ -42,7 +42,7 @@
             :value="$pendingUsersCount"
             subtitle="Pendaftar Baru"
             :tagText="'+' . $pendingUsersToday . ' Hari Ini'"
-            footerText="Target SLA < 24 Jam"
+            footerText="Verifikasi Petugas < 24 Jam"
             icon="how_to_reg"
             variant="tertiary"
         />
@@ -72,7 +72,7 @@
             :value="$activeDamageReports"
             subtitle="Perlu Pemantauan"
             :tagText="$urgentDamageCount . ' Prioritas Baru'"
-            :footerText="'SLA Terselesaikan ' . $slaResolutionPercent . '%'"
+            :footerText="'Terselesaikan Petugas ' . $slaResolutionPercent . '%'"
             icon="build"
             variant="error"
         />

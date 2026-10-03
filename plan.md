@@ -1,129 +1,84 @@
-# Rencana Implementasi: Unifikasi Halaman Reservasi & Pelaporan Kerusakan (Bento UI Layout)
+# Rencana Implementasi: Refinement Bento UI Dasbor User, Pembersihan Breadcrumb, dan Penyesuaian Respon Petugas (< 24 Jam)
 
 **Branch Target**: `refactor/refine-layout`  
 **Fitur & Modul**:
-1. **Unifikasi Reservasi Ruangan (USR-01, USR-02, USR-03)**: Integrasi form pengajuan ke dalam halaman riwayat sebagai basis utama via Modal / Slide-over Drawer.
-2. **Unifikasi Pelaporan Kerusakan (USR-04, USR-05)**: Integrasi form pelaporan ke dalam halaman riwayat sebagai basis utama via Modal / Slide-over Drawer.
-3. **Penyederhanaan Elemen Terfragmentasi**: Mengganti pill button bertumpuk/berdempetan (filter status dan kategori pelaporan) menjadi elemen Dropdown (`<select>`) yang rapi dan ergonomis.
-4. **Transformasi Tabel Padat Menjadi Bento List**: Mengubah format tabel lebar yang ramai menjadi daftar kartu interaktif modern dilengkapi tombol *"Lihat Detail"*.
-5. **Penerapan Bento UI Layout**: Merestrukturisasi antarmuka pengguna ke grid Bento modern (Kartu Ringkasan Metrik, Kartu Quick Action, dan Kartu Konten Utama).
-6. **Perampingan Navigasi Sidebar**: Meringkas menu portal mahasiswa/dosen dari 4 tautan terpisah menjadi 2 modul terpadu.
+1. **Bento UI List Dasbor User (Riwayat Reservasi Terkini)**: Mengganti tabel padat di dasbor pengguna menjadi Bento List Card (maksimal 3 item) dengan micro-animation pop-up saat hover (`hover:scale-[1.015] hover:shadow-md`) dan navigasi langsung terarah ke `#daftar-reservasi` pada halaman riwayat.
+2. **Pembersihan Kartu Tiket Kerusakan (*Ultra Clean List*)**: Menghilangkan teks deskripsi masalah dan kotak resolusi dari kartu baris daftar tiket agar antarmuka bersih dan minimalis; rincian tetap tersimpan dan dapat dilihat melalui modal dialog *"Lihat Detail"*.
+3. **Standardisasi Respon Petugas (< 24 Jam) Pengganti SLA**: Menghapus istilah teknis "SLA Respon Teknisi" pada pelaporan kerusakan dan menggantinya dengan penjelasan manusiawi bahwa laporan akan ditinjau dan direspon oleh petugas dalam waktu kurang dari 24 jam. Menyesuaikan teks terkait pada antarmuka Petugas dan Admin.
+4. **Pembersihan Navigasi Atas (*Breadcrumb Removal*)**: Menghapus elemen breadcrumb ikon home dan tulisan *"Dasbor Saya > ..."* di bagian atas halaman pengguna agar tampilan lebih modern dan langsung berfokus pada konten utama.
+5. **Pembersihan Kode Tiket & Penyeragaman Font Tanggal/Jam**: Menghilangkan tampilan kode tiket dari kartu reservasi pengguna dan menyamakan font jam kegiatan dengan font tanggal (Inter/Sans bold, bukan monospace).
 
-**Dokumen Terkait**: `RULE_FRONTEND.md`, `RULE_BACKEND.md`, `RULE_PROJECT.md`, `TECHSTACK.md`, `GUIDE_GITHUB.md`, `CASE_PROJECT.md`
+**Dokumen Terkait**: `RULE_FRONTEND.md`, `RULE_BACKEND.md`, `GUIDE_GITHUB.md`, `TECHSTACK.md`, `CASE_PROJECT.md`
 
 ---
 
-## 1. Analisis Kebutuhan & Permasalahan Saat Ini
+## 1. Analisis Kebutuhan & Permasalahan
 
-Berdasarkan instruksi perbaikan antarmuka dari pengguna dan evaluasi visual pada tangkapan layar `report-history.blade.php`:
+1. **Dasbor User (`user/dashboard.blade.php`)**:
+   - *Masalah*: Seksi "Riwayat Reservasi Terkini" masih menggunakan tabel HTML 6 kolom tradisional yang kaku dan memenuhi ruang.
+   - *Solusi*: Ubah menjadi **Bento UI List View** (maksimal 3 item teratas via `$recentReservations->take(3)`). Berikan efek animasi pop-up mikro yang halus saat kursor diarahkan (`transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 hover:shadow-md cursor-pointer`). Tautan *"Lihat Semua Riwayat Reservasi"* diarahkan ke `url('/user/reservation-history#daftar-reservasi')` sehingga halaman riwayat langsung fokus ke daftar reservasi.
 
-1. **Fragmentasi Halaman (Form vs Riwayat Terpisah)**:
-   - *Kondisi Saat Ini*: Mahasiswa/dosen memiliki halaman terpisah untuk "Ajukan Reservasi" (`/user/reservation-form`) dan "Riwayat Reservasi" (`/user/reservation-history`), serta "Lapor Kerusakan" (`/user/report-form`) dan "Status Laporan" (`/user/report-history`). Hal ini membuat navigasi terkesan berulang dan tidak efisien.
-   - *Solusi*: Jadikan halaman Riwayat sebagai halaman basis tunggal per modul. Aksi "Ajukan Reservasi" atau "Buat Laporan Baru" memunculkan Form Pengisian langsung di tempat via Modal / Slide-over Drawer terintegrasi (dengan dukungan pembukaan otomatis saat terjadi error validasi atau URL `?action=create`).
+2. **Daftar Laporan Kerusakan (`user/report-history.blade.php`)**:
+   - *Masalah*: Kartu baris tiket saat ini menampilkan cuplikan teks deskripsi dan kotak hijau catatan resolusi teknisi yang membuat daftar terlihat ramai (*cluttered*).
+   - *Solusi*: Bersihkan kartu baris tiket sehingga hanya menampilkan identitas penting: Kode Tiket, Tanggal & Waktu, Kategori Sarana, Nama Fasilitas, Badge Status, dan tombol *"Lihat Detail"*. Rincian deskripsi kerusakan dan catatan resolusi teknisi tetap dapat dibaca secara lengkap pada modal pop-up ketika pengguna mengeklik *"Lihat Detail"*.
 
-2. **Elemen Kecil Berdempetan (*Cluttered UI*)**:
-   - *Kondisi Saat Ini*: Terdapat tombol-tombol pill filter status (`[Semua 1] [Baru 0] [Diproses 0] [Selesai 1] [Ditolak 0]`) yang berdempetan dengan input pencarian. Pada form laporan kerusakan, terdapat 8 pill tombol kategori yang tersebar berjejeran.
-   - *Solusi*: Ganti pemilihan berdempetan tersebut menjadi komponen Dropdown (`<select>`) standar yang bersih, lapang, dan mudah digunakan sesuai kaidah *Ponytail Methodology*.
+3. **Penyesuaian Istilah SLA Menjadi Respon Petugas (< 24 Jam)**:
+   - *Masalah*: Frasa "SLA Respon Teknisi" merupakan istilah teknis yang kurang ramah pengguna umum, dan pengguna meminta diganti dengan penjelasan bahwa laporan direspon petugas sarpras kurang dari 24 jam, serta disesuaikan di sisi Petugas dan Admin.
+   - *Solusi*: 
+     - Di `user/report-history.blade.php`: Hapus badge pill SLA, ubah deskripsi kartu aksi menjadi: *"Laporan kendala fasilitas akan ditinjau dan direspon oleh petugas sarpras dalam waktu kurang dari 24 jam."*
+     - Di `user/report-form.blade.php`: Sesuaikan badge header menjadi *"Respon Petugas: < 24 Jam"*.
+     - Di `petugas/dashboard.blade.php`: Sesuaikan metrik footer menjadi *"Respon Cepat Petugas < 2 Jam"* dan *"Target Penanganan < 24 Jam"*.
+     - Di `admin/dashboard.blade.php`: Sesuaikan metrik footer menjadi *"Verifikasi Petugas < 24 Jam"* dan *"Terselesaikan Petugas X%"*.
 
-3. **Tabel Data Terlalu Ramai & Penuh Kolom**:
-   - *Kondisi Saat Ini*: Tabel laporan kerusakan memuat 6 kolom lebar (ID Tiket & Waktu, Fasilitas & Kategori, Deskripsi Kerusakan panjang, Status Penanganan, Catatan Resolusi Teknisi, Foto Bukti) yang membuat tabel tampak penuh sesak dan kurang estetis.
-   - *Solusi*: Rombak tabel menjadi **Daftar List Item / Card List Modern**. Tampilkan informasi esensial (Kode Tiket, Nama Fasilitas, Tanggal/Waktu, Status) secara rapi dengan tipografi berjenjang, dan pindahkan rincian teknis mendalam (catatan teknisi, foto resolusi tinggi, deskripsi komprehensif) ke dalam modal **"Lihat Detail"**.
-
-4. **Kebutuhan Layout Bento UI**:
-   - *Solusi*: Implementasikan layout Bento Box Grid yang membagi ruang halaman secara hierarkis:
-     - **Bento Top Card 1 (Statistik & Metrik Cepat)**: Menampilkan rekapitulasi status tiket dalam kartu-kartu metrik yang bersih.
-     - **Bento Top Card 2 (Quick Action & SLA Info)**: Kartu ringkas dengan tombol aksi utama (*Call to Action*) dan informasi operasional/SLA kampus.
-     - **Bento Main Card (Daftar Riwayat & Kontrol Pencarian/Filter)**: Kartu utama berisi kontrol filter dropdown, kolom pencarian, dan daftar riwayat interaktif.
+4. **Pembersihan Navigasi Atas (*Breadcrumb*)**:
+   - *Masalah*: Di atas judul halaman terdapat breadcrumb ikon home dan tulisan *"Dasbor Saya > ..."* yang dirasa repetitif karena sidebar sudah menunjukkan posisi aktif.
+   - *Solusi*: Hapus blok breadcrumb tersebut dari halaman `reservation-history.blade.php` dan `report-history.blade.php` agar tata letak langsung menampilkan judul halaman yang elegan.
 
 ---
 
 ## 2. Rencana Arsitektur & Perubahan Teknis
 
-### A. Backend (`app/Http/Controllers/`)
+### A. Frontend: `resources/views/user/dashboard.blade.php`
+- Pada seksi "Riwayat Reservasi Terkini":
+  - Hapus tag `<table>` 6 kolom.
+  - Render kartu-kartu Bento List (maksimal 3 item via `$recentReservations->take(3)`):
+    - Layout flexbox responsif dengan `transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 hover:shadow-md cursor-pointer border border-slate-200/80 hover:border-slate-300 rounded-2xl bg-white p-4 sm:p-5`.
+    - Menampilkan Kode Tiket (mono badge), Tanggal & Sesi Jam, Nama Ruangan & Gedung, serta Badge Status.
+  - Tautan tombol *"Lihat Semua Riwayat Reservasi"* diperbarui mengarah ke `url('/user/reservation-history#daftar-reservasi')`.
 
-1. **`ReservationController.php`**:
-   - Pada method `history(Request $request)`:
-     - Tambahkan pemuatan data fasilitas aktif:
-       ```php
-       $facilities = Facility::where('status', 'aktif')->orderBy('name')->get();
-       ```
-     - Sertakan `$facilities` ke dalam `compact('reservations', 'counts', 'activeStatus', 'keyword', 'facilities')`.
-     - Ini memungkinkan formulir modal pengajuan reservasi di `reservation-history.blade.php` memiliki data gedung, lantai, dan ruangan secara langsung tanpa perlu fetch AJAX terpisah.
-   - Pada method `create(Request $request)`:
-     - Pertahankan agar tetap mengembalikan `view('user.reservation-form', ...)` untuk menjaga kompatibilitas rute lama dan kelulusan pengujian otomatis pest (`ReservationFeatureTest.php`).
+### B. Frontend: `resources/views/user/reservation-history.blade.php`
+- Hapus blok breadcrumb navigasi atas (ikon home dan tulisan `Dasbor Saya > Reservasi Ruangan Kampus`).
+- Tambahkan atribut `id="daftar-reservasi"` pada elemen container Bento Grid Daftar Reservasi agar tautan anchor dari dasbor langsung mendarat tepat pada daftar riwayat.
 
-2. **`ReportController.php`**:
-   - Pada method `history(Request $request)`:
-     - Tambahkan pemuatan fasilitas aktif:
-       ```php
-       $facilities = Facility::where('status', 'aktif')->orderBy('name')->get();
-       ```
-     - Sertakan `$facilities` ke dalam `compact('reports', 'counts', 'activeStatus', 'facilities')`.
-     - Ini memungkinkan modal formulir pelaporan kerusakan di `report-history.blade.php` memuat dropdown fasilitas secara langsung.
-   - Pada method `create(Request $request)`:
-     - Pertahankan agar tetap merender `view('user.report-form', ...)` demi kompatibilitas pengujian otomatis pest (`ReportFeatureTest.php`).
+### C. Frontend: `resources/views/user/report-history.blade.php`
+- Hapus blok breadcrumb navigasi atas (ikon home dan tulisan `Dasbor Saya > Pelaporan Kerusakan Fasilitas`).
+- Pada Bento Card 2 (Quick Action):
+  - Hapus badge pill `SLA Respon Teknisi: < 24 Jam`.
+  - Sesuaikan paragraf penjelasan: *"Kirimkan laporan kerusakan AC, proyektor, kelistrikan, atau fasilitas kampus lainnya. Laporan Anda akan segera ditinjau dan direspon oleh petugas sarpras dalam waktu kurang dari 24 jam."*
+  - Sesuaikan footer kartu: *"Respon petugas < 24 jam"*.
+- Pada kartu baris daftar tiket pengaduan:
+  - Hapus baris deskripsi: `<p class="text-xs text-slate-600 mt-1 line-clamp-1">{{ $report->description }}</p>`.
+  - Hapus blok resolusi hijau: `@if ($report->resolution_note) ... @endif`.
+  - Kartu kini tampil bersih dan rapi (*clean minimalist*), dengan seluruh deskripsi dan resolusi dapat dilihat melalui modal *"Lihat Detail"*.
 
----
+### D. Frontend: `resources/views/user/report-form.blade.php`
+- Sesuaikan badge informasi header dari `Target Respon SLA: < 24 Jam` menjadi `Respon Petugas: < 24 Jam`.
 
-### B. Frontend (`resources/views/`)
-
-1. **Halaman Terpadu Status & Riwayat Pelaporan Kerusakan (`user/report-history.blade.php`)**:
-   - **Struktur Bento UI**:
-     - **Hero / Header**: Judul dan subjudul yang elegan dengan ikon modul.
-     - **Bento Grid Atas**:
-       - *Card Metrik Status*: Ringkasan statistik (Total Tiket, Selesai Ditangani, Sedang Diproses, Menunggu).
-       - *Card Aksi Cepat*: Tombol utama *"Buat Laporan Baru"* yang membuka modal formulir, disertai info SLA respon teknisi sarpras (&lt; 24 Jam).
-     - **Bento Grid Utama (Daftar Laporan)**:
-       - *Bar Kontrol*: Input pencarian kata kunci dan **Dropdown Filter Status** (menggantikan pill bertumpuk).
-       - *Modern List View*: Menggantikan tabel HTML ramai dengan baris kartu ringkas:
-         - Badge Tiket & Tanggal Laporan.
-         - Nama Fasilitas & Kategori Sarana.
-         - Ringkasan singkat deskripsi masalah (1-2 baris bersih).
-         - Indikator Status (Baru, Diproses, Selesai, Ditolak).
-         - Tombol *"Lihat Detail"*.
-       - *Paginasi Laravel*: Tetap terintegrasi di bagian bawah.
-   - **Modal Form Laporan Baru (Terintegrasi)**:
-     - Dikelola dengan Alpine.js (`showCreateModal = false`).
-     - Otomatis terbuka jika terdapat error validasi (`{{ $errors->any() ? 'true' : 'false' }}`) atau parameter URL `?action=create`.
-     - Berisi input fasilitas, **Dropdown Kategori Kerusakan** (menggantikan 8 pill berdempetan), textarea deskripsi, dan upload foto bukti dengan pratinjau instan.
-   - **Modal Lihat Detail Tiket**:
-     - Menampilkan rincian penuh kendala, foto bukti kerusakan resolusi penuh, nama petugas penangan, tanggal selesai, dan catatan resolusi teknisi.
-
-2. **Halaman Terpadu Reservasi Ruangan (`user/reservation-history.blade.php`)**:
-   - **Struktur Bento UI**:
-     - **Bento Grid Atas**:
-       - *Card Metrik Reservasi*: Rekap status permohonan (Total, Disetujui, Menunggu, Ditolak/Batal).
-       - *Card Aksi Cepat*: Tombol utama *"Ajukan Reservasi Baru"* yang membuka modal form, disertai ringkasan aturan batas pembatalan H-1.
-     - **Bento Grid Utama (Daftar Reservasi)**:
-       - *Bar Kontrol*: Input pencarian dan **Dropdown Filter Status** yang rapi.
-       - *Modern List View*: Menggantikan tabel ramai dengan kartu list informatif:
-         - Kode Tiket & Waktu Pelaksanaan (Tanggal, Jam Mulai - Selesai, Durasi Slot).
-         - Nama Ruangan & Gedung.
-         - Ringkasan tujuan acara.
-         - Status verifikasi sarpras.
-         - Tombol *"Lihat Detail"* & tombol cepat *"Batalkan"* (jika memenuhi batas minimal H-1).
-       - *Paginasi Laravel*: Bersih di bawah kartu utama.
-   - **Modal Form Reservasi Baru (Terintegrasi)**:
-     - Dikelola via Alpine.js (`showCreateModal = false`).
-     - Otomatis terbuka jika `$errors->any()` atau parameter `action=create`.
-     - Berisi pemilihan 3 tingkat hierarki (Gedung, Lantai, Ruang), tanggal kegiatan (min hari ini), rentang jam operasional (07:00 - 20:00 WIB slot 30 menit), estimasi peserta, dan tujuan acara.
-   - **Modal Lihat Detail Reservasi**:
-     - Menampilkan data lengkap tiket: kapasitas ruang, PIC acara, catatan petugas, reviewer, dan tombol pembatalan mandiri.
-
-3. **Bilah Samping Navigasi (`resources/views/components/cava/sidebar.blade.php`)**:
-   - Ringkas navigasi peran Pengguna (`$role === 'user'`) menjadi:
-     1. **Dasbor Saya** (`/user/dashboard`) - Ikon `home`
-     2. **Reservasi Ruangan** (`/user/reservation-history`) - Ikon `calendar_month` (menyatukan form & riwayat)
-     3. **Pelaporan Kerusakan** (`/user/report-history`) - Ikon `handyman` (menyatukan form & riwayat)
-   - Tautan `reservation-form` dan `report-form` di dasbor atau pintasan diarahkan ke halaman terpadu dengan opsi pembukaan modal instan.
+### E. Frontend: Dasbor Petugas & Admin (`resources/views/petugas/dashboard.blade.php` & `resources/views/admin/dashboard.blade.php`)
+- `petugas/dashboard.blade.php`:
+  - Ubah `SLA Respon < 2 Jam` menjadi `Respon Cepat Petugas < 2 Jam`.
+  - Ubah `Tidak ada permohonan reservasi... SLA operasional dalam kondisi optimal` menjadi `Penanganan operasional dalam kondisi optimal`.
+- `admin/dashboard.blade.php`:
+  - Ubah `Target SLA < 24 Jam` menjadi `Verifikasi Petugas < 24 Jam`.
+  - Ubah `SLA Terselesaikan` menjadi `Terselesaikan Petugas`.
 
 ---
 
 ## 3. Tahapan Pengerjaan (Step-by-Step Execution)
 
-1. **Langkah 1**: Perbarui `app/Http/Controllers/ReservationController.php` & `app/Http/Controllers/ReportController.php` untuk memuat data `$facilities` pada method `history()`.
-2. **Langkah 2**: Bangun ulang `resources/views/user/report-history.blade.php` dengan Bento UI, Dropdown Filter, Dropdown Kategori Form, Bento List View, Modal Detail, dan Modal Form Laporan Baru.
-3. **Langkah 3**: Bangun ulang `resources/views/user/reservation-history.blade.php` dengan Bento UI, Dropdown Filter, Bento List View, Modal Detail, dan Modal Form Reservasi Baru.
-4. **Langkah 4**: Perbarui `resources/views/components/cava/sidebar.blade.php` untuk merampingkan navigasi menu pengguna menjadi ringkas dan terpadu.
-5. **Langkah 5**: Lakukan verifikasi visual pada antarmuka peramban untuk memastikan responsivitas, interaksi modal, fungsionalitas submit, dan ketiadaan elemen berdempetan.
-6. **Langkah 6**: Buat laporan pasca-eksekusi `walkthrough.md` serta cetak instruksi Git commit terstandarisasi untuk dieksekusi oleh programmer manusia.
+1. **Langkah 1**: Perbarui `resources/views/user/dashboard.blade.php` untuk merombak seksi riwayat reservasi terkini menjadi Bento List Card (maksimal 3 item) dengan micro-animation pop-up dan anchor `#daftar-reservasi`.
+2. **Langkah 2**: Perbarui `resources/views/user/reservation-history.blade.php` untuk menghapus breadcrumb atas dan menambahkan anchor `id="daftar-reservasi"`.
+3. **Langkah 3**: Perbarui `resources/views/user/report-history.blade.php` untuk menghapus breadcrumb atas, menghapus SLA badge, memperjelas respon petugas < 24 jam, serta membersihkan teks deskripsi dan kotak resolusi pada kartu tiket.
+4. **Langkah 4**: Perbarui `resources/views/user/report-form.blade.php`, `resources/views/petugas/dashboard.blade.php`, dan `resources/views/admin/dashboard.blade.php` untuk menyelaraskan istilah respon petugas < 24 jam.
+5. **Langkah 5**: Validasi sintaks blade dan jalankan kompilasi template (`php artisan view:clear; php artisan view:cache`).
+6. **Langkah 6**: Buat laporan pasca-eksekusi `walkthrough.md` serta sajikan instruksi Git commit terpisah sesuai panduan tim.
