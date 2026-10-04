@@ -57,39 +57,6 @@
     <div :class="{'md:pl-64': sidebarOpen, 'transition-all duration-300': isLoaded}" class="flex-1 flex flex-col min-h-screen pt-16">
 
         <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-            {{-- Context Officer Info Bar (Sleek Single Strip) --}}
-            <section class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                        <span class="material-symbols-outlined text-[22px]">shield_person</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-slate-900">Bambang Setyawan</span>
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Zona Gedung A Aktif
-                            </span>
-                        </div>
-                        <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
-                            <span>NIP. 197804122005011002</span>
-                            <span>•</span>
-                            <span class="text-slate-600 font-medium">Shift Pagi (07.00 - 15.00 WIB)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <span class="hidden md:flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-200/60">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>Validasi Anti-Bentrok: Aktif</span>
-                    </span>
-                    <button type="button" onclick="location.reload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 transition shadow-xs">
-                        <span class="material-symbols-outlined text-[16px]">refresh</span>
-                        <span>Sinkron Data</span>
-                    </button>
-                </div>
-            </section>
 
             {{ $slot ?? '' }}
             @yield('content')
