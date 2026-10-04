@@ -77,35 +77,38 @@
     <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
         @if($role === 'petugas')
             {{-- Menu Petugas Sarpras --}}
-            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">dashboard</span>
                     <span>Dasbor Operasional</span>
                 </span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded font-bold {{ $active === 'dashboard' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' }}">LIVE</span>
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full {{ $active === 'dashboard' ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Live</span>
+                </span>
             </a>
 
-            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'reservation-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">approval</span>
+                    <span class="material-symbols-outlined text-[18px]">inbox_customize</span>
                     <span>Antrean Reservasi</span>
                 </span>
                 @if($sidebarCounts['petugas_reservations'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['petugas_reservations'] }}</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold {{ $active === 'reservation-management' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $sidebarCounts['petugas_reservations'] }}</span>
                 @endif
             </a>
 
-            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">build</span>
                     <span>Penanganan Laporan</span>
                 </span>
                 @if($sidebarCounts['petugas_reports'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">{{ $sidebarCounts['petugas_reports'] }}</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold {{ $active === 'report-management' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $sidebarCounts['petugas_reports'] }}</span>
                 @endif
             </a>
 
-            <a href="{{ route('petugas.schedule-matrix') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'schedule-matrix' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ route('petugas.schedule-matrix') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'schedule-matrix' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                     <span>Matriks Jadwal 30m</span>
