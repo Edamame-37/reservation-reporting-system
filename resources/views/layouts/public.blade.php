@@ -1,8 +1,7 @@
 {{-- 
   NAMA FILE      : public.blade.php
   FUNGSIONALITAS : Kerangka Layout Utama (Master) untuk Halaman Publik / Pengunjung
-  DESKRIPSI      : Berisi struktur HTML dasar, Google Fonts (Inter & Material Symbols), Header CAVA 64px, Sidebar Navigasi Publik, dan slot konten utama.
-  CARA KERJA     : Bertindak sebagai master layout. Halaman publik menggunakan layout ini via <x-public-layout> atau @extends('layouts.public').
+  DESKRIPSI      : Layout Apple-esque Minimalist (Option 1) dengan Glassmorphism
 --}}
 
 @props([
@@ -11,7 +10,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,46 +19,46 @@
     <title>{{ $title }} | CAVA</title>
     <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
-    {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
-    {{-- Asset Vite (Tailwind CSS & JavaScript) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Alpine.js CDN Backup --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] { display: none !important; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
-    <x-cava.header 
-        :showProfile="false" 
-        title="CAVA" 
-        subtitle="Campus Venue Access"
-        role="public"
-        :active="$active"
-    />
+<body x-data="{ mobileMenuOpen: false }" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col">
 
-    {{-- 2. Area Konten Utama Halaman (Tanpa Sidebar) --}}
-    <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
+    <nav class="fixed w-full z-40 glass-panel">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="{{ url('/') }}" class="font-semibold tracking-tight text-lg">CAVA.</a>
+            <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium">
+                <a href="{{ url('/') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
+                <a href="{{ url('/public/catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
+                <a href="{{ url('/public/availability') }}" class="{{ $active === 'availability' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Matriks Jadwal</a>
+                <a href="{{ url('/public/information') }}" class="{{ $active === 'information' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Informasi</a>
+            </div>
+            <div>
+                <a href="{{ route('login') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">Masuk</a>
+            </div>
+        </div>
+    </nav>
 
-        <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex-1 flex flex-col min-h-screen pt-16">
+        <main class="flex-1 w-full mx-auto">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
-
-        {{-- Footer --}}
-        <x-cava.footer />
+        <footer class="py-6 text-center text-xs text-[#86868B] mt-auto">
+            &copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus.
+        </footer>
     </div>
-
-
 </body>
 </html>
