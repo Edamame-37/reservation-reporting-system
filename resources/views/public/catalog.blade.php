@@ -30,25 +30,27 @@
                 </div>
 
                 <!-- Filter Aktif / Applied Filters -->
-                <div class="flex flex-wrap items-center gap-2 mt-4" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
-                    <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
-                    <template x-for="cat in selectedCategories" :key="cat">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 text-[13px] font-medium border border-blue-200 shadow-sm">
-                            <span x-text="cat === 'Auditorium' ? 'Auditorium' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas')"></span>
-                            <button type="button" @click.prevent.stop="let idx = selectedCategories.indexOf(cat); if(idx > -1) selectedCategories.splice(idx, 1)" class="text-blue-500 hover:text-blue-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
+                <div x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" x-collapse.duration.300ms style="display: none;">
+                    <div class="relative z-10 flex flex-wrap items-center gap-2 pt-4 pb-1">
+                        <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
+                        <template x-for="cat in selectedCategories" :key="cat">
+                            <span x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 text-[13px] font-medium border border-blue-200 shadow-sm">
+                                <span x-text="cat === 'Auditorium' ? 'Auditorium' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas')"></span>
+                                <button type="button" @click.prevent.stop="let idx = selectedCategories.indexOf(cat); if(idx > -1) selectedCategories.splice(idx, 1)" class="text-blue-500 hover:text-blue-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
+                            </span>
+                        </template>
+                        <span x-show="minCapacity !== ''" x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-800 text-[13px] font-medium border border-purple-200 shadow-sm">
+                            <span x-text="'Min. ' + minCapacity + ' Kursi'"></span>
+                            <button type="button" @click.prevent.stop="minCapacity = ''" class="text-purple-500 hover:text-purple-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
                         </span>
-                    </template>
-                    <span x-show="minCapacity !== ''" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-800 text-[13px] font-medium border border-purple-200 shadow-sm">
-                        <span x-text="'Min. ' + minCapacity + ' Kursi'"></span>
-                        <button type="button" @click.prevent.stop="minCapacity = ''" class="text-purple-500 hover:text-purple-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
-                    </span>
-                    <template x-for="fac in selectedFacilities" :key="fac">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200 shadow-sm">
-                            <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
-                            <button type="button" @click.prevent.stop="let idx = selectedFacilities.indexOf(fac); if(idx > -1) selectedFacilities.splice(idx, 1)" class="text-emerald-500 hover:text-emerald-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
-                        </span>
-                    </template>
-                    <button type="button" @click.prevent.stop="selectedCategories.splice(0, selectedCategories.length); selectedFacilities.splice(0, selectedFacilities.length); minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                        <template x-for="fac in selectedFacilities" :key="fac">
+                            <span x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200 shadow-sm">
+                                <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
+                                <button type="button" @click.prevent.stop="let idx = selectedFacilities.indexOf(fac); if(idx > -1) selectedFacilities.splice(idx, 1)" class="text-emerald-500 hover:text-emerald-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
+                            </span>
+                        </template>
+                        <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories.splice(0, selectedCategories.length); selectedFacilities.splice(0, selectedFacilities.length); minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                    </div>
                 </div>
 
                 <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
