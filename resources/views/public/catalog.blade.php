@@ -12,7 +12,25 @@
                 selectedCategories: [],
                 minCapacity: '',
                 openFacility: false,
-                selectedFacilities: []
+                selectedFacilities: [],
+                get allFilters() {
+                    let filters = [];
+                    this.selectedCategories.forEach(c => filters.push({ type: 'category', value: c }));
+                    if (this.minCapacity !== '') filters.push({ type: 'capacity', value: this.minCapacity });
+                    this.selectedFacilities.forEach(f => filters.push({ type: 'facility', value: f }));
+                    return filters;
+                },
+                removeFilter(filter) {
+                    if (filter.type === 'category') {
+                        let idx = this.selectedCategories.indexOf(filter.value);
+                        if(idx > -1) this.selectedCategories.splice(idx, 1);
+                    } else if (filter.type === 'capacity') {
+                        this.minCapacity = '';
+                    } else if (filter.type === 'facility') {
+                        let idx = this.selectedFacilities.indexOf(filter.value);
+                        if(idx > -1) this.selectedFacilities.splice(idx, 1);
+                    }
+                }
             }">
                 <div class="relative group">
                     @if(request()->has('category') && request('category') !== 'semua')
@@ -44,34 +62,37 @@
                     <!-- Filter Aktif (Absolute) -->
                     <div class="absolute top-0 left-0 right-0 w-full pointer-events-auto"
                          x-ref="pillContainer">
-                        <div x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" 
+                        <div x-show="allFilters.length > 0" 
                              x-transition.opacity.duration.300ms 
                              class="flex flex-wrap items-center gap-2 pt-4 pb-1"
                              style="display: none;">
                             <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
-                            <template x-for="cat in selectedCategories" :key="cat">
-                                <span x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 text-[13px] font-medium border border-blue-200 shadow-sm">
-                                    <span x-text="cat === 'Auditorium' ? 'Auditorium' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas')"></span>
-                                    <button type="button" @click.prevent.stop="let idx = selectedCategories.indexOf(cat); if(idx > -1) selectedCategories.splice(idx, 1)" class="text-blue-500 hover:text-blue-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
+                            
+                            <template x-for="filter in allFilters.slice(0, 3)" :key="filter.type + '-' + filter.value">
+                                <span x-transition.opacity.scale.90.duration.200ms 
+                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
+                                      :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200')">
+                                    <span x-text="filter.type === 'category' ? (filter.value === 'Auditorium' ? 'Auditorium' : (filter.value === 'Lab' ? 'Lab Komputer' : 'Kelas')) : (filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.value === 'Proyektor' ? 'Proyektor' : 'AC Central'))"></span>
+                                    <button type="button" @click.prevent.stop="removeFilter(filter)" 
+                                            class="focus:outline-none transition"
+                                            :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : 'text-emerald-500 hover:text-emerald-900')">
+                                        <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                                    </button>
                                 </span>
                             </template>
-                            <span x-show="minCapacity !== ''" x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-800 text-[13px] font-medium border border-purple-200 shadow-sm">
-                                <span x-text="'Min. ' + minCapacity + ' Kursi'"></span>
-                                <button type="button" @click.prevent.stop="minCapacity = ''" class="text-purple-500 hover:text-purple-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
+                            
+                            <span x-show="allFilters.length > 3" x-transition.opacity.scale.90.duration.200ms 
+                                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-[13px] font-medium border border-gray-200 shadow-sm">
+                                <span x-text="'+' + (allFilters.length - 3) + ' lainnya'"></span>
                             </span>
-                            <template x-for="fac in selectedFacilities" :key="fac">
-                                <span x-transition.opacity.scale.90.duration.200ms class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200 shadow-sm">
-                                    <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
-                                    <button type="button" @click.prevent.stop="let idx = selectedFacilities.indexOf(fac); if(idx > -1) selectedFacilities.splice(idx, 1)" class="text-emerald-500 hover:text-emerald-900 focus:outline-none transition"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
-                                </span>
-                            </template>
-                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories.splice(0, selectedCategories.length); selectedFacilities.splice(0, selectedFacilities.length); minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
                         </div>
                     </div>
 
                     <!-- Advanced Search Popup (Absolute positioning slides based on pillsHeight) -->
                     <div class="absolute right-0 md:min-w-[600px] transition-all duration-300 ease-out pointer-events-auto"
-                         :style="`top: ${(selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== '') ? pillsHeight : 0}px`">
+                         :style="`top: ${(allFilters.length > 0) ? pillsHeight : 0}px`">
                         
                         <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
                         <div x-show="showAdvanced" 
