@@ -294,7 +294,7 @@
                         <p class="text-sm text-[#86868B]">Transparansi pengelolaan data Anda.</p>
                     </div>
                     <!-- Emote / Giant Icon -->
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-16 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
                         <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-blue-50 transition-colors duration-700 font-light">shield_lock</span>
                     </div>
                 </a>
@@ -305,7 +305,7 @@
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-purple-600 transition-colors duration-300">Syarat & Ketentuan</h3>
                         <p class="text-sm text-[#86868B]">Aturan main penggunaan ruang.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-16 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
                         <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-purple-50 transition-colors duration-700 font-light">gavel</span>
                     </div>
                 </a>
@@ -316,7 +316,7 @@
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-emerald-600 transition-colors duration-300">Panduan Peminjaman</h3>
                         <p class="text-sm text-[#86868B]">Langkah demi langkah reservasi.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-16 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
                         <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-emerald-50 transition-colors duration-700 font-light">menu_book</span>
                     </div>
                 </a>
@@ -327,7 +327,7 @@
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-red-600 transition-colors duration-300">Lapor Kerusakan</h3>
                         <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-16 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
                         <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-red-50 transition-colors duration-700 font-light">support_agent</span>
                     </div>
                 </a>
