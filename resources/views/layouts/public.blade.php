@@ -38,7 +38,10 @@
 
     <nav class="fixed w-full z-40 glass-panel">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="font-semibold tracking-tight text-lg">CAVA.</a>
+            <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold tracking-tight text-lg hover:opacity-80 transition">
+                <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo CAVA" class="w-8 h-8 object-contain">
+                <span>CAVA.</span>
+            </a>
             <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium">
                 <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
                 <a href="{{ route('public.catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
