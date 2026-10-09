@@ -163,7 +163,7 @@
     </form>
         </main>
         
-        <section class="max-w-7xl mx-auto px-6 py-20 mt-10" x-data="{ 
+        <section class="max-w-7xl mx-auto px-6 py-20 mt-14" x-data="{ 
             showModal: false, 
             activeFacility: null,
             get parsedEquipment() {
