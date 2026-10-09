@@ -32,12 +32,20 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
-                            <select class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
-                                <option>Semua Kategori</option>
-                                <option>Auditorium & Aula</option>
-                                <option>Laboratorium Komputer</option>
-                                <option>Ruang Kelas Terpadu</option>
-                            </select>
+                            <div class="flex flex-col gap-2 mt-2">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">Auditorium & Aula</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">Laboratorium Komputer</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">Ruang Kelas Terpadu</span>
+                                </label>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum (Kursi)</label>
