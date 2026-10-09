@@ -212,7 +212,7 @@
 
                 <div class="space-y-3 relative z-0">
                     @foreach ($facilities as $f)
-                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 items-center hover:bg-gray-50 p-1 rounded-lg transition border border-transparent hover:border-gray-100">
+                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 items-center hover:bg-gray-50 py-1 rounded-lg transition border border-transparent hover:border-gray-100">
                         <div class="pr-4">
                             <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
                             <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
