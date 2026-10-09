@@ -276,61 +276,60 @@
 
         </section>
 
-        <!-- Pusat Informasi Section -->
-        <section class="max-w-7xl mx-auto px-6 py-20 border-t border-gray-100">
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Informasi & Bantuan.</h2>
-                <p class="text-[#86868B] text-lg max-w-2xl">Pahami prosedur, tata tertib, dan panduan peminjaman ruangan agar kegiatan Anda berjalan lancar tanpa hambatan.</p>
-            </div>
+        <!-- Pusat Informasi Section (Redesign Asimetris Minimalis) -->
+        <section class="max-w-7xl mx-auto px-6 py-24 border-t border-gray-100">
+            <div class="flex flex-col md:flex-row gap-12 md:gap-24 items-start">
+                
+                <!-- Kiri: Header Besar -->
+                <div class="md:w-1/3 shrink-0">
+                    <h2 class="text-4xl font-bold tracking-tight text-[#1D1D1F] mb-4">Pusat Bantuan.</h2>
+                    <p class="text-[#86868B] text-lg leading-relaxed">Panduan dan regulasi penggunaan fasilitas.</p>
+                </div>
+                
+                <!-- Kanan: List Bergaris Elegan -->
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10">
+                    
+                    <a href="{{ route('public.information') }}#kebijakan" class="group block border-b border-gray-200 pb-6 hover:border-[#1D1D1F] transition-colors duration-300">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold text-[#1D1D1F] mb-2">Kebijakan Privasi</h3>
+                                <p class="text-sm text-[#86868B]">Transparansi pengelolaan data Anda.</p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ route('public.information') }}#syarat" class="group block border-b border-gray-200 pb-6 hover:border-[#1D1D1F] transition-colors duration-300">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold text-[#1D1D1F] mb-2">Syarat & Ketentuan</h3>
+                                <p class="text-sm text-[#86868B]">Aturan main penggunaan ruang.</p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+                        </div>
+                    </a>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Kebijakan Privasi -->
-                <a href="{{ route('public.information') }}#kebijakan" class="group flex flex-col p-6 bg-white rounded-3xl border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-gray-200 transition-all duration-300 h-full">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                        <span class="material-symbols-outlined text-[24px]">shield_locked</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#1D1D1F] mb-2">Kebijakan Privasi</h3>
-                    <p class="text-sm text-[#86868B] mb-6 leading-relaxed flex-grow">Pelajari perlindungan data dan privasi Anda dalam sistem CAVA.</p>
-                    <div class="flex items-center text-sm font-medium text-[#1D1D1F] opacity-70 group-hover:opacity-100 transition-opacity mt-auto">
-                        Baca Selengkapnya <span class="material-symbols-outlined text-[16px] ml-1 transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                </a>
+                    <a href="{{ route('public.information') }}#panduan" class="group block border-b border-gray-200 pb-6 hover:border-[#1D1D1F] transition-colors duration-300">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold text-[#1D1D1F] mb-2">Panduan Peminjaman</h3>
+                                <p class="text-sm text-[#86868B]">Langkah demi langkah reservasi.</p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+                        </div>
+                    </a>
+            
+                    <a href="{{ route('public.information') }}#lapor" class="group block border-b border-gray-200 pb-6 hover:border-[#1D1D1F] transition-colors duration-300">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xl font-semibold text-[#1D1D1F] mb-2">Lapor Kerusakan</h3>
+                                <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+                        </div>
+                    </a>
 
-                <!-- Syarat & Ketentuan -->
-                <a href="{{ route('public.information') }}#syarat" class="group flex flex-col p-6 bg-white rounded-3xl border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-gray-200 transition-all duration-300 h-full">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                        <span class="material-symbols-outlined text-[24px]">gavel</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#1D1D1F] mb-2">Syarat & Ketentuan</h3>
-                    <p class="text-sm text-[#86868B] mb-6 leading-relaxed flex-grow">Pahami hak dan kewajiban selama menggunakan fasilitas kampus.</p>
-                    <div class="flex items-center text-sm font-medium text-[#1D1D1F] opacity-70 group-hover:opacity-100 transition-opacity mt-auto">
-                        Baca Selengkapnya <span class="material-symbols-outlined text-[16px] ml-1 transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                </a>
-
-                <!-- Panduan Peminjaman -->
-                <a href="{{ route('public.information') }}#panduan" class="group flex flex-col p-6 bg-white rounded-3xl border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-gray-200 transition-all duration-300 h-full">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                        <span class="material-symbols-outlined text-[24px]">menu_book</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#1D1D1F] mb-2">Panduan Peminjaman</h3>
-                    <p class="text-sm text-[#86868B] mb-6 leading-relaxed flex-grow">Langkah demi langkah prosedur pengajuan ruang yang tepat.</p>
-                    <div class="flex items-center text-sm font-medium text-[#1D1D1F] opacity-70 group-hover:opacity-100 transition-opacity mt-auto">
-                        Baca Selengkapnya <span class="material-symbols-outlined text-[16px] ml-1 transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                </a>
-
-                <!-- Lapor Kerusakan -->
-                <a href="{{ route('public.information') }}#lapor" class="group flex flex-col p-6 bg-white rounded-3xl border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-gray-200 transition-all duration-300 h-full">
-                    <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                        <span class="material-symbols-outlined text-[24px]">support_agent</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#1D1D1F] mb-2">Lapor Kerusakan</h3>
-                    <p class="text-sm text-[#86868B] mb-6 leading-relaxed flex-grow">Hubungi Helpdesk jika menemukan kerusakan pada fasilitas.</p>
-                    <div class="flex items-center text-sm font-medium text-[#1D1D1F] opacity-70 group-hover:opacity-100 transition-opacity mt-auto">
-                        Baca Selengkapnya <span class="material-symbols-outlined text-[16px] ml-1 transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                </a>
+                </div>
             </div>
         </section>
     </div>
