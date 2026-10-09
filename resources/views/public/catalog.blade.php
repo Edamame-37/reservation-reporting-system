@@ -3,11 +3,23 @@
         <h1 class="text-4xl font-bold tracking-tight mb-2">Katalog Fasilitas.</h1>
         <p class="text-lg text-[#86868B] mb-8">Temukan ruang yang sesuai dengan kebutuhan spesifik kegiatan Anda.</p>
         
+        <form action="{{ route('public.catalog') }}" method="GET" class="max-w-3xl mb-8 relative group">
+            @if(request()->has('category') && request('category') !== 'semua')
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
+                <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung, atau alat..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent">
+                <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+            </div>
+        </form>
+
         <div class="flex gap-3 mb-10 overflow-x-auto hide-scroll pb-2">
-            <a href="{{ route('public.catalog') }}" class="px-5 py-2.5 rounded-full bg-[#1D1D1F] text-white text-sm font-medium whitespace-nowrap">Semua Fasilitas</a>
-            <a href="{{ route('public.catalog', ['category' => 'Auditorium']) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Auditorium & Aula</a>
-            <a href="{{ route('public.catalog', ['category' => 'Lab']) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Laboratorium Komputer</a>
-            <a href="{{ route('public.catalog', ['category' => 'Kelas']) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Ruang Kelas Terpadu</a>
+            <a href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full bg-[#1D1D1F] text-white text-sm font-medium whitespace-nowrap">Semua Fasilitas</a>
+            <a href="{{ route('public.catalog', array_filter(['category' => 'Auditorium', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Auditorium & Aula</a>
+            <a href="{{ route('public.catalog', array_filter(['category' => 'Lab', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Laboratorium Komputer</a>
+            <a href="{{ route('public.catalog', array_filter(['category' => 'Kelas', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Ruang Kelas Terpadu</a>
         </div>
 
         <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
