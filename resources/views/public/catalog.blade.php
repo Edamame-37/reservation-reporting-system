@@ -28,24 +28,25 @@
                 </div>
 
                 <!-- Filter Aktif / Applied Filters -->
-                <div class="absolute top-full right-0 mt-3 flex flex-wrap justify-end items-center gap-1.5 min-w-[400px] z-10" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
+                <div class="flex flex-wrap items-center gap-2 mt-4" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
+                    <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
                     <template x-for="cat in selectedCategories" :key="cat">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold tracking-wide uppercase border border-blue-100 shadow-sm">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 text-[13px] font-medium border border-blue-200 shadow-sm">
                             <span x-text="cat === 'Auditorium' ? 'Auditorium' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas')"></span>
-                            <button type="button" @click="selectedCategories = selectedCategories.filter(c => c !== cat)" class="hover:text-blue-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                            <button type="button" @click.prevent.stop="let idx = selectedCategories.indexOf(cat); if(idx > -1) selectedCategories.splice(idx, 1)" class="text-blue-500 hover:text-blue-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
                         </span>
                     </template>
-                    <span x-show="minCapacity !== ''" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-[10px] font-semibold tracking-wide uppercase border border-purple-100 shadow-sm">
-                        <span x-text="'Min. ' + minCapacity"></span>
-                        <button type="button" @click="minCapacity = ''" class="hover:text-purple-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                    <span x-show="minCapacity !== ''" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-800 text-[13px] font-medium border border-purple-200 shadow-sm">
+                        <span x-text="'Min. ' + minCapacity + ' Kursi'"></span>
+                        <button type="button" @click.prevent.stop="minCapacity = ''" class="text-purple-500 hover:text-purple-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
                     </span>
                     <template x-for="fac in selectedFacilities" :key="fac">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold tracking-wide uppercase border border-emerald-100 shadow-sm">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200 shadow-sm">
                             <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
-                            <button type="button" @click="selectedFacilities = selectedFacilities.filter(f => f !== fac)" class="hover:text-emerald-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                            <button type="button" @click.prevent.stop="let idx = selectedFacilities.indexOf(fac); if(idx > -1) selectedFacilities.splice(idx, 1)" class="text-emerald-500 hover:text-emerald-900 focus:outline-none"><span class="material-symbols-outlined text-[14px] font-bold">close</span></button>
                         </span>
                     </template>
-                    <button type="button" @click="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[10px] text-gray-400 hover:text-[#1D1D1F] underline px-1 transition">Hapus</button>
+                    <button type="button" @click.prevent.stop="selectedCategories.splice(0, selectedCategories.length); selectedFacilities.splice(0, selectedFacilities.length); minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
                 </div>
 
                 <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
