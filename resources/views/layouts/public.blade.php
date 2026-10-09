@@ -38,12 +38,12 @@
 
     <nav class="fixed w-full z-40 glass-panel">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="{{ url('/') }}" class="font-semibold tracking-tight text-lg">CAVA.</a>
+            <a href="{{ route('home') }}" class="font-semibold tracking-tight text-lg">CAVA.</a>
             <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium">
-                <a href="{{ url('/') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
-                <a href="{{ url('/public/catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
-                <a href="{{ url('/public/availability') }}" class="{{ $active === 'availability' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Matriks Jadwal</a>
-                <a href="{{ url('/public/information') }}" class="{{ $active === 'information' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Informasi</a>
+                <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
+                <a href="{{ route('public.catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
+                <a href="{{ route('public.availability') }}" class="{{ $active === 'availability' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Matriks Jadwal</a>
+                <a href="{{ route('public.information') }}" class="{{ $active === 'information' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Informasi</a>
             </div>
             <div>
                 <a href="{{ route('login') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">Masuk</a>
