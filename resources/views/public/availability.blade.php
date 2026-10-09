@@ -189,42 +189,31 @@
                 </div>
             </div>
 
-            <div class="min-w-[1000px] relative pb-4">
-                <!-- Overlay Grid Lines -->
-                <div class="absolute top-12 bottom-0 left-0 right-0 grid grid-cols-[250px_repeat(13,1fr)] pointer-events-none z-10">
-                    <div></div> <!-- Spacer for Nama Fasilitas -->
-                    <template x-for="(i, index) in Array.from({length: 13})">
-                        <div class="border-l border-black/10 relative" :class="index === 12 ? 'border-r' : ''">
-                            <div class="absolute inset-y-0 left-1/2 border-l border-black/5 border-dashed"></div>
+            <div class="min-w-[1000px] pb-4">
+                <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
+                    <div class="pr-4 font-semibold text-gray-700 text-xs self-end pb-1">Nama Fasilitas</div>
+                    <template x-for="(timeSlot, index) in timeSlots">
+                        <div class="flex flex-col items-center justify-end pb-1 relative">
+                            <!-- Garis penanda kecil di bawah teks -->
+                            <div class="w-px h-1.5 bg-gray-200 absolute -bottom-2"></div>
+                            
+                            <span x-show="index % 2 === 0" class="text-[11px] font-semibold text-gray-700 mb-0.5" x-text="timeSlot.split(':')[0] + ':00'"></span>
+                            <span x-show="index % 2 === 1" class="text-[9px] text-gray-400 font-medium leading-none mb-0.5">30</span>
                         </div>
                     </template>
                 </div>
 
-                <div class="grid grid-cols-[250px_repeat(13,1fr)] mb-4 border-b border-gray-200 pb-2 text-xs font-medium text-[#86868B] relative z-20 h-6">
-                    <div class="pr-4 font-semibold text-gray-700 bg-white inline-block">Nama Fasilitas</div>
-                    <template x-for="hour in [7,8,9,10,11,12,13,14,15,16,17,18,19]">
-                        <div class="relative">
-                            <span x-text="(hour < 10 ? '0'+hour : hour) + ':00'" class="absolute top-0 left-0 bg-white px-1 -translate-x-1/2 z-10 text-gray-700"></span>
-                            <span class="absolute top-0.5 left-1/2 text-[10px] text-gray-400 bg-white px-1 -translate-x-1/2 z-10">30</span>
-                        </div>
-                    </template>
-                </div>
-
-                <div class="space-y-3 relative z-0">
+                <div class="space-y-3">
                     @foreach ($facilities as $f)
-                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 items-center hover:bg-gray-50 py-1 rounded-lg transition border border-transparent hover:border-gray-100">
-                        <div class="pr-4">
+                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1.5 items-center hover:bg-gray-50 py-1.5 px-2 rounded-xl transition">
+                        <div class="pr-2">
                             <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
                             <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
                         </div>
                         
-                        <template x-for="(timeSlot, index) in timeSlots">
-                            <div class="h-8 w-full transition" 
-                                 :class="[
-                                    index === 0 ? 'rounded-l-md' : '',
-                                    index === timeSlots.length - 1 ? 'rounded-r-md' : '',
-                                    {{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300 hover:bg-gray-400' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400 hover:bg-red-500' : 'bg-emerald-400 hover:bg-emerald-500')
-                                 ]"
+                        <template x-for="timeSlot in timeSlots">
+                            <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
+                                 :class="{{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400' : 'bg-emerald-400')"
                                  :title="timeSlot + ' - ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
                             </div>
                         </template>
