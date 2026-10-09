@@ -214,7 +214,7 @@
                         <template x-for="timeSlot in timeSlots">
                             <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
                                  :class="{{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400' : 'bg-emerald-400')"
-                                 :title="timeSlot + ' - ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
+                                 :title="timeSlot + ' - ' + getEndTime(timeSlot) + ' ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
                             </div>
                         </template>
                     </div>
@@ -257,6 +257,17 @@
                     if(!dateStr) return '';
                     const d = new Date(dateStr);
                     return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
+                },
+
+                getEndTime(timeStr) {
+                    let parts = timeStr.split(':');
+                    let hours = parseInt(parts[0]);
+                    let minutes = parseInt(parts[1]) + 30;
+                    if (minutes >= 60) {
+                        hours += 1;
+                        minutes -= 60;
+                    }
+                    return (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes);
                 },
                 
                 async fetchMatrix() {
