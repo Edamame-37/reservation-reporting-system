@@ -2,7 +2,7 @@
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="availabilityMatrix()" x-init="initMatrix('{{ date('Y-m-d') }}')">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8">
             <div>
-                <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal.</h1>
+                <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal</h1>
                 <p class="text-lg text-[#86868B]">Pantau ketersediaan slot waktu secara transparan.</p>
 
                 <!-- Quick Date Navigation -->

@@ -177,7 +177,7 @@
         }">
             <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight mb-2">Fasilitas Unggulan.</h2>
+                    <h2 class="text-3xl font-bold tracking-tight mb-2">Fasilitas Unggulan</h2>
                     <p class="text-[#86868B] text-lg">Ruang terbaik untuk produktivitas maksimal.</p>
                 </div>
                 <a href="{{ route('public.catalog') }}" class="text-blue-600 font-medium hover:underline text-sm">Lihat Semua →</a>
@@ -283,7 +283,7 @@
         <section class="max-w-7xl mx-auto px-6 py-24 border-t border-gray-100">
             <!-- Top Header -->
             <div class="mb-10">
-                <h2 class="text-4xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Bantuan.</h2>
+                <h2 class="text-4xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Bantuan</h2>
                 <p class="text-[#86868B] text-lg leading-relaxed">Panduan dan regulasi penggunaan fasilitas.</p>
             </div>
             
