@@ -10,11 +10,13 @@
                 showAdvanced: false,
                 openCategory: false,
                 selectedCategories: [],
+                selectedDate: '',
                 minCapacity: '',
                 openFacility: false,
                 selectedFacilities: [],
                 get allFilters() {
                     let filters = [];
+                    if (this.selectedDate !== '') filters.push({ type: 'date', value: this.selectedDate });
                     this.selectedCategories.forEach(c => filters.push({ type: 'category', value: c }));
                     if (this.minCapacity !== '') filters.push({ type: 'capacity', value: this.minCapacity });
                     this.selectedFacilities.forEach(f => filters.push({ type: 'facility', value: f }));
@@ -29,6 +31,8 @@
                     } else if (filter.type === 'facility') {
                         let idx = this.selectedFacilities.indexOf(filter.value);
                         if(idx > -1) this.selectedFacilities.splice(idx, 1);
+                    } else if (filter.type === 'date') {
+                        this.selectedDate = '';
                     }
                 }
             }">
@@ -71,11 +75,11 @@
                             <template x-for="filter in allFilters.slice(0, 3)" :key="filter.type + '-' + filter.value">
                                 <span x-transition.opacity.scale.90.duration.200ms 
                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
-                                      :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200')">
-                                    <span x-text="filter.type === 'category' ? (filter.value === 'Auditorium' ? 'Auditorium' : (filter.value === 'Lab' ? 'Lab Komputer' : 'Kelas')) : (filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.value === 'Proyektor' ? 'Proyektor' : 'AC Central'))"></span>
+                                      :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : (filter.type === 'date' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'))">
+                                    <span x-text="filter.type === 'category' ? (filter.value === 'Auditorium' ? 'Auditorium' : (filter.value === 'Lab' ? 'Lab Komputer' : 'Kelas')) : (filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.type === 'date' ? 'Tgl: ' + filter.value : (filter.value === 'Proyektor' ? 'Proyektor' : 'AC Central')))"></span>
                                     <button type="button" @click.prevent.stop="removeFilter(filter)" 
                                             class="focus:outline-none transition"
-                                            :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : 'text-emerald-500 hover:text-emerald-900')">
+                                            :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : (filter.type === 'date' ? 'text-amber-500 hover:text-amber-900' : 'text-emerald-500 hover:text-emerald-900'))">
                                         <span class="material-symbols-outlined text-[14px] font-bold">close</span>
                                     </button>
                                 </span>
@@ -86,7 +90,7 @@
                                 <span x-text="'+' + (allFilters.length - 3) + ' lainnya'"></span>
                             </span>
 
-                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''; selectedDate = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
                         </div>
                     </div>
 
@@ -108,7 +112,11 @@
                                 <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
                                 <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined text-xl">close</span></button>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Tanggal Jadwal</label>
+                                    <input type="date" x-model="selectedDate" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                                </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
                                     <div class="relative mt-2">
