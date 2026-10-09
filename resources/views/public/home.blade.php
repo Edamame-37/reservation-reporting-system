@@ -4,7 +4,7 @@
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-[#1D1D1F] leading-tight mb-6">Ruang Anda.<br>Waktu Anda.</h1>
             <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light">Platform reservasi fasilitas kampus yang elegan, cepat, dan transparan. Temukan ruang yang sempurna untuk ide brilian Anda berikutnya.</p>
             
-            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative group" x-data="{ 
+            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
                 selectedCategories: [],
@@ -12,18 +12,20 @@
                 openFacility: false,
                 selectedFacilities: []
             }">
-                <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
-                    <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
-                    <input type="text" name="search" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent">
-                    <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px]">tune</span>
-                    </button>
-                    <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
+                        <input type="text" name="search" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent">
+                        <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[24px]">tune</span>
+                        </button>
+                        <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+                    </div>
                 </div>
 
                 <!-- Filter Aktif / Applied Filters -->
-                <div class="flex flex-wrap items-center gap-2 mt-4" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
+                <div class="relative z-10 flex flex-wrap items-center gap-2 mt-4" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
                     <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
                     <template x-for="cat in selectedCategories" :key="cat">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 text-[13px] font-medium border border-blue-200 shadow-sm">
