@@ -137,7 +137,9 @@
                         <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
                     </div>
                 </div>
-            </form>
+            </div>
+        </div>
+    </form>
         </main>
         
         <section class="max-w-7xl mx-auto px-6 py-20 mt-10" x-data="{ 
