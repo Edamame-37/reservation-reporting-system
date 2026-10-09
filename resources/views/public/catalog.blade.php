@@ -194,7 +194,7 @@
                     @if($facility['status'] === 'locked')
                         <span class="flex items-center gap-1.5 text-xs font-medium text-red-600"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Perbaikan</span>
                     @else
-                        <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia ({{ $facility['availableSlots'] }} slot)</span>
+                        <div></div>
                     @endif
                     <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transition text-[18px]">arrow_forward</span>
                 </div>
