@@ -179,35 +179,42 @@
         <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto">
             <div class="flex justify-between items-center mb-6 min-w-[800px]">
                 <div class="flex items-center gap-4">
-                    <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]">{{ date('d F Y') }}</span></h2>
+                    <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]" x-text="formatDate(currentDate)"></span></h2>
                     <span x-show="loading" class="text-xs text-blue-500 font-medium animate-pulse">Memuat data live...</span>
                 </div>
                 <div class="flex gap-4">
-                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-full bg-gray-100 border border-gray-200"></span> Tersedia</div>
-                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-full bg-red-100 border border-red-200"></span> Dipakai / Maintenance</div>
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-emerald-400 border border-emerald-500"></span> Tersedia</div>
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-red-400 border border-red-500"></span> Terpakai</div>
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-gray-300 border border-gray-400"></span> Maintenance</div>
                 </div>
             </div>
 
             <div class="min-w-[1000px]">
-                <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1 mb-4 border-b border-gray-100 pb-4 text-xs font-medium text-[#86868B]">
-                    <div>Nama Fasilitas</div>
-                    <template x-for="time in timeLabels">
-                        <div class="text-center" x-text="time"></div>
+                <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 mb-4 border-b border-gray-100 pb-4 text-xs font-medium text-[#86868B]">
+                    <div class="pr-4">Nama Fasilitas</div>
+                    <template x-for="(time, index) in timeLabels">
+                        <div class="text-center relative" :class="index > 0 ? 'border-l border-gray-200' : ''">
+                            <span x-text="time === '' ? '30' : time" :class="time === '' ? 'text-[9px] absolute -left-2 top-0.5 bg-white px-1' : ''"></span>
+                        </div>
                     </template>
                 </div>
 
                 <div class="space-y-3">
                     @foreach ($facilities as $f)
-                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1 items-center hover:bg-gray-50 p-1 rounded-lg transition">
+                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 items-center hover:bg-gray-50 p-1 rounded-lg transition border border-transparent hover:border-gray-100">
                         <div class="pr-4">
                             <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
                             <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
                         </div>
                         
-                        <template x-for="timeSlot in timeSlots">
-                            <div class="h-8 rounded-md w-full transition" 
-                                 :class="isBooked('{{ $f['id'] }}', timeSlot) || {{ $f['locked'] ? 'true' : 'false' }} ? 'bg-red-50 border border-red-100' : 'bg-gray-50 border border-gray-200'"
-                                 :title="timeSlot">
+                        <template x-for="(timeSlot, index) in timeSlots">
+                            <div class="h-8 w-full transition border-r border-white/50" 
+                                 :class="[
+                                    index === 0 ? 'rounded-l-md' : '',
+                                    index === timeSlots.length - 1 ? 'rounded-r-md border-r-0' : '',
+                                    {{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300 hover:bg-gray-400' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400 hover:bg-red-500' : 'bg-emerald-400 hover:bg-emerald-500')
+                                 ]"
+                                 :title="timeSlot + ' - ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
                             </div>
                         </template>
                     </div>
@@ -244,6 +251,12 @@
                 initMatrix(date) {
                     this.currentDate = date;
                     this.fetchMatrix();
+                },
+
+                formatDate(dateStr) {
+                    if(!dateStr) return '';
+                    const d = new Date(dateStr);
+                    return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
                 },
                 
                 async fetchMatrix() {
