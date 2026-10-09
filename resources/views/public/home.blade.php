@@ -2,8 +2,8 @@
     <div class="pt-20 pb-20">
         <main class="px-6 max-w-5xl mx-auto text-center">
             <h1 class="text-5xl md:text-7xl tracking-tight leading-tight mb-6">
-                <span class="block font-extrabold text-[#86868B] mb-2 md:mb-4 tracking-widest">CAVA.</span>
-                <span class="font-extrabold text-[#1D1D1F]">Reserve <span class="font-light text-gray-500">and</span> Report</span>
+                <span class="block font-extrabold text-[#86868B] mb-0.5 md:mb-0.5 tracking-widest">CAVA</span>
+                <span class="font-extrabold text-[#1D1D1F]">Reserve and Report</span>
             </h1>
             <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light leading-relaxed">Optimalisasi fasilitas kampus dalam satu platform terpadu. Pesan ruang instan dan laporkan kendala seketika.</p>
             
@@ -283,7 +283,7 @@
         <section class="max-w-7xl mx-auto px-6 py-24 border-t border-gray-100">
             <!-- Top Header -->
             <div class="mb-10">
-                <h2 class="text-4xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Bantuan</h2>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Bantuan</h2>
                 <p class="text-[#86868B] text-lg leading-relaxed">Panduan dan regulasi penggunaan fasilitas.</p>
             </div>
             
