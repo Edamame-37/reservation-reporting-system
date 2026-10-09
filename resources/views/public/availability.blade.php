@@ -1,9 +1,36 @@
 <x-public-layout title="Matriks Jadwal Ketersediaan" active="availability">
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="availabilityMatrix()" x-init="initMatrix('{{ date('Y-m-d') }}')">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-24">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8">
             <div>
                 <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal.</h1>
                 <p class="text-lg text-[#86868B]">Pantau ketersediaan slot waktu secara transparan.</p>
+
+                <!-- Quick Date Navigation -->
+                <div class="mt-8 hidden md:block">
+                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Pintasan Tanggal</div>
+                    <div class="flex gap-2">
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d') }}')" 
+                                :class="currentDate === '{{ date('Y-m-d') }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            Hari Ini
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+1 day')) }}')" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+1 day')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            Besok
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+2 days')) }}')" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+2 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            {{ \Carbon\Carbon::now()->addDays(2)->translatedFormat('d M') }}
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+3 days')) }}')" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+3 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            {{ \Carbon\Carbon::now()->addDays(3)->translatedFormat('d M') }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" x-data="{ 
