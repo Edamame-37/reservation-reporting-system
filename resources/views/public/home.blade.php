@@ -4,7 +4,14 @@
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-[#1D1D1F] leading-tight mb-6">Ruang Anda.<br>Waktu Anda.</h1>
             <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light">Platform reservasi fasilitas kampus yang elegan, cepat, dan transparan. Temukan ruang yang sempurna untuk ide brilian Anda berikutnya.</p>
             
-            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative group" x-data="{ showAdvanced: false }">
+            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative group" x-data="{ 
+                showAdvanced: false,
+                openCategory: false,
+                selectedCategories: [],
+                minCapacity: '',
+                openFacility: false,
+                selectedFacilities: []
+            }">
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
                     <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
@@ -13,6 +20,28 @@
                         <span class="material-symbols-outlined text-[24px]">tune</span>
                     </button>
                     <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+                </div>
+
+                <!-- Filter Aktif / Applied Filters -->
+                <div class="flex flex-wrap items-center gap-2 mt-4" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
+                    <span class="text-xs font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
+                    <template x-for="cat in selectedCategories" :key="cat">
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold tracking-wide uppercase border border-blue-100">
+                            <span x-text="cat === 'Auditorium' ? 'Auditorium & Aula' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas Terpadu')"></span>
+                            <button type="button" @click="selectedCategories = selectedCategories.filter(c => c !== cat)" class="hover:text-blue-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                        </span>
+                    </template>
+                    <span x-show="minCapacity !== ''" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 text-[11px] font-semibold tracking-wide uppercase border border-purple-100">
+                        <span x-text="'Min. ' + minCapacity + ' Kursi'"></span>
+                        <button type="button" @click="minCapacity = ''" class="hover:text-purple-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                    </span>
+                    <template x-for="fac in selectedFacilities" :key="fac">
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold tracking-wide uppercase border border-emerald-100">
+                            <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
+                            <button type="button" @click="selectedFacilities = selectedFacilities.filter(f => f !== fac)" class="hover:text-emerald-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                        </span>
+                    </template>
+                    <button type="button" @click="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-xs text-gray-400 hover:text-[#1D1D1F] underline px-2 py-1 transition">Hapus Semua</button>
                 </div>
 
                 <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
@@ -32,7 +61,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
-                            <div x-data="{ openCategory: false, selectedCategories: [] }" class="relative mt-2">
+                            <div class="relative mt-2">
                                 <button type="button" @click="openCategory = !openCategory" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
@@ -55,12 +84,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum (Kursi)</label>
-                            <input type="number" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
+                            <input type="number" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
-                            <div x-data="{ openFacility: false, selectedFacilities: [] }" class="relative mt-2">
+                            <div class="relative mt-2">
                                 <button type="button" @click="openFacility = !openFacility" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>

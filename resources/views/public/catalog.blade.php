@@ -6,7 +6,14 @@
                 <p class="text-lg text-[#86868B]">Temukan ruang yang sesuai dengan kebutuhan spesifik kegiatan Anda.</p>
             </div>
             
-            <form action="{{ route('public.catalog') }}" method="GET" class="w-full md:w-96 relative group shrink-0" x-data="{ showAdvanced: false }">
+            <form action="{{ route('public.catalog') }}" method="GET" class="w-full md:w-96 relative group shrink-0" x-data="{ 
+                showAdvanced: false,
+                openCategory: false,
+                selectedCategories: [],
+                minCapacity: '',
+                openFacility: false,
+                selectedFacilities: []
+            }">
                 @if(request()->has('category') && request('category') !== 'semua')
                     <input type="hidden" name="category" value="{{ request('category') }}">
                 @endif
@@ -18,6 +25,27 @@
                         <span class="material-symbols-outlined text-[20px]">tune</span>
                     </button>
                     <button type="submit" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition">Cari</button>
+                </div>
+
+                <!-- Filter Aktif / Applied Filters -->
+                <div class="absolute top-full right-0 mt-3 flex flex-wrap justify-end items-center gap-1.5 min-w-[400px] z-10" x-show="selectedCategories.length > 0 || selectedFacilities.length > 0 || minCapacity !== ''" style="display: none;">
+                    <template x-for="cat in selectedCategories" :key="cat">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold tracking-wide uppercase border border-blue-100 shadow-sm">
+                            <span x-text="cat === 'Auditorium' ? 'Auditorium' : (cat === 'Lab' ? 'Lab Komputer' : 'Kelas')"></span>
+                            <button type="button" @click="selectedCategories = selectedCategories.filter(c => c !== cat)" class="hover:text-blue-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                        </span>
+                    </template>
+                    <span x-show="minCapacity !== ''" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-[10px] font-semibold tracking-wide uppercase border border-purple-100 shadow-sm">
+                        <span x-text="'Min. ' + minCapacity"></span>
+                        <button type="button" @click="minCapacity = ''" class="hover:text-purple-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                    </span>
+                    <template x-for="fac in selectedFacilities" :key="fac">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold tracking-wide uppercase border border-emerald-100 shadow-sm">
+                            <span x-text="fac === 'Proyektor' ? 'Proyektor' : 'AC Central'"></span>
+                            <button type="button" @click="selectedFacilities = selectedFacilities.filter(f => f !== fac)" class="hover:text-emerald-900 ml-1"><span class="material-symbols-outlined text-[12px] font-bold">close</span></button>
+                        </span>
+                    </template>
+                    <button type="button" @click="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[10px] text-gray-400 hover:text-[#1D1D1F] underline px-1 transition">Hapus</button>
                 </div>
 
                 <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
@@ -37,7 +65,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
-                            <div x-data="{ openCategory: false, selectedCategories: [] }" class="relative mt-2">
+                            <div class="relative mt-2">
                                 <button type="button" @click="openCategory = !openCategory" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
@@ -60,12 +88,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum (Kursi)</label>
-                            <input type="number" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
+                            <input type="number" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
-                            <div x-data="{ openFacility: false, selectedFacilities: [] }" class="relative mt-2">
+                            <div class="relative mt-2">
                                 <button type="button" @click="openFacility = !openFacility" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
