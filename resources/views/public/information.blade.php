@@ -1,37 +1,59 @@
 <x-public-layout title="Pusat Informasi & Regulasi" active="information">
-    <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="{ activeTab: 'kebijakan' }">
+    <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" 
+         x-data="{ 
+            activeTab: 'kebijakan',
+            initObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            this.activeTab = entry.target.id;
+                        }
+                    });
+                }, {
+                    rootMargin: '-20% 0px -70% 0px',
+                    threshold: 0
+                });
+
+                document.querySelectorAll('.info-section').forEach(section => {
+                    observer.observe(section);
+                });
+            }
+         }"
+         x-init="initObserver()">
+         
         <div class="flex flex-col md:flex-row gap-12">
             
-            <!-- Sidebar Navigasi Tab -->
+            <!-- Sidebar Navigasi -->
             <div class="w-full md:w-64 shrink-0">
-                <div class="sticky top-24">
+                <div class="sticky top-28">
                     <h3 class="text-xs font-semibold text-[#86868B] tracking-wider uppercase mb-4">Pusat Informasi</h3>
-                    <ul class="space-y-3 text-sm font-medium">
+                    <ul class="space-y-3 text-sm font-medium relative">
+                        <!-- Indikator Garis Samping (Opsional untuk estetika tambahan, tapi kita biarkan simple seperti text highlight saja) -->
                         <li>
-                            <a href="#" @click.prevent="activeTab = 'kebijakan'" 
+                            <a href="#kebijakan" @click.prevent="document.getElementById('kebijakan').scrollIntoView({behavior: 'smooth'})" 
                                class="transition block" 
-                               :class="activeTab === 'kebijakan' ? 'text-[#1D1D1F]' : 'text-[#86868B] hover:text-[#1D1D1F]'">
+                               :class="activeTab === 'kebijakan' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
                                Kebijakan Privasi
                             </a>
                         </li>
                         <li>
-                            <a href="#" @click.prevent="activeTab = 'syarat'" 
+                            <a href="#syarat" @click.prevent="document.getElementById('syarat').scrollIntoView({behavior: 'smooth'})" 
                                class="transition block"
-                               :class="activeTab === 'syarat' ? 'text-[#1D1D1F]' : 'text-[#86868B] hover:text-[#1D1D1F]'">
+                               :class="activeTab === 'syarat' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
                                Syarat & Ketentuan
                             </a>
                         </li>
                         <li>
-                            <a href="#" @click.prevent="activeTab = 'panduan'" 
+                            <a href="#panduan" @click.prevent="document.getElementById('panduan').scrollIntoView({behavior: 'smooth'})" 
                                class="transition block"
-                               :class="activeTab === 'panduan' ? 'text-[#1D1D1F]' : 'text-[#86868B] hover:text-[#1D1D1F]'">
+                               :class="activeTab === 'panduan' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
                                Panduan Peminjaman
                             </a>
                         </li>
                         <li>
-                            <a href="#" @click.prevent="activeTab = 'lapor'" 
+                            <a href="#lapor" @click.prevent="document.getElementById('lapor').scrollIntoView({behavior: 'smooth'})" 
                                class="transition block"
-                               :class="activeTab === 'lapor' ? 'text-[#1D1D1F]' : 'text-[#86868B] hover:text-[#1D1D1F]'">
+                               :class="activeTab === 'lapor' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
                                Lapor Kerusakan (Helpdesk)
                             </a>
                         </li>
@@ -43,11 +65,7 @@
             <div class="flex-1 max-w-3xl relative">
                 
                 <!-- Konten: Kebijakan Privasi -->
-                <div x-show="activeTab === 'kebijakan'" 
-                     x-transition:enter="transition ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4" 
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     style="display: none;">
+                <div id="kebijakan" class="info-section scroll-mt-32 mb-20">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Kebijakan Privasi</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -65,11 +83,7 @@
                 </div>
 
                 <!-- Konten: Syarat & Ketentuan -->
-                <div x-show="activeTab === 'syarat'" 
-                     x-transition:enter="transition ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4" 
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     style="display: none;" x-cloak>
+                <div id="syarat" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Syarat & Ketentuan</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
                         <p>Aliquam erat volutpat. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus.</p>
@@ -88,11 +102,7 @@
                 </div>
 
                 <!-- Konten: Panduan Peminjaman -->
-                <div x-show="activeTab === 'panduan'" 
-                     x-transition:enter="transition ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4" 
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     style="display: none;" x-cloak>
+                <div id="panduan" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Panduan Peminjaman</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
                         <p>Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est. Sed lectus.</p>
@@ -109,11 +119,7 @@
                 </div>
 
                 <!-- Konten: Lapor Kerusakan -->
-                <div x-show="activeTab === 'lapor'" 
-                     x-transition:enter="transition ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4" 
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     style="display: none;" x-cloak>
+                <div id="lapor" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Helpdesk & Lapor Kerusakan</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
                         <p>In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit. Phasellus gravida semper nisi.</p>
