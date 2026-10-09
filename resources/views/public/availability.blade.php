@@ -189,17 +189,28 @@
                 </div>
             </div>
 
-            <div class="min-w-[1000px]">
-                <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 mb-4 border-b border-gray-100 pb-4 text-xs font-medium text-[#86868B]">
-                    <div class="pr-4">Nama Fasilitas</div>
-                    <template x-for="(time, index) in timeLabels">
-                        <div class="text-center relative" :class="index > 0 ? 'border-l border-gray-200' : ''">
-                            <span x-text="time === '' ? '30' : time" :class="time === '' ? 'text-[9px] absolute -left-2 top-0.5 bg-white px-1' : ''"></span>
+            <div class="min-w-[1000px] relative pb-4">
+                <!-- Overlay Grid Lines -->
+                <div class="absolute top-12 bottom-0 left-0 right-0 grid grid-cols-[250px_repeat(13,1fr)] pointer-events-none z-10">
+                    <div></div> <!-- Spacer for Nama Fasilitas -->
+                    <template x-for="(i, index) in Array.from({length: 13})">
+                        <div class="border-l border-black/10 relative" :class="index === 12 ? 'border-r' : ''">
+                            <div class="absolute inset-y-0 left-1/2 border-l border-black/5 border-dashed"></div>
                         </div>
                     </template>
                 </div>
 
-                <div class="space-y-3">
+                <div class="grid grid-cols-[250px_repeat(13,1fr)] mb-4 border-b border-gray-200 pb-2 text-xs font-medium text-[#86868B] relative z-20 h-6">
+                    <div class="pr-4 font-semibold text-gray-700 bg-white inline-block">Nama Fasilitas</div>
+                    <template x-for="hour in [7,8,9,10,11,12,13,14,15,16,17,18,19]">
+                        <div class="relative">
+                            <span x-text="(hour < 10 ? '0'+hour : hour) + ':00'" class="absolute top-0 left-0 bg-white px-1 -translate-x-1/2 z-10 text-gray-700"></span>
+                            <span class="absolute top-0.5 left-1/2 text-[10px] text-gray-400 bg-white px-1 -translate-x-1/2 z-10">30</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="space-y-3 relative z-0">
                     @foreach ($facilities as $f)
                     <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-0 items-center hover:bg-gray-50 p-1 rounded-lg transition border border-transparent hover:border-gray-100">
                         <div class="pr-4">
@@ -208,10 +219,10 @@
                         </div>
                         
                         <template x-for="(timeSlot, index) in timeSlots">
-                            <div class="h-8 w-full transition border-r border-white/50" 
+                            <div class="h-8 w-full transition" 
                                  :class="[
                                     index === 0 ? 'rounded-l-md' : '',
-                                    index === timeSlots.length - 1 ? 'rounded-r-md border-r-0' : '',
+                                    index === timeSlots.length - 1 ? 'rounded-r-md' : '',
                                     {{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300 hover:bg-gray-400' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400 hover:bg-red-500' : 'bg-emerald-400 hover:bg-emerald-500')
                                  ]"
                                  :title="timeSlot + ' - ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
