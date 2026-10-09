@@ -38,18 +38,25 @@
 <body x-data="{ mobileMenuOpen: false }" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col">
 
     <nav class="fixed w-full z-40 glass-panel">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold tracking-tight text-lg hover:opacity-80 transition">
-                <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo CAVA" class="w-8 h-8 object-contain">
-                <span>CAVA.</span>
-            </a>
-            <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center">
+            <!-- Kiri: Logo -->
+            <div class="flex-1 flex justify-start">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold tracking-tight text-lg hover:opacity-80 transition">
+                    <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo CAVA" class="w-8 h-8 object-contain">
+                    <span>CAVA.</span>
+                </a>
+            </div>
+            
+            <!-- Tengah: Menu Navigasi -->
+            <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium justify-center">
                 <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
                 <a href="{{ route('public.catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
                 <a href="{{ route('public.availability') }}" class="{{ $active === 'availability' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Matriks Jadwal</a>
                 <a href="{{ route('public.information') }}" class="{{ $active === 'information' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Informasi</a>
             </div>
-            <div>
+
+            <!-- Kanan: Tombol Masuk -->
+            <div class="flex-1 flex justify-end">
                 <a href="{{ route('login') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">Masuk</a>
             </div>
         </div>
