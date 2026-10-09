@@ -32,19 +32,26 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
-                            <div class="flex flex-col gap-2 mt-2">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">Auditorium & Aula</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">Laboratorium Komputer</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">Ruang Kelas Terpadu</span>
-                                </label>
+                            <div x-data="{ openCategory: false, selectedCategories: [] }" class="relative mt-2">
+                                <button type="button" @click="openCategory = !openCategory" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
+                                    <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
+                                </button>
+                                
+                                <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition">
+                                        <input type="checkbox" value="Auditorium" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700">Auditorium & Aula</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
+                                        <input type="checkbox" value="Lab" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700">Laboratorium Komputer</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
+                                        <input type="checkbox" value="Kelas" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700">Ruang Kelas Terpadu</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         <div>
