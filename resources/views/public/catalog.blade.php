@@ -71,7 +71,7 @@
 
                 <div class="h-64 bg-gray-50 relative shrink-0 border-b border-gray-100">
                     <template x-if="activeFacility && activeFacility.image">
-                        <img :src="'/storage/' + activeFacility.image" :alt="activeFacility.name" class="w-full h-full object-cover">
+                        <img :src="'/storage/' + activeFacility.image" :alt="activeFacility.name" class="w-full h-full object-contain">
                     </template>
                     <template x-if="!activeFacility || !activeFacility.image">
                         <div class="w-full h-full flex items-center justify-center">
