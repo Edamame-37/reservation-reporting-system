@@ -1,8 +1,11 @@
 <x-public-layout title="Beranda Publik Fasilitas Kampus" active="home">
     <div class="pt-20 pb-20">
         <main class="px-6 max-w-5xl mx-auto text-center">
-            <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-[#1D1D1F] leading-tight mb-6">Reserve and<br>Report.</h1>
-            <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light">Sistem cerdas untuk efektivitas penggunaan ruang. Mulai dari pemesanan fasilitas secara instan hingga pelaporan kendala teknis dalam satu alur kerja yang terpadu.</p>
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-[#1D1D1F] leading-tight mb-6">
+                Reserve <span class="text-[#86868B] font-light">and</span><br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Report.</span>
+            </h1>
+            <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light leading-relaxed">Optimalisasi fasilitas kampus dalam satu platform terpadu. Pesan ruang instan dan laporkan kendala seketika.</p>
             
             <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" x-data="{ 
                 showAdvanced: false,
