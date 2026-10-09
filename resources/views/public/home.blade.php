@@ -288,47 +288,47 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 <!-- Kebijakan Privasi -->
-                <a href="{{ route('public.information') }}#kebijakan" class="group relative overflow-hidden bg-white rounded-[2rem] border border-gray-200 p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-gray-300 transition-all duration-500 flex items-center">
+                <a href="{{ route('public.information') }}#kebijakan" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
                     <div class="relative z-10 w-3/4">
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-blue-600 transition-colors duration-300">Kebijakan Privasi</h3>
                         <p class="text-sm text-[#86868B]">Transparansi pengelolaan data Anda.</p>
                     </div>
                     <!-- Emote / Giant Icon -->
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-4 group-hover:-translate-x-2 transition-transform duration-500">
-                        <span class="material-symbols-outlined text-[100px] text-gray-100 group-hover:text-blue-50 transition-colors duration-500 font-light">shield_lock</span>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-10 group-hover:-translate-x-2 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-blue-50 transition-colors duration-500 font-light">shield_lock</span>
                     </div>
                 </a>
 
                 <!-- Syarat & Ketentuan -->
-                <a href="{{ route('public.information') }}#syarat" class="group relative overflow-hidden bg-white rounded-[2rem] border border-gray-200 p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-gray-300 transition-all duration-500 flex items-center">
+                <a href="{{ route('public.information') }}#syarat" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
                     <div class="relative z-10 w-3/4">
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-purple-600 transition-colors duration-300">Syarat & Ketentuan</h3>
                         <p class="text-sm text-[#86868B]">Aturan main penggunaan ruang.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-4 group-hover:-translate-x-2 transition-transform duration-500">
-                        <span class="material-symbols-outlined text-[100px] text-gray-100 group-hover:text-purple-50 transition-colors duration-500 font-light">gavel</span>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-10 group-hover:-translate-x-2 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-purple-50 transition-colors duration-500 font-light">gavel</span>
                     </div>
                 </a>
 
                 <!-- Panduan Peminjaman -->
-                <a href="{{ route('public.information') }}#panduan" class="group relative overflow-hidden bg-white rounded-[2rem] border border-gray-200 p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-gray-300 transition-all duration-500 flex items-center">
+                <a href="{{ route('public.information') }}#panduan" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
                     <div class="relative z-10 w-3/4">
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-emerald-600 transition-colors duration-300">Panduan Peminjaman</h3>
                         <p class="text-sm text-[#86868B]">Langkah demi langkah reservasi.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-4 group-hover:-translate-x-2 transition-transform duration-500">
-                        <span class="material-symbols-outlined text-[100px] text-gray-100 group-hover:text-emerald-50 transition-colors duration-500 font-light">menu_book</span>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-10 group-hover:-translate-x-2 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-emerald-50 transition-colors duration-500 font-light">menu_book</span>
                     </div>
                 </a>
 
                 <!-- Lapor Kerusakan -->
-                <a href="{{ route('public.information') }}#lapor" class="group relative overflow-hidden bg-white rounded-[2rem] border border-gray-200 p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-gray-300 transition-all duration-500 flex items-center">
+                <a href="{{ route('public.information') }}#lapor" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
                     <div class="relative z-10 w-3/4">
                         <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-red-600 transition-colors duration-300">Lapor Kerusakan</h3>
                         <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
                     </div>
-                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-4 group-hover:-translate-x-2 transition-transform duration-500">
-                        <span class="material-symbols-outlined text-[100px] text-gray-100 group-hover:text-red-50 transition-colors duration-500 font-light">support_agent</span>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform translate-x-10 group-hover:-translate-x-2 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-red-50 transition-colors duration-500 font-light">support_agent</span>
                     </div>
                 </a>
                 
