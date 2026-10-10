@@ -8,7 +8,7 @@
     ];
     $subIndex = $categoryIndexes[$currentCategory] ?? 1;
 @endphp
-<x-public-layout title="Katalog Fasilitas" active="catalog" :subIndex="$subIndex">
+<x-public-layout title="Katalog Fasilitas" active="catalog">
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="{ showModal: false, activeFacility: null }">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-24">
             <div>
@@ -188,7 +188,21 @@
             <a href="{{ route('public.catalog', array_filter(['category' => 'Kelas', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Kelas' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Ruang Kelas Terpadu</a>
         </div>
 
-        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Grid Container with Local Swipe Animation -->
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-0" 
+             x-data="{
+                localClass: 'animate-fade-in',
+                init() {
+                    let prev = sessionStorage.getItem('prevCatalogIndex');
+                    let curr = {{ $subIndex }};
+                    if (prev) {
+                        if (curr > prev) this.localClass = 'animate-slide-in-right';
+                        else if (curr < prev) this.localClass = 'animate-slide-in-left';
+                    }
+                    sessionStorage.setItem('prevCatalogIndex', curr);
+                }
+             }"
+             :class="localClass">
             @foreach ($facilities as $facility)
             <div class="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300 group cursor-pointer flex flex-col" @click="activeFacility = {{ json_encode($facility) }}; showModal = true">
                 <div class="h-40 rounded-xl bg-gray-50 mb-5 flex items-center justify-center group-hover:bg-gray-100 transition overflow-hidden">

@@ -63,12 +63,11 @@
     </style>
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('pageTransition', (pageIndex, subIndex) => ({
+            Alpine.data('pageTransition', (pageIndex) => ({
                 animationClass: 'opacity-0',
                 mobileMenuOpen: false,
                 init() {
                     let prevIndex = sessionStorage.getItem('prevPageIndex');
-                    let prevSubIndex = sessionStorage.getItem('prevSubIndex');
                     
                     if (!prevIndex) {
                         this.animationClass = 'animate-fade-in';
@@ -77,31 +76,19 @@
                     } else if (pageIndex < prevIndex) {
                         this.animationClass = 'animate-slide-in-left';
                     } else {
-                        if (subIndex !== null && prevSubIndex !== null) {
-                            if (subIndex > prevSubIndex) {
-                                this.animationClass = 'animate-slide-in-right';
-                            } else if (subIndex < prevSubIndex) {
-                                this.animationClass = 'animate-slide-in-left';
-                            } else {
-                                this.animationClass = 'animate-fade-in';
-                            }
-                        } else {
-                            this.animationClass = 'animate-fade-in';
-                        }
+                        // Jika berada di indeks halaman yang sama (misal sedang di Katalog, ganti kategori Katalog)
+                        this.animationClass = 'animate-fade-in';
                     }
                     
                     sessionStorage.setItem('prevPageIndex', pageIndex);
-                    if (subIndex !== null) {
-                        sessionStorage.setItem('prevSubIndex', subIndex);
-                    }
                 }
             }))
         });
     </script>
 </head>
-<body x-data="pageTransition({{ $currentIndex }}, {{ $subIndex }})" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col overflow-x-hidden">
+<body x-data="pageTransition({{ $currentIndex }})" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    <nav class="fixed w-full z-40 glass-panel opacity-0" :class="animationClass">
+    <nav class="fixed w-full z-40 glass-panel">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center">
             <!-- Kiri: Logo -->
             <div class="flex-1 flex justify-start">
