@@ -44,11 +44,11 @@
             <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
-                selectedCategories: [],
+                selectedCategories: {{ json_encode(request('categories', [])) }},
                 selectedDate: '',
-                minCapacity: '',
+                minCapacity: '{{ request('capacity', '') }}',
                 openFacility: false,
-                selectedFacilities: [],
+                selectedFacilities: {{ json_encode(request('equipments', [])) }},
                 get allFilters() {
                     let filters = [];
                     if (this.selectedDate !== '') filters.push({ type: 'date', value: this.selectedDate });
@@ -125,7 +125,7 @@
                                 <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
                                     <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
                                     <template x-for="f in facilities">
-                                        <a :href="'/availability?search=' + encodeURIComponent(f.name)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                        <a :href="'/public/availability?search=' + encodeURIComponent(f.name)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
                                             <span class="material-symbols-outlined text-blue-500 text-[18px]">meeting_room</span>
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-medium text-gray-900" x-html="highlight(f.name)"></span>
@@ -181,7 +181,7 @@
                                 <span x-transition.opacity.scale.90.duration.200ms 
                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
                                       :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : (filter.type === 'date' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'))">
-                                    <span x-text="filter.type === 'category' ? (filter.value === 'Auditorium' ? 'Auditorium' : (filter.value === 'Lab' ? 'Lab Komputer' : 'Kelas')) : (filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.type === 'date' ? 'Tgl: ' + filter.value : (filter.value === 'Proyektor' ? 'Proyektor' : 'AC Central')))"></span>
+                                    <span x-text="filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.type === 'date' ? 'Tgl: ' + filter.value : filter.value)"></span>
                                     <button type="button" @click.prevent.stop="removeFilter(filter)" 
                                             class="focus:outline-none transition"
                                             :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : (filter.type === 'date' ? 'text-amber-500 hover:text-amber-900' : 'text-emerald-500 hover:text-emerald-900'))">
@@ -231,18 +231,12 @@
                                         </button>
                                         
                                         <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition">
-                                                <input type="checkbox" value="Auditorium" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                                <span class="text-sm font-medium text-gray-700">Auditorium & Aula</span>
+                                            @foreach($categories as $index => $cat)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
                                             </label>
-                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                                <input type="checkbox" value="Lab" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                                <span class="text-sm font-medium text-gray-700">Laboratorium Komputer</span>
-                                            </label>
-                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                                <input type="checkbox" value="Kelas" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                                <span class="text-sm font-medium text-gray-700">Ruang Kelas Terpadu</span>
-                                            </label>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
@@ -259,14 +253,12 @@
                                         </button>
                                         
                                         <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition">
-                                                <input type="checkbox" value="Proyektor" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                                <span class="text-sm font-medium text-gray-700">Proyektor & Layar</span>
+                                            @foreach($equipments as $index => $eq)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
                                             </label>
-                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                                <input type="checkbox" value="AC" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                                <span class="text-sm font-medium text-gray-700">AC Central</span>
-                                            </label>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>

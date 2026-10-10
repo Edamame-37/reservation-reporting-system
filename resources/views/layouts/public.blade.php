@@ -93,7 +93,24 @@
 
                 async fetchResults() {
                     try {
-                        let res = await fetch(`/api/facilities/search?q=${encodeURIComponent(this.query)}`);
+                        let params = new URLSearchParams({ q: this.query });
+                        
+                        // Cek apakah ada allFilters di form terdekat
+                        let formEl = this.$el.closest('form');
+                        if (formEl && formEl.__x) {
+                            let formComponent = Alpine.$data(formEl);
+                            if (formComponent.selectedCategories && formComponent.selectedCategories.length > 0) {
+                                formComponent.selectedCategories.forEach(c => params.append('categories[]', c));
+                            }
+                            if (formComponent.selectedFacilities && formComponent.selectedFacilities.length > 0) {
+                                formComponent.selectedFacilities.forEach(f => params.append('equipments[]', f));
+                            }
+                            if (formComponent.minCapacity) {
+                                params.append('capacity', formComponent.minCapacity);
+                            }
+                        }
+
+                        let res = await fetch(`/api/facilities/search?${params.toString()}`);
                         let data = await res.json();
                         this.suggestions = data.suggestions || [];
                         this.facilities = data.facilities || [];
