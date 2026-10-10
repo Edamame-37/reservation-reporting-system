@@ -259,17 +259,20 @@
 
         @php
             $currentCategory = request('category', 'semua');
+            $hasFilterQuery = request()->filled('categories') || request()->filled('equipments') || request()->filled('capacity');
+            $hasSearchQuery = request()->filled('search');
+            $isSearching = $hasSearchQuery || $hasFilterQuery;
         @endphp
         
         <div class="mt-4 flex md:justify-center gap-3 mb-16 overflow-x-auto hide-scroll pb-2">
-            @if(request()->filled('search'))
+            @if($isSearching)
                 <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => request('category')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition bg-[#1D1D1F] text-white border border-transparent flex items-center gap-2">
                     <span class="material-symbols-outlined text-[16px]">search</span>
-                    Hasil: "{{ request('search') }}"
+                    Hasil: {!! $hasSearchQuery ? '"' . request('search') . '"' : 'Filter Pencarian' !!}
                     <span class="material-symbols-outlined text-[16px] ml-1 hover:text-red-400">close</span>
                 </a>
             @endif
-            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !request()->filled('search') ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog') }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !$isSearching ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
             @foreach($categories as $cat)
                 <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => $cat, 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition capitalize {{ $currentCategory === $cat ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">{{ $cat }}</a>
             @endforeach
