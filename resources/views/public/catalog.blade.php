@@ -1,4 +1,14 @@
-<x-public-layout title="Katalog Fasilitas" active="catalog">
+@php
+    $currentCategory = request('category', 'semua');
+    $categoryIndexes = [
+        'semua' => 1,
+        'Auditorium' => 2,
+        'Lab' => 3,
+        'Kelas' => 4
+    ];
+    $subIndex = $categoryIndexes[$currentCategory] ?? 1;
+@endphp
+<x-public-layout title="Katalog Fasilitas" active="catalog" :subIndex="$subIndex">
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="{ showModal: false, activeFacility: null }">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-24">
             <div>

@@ -6,8 +6,19 @@
 
 @props([
     'title' => 'CAVA - Portal Publik Fasilitas Kampus',
-    'active' => 'home'
+    'active' => 'home',
+    'subIndex' => 'null'
 ])
+
+@php
+    $pageIndexes = [
+        'home' => 1,
+        'catalog' => 2,
+        'availability' => 3,
+        'information' => 4
+    ];
+    $currentIndex = $pageIndexes[$active] ?? 1;
+@endphp
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
@@ -33,11 +44,64 @@
         body { font-family: 'Inter', sans-serif; }
         .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
         .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
     </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('pageTransition', (pageIndex, subIndex) => ({
+                animationClass: 'opacity-0',
+                mobileMenuOpen: false,
+                init() {
+                    let prevIndex = sessionStorage.getItem('prevPageIndex');
+                    let prevSubIndex = sessionStorage.getItem('prevSubIndex');
+                    
+                    if (!prevIndex) {
+                        this.animationClass = 'animate-fade-in';
+                    } else if (pageIndex > prevIndex) {
+                        this.animationClass = 'animate-slide-in-right';
+                    } else if (pageIndex < prevIndex) {
+                        this.animationClass = 'animate-slide-in-left';
+                    } else {
+                        if (subIndex !== null && prevSubIndex !== null) {
+                            if (subIndex > prevSubIndex) {
+                                this.animationClass = 'animate-slide-in-right';
+                            } else if (subIndex < prevSubIndex) {
+                                this.animationClass = 'animate-slide-in-left';
+                            } else {
+                                this.animationClass = 'animate-fade-in';
+                            }
+                        } else {
+                            this.animationClass = 'animate-fade-in';
+                        }
+                    }
+                    
+                    sessionStorage.setItem('prevPageIndex', pageIndex);
+                    if (subIndex !== null) {
+                        sessionStorage.setItem('prevSubIndex', subIndex);
+                    }
+                }
+            }))
+        });
+    </script>
 </head>
-<body x-data="{ mobileMenuOpen: false }" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col">
+<body x-data="pageTransition({{ $currentIndex }}, {{ $subIndex }})" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    <nav class="fixed w-full z-40 glass-panel">
+    <nav class="fixed w-full z-40 glass-panel opacity-0" :class="animationClass">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center">
             <!-- Kiri: Logo -->
             <div class="flex-1 flex justify-start">
@@ -62,7 +126,7 @@
         </div>
     </nav>
 
-    <div class="flex-1 flex flex-col min-h-screen pt-16">
+    <div class="flex-1 flex flex-col min-h-screen pt-16 opacity-0" :class="animationClass">
         <main class="flex-1 w-full mx-auto">
             {{ $slot ?? '' }}
             @yield('content')

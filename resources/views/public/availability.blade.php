@@ -9,22 +9,22 @@
                 <div class="mt-8 hidden md:block">
                     <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Pintasan Tanggal</div>
                     <div class="flex gap-2">
-                        <button type="button" @click="initMatrix('{{ date('Y-m-d') }}')" 
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d') }}', 1)" 
                                 :class="currentDate === '{{ date('Y-m-d') }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
                                 class="px-4 py-2 rounded-xl text-xs font-medium transition">
                             Hari Ini
                         </button>
-                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+1 day')) }}')" 
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+1 day')) }}', 2)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+1 day')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
                                 class="px-4 py-2 rounded-xl text-xs font-medium transition">
                             Besok
                         </button>
-                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+2 days')) }}')" 
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+2 days')) }}', 3)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+2 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
                                 class="px-4 py-2 rounded-xl text-xs font-medium transition">
                             {{ \Carbon\Carbon::now()->addDays(2)->translatedFormat('d M') }}
                         </button>
-                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+3 days')) }}')" 
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+3 days')) }}', 4)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+3 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
                                 class="px-4 py-2 rounded-xl text-xs font-medium transition">
                             {{ \Carbon\Carbon::now()->addDays(3)->translatedFormat('d M') }}
@@ -203,7 +203,7 @@
             </form>
         </div>
 
-        <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto">
+        <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto opacity-0" :class="animationClass || 'animate-fade-in'">
             <div class="flex justify-between items-center mb-6 min-w-[800px]">
                 <div class="flex items-center gap-4">
                     <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]" x-text="formatDate(currentDate)"></span></h2>
@@ -263,19 +263,30 @@
                 currentDate: '',
                 matrixData: {},
                 loading: true,
-                // Label jam untuk header (hanya jam penuh untuk tampilan)
+                currentDateIndex: 1,
+                animationClass: 'animate-fade-in',
                 timeLabels: [
                     '07:00','','08:00','','09:00','','10:00','','11:00','','12:00','','13:00','',
                     '14:00','','15:00','','16:00','','17:00','','18:00','','19:00',''
                 ],
-                // Slot waktu per 30 menit (26 slot)
                 timeSlots: [
                     '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
                     '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
                     '17:00','17:30','18:00','18:30','19:00','19:30'
                 ],
                 
-                initMatrix(date) {
+                initMatrix(date, index = 1) {
+                    if (this.currentDate !== '' && index !== this.currentDateIndex) {
+                        this.animationClass = ''; // reset
+                        setTimeout(() => {
+                            if (index > this.currentDateIndex) {
+                                this.animationClass = 'animate-slide-in-right';
+                            } else {
+                                this.animationClass = 'animate-slide-in-left';
+                            }
+                            this.currentDateIndex = index;
+                        }, 10);
+                    }
                     this.currentDate = date;
                     this.fetchMatrix();
                 },
