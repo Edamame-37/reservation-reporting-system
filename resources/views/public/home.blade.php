@@ -7,7 +7,9 @@
             </h1>
             <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light leading-relaxed">Optimalisasi fasilitas kampus dalam satu platform terpadu. Pesan ruang instan dan laporkan kendala seketika.</p>
             
-            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" x-data="{ 
+            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" 
+                  @close-other-popups.window="openCategory = false; openFacility = false;"
+                  x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
                 selectedCategories: [],
@@ -37,7 +39,7 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
-                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) open = true" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent" autocomplete="off">
+                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent" autocomplete="off">
                         <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
                             <span class="material-symbols-outlined text-[24px]">tune</span>
                         </button>
@@ -191,7 +193,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
                             <div class="relative mt-2">
-                                <button type="button" @click="openCategory = !openCategory" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
                                 </button>
@@ -213,7 +215,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
                             <div class="relative mt-2">
-                                <button type="button" @click="openFacility = !openFacility" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                     <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
                                     <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
                                 </button>

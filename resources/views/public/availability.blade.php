@@ -41,7 +41,9 @@
                 </div>
             </div>
 
-            <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" x-data="{ 
+            <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" 
+                  @close-other-popups.window="openCategory = false; openFacility = false;"
+                  x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
                 selectedCategories: {{ json_encode(request('categories', [])) }},
@@ -78,7 +80,7 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
-                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) open = true" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
+                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
                         <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
                             <span class="material-symbols-outlined text-[20px]">tune</span>
                         </button>
@@ -233,7 +235,7 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
                                     <div class="relative mt-2">
-                                        <button type="button" @click="openCategory = !openCategory" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                             <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
                                             <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
                                         </button>
@@ -255,7 +257,7 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
                                     <div class="relative mt-2">
-                                        <button type="button" @click="openFacility = !openFacility" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
                                             <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
                                             <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
                                         </button>

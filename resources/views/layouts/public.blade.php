@@ -92,6 +92,10 @@
                         });
                     }
 
+                    window.addEventListener('close-smart-search', () => {
+                        this.open = false;
+                    });
+
                     this.$watch('query', value => {
                         this.emptyState = false;
                         if (value.trim().length === 0) {
@@ -103,6 +107,7 @@
                         
                         this.loading = true;
                         this.open = true;
+                        this.$dispatch('close-other-popups');
                         clearTimeout(this.timer);
                         
                         this.timer = setTimeout(() => {
