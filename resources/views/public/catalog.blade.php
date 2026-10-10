@@ -329,18 +329,19 @@
         </div>
 
         <!-- Pop-up Modal Detail Fasilitas -->
-        <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
-            <!-- Backdrop -->
-            <div x-show="showModal" 
-                 x-transition:enter="ease-out duration-300" 
-                 x-transition:enter-start="opacity-0" 
-                 x-transition:enter-end="opacity-100" 
-                 x-transition:leave="ease-in duration-200" 
-                 x-transition:leave-start="opacity-100" 
-                 x-transition:leave-end="opacity-0" 
-                 class="fixed inset-0 bg-black/40 backdrop-blur-sm" 
-                 @click="showModal = false">
-            </div>
+        <template x-teleport="body">
+            <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
+                <!-- Backdrop -->
+                <div x-show="showModal" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0" 
+                     x-transition:enter-end="opacity-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100" 
+                     x-transition:leave-end="opacity-0" 
+                     class="fixed inset-0 bg-black/40 backdrop-blur-sm" 
+                     @click="showModal = false">
+                </div>
 
             <!-- Modal Content -->
             <div x-show="showModal" 
@@ -399,7 +400,7 @@
                     </a>
                 </div>
             </div>
-        </div>
+        </template>
 
     </div>
 </x-public-layout>

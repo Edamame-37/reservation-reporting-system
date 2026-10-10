@@ -280,8 +280,9 @@
             </div>
 
             <!-- Pop-up Modal Detail Fasilitas -->
-            <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
-                <!-- Backdrop -->
+            <template x-teleport="body">
+                <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
+                    <!-- Backdrop -->
                 <div x-show="showModal" 
                      x-transition:enter="ease-out duration-300" 
                      x-transition:enter-start="opacity-0" 
@@ -350,7 +351,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </template>
 
         </section>
 
