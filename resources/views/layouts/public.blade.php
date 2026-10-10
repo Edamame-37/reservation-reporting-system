@@ -85,7 +85,7 @@
                         } else {
                             // Jika berada di indeks halaman yang sama
                             if (categoryClicked === 'true') {
-                                this.animationClass = ''; // Hapus fade-in (statis)
+                                this.animationClass = 'opacity-100'; // Langsung tampil utuh tanpa kedip
                                 sessionStorage.removeItem('categoryClicked');
                             } else {
                                 this.animationClass = 'animate-fade-in';

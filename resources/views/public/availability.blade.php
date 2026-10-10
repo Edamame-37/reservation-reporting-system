@@ -225,8 +225,8 @@
                 <div class="grid grid-cols-[250px_1fr] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
                     <div class="pr-4 font-semibold text-gray-700 text-xs self-end pb-1">Nama Fasilitas</div>
                     
-                    <!-- Time slots header (Animates with the slots) -->
-                    <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5 opacity-0" :class="animationClass || 'animate-fade-in'">
+                    <!-- Time slots header (Static) -->
+                    <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5">
                         <template x-for="(timeSlot, index) in timeSlots">
                             <div class="flex flex-col items-center justify-end pb-1 relative">
                                 <div class="w-px h-1.5 bg-gray-200 absolute -bottom-2"></div>
