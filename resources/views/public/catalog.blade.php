@@ -269,9 +269,9 @@
                     <span class="material-symbols-outlined text-[16px] ml-1 hover:text-red-400">close</span>
                 </a>
             @endif
-            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog') }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !request()->filled('search') ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !request()->filled('search') ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
             @foreach($categories as $cat)
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', ['category' => $cat]) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition capitalize {{ $currentCategory === $cat ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">{{ $cat }}</a>
+                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => $cat, 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition capitalize {{ $currentCategory === $cat ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">{{ $cat }}</a>
             @endforeach
         </div>
 
@@ -389,7 +389,7 @@
                         </template>
                     </div>
 
-                    <a href="{{ route('public.availability') }}" class="block w-full text-center bg-[#1D1D1F] text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10">
+                    <a :href="'{{ route('public.availability') }}?search=' + encodeURIComponent(activeFacility ? activeFacility.name : '')" class="block w-full text-center bg-[#1D1D1F] text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10">
                         Cek Jadwal Ketersediaan
                     </a>
                 </div>

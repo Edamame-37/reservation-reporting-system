@@ -77,8 +77,11 @@
                     let formEl = this.$el.closest('form');
                     if (formEl) {
                         formEl.addEventListener('submit', (e) => {
-                            let formComponent = formEl.__x ? Alpine.$data(formEl) : null;
-                            let hasFilter = formComponent && formComponent.allFilters && formComponent.allFilters.length > 0;
+                            let hasFilter = false;
+                            if (formEl.querySelectorAll('input[type="checkbox"]:checked').length > 0) hasFilter = true;
+                            let cap = formEl.querySelector('input[name="capacity"]');
+                            if (cap && cap.value.trim() !== '') hasFilter = true;
+
                             if (this.query.trim().length === 0 && !hasFilter) {
                                 e.preventDefault();
                                 this.open = true;
