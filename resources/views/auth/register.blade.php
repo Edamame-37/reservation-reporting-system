@@ -19,14 +19,14 @@
         <!-- Name -->
         <div>
             <label for="name" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Nama Lengkap</label>
-            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Mis. Bima Dewantara">
+            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Mis. Bima Dewantara">
             <x-input-error :messages="$errors->get('name')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Identifier (NIM/NIP) -->
         <div>
             <label for="identifier" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">NIM / NIP / NIDN</label>
-            <input id="identifier" type="text" name="identifier" value="{{ old('identifier') }}" required class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Contoh: 2108561044">
+            <input id="identifier" type="text" name="identifier" value="{{ old('identifier') }}" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Contoh: 2108561044">
             <x-input-error :messages="$errors->get('identifier')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
@@ -34,15 +34,12 @@
         <div>
             <label for="role_type" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Kategori Sivitas</label>
             <div class="relative">
-                <select id="role_type" name="role_type" required class="w-full bg-[#F5F5F7] text-[#1D1D1F] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px] appearance-none cursor-pointer">
-                    <option value="" disabled {{ old('role_type') ? '' : 'selected' }}>-- Pilih Kategori --</option>
+                <select id="role_type" name="role_type" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px] cursor-pointer">
+                    <option value="" disabled {{ old('role_type') ? '' : 'selected' }}>Pilih Kategori...</option>
                     <option value="mahasiswa" {{ old('role_type') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
                     <option value="dosen" {{ old('role_type') == 'dosen' ? 'selected' : '' }}>Dosen</option>
                     <option value="staf" {{ old('role_type') == 'staf' ? 'selected' : '' }}>Staf</option>
                 </select>
-                <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-[#86868B]">expand_more</span>
-                </div>
             </div>
             <x-input-error :messages="$errors->get('role_type')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
@@ -50,7 +47,7 @@
         <!-- Email Address -->
         <div>
             <label for="email" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Email Kampus</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
@@ -74,14 +71,14 @@
         <!-- Password -->
         <div>
             <label for="password" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Kata Sandi</label>
-            <input id="password" type="password" name="password" required autocomplete="new-password" minlength="8" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Buat sandi yang kuat">
+            <input id="password" type="password" name="password" required autocomplete="new-password" minlength="8" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Buat sandi yang kuat">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Confirm Password -->
         <div>
             <label for="password_confirmation" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Konfirmasi Sandi</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" minlength="8" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Ketik ulang sandi">
+            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" minlength="8" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Ketik ulang sandi">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 

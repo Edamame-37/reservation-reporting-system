@@ -18,21 +18,21 @@
         <!-- Email Address -->
         <div>
             <label for="email" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">{{ __('Email') }}</label>
-            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]">
+            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Password -->
         <div>
             <label for="password" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">{{ __('Password') }}</label>
-            <input id="password" type="password" name="password" required autocomplete="new-password" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Minimal 8 karakter">
+            <input id="password" type="password" name="password" required autocomplete="new-password" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Minimal 8 karakter">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Confirm Password -->
         <div>
             <label for="password_confirmation" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">{{ __('Confirm Password') }}</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Ulangi kata sandi">
+            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Ulangi kata sandi">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 

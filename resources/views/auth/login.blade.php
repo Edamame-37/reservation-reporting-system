@@ -28,7 +28,7 @@
         <!-- Email Address -->
         <div>
             <label for="email" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Email Sivitas</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
@@ -40,7 +40,7 @@
                     <a href="{{ route('password.request') }}" class="text-[13px] text-[#1D1D1F] font-semibold hover:underline">Lupa Sandi?</a>
                 @endif
             </div>
-            <input id="password" type="password" name="password" required autocomplete="current-password" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Minimal 8 karakter">
+            <input id="password" type="password" name="password" required autocomplete="current-password" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Minimal 8 karakter">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 

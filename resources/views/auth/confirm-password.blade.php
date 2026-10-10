@@ -15,7 +15,7 @@
         <!-- Password -->
         <div>
             <label for="password" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">{{ __('Password') }}</label>
-            <input id="password" type="password" name="password" required autocomplete="current-password" class="w-full bg-[#F5F5F7] text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="••••••••">
+            <input id="password" type="password" name="password" required autocomplete="current-password" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="••••••••">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
