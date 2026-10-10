@@ -194,7 +194,7 @@
                         @endif
                     </div>
                     <div class="flex justify-between items-start mb-2 gap-2">
-                        <h3 class="text-xl font-semibold leading-tight">{{ $facility->name }}</h3>
+                        <h3 class="text-xl font-semibold leading-tight group-hover:text-blue-600 transition-colors">{{ $facility->name }}</h3>
                     </div>
                     <p class="text-[#86868B] text-sm mb-6">{{ $facility->building }} • {{ $facility->capacity }} Kursi</p>
                     <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity mt-auto">

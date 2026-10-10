@@ -188,7 +188,7 @@
                         <span class="material-symbols-outlined text-5xl text-gray-300">meeting_room</span>
                     @endif
                 </div>
-                <h3 class="font-semibold text-[#1D1D1F] mb-1 leading-tight">{{ $facility['name'] }}</h3>
+                <h3 class="font-semibold text-[#1D1D1F] mb-1 leading-tight group-hover:text-blue-600 transition-colors">{{ $facility['name'] }}</h3>
                 <p class="text-xs text-[#86868B] mb-4">{{ $facility['building'] }} • Kapasitas {{ $facility['capacity'] }}</p>
                 <div class="flex items-center justify-between mt-auto">
                     @if($facility['status'] === 'locked')
