@@ -182,8 +182,16 @@
             $currentCategory = request('category', 'semua');
         @endphp
         
-        <!-- Local Animation Wrapper for Categories and Grid -->
-        <div x-data="{
+        <div class="mt-4 flex md:justify-center gap-3 mb-16 overflow-x-auto hide-scroll pb-2">
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Auditorium', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Auditorium' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Auditorium & Aula</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Lab', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Lab' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Laboratorium Komputer</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Kelas', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Kelas' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Ruang Kelas Terpadu</a>
+        </div>
+
+        <!-- Grid Container (Animated) -->
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-0"
+             x-data="{
                 localClass: 'opacity-0',
                 init() {
                     let prev = sessionStorage.getItem('prevCatalogIndex');
@@ -199,16 +207,6 @@
                 }
              }"
              :class="localClass">
-             
-            <div class="mt-4 flex md:justify-center gap-3 mb-16 overflow-x-auto hide-scroll pb-2">
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Auditorium', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Auditorium' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Auditorium & Aula</a>
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Lab', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Lab' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Laboratorium Komputer</a>
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => 'Kelas', 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'Kelas' ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Ruang Kelas Terpadu</a>
-            </div>
-
-            <!-- Grid Container -->
-            <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach ($facilities as $facility)
             <div class="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300 group cursor-pointer flex flex-col" @click="activeFacility = {{ json_encode($facility) }}; showModal = true">
                 <div class="h-40 rounded-xl bg-gray-50 mb-5 flex items-center justify-center group-hover:bg-gray-100 transition overflow-hidden">
@@ -238,7 +236,6 @@
             </div>
             @endif
         </div>
-        </div> <!-- End Local Animation Wrapper -->
 
         <!-- Pop-up Modal Detail Fasilitas -->
         <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
