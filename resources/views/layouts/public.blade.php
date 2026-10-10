@@ -69,11 +69,28 @@
                 facilities: [],
                 loading: false,
                 open: false,
+                emptyState: false,
                 timer: null,
                 pageType: pageType,
 
                 init() {
+                    let formEl = this.$el.closest('form');
+                    if (formEl) {
+                        formEl.addEventListener('submit', (e) => {
+                            let formComponent = formEl.__x ? Alpine.$data(formEl) : null;
+                            let hasFilter = formComponent && formComponent.allFilters && formComponent.allFilters.length > 0;
+                            if (this.query.trim().length === 0 && !hasFilter) {
+                                e.preventDefault();
+                                this.open = true;
+                                this.emptyState = true;
+                                this.suggestions = [];
+                                this.facilities = [];
+                            }
+                        });
+                    }
+
                     this.$watch('query', value => {
+                        this.emptyState = false;
                         if (value.trim().length === 0) {
                             this.suggestions = [];
                             this.facilities = [];
@@ -114,6 +131,7 @@
                         let data = await res.json();
                         this.suggestions = data.suggestions || [];
                         this.facilities = data.facilities || [];
+                        this.emptyState = data.empty_state || false;
                     } catch (e) {
                         console.error(e);
                     } finally {

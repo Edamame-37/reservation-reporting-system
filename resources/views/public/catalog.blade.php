@@ -116,8 +116,16 @@
                                 </div>
                             </template>
 
+                            <!-- Empty State Warning -->
+                            <template x-if="emptyState">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
+                                    <p class="text-sm">Ketikkan sesuatu atau pilih filter untuk memulai pencarian</p>
+                                </div>
+                            </template>
+
                             <!-- No Results -->
-                            <template x-if="suggestions.length === 0 && facilities.length === 0">
+                            <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
                                     <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>
@@ -261,9 +269,9 @@
                     <span class="material-symbols-outlined text-[16px] ml-1 hover:text-red-400">close</span>
                 </a>
             @endif
-            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !request()->filled('search') ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
+            <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog') }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition {{ $currentCategory === 'semua' && !request()->filled('search') ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">Semua Fasilitas</a>
             @foreach($categories as $cat)
-                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', array_filter(['category' => $cat, 'search' => request('search')])) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition capitalize {{ $currentCategory === $cat ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">{{ $cat }}</a>
+                <a @click="sessionStorage.setItem('categoryClicked', 'true')" href="{{ route('public.catalog', ['category' => $cat]) }}" class="px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition capitalize {{ $currentCategory === $cat ? 'bg-[#1D1D1F] text-white border border-transparent' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400' }}">{{ $cat }}</a>
             @endforeach
         </div>
 

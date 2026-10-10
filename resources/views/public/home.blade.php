@@ -79,12 +79,12 @@
                                 </div>
                             </template>
 
-                            <!-- Facility Suggestions -->
+                                <!-- Facility Suggestions -->
                             <template x-if="facilities.length > 0">
                                 <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
                                     <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
                                     <template x-for="f in facilities">
-                                        <a :href="'/catalog?search=' + encodeURIComponent(f.name)" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                        <a :href="'/public/catalog?search=' + encodeURIComponent(f.name) + '&auto_open=1'" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
                                             <span class="material-symbols-outlined text-blue-500 text-[20px]">meeting_room</span>
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-medium text-gray-900" x-html="highlight(f.name)"></span>
@@ -95,8 +95,16 @@
                                 </div>
                             </template>
 
+                            <!-- Empty State Warning -->
+                            <template x-if="emptyState">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
+                                    <p class="text-sm">Ketikkan sesuatu atau pilih filter untuk memulai pencarian</p>
+                                </div>
+                            </template>
+
                             <!-- No Results -->
-                            <template x-if="suggestions.length === 0 && facilities.length === 0">
+                            <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
                                     <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>
@@ -106,10 +114,10 @@
                             <!-- Action Buttons -->
                             <template x-if="suggestions.length > 0 || facilities.length > 0">
                                 <div class="bg-gray-50 p-3 border-t border-gray-100 flex gap-2">
-                                    <a :href="'/catalog?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                    <a :href="'/public/catalog?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
                                         Lihat Fasilitas
                                     </a>
-                                    <a :href="'/availability?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                    <a :href="'/public/availability?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
                                         Lihat Jadwal
                                     </a>
                                 </div>
@@ -143,7 +151,7 @@
                                 <span x-transition.opacity.scale.90.duration.200ms 
                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
                                       :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200')">
-                                    <span x-text="filter.type === 'category' ? (filter.value === 'Auditorium' ? 'Auditorium & Aula' : (filter.value === 'Lab' ? 'Lab Komputer' : 'Kelas Terpadu')) : (filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.value === 'Proyektor' ? 'Proyektor' : 'AC Central'))"></span>
+                                    <span x-text="filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : filter.value"></span>
                                     <button type="button" @click.prevent.stop="removeFilter(filter)" 
                                             class="focus:outline-none transition"
                                             :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : 'text-emerald-500 hover:text-emerald-900')">
@@ -189,24 +197,18 @@
                                 </button>
                                 
                                 <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition">
-                                        <input type="checkbox" value="Auditorium" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700">Auditorium & Aula</span>
+                                    @foreach($categories as $index => $cat)
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                        <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
                                     </label>
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                        <input type="checkbox" value="Lab" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700">Laboratorium Komputer</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                        <input type="checkbox" value="Kelas" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700">Ruang Kelas Terpadu</span>
-                                    </label>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
-                            <input type="number" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                            <input type="number" name="capacity" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
@@ -217,14 +219,12 @@
                                 </button>
                                 
                                 <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition">
-                                        <input type="checkbox" value="Proyektor" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700">Proyektor & Layar</span>
+                                    @foreach($equipments as $index => $eq)
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                        <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
                                     </label>
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-t border-gray-50">
-                                        <input type="checkbox" value="AC" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700">AC Central</span>
-                                    </label>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>

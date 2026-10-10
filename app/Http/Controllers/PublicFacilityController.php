@@ -75,6 +75,15 @@ class PublicFacilityController extends Controller
         return compact('categories', 'equipments');
     }
 
+    public function home()
+    {
+        $facilities = Facility::where('status', '!=', 'nonaktif')->take(3)->get();
+        $filterOptions = $this->getFilterOptions();
+        $categories = $filterOptions['categories'];
+        $equipments = $filterOptions['equipments'];
+        return view('public.home', compact('facilities', 'categories', 'equipments'));
+    }
+
     /**
      * Menampilkan katalog daftar fasilitas aktif.
      */
@@ -231,36 +240,43 @@ class PublicFacilityController extends Controller
     public function searchSuggestions(Request $request)
     {
         $q = $request->q;
-        if (empty($q)) {
-            return response()->json(['suggestions' => [], 'facilities' => []]);
+        $hasFilters = $request->filled('categories') || $request->filled('equipments') || $request->filled('capacity');
+
+        if (empty($q) && !$hasFilters) {
+            return response()->json(['suggestions' => [], 'facilities' => [], 'empty_state' => true]);
         }
 
         // 1. Text Suggestions (Kategori atau Gedung)
-        $categoriesQuery = Facility::where('status', '!=', 'nonaktif')
-            ->where('category', 'LIKE', "%{$q}%");
-        $categoriesQuery = $this->applyFilters($categoriesQuery, $request);
-        $categories = $categoriesQuery->pluck('category')
-            ->unique()
-            ->values()
-            ->take(2);
+        $textSuggestions = collect();
+        if (!empty($q)) {
+            $categoriesQuery = Facility::where('status', '!=', 'nonaktif')
+                ->where('category', 'LIKE', "%{$q}%");
+            $categoriesQuery = $this->applyFilters($categoriesQuery, $request);
+            $categories = $categoriesQuery->pluck('category')
+                ->unique()
+                ->values()
+                ->take(2);
 
-        $buildingsQuery = Facility::where('status', '!=', 'nonaktif')
-            ->where('building', 'LIKE', "%{$q}%");
-        $buildingsQuery = $this->applyFilters($buildingsQuery, $request);
-        $buildings = $buildingsQuery->pluck('building')
-            ->unique()
-            ->values()
-            ->take(2);
-            
-        $textSuggestions = $categories->concat($buildings)->unique()->take(3)->values();
+            $buildingsQuery = Facility::where('status', '!=', 'nonaktif')
+                ->where('building', 'LIKE', "%{$q}%");
+            $buildingsQuery = $this->applyFilters($buildingsQuery, $request);
+            $buildings = $buildingsQuery->pluck('building')
+                ->unique()
+                ->values()
+                ->take(2);
+                
+            $textSuggestions = $categories->concat($buildings)->unique()->take(3)->values();
+        }
 
         // 2. Facilities
-        $facilitiesQuery = Facility::where('status', '!=', 'nonaktif')
-            ->where(function($query) use ($q) {
+        $facilitiesQuery = Facility::where('status', '!=', 'nonaktif');
+        if (!empty($q)) {
+            $facilitiesQuery->where(function($query) use ($q) {
                 $query->where('name', 'LIKE', "%{$q}%")
                       ->orWhere('code', 'LIKE', "%{$q}%")
                       ->orWhere('building', 'LIKE', "%{$q}%");
             });
+        }
         $facilitiesQuery = $this->applyFilters($facilitiesQuery, $request);
         $facilities = $facilitiesQuery->take(3)
             ->get()

@@ -136,8 +136,16 @@
                                 </div>
                             </template>
 
+                            <!-- Empty State Warning -->
+                            <template x-if="emptyState">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
+                                    <p class="text-sm">Ketikkan sesuatu atau pilih filter untuk memulai pencarian</p>
+                                </div>
+                            </template>
+
                             <!-- No Results -->
-                            <template x-if="suggestions.length === 0 && facilities.length === 0">
+                            <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
                                     <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>

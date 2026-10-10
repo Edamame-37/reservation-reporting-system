@@ -30,10 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 // ROUTE: Menerima GET request ke root domain ('/')
 // FUNGSI: Menampilkan halaman beranda (landing page) publik CAVA
-Route::get('/', function () {
-    $facilities = \App\Models\Facility::where('status', '!=', 'nonaktif')->take(3)->get();
-    return view('public.home', compact('facilities'));
-})->name('home');
+Route::get('/', [PublicFacilityController::class, 'home'])->name('home');
 
 
 // ROUTE: Menerima GET request ke '/public/catalog'
