@@ -33,15 +33,88 @@
                     }
                 }
             }">
-                <div class="relative group">
+                <div class="relative group" x-data="smartSearch('home')" @click.outside="open = false">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
-                        <input type="text" name="search" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent">
+                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) open = true" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent" autocomplete="off">
                         <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
                             <span class="material-symbols-outlined text-[24px]">tune</span>
                         </button>
                         <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+                    </div>
+
+                    <!-- Smart Search Dropdown -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         class="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 pointer-events-auto"
+                         style="display: none;">
+                         
+                        <!-- Loading State -->
+                        <div x-show="loading" class="p-4 flex items-center justify-center text-gray-500">
+                            <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm font-medium">Mencari...</span>
+                        </div>
+
+                        <!-- Results -->
+                        <div x-show="!loading" class="flex flex-col">
+                            <!-- Text Suggestions -->
+                            <template x-if="suggestions.length > 0">
+                                <div class="px-2 pt-2">
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Rekomendasi</div>
+                                    <template x-for="text in suggestions">
+                                        <button type="button" @click="query = text; open = false; $el.closest('form').submit()" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
+                                            <span class="text-sm text-gray-700" x-html="highlight(text)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Facility Suggestions -->
+                            <template x-if="facilities.length > 0">
+                                <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
+                                    <template x-for="f in facilities">
+                                        <a :href="'/catalog?search=' + encodeURIComponent(f.name)" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-blue-500 text-[20px]">meeting_room</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-gray-900" x-html="highlight(f.name)"></span>
+                                                <span class="text-[11px] text-gray-500" x-text="f.building"></span>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- No Results -->
+                            <template x-if="suggestions.length === 0 && facilities.length === 0">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
+                                    <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>
+                                </div>
+                            </template>
+
+                            <!-- Action Buttons -->
+                            <template x-if="suggestions.length > 0 || facilities.length > 0">
+                                <div class="bg-gray-50 p-3 border-t border-gray-100 flex gap-2">
+                                    <a :href="'/catalog?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                        Lihat Fasilitas
+                                    </a>
+                                    <a :href="'/availability?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                        Lihat Jadwal
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 

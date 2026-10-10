@@ -51,7 +51,7 @@ Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMat
 Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
 // API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
-Route::get('/api/facilities/search', [PublicFacilityController::class, 'autocomplete'])->name('api.facilities.search');
+Route::get('/api/facilities/search', [PublicFacilityController::class, 'searchSuggestions'])->name('api.facilities.search');
 
 // ROUTE: Menerima GET request ke '/informasi/{section?}'
 // FUNGSI: Menampilkan pusat informasi publik (Kebijakan, Syarat & Ketentuan, dan Bantuan)

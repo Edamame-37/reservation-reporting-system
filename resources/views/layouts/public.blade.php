@@ -63,6 +63,56 @@
     </style>
     <script>
         document.addEventListener('alpine:init', () => {
+            Alpine.data('smartSearch', (pageType) => ({
+                query: '{{ request('search') }}',
+                suggestions: [],
+                facilities: [],
+                loading: false,
+                open: false,
+                timer: null,
+                pageType: pageType,
+
+                init() {
+                    this.$watch('query', value => {
+                        if (value.trim().length === 0) {
+                            this.suggestions = [];
+                            this.facilities = [];
+                            this.open = false;
+                            return;
+                        }
+                        
+                        this.loading = true;
+                        this.open = true;
+                        clearTimeout(this.timer);
+                        
+                        this.timer = setTimeout(() => {
+                            this.fetchResults();
+                        }, 1000);
+                    });
+                },
+
+                async fetchResults() {
+                    try {
+                        let res = await fetch(`/api/facilities/search?q=${encodeURIComponent(this.query)}`);
+                        let data = await res.json();
+                        this.suggestions = data.suggestions || [];
+                        this.facilities = data.facilities || [];
+                    } catch (e) {
+                        console.error(e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                highlight(text) {
+                    if (!this.query) return text;
+                    // Escape special regex chars
+                    let escapedQuery = this.query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+                    return text.replace(regex, '<span class="text-blue-600 font-semibold">$1</span>');
+                }
+            }));
+
             Alpine.data('pageTransition', (pageIndex) => ({
                 animationClass: '',
                 mobileMenuOpen: false,

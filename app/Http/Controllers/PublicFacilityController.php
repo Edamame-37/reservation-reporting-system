@@ -179,40 +179,50 @@ class PublicFacilityController extends Controller
         ]);
     }
 
-    /**
-     * Endpoint API: Mencari fasilitas secara spesifik untuk fitur autocomplete
-     */
-    public function autocomplete(Request $request)
+    public function searchSuggestions(Request $request)
     {
-        $query = Facility::where('status', '!=', 'nonaktif');
-
-        if ($request->filled('q')) {
-            $searchTerm = $request->q;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('code', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('description', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('building', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('equipment', 'LIKE', "%{$searchTerm}%");
-            });
+        $q = $request->q;
+        if (empty($q)) {
+            return response()->json(['suggestions' => [], 'facilities' => []]);
         }
 
-        // Limit data to prevent huge payload on live search
-        $results = $query->take(5)->get()->map(function($f) {
-            return [
-                'id' => $f->id,
-                'code' => $f->code,
-                'name' => $f->name,
-                'category' => strtolower($f->category ?? 'umum'),
-                'building' => $f->building . ($f->floor_location ? ' (Lt. ' . $f->floor_location . ')' : ''),
-                'capacity' => $f->capacity,
-                'status' => $f->status === 'dalam perbaikan' ? 'locked' : 'approved',
-                'equipment' => is_array($f->equipment) ? $f->equipment : (json_decode($f->equipment, true) ?? []),
-                'desc' => $f->description,
-                'image' => $f->image_path
-            ];
-        });
+        // 1. Text Suggestions (Kategori atau Gedung)
+        $categories = Facility::where('status', '!=', 'nonaktif')
+            ->where('category', 'LIKE', "%{$q}%")
+            ->pluck('category')
+            ->unique()
+            ->values()
+            ->take(2);
 
-        return response()->json($results);
+        $buildings = Facility::where('status', '!=', 'nonaktif')
+            ->where('building', 'LIKE', "%{$q}%")
+            ->pluck('building')
+            ->unique()
+            ->values()
+            ->take(2);
+            
+        $textSuggestions = $categories->concat($buildings)->unique()->take(3)->values();
+
+        // 2. Facilities
+        $facilities = Facility::where('status', '!=', 'nonaktif')
+            ->where(function($query) use ($q) {
+                $query->where('name', 'LIKE', "%{$q}%")
+                      ->orWhere('code', 'LIKE', "%{$q}%")
+                      ->orWhere('building', 'LIKE', "%{$q}%");
+            })
+            ->take(3)
+            ->get()
+            ->map(function($f) {
+                return [
+                    'id' => $f->id,
+                    'name' => $f->name,
+                    'building' => $f->building . ($f->floor_location ? ' (Lt. ' . $f->floor_location . ')' : ''),
+                ];
+            });
+
+        return response()->json([
+            'suggestions' => $textSuggestions,
+            'facilities' => $facilities
+        ]);
     }
 }
