@@ -26,7 +26,7 @@
             </div>
             
             <form action="{{ route('public.catalog') }}" method="GET" class="w-full md:w-96 relative group shrink-0" 
-                  @close-other-popups.window="openCategory = false; openFacility = false;"
+                  @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
                   x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
@@ -61,7 +61,7 @@
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
                         <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
-                        <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
                             <span class="material-symbols-outlined text-[20px]">tune</span>
                         </button>
                         <button type="submit" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition">Cari</button>

@@ -8,7 +8,7 @@
             <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light leading-relaxed">Optimalisasi fasilitas kampus dalam satu platform terpadu. Pesan ruang instan dan laporkan kendala seketika.</p>
             
             <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" 
-                  @close-other-popups.window="openCategory = false; openFacility = false;"
+                  @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
                   x-data="{ 
                 showAdvanced: false,
                 openCategory: false,
@@ -40,7 +40,7 @@
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
                         <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent" autocomplete="off">
-                        <button type="button" @click="showAdvanced = !showAdvanced" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
                             <span class="material-symbols-outlined text-[24px]">tune</span>
                         </button>
                         <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
