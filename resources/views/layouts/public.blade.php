@@ -64,20 +64,33 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('pageTransition', (pageIndex) => ({
-                animationClass: 'opacity-0',
+                animationClass: '',
                 mobileMenuOpen: false,
                 init() {
+                    this.animationClass = 'opacity-0'; // Default hidden
+                    
                     let prevIndex = sessionStorage.getItem('prevPageIndex');
+                    let categoryClicked = sessionStorage.getItem('categoryClicked');
                     
                     if (!prevIndex) {
                         this.animationClass = 'animate-fade-in';
-                    } else if (pageIndex > prevIndex) {
-                        this.animationClass = 'animate-slide-in-right';
-                    } else if (pageIndex < prevIndex) {
-                        this.animationClass = 'animate-slide-in-left';
                     } else {
-                        // Jika berada di indeks halaman yang sama (misal sedang di Katalog, ganti kategori Katalog)
-                        this.animationClass = 'animate-fade-in';
+                        prevIndex = parseInt(prevIndex);
+                        pageIndex = parseInt(pageIndex);
+                        
+                        if (pageIndex > prevIndex) {
+                            this.animationClass = 'animate-slide-in-right';
+                        } else if (pageIndex < prevIndex) {
+                            this.animationClass = 'animate-slide-in-left';
+                        } else {
+                            // Jika berada di indeks halaman yang sama
+                            if (categoryClicked === 'true') {
+                                this.animationClass = ''; // Hapus fade-in (statis)
+                                sessionStorage.removeItem('categoryClicked');
+                            } else {
+                                this.animationClass = 'animate-fade-in';
+                            }
+                        }
                     }
                     
                     sessionStorage.setItem('prevPageIndex', pageIndex);

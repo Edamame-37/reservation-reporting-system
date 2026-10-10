@@ -221,34 +221,41 @@
             </div>
 
             <div class="min-w-[1000px] pb-4">
-                <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
+                <!-- HEADER ROW -->
+                <div class="grid grid-cols-[250px_1fr] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
                     <div class="pr-4 font-semibold text-gray-700 text-xs self-end pb-1">Nama Fasilitas</div>
-                    <template x-for="(timeSlot, index) in timeSlots">
-                        <div class="flex flex-col items-center justify-end pb-1 relative">
-                            <!-- Garis penanda kecil di bawah teks -->
-                            <div class="w-px h-1.5 bg-gray-200 absolute -bottom-2"></div>
-                            
-                            <span x-show="index % 2 === 0" class="text-[11px] font-semibold text-gray-700 mb-0.5" x-text="timeSlot.split(':')[0] + ':00'"></span>
-                            <span x-show="index % 2 === 1" class="text-[9px] text-gray-400 font-medium leading-none mb-0.5">30</span>
-                        </div>
-                    </template>
+                    
+                    <!-- Time slots header (Animates with the slots) -->
+                    <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5 opacity-0" :class="animationClass || 'animate-fade-in'">
+                        <template x-for="(timeSlot, index) in timeSlots">
+                            <div class="flex flex-col items-center justify-end pb-1 relative">
+                                <div class="w-px h-1.5 bg-gray-200 absolute -bottom-2"></div>
+                                <span x-show="index % 2 === 0" class="text-[11px] font-semibold text-gray-700 mb-0.5" x-text="timeSlot.split(':')[0] + ':00'"></span>
+                                <span x-show="index % 2 === 1" class="text-[9px] text-gray-400 font-medium leading-none mb-0.5">30</span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
-                <!-- Only the rows slide -->
-                <div class="space-y-3 opacity-0" :class="animationClass || 'animate-fade-in'">
+                <!-- ROWS CONTAINER (Not animated directly anymore) -->
+                <div class="space-y-3">
                     @foreach ($facilities as $f)
-                    <div class="grid grid-cols-[250px_repeat(26,1fr)] gap-1.5 items-center hover:bg-gray-50 py-1.5 px-2 rounded-xl transition">
+                    <div class="grid grid-cols-[250px_1fr] gap-1.5 items-center hover:bg-gray-50 py-1.5 px-2 rounded-xl transition">
+                        <!-- Facility Name (Static) -->
                         <div class="pr-2">
                             <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
                             <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
                         </div>
                         
-                        <template x-for="timeSlot in timeSlots">
-                            <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
-                                 :class="{{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400' : 'bg-emerald-400')"
-                                 :title="timeSlot + ' - ' + getEndTime(timeSlot) + ' ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
-                            </div>
-                        </template>
+                        <!-- Slots (Animated) -->
+                        <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5 opacity-0" :class="animationClass || 'animate-fade-in'">
+                            <template x-for="timeSlot in timeSlots">
+                                <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
+                                     :class="{{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400' : 'bg-emerald-400')"
+                                     :title="timeSlot + ' - ' + getEndTime(timeSlot) + ' ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
+                                </div>
+                            </template>
+                        </div>
                     </div>
                     @endforeach
                     
