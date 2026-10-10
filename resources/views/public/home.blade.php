@@ -194,10 +194,10 @@
                         @endif
                     </div>
                     <div class="flex justify-between items-start mb-2 gap-2">
-                        <h3 class="text-xl font-semibold leading-tight group-hover:text-blue-600 transition-colors">{{ $facility->name }}</h3>
+                        <h3 class="text-xl font-semibold leading-tight group-hover:text-blue-600 transition-colors duration-300">{{ $facility->name }}</h3>
                     </div>
                     <p class="text-[#86868B] text-sm mb-6">{{ $facility->building }} • {{ $facility->capacity }} Kursi</p>
-                    <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity mt-auto">
+                    <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 mt-auto">
                         Lihat Detail <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                     </div>
                 </div>
