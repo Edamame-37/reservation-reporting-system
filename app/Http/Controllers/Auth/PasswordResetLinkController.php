@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : PasswordResetLinkController.php
  * FUNGSI       : Controller pengiriman permintaan tautan reset kata sandi
- * DESKRIPSI    : Menangani formulir lupa kata sandi (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Menerima email tujuan, melewati kueri tabel password_reset_tokens, dan mengembalikan pesan status tiruan.
+ * DESKRIPSI    : Menangani formulir lupa kata sandi dan pengiriman tautan token pemulihan akun ke email terdaftar.
+ * CARA KERJA   : Memvalidasi alamat email dan memicu Password::sendResetLink() untuk mencatat token ke tabel password_reset_tokens serta mengirim notifikasi.
  */
 
 namespace App\Http\Controllers\Auth;
@@ -30,7 +30,7 @@ class PasswordResetLinkController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Mengirimkan tautan reset kata sandi ke email pemohon.
-     * CARA KERJA         : [MODE MOCKUP] Kueri broker password dinonaktifkan sementara dan mengembalikan pesan sukses simulasi.
+     * CARA KERJA         : Memvalidasi format email dan memanggil Password broker Laravel untuk menerbitkan token reset.
      *
      * @throws ValidationException
      */

@@ -320,7 +320,7 @@
                                     *Wajib Diisi
                                 </span>
                             </div>
-                            <textarea id="resolution-note" name="catatan_resolusi" x-model="selectedReport.resolutionNote" :required="selectedReport.status === 'selesai' || selectedReport.status === 'ditolak'" rows="3" placeholder="Contoh: Komponen telah diganti dan fasilitas telah diuji normal..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                            <textarea id="resolution-note" name="catatan_resolusi" x-model="selectedReport.resolutionNote" :required="selectedReport.status === 'selesai' || selectedReport.status === 'ditolak'" maxlength="2000" rows="3" placeholder="Contoh: Komponen telah diganti dan fasilitas telah diuji normal (maks. 2000 karakter)..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
                         </div>
 
                         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">

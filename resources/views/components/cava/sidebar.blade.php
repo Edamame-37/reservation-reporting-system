@@ -24,10 +24,8 @@
         $sidebarCounts['petugas_reports'] = \App\Models\DamageReport::whereIn('status', ['baru', 'diproses'])->count();
     } elseif ($role === 'admin') {
         $sidebarCounts['admin_users'] = \App\Models\User::where('status', 'pending')->count();
-    } elseif ($role === 'user' && auth()->check()) {
-        $sidebarCounts['user_reservations'] = auth()->user()->reservations()->count();
-        $sidebarCounts['user_reports'] = auth()->user()->damageReports()->count();
     }
+    // Catatan: Query badge untuk peran user ditiadakan untuk efisiensi karena menu user kini bersih tanpa badge penanda
 @endphp
 
 <!-- 
@@ -157,24 +155,20 @@
                 </span>
             </a>
 
+            {{-- Navigasi Reservasi Ruangan (Tampilan Bersih Minimalis Tanpa Angka Penanda) --}}
             <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['reservation-history', 'reservation-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                     <span>Reservasi Ruangan</span>
                 </span>
-                @if($sidebarCounts['user_reservations'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">{{ $sidebarCounts['user_reservations'] }}</span>
-                @endif
             </a>
 
+            {{-- Navigasi Pelaporan Kerusakan (Tampilan Bersih Minimalis Tanpa Angka Penanda) --}}
             <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['report-history', 'report-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">handyman</span>
                     <span>Pelaporan Kerusakan</span>
                 </span>
-                @if($sidebarCounts['user_reports'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['user_reports'] }}</span>
-                @endif
             </a>
 
         @else

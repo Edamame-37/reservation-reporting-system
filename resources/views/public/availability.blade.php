@@ -1,359 +1,432 @@
 {{-- 
   NAMA FILE      : availability.blade.php
-  FUNGSIONALITAS : Halaman Matriks Jadwal Ketersediaan Ruang (Bento UI & Paginasi 10 Data)
-  DESKRIPSI      : Menampilkan matriks jadwal slot 30 menit seluruh fasilitas kampus (07:00 - 20:00 WIB) dengan Bento UI modular, filter tanggal & gedung, legenda status, dan paginasi interaktif dibatasi 10 ruangan per halaman.
-  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menyajikan visualisasi slot ketersediaan interaktif dengan Alpine.js tanpa reload.
+  FUNGSIONALITAS : Matriks Transparan Slot Waktu Ketersediaan Fasilitas Publik
+  DESKRIPSI      : Menampilkan kalender visual slot 30 menit (07:00-20:00 WIB) untuk seluruh ruang kampus dengan indikator status terpakai, terkunci, dan tersedia secara real-time.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menarik matriks slot waktu via API endpoint /api/availability/{date} dan dirender dengan Alpine.js.
 --}}
 
-<x-public-layout title="Matriks Jadwal Ketersediaan Ruang" active="availability">
-    <div x-data="availabilityData()" class="space-y-6">
+<x-public-layout title="Matriks Jadwal Ketersediaan" active="availability">
+    <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="availabilityMatrix()" x-init="initMatrix('{{ request('date', date('Y-m-d')) }}')">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal</h1>
+                <p class="text-lg text-[#86868B]">Pantau ketersediaan slot waktu secara transparan.</p>
 
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 1: HEADER & PANEL KONTROL MATRIKS JADWAL                       --}}
-        {{-- ========================================================================= --}}
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            {{-- Bento Card 1: Headline & Keterangan Operasional (7 Kolom) --}}
-            <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs flex flex-col justify-between">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-3">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>Jadwal Operasional Kampus: 07:00 - 20:00 WIB</span>
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
-                        Matriks Ketersediaan Slot Waktu Ruang
-                    </h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
-                        Transparansi status seluruh auditorium, lab komputer, dan ruang kelas interaktif per interval 30 menit. Silakan pilih tanggal dan gedung untuk memantau waktu luang fasilitas sebelum mengajukan peminjaman.
-                    </p>
-                </div>
-
-                {{-- Indikator Legenda Status --}}
-                <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-4 text-xs">
-                    <span class="flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-md bg-emerald-50 border border-emerald-300"></span>
-                        <span class="text-slate-700 font-medium">Bebas / Tersedia</span>
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-md bg-rose-50 border border-rose-300"></span>
-                        <span class="text-slate-700 font-medium">Terisi (Approved)</span>
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-md bg-slate-200 border border-slate-300"></span>
-                        <span class="text-slate-700 font-medium">Dalam Perbaikan</span>
-                    </span>
-                </div>
-            </div>
-
-            {{-- Bento Card 2: Filter Toolbar Tanggal & Gedung (5 Kolom) --}}
-            <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Filter Pemantauan</span>
-                        <span class="inline-flex items-center gap-1 text-[11px] text-blue-200 bg-white/10 px-2.5 py-0.5 rounded-full font-medium">
-                            <span>Privasi UR-01 Aktif</span>
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-4">Pilih Jadwal & Lokasi</h3>
-
-                    <div class="space-y-3.5">
-                        {{-- Pemilih Tanggal --}}
-                        <div>
-                            <label for="matrix-date" class="block text-xs font-semibold text-slate-300 mb-1.5">Tanggal Pelaksanaan:</label>
-                            <div class="relative">
-                                <input type="date" 
-                                       id="matrix-date" 
-                                       x-model="selectedDate" 
-                                       class="w-full text-xs sm:text-sm bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-slate-400">
-                            </div>
-                        </div>
-
-                        {{-- Pemilih Gedung --}}
-                        <div>
-                            <label for="matrix-building" class="block text-xs font-semibold text-slate-300 mb-1.5">Gedung Kampus:</label>
-                            <select id="matrix-building" 
-                                    x-model="selectedBuilding" 
-                                    class="w-full text-xs sm:text-sm bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 [&>option]:text-slate-900 [&>option]:bg-white">
-                                <option value="semua">Semua Gedung Kampus</option>
-                                <option value="Rektorat">Gedung Rektorat</option>
-                                <option value="Lab Terpadu C">Gedung Lab Terpadu C</option>
-                                <option value="Kuliah Bersama B">Gedung Kuliah Bersama B</option>
-                                <option value="PKM">Student Center (PKM)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>Transparansi publik terverifikasi</span>
-                    <span x-show="isLoading" class="text-emerald-400 font-semibold animate-pulse">Memuat ketersediaan...</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 2: TABEL MATRIKS JADWAL DENGAN PAGINASI 10 RUANGAN             --}}
-        {{-- ========================================================================= --}}
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-            
-            {{-- Toolbar Status Paginasi Atas --}}
-            <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                <div class="text-xs text-slate-600 font-medium">
-                    Menampilkan <strong class="text-slate-900" x-text="filteredRooms.length > 0 ? ((currentPage - 1) * perPage) + 1 : 0"></strong>
-                    - <strong class="text-slate-900" x-text="Math.min(currentPage * perPage, filteredRooms.length)"></strong> 
-                    dari <strong class="text-slate-900" x-text="filteredRooms.length"></strong> Fasilitas Kampus
-                    <span class="text-slate-400 ml-1">(Dibatasi 10 ruang per halaman)</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <span>Halaman</span>
-                    <span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-bold text-slate-900 font-mono" x-text="currentPage"></span>
-                    <span>dari</span>
-                    <span class="font-bold text-slate-900 font-mono" x-text="totalPages"></span>
-                </div>
-            </div>
-
-            {{-- Container Tabel Gulir Horizontal --}}
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-700">
-                            <th class="py-3 px-4 font-bold uppercase tracking-wider min-w-[240px] sticky left-0 bg-slate-100/95 backdrop-blur-xs z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
-                                Ruang / Fasilitas
-                            </th>
-                            <template x-for="slot in timeSlots" :key="slot">
-                                <th class="py-2.5 px-2 text-center font-bold text-slate-600 border-l border-slate-200/70 min-w-[58px]" x-text="slot"></th>
-                            </template>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <template x-for="room in paginatedRooms" :key="room.id">
-                            <tr class="group hover:bg-slate-50/90 transition-all duration-300">
-                                {{-- Kolom Kiri Sticky: Nama Ruang & Detail Hanya Total Kursi dengan Animasi Pop-Up --}}
-                                <td class="py-3 px-4 sticky left-0 bg-white group-hover:bg-slate-50/95 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)] border-b border-slate-100 transition-colors">
-                                    <div class="transition-all duration-300 transform group-hover:scale-[1.03] group-hover:translate-x-1 origin-left">
-                                        <div class="font-bold text-slate-900 text-sm leading-snug group-hover:text-blue-950 transition-colors" x-text="room.name"></div>
-                                        <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-1">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100/90 font-semibold text-slate-700 shadow-2xs">
-                                                <span class="material-symbols-outlined text-[13px] text-slate-500">group</span>
-                                                <span x-text="room.capacity + ' Kursi'"></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                {{-- Slot 30 Menit dengan Efek Animasi Pop-Up Mikro saat Hover --}}
-                                <template x-for="slot in timeSlots" :key="slot">
-                                    <td class="p-1 border-l border-slate-100 text-center align-middle">
-                                        {{-- Kondisi 1: Ruang Dalam Perbaikan --}}
-                                        <div x-show="room.locked" 
-                                             class="w-full h-8 rounded-lg bg-slate-200 border border-slate-300 flex items-center justify-center text-[10px] text-slate-600 transition-all duration-200 transform hover:scale-110 hover:shadow-xs" 
-                                             title="Ruang Dalam Perbaikan">
-                                            <span class="material-symbols-outlined text-[13px]">build</span>
-                                        </div>
-
-                                        {{-- Kondisi 2: Slot Terisi --}}
-                                        <div x-show="!room.locked && isBooked(room, slot)" 
-                                             class="w-full h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center text-[9px] font-bold transition-all duration-200 transform hover:scale-110 hover:shadow-xs hover:z-30 relative cursor-default" 
-                                             title="Slot Waktu Terpakai (Approved)">
-                                            <span>Terisi</span>
-                                        </div>
-
-                                        {{-- Kondisi 3: Slot Bebas/Tersedia --}}
-                                        <div x-show="!room.locked && !isBooked(room, slot)" 
-                                             class="w-full h-8 rounded-lg bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors text-emerald-800 flex items-center justify-center text-[9px] font-semibold transition-all duration-200 transform hover:scale-110 hover:shadow-xs hover:z-30 relative cursor-pointer" 
-                                             title="Slot Waktu Tersedia">
-                                            <span>Bebas</span>
-                                        </div>
-                                    </td>
-                                </template>
-                            </tr>
-                        </template>
-
-                        {{-- State Kosong Jika Filter Tidak Menemukan Ruang --}}
-                        <template x-if="paginatedRooms.length === 0">
-                            <tr>
-                                <td :colspan="timeSlots.length + 1" class="py-12 text-center text-slate-500">
-                                    <span class="material-symbols-outlined text-[36px] text-slate-300 mb-1">domain_disabled</span>
-                                    <p class="text-sm font-semibold text-slate-800">Tidak ada fasilitas yang sesuai dengan filter gedung ini.</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Silakan pilih 'Semua Gedung Kampus' untuk melihat seluruh ruangan.</p>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Toolbar Navigasi Paginasi Bento Bawah (Show Only 10 Items per Page) --}}
-            <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/40">
-                <div class="text-xs text-slate-500">
-                    Menampilkan halaman <strong class="text-slate-800" x-text="currentPage"></strong> dari <strong class="text-slate-800" x-text="totalPages"></strong>
-                </div>
-
-                {{-- Tombol Navigasi Paginasi --}}
-                <div class="flex items-center gap-1.5">
-                    {{-- Tombol Sebelumnya --}}
-                    <button type="button" 
-                            @click="prevPage()" 
-                            :disabled="currentPage === 1"
-                            :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border-slate-200 shadow-2xs'"
-                            class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">arrow_back</span>
-                        <span>Sebelumnya</span>
-                    </button>
-
-                    {{-- Tombol Nomor Halaman --}}
-                    <div class="flex items-center gap-1">
-                        <template x-for="p in totalPages" :key="p">
+                <!-- Quick Date Navigation -->
+                <div class="mt-8 hidden md:block">
+                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Pintasan Tanggal</div>
+                    <div class="flex gap-2">
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d') }}', 1)" 
+                                :class="currentDate === '{{ date('Y-m-d') }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            Hari Ini
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+1 day')) }}', 2)" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+1 day')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            Besok
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+2 days')) }}', 3)" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+2 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            {{ \Carbon\Carbon::now()->addDays(2)->translatedFormat('d M') }}
+                        </button>
+                        <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+3 days')) }}', 4)" 
+                                :class="currentDate === '{{ date('Y-m-d', strtotime('+3 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                            {{ \Carbon\Carbon::now()->addDays(3)->translatedFormat('d M') }}
+                        </button>
+                        
+                        <!-- Custom Date (if selected date is outside the 4 shortcuts) -->
+                        <template x-if="currentDate && !['{{ date('Y-m-d') }}', '{{ date('Y-m-d', strtotime('+1 day')) }}', '{{ date('Y-m-d', strtotime('+2 days')) }}', '{{ date('Y-m-d', strtotime('+3 days')) }}'].includes(currentDate)">
                             <button type="button" 
-                                    @click="goToPage(p)"
-                                    :class="currentPage === p 
-                                        ? 'bg-slate-900 text-white font-bold shadow-xs' 
-                                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold'"
-                                    class="w-8 h-8 rounded-xl text-xs transition flex items-center justify-center font-mono"
-                                    x-text="p">
+                                    class="bg-[#1D1D1F] text-white shadow-md px-4 py-2 rounded-xl text-xs font-medium transition"
+                                    x-text="formatDate(currentDate).substring(0, 6) + '..'">
                             </button>
                         </template>
                     </div>
+                </div>
+            </div>
 
-                    {{-- Tombol Selanjutnya --}}
-                    <button type="button" 
-                            @click="nextPage()" 
-                            :disabled="currentPage === totalPages"
-                            :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border-slate-200 shadow-2xs'"
-                            class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1">
-                        <span>Selanjutnya</span>
-                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </button>
+            <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" 
+                  @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
+                  x-data="{ 
+                showAdvanced: false,
+                openCategory: false,
+                selectedCategories: {{ json_encode(request('categories', [])) }},
+                selectedDate: '',
+                minCapacity: '{{ request('capacity', '') }}',
+                openFacility: false,
+                selectedFacilities: {{ json_encode(request('equipments', [])) }},
+                get allFilters() {
+                    let filters = [];
+                    if (this.selectedDate !== '') filters.push({ type: 'date', value: this.selectedDate });
+                    this.selectedCategories.forEach(c => filters.push({ type: 'category', value: c }));
+                    if (this.minCapacity !== '') filters.push({ type: 'capacity', value: this.minCapacity });
+                    this.selectedFacilities.forEach(f => filters.push({ type: 'facility', value: f }));
+                    return filters;
+                },
+                removeFilter(filter) {
+                    if (filter.type === 'category') {
+                        let idx = this.selectedCategories.indexOf(filter.value);
+                        if(idx > -1) this.selectedCategories.splice(idx, 1);
+                    } else if (filter.type === 'capacity') {
+                        this.minCapacity = '';
+                    } else if (filter.type === 'facility') {
+                        let idx = this.selectedFacilities.indexOf(filter.value);
+                        if(idx > -1) this.selectedFacilities.splice(idx, 1);
+                    } else if (filter.type === 'date') {
+                        this.selectedDate = '';
+                    }
+                }
+            }">
+                <div class="relative group" x-data="smartSearch('availability')" @click.outside="open = false">
+                    @if(request()->has('category') && request('category') !== 'semua')
+                        <input type="hidden" name="category" value="{{ request('category') }}">
+                    @endif
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
+                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">tune</span>
+                        </button>
+                        <button type="submit" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition">Cari</button>
+                    </div>
+
+                    <!-- Smart Search Dropdown -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 pointer-events-auto"
+                         style="display: none;">
+                         
+                        <!-- Loading State -->
+                        <div x-show="loading" class="p-4 flex items-center justify-center text-gray-500">
+                            <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm font-medium">Mencari...</span>
+                        </div>
+
+                        <!-- Results -->
+                        <div x-show="!loading" class="flex flex-col">
+                            <!-- Text Suggestions -->
+                            <template x-if="suggestions.length > 0">
+                                <div class="px-2 pt-2">
+                                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Rekomendasi</div>
+                                    <template x-for="text in suggestions">
+                                        <button type="button" @click="query = text; open = false; $el.closest('form').submit()" class="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
+                                            <span class="text-sm text-gray-700" x-html="highlight(text)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Facility Suggestions -->
+                            <template x-if="facilities.length > 0">
+                                <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
+                                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
+                                    <template x-for="f in facilities">
+                                        <a :href="'/public/availability?search=' + encodeURIComponent(f.name)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-blue-500 text-[18px]">meeting_room</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-gray-900" x-html="highlight(f.name)"></span>
+                                                <span class="text-[10px] text-gray-500" x-text="f.building"></span>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Empty State Warning -->
+                            <template x-if="emptyState">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
+                                    <p class="text-sm">Ketikkan sesuatu atau pilih filter untuk memulai pencarian</p>
+                                </div>
+                            </template>
+
+                            <!-- No Results -->
+                            <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
+                                    <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>
+                                </div>
+                            </template>
+
+                            <!-- Action Buttons -->
+                            <template x-if="suggestions.length > 0 || facilities.length > 0">
+                                <div class="bg-gray-50 p-2.5 border-t border-gray-100 flex gap-2">
+                                    <button type="submit" class="w-full flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                        Lihat Selengkapnya
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Absolute Container for Filters and Popup -->
+                <div class="absolute top-full left-0 right-0 w-full z-40 pointer-events-none"
+                     x-data="{ pillsHeight: 0 }"
+                     x-init="
+                        const observer = new ResizeObserver(entries => {
+                            pillsHeight = entries[0].target.offsetHeight;
+                        });
+                        if ($refs.pillContainer) {
+                            observer.observe($refs.pillContainer);
+                        }
+                     ">
+                     
+                    <!-- Filter Aktif (Absolute) -->
+                    <div class="absolute top-0 left-0 right-0 w-full pointer-events-auto"
+                         x-ref="pillContainer">
+                        <div x-show="allFilters.length > 0" 
+                             x-transition.opacity.duration.300ms 
+                             class="flex flex-wrap items-center gap-2 pt-4 pb-1"
+                             style="display: none;">
+                            <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
+                            
+                            <template x-for="filter in allFilters.slice(0, 3)" :key="filter.type + '-' + filter.value">
+                                <span x-transition.opacity.scale.90.duration.200ms 
+                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
+                                      :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : (filter.type === 'date' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'))">
+                                    <span x-text="filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : (filter.type === 'date' ? 'Tgl: ' + filter.value : filter.value)"></span>
+                                    <button type="button" @click.prevent.stop="removeFilter(filter)" 
+                                            class="focus:outline-none transition"
+                                            :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : (filter.type === 'date' ? 'text-amber-500 hover:text-amber-900' : 'text-emerald-500 hover:text-emerald-900'))">
+                                        <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                                    </button>
+                                </span>
+                            </template>
+                            
+                            <span x-show="allFilters.length > 3" x-transition.opacity.scale.90.duration.200ms 
+                                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-[13px] font-medium border border-gray-200 shadow-sm">
+                                <span x-text="'+' + (allFilters.length - 3) + ' lainnya'"></span>
+                            </span>
+
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''; selectedDate = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Search Popup (Absolute positioning slides based on pillsHeight) -->
+                    <div class="absolute right-0 md:min-w-[600px] transition-all duration-300 ease-out pointer-events-auto"
+                         :style="`top: ${(allFilters.length > 0) ? pillsHeight : 0}px`">
+                        
+                        <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
+                        <div x-show="showAdvanced" 
+                             @click.away="showAdvanced = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-2"
+                             class="mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 z-50 text-left" style="display: none;">
+                             <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-100">
+                                <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
+                                <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined text-xl">close</span></button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Tanggal Jadwal</label>
+                                    <input type="date" name="date" x-model="selectedDate" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
+                                    <div class="relative mt-2">
+                                        <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
+                                            <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
+                                        </button>
+                                        
+                                        <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                            @foreach($categories as $index => $cat)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
+                                    <input type="number" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
+                                    <div class="relative mt-2">
+                                        <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
+                                            <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
+                                        </button>
+                                        
+                                        <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                            @foreach($equipments as $index => $eq)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-8 flex justify-end gap-3">
+                                <button type="reset" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition text-sm">Reset</button>
+                                <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto">
+            <div class="flex justify-between items-center mb-6 min-w-[800px]">
+                <div class="flex items-center gap-4">
+                    <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]" x-text="formatDate(currentDate)"></span></h2>
+                    <!-- Spinner SVG instead of simple text -->
+                    <svg x-show="loading" class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-emerald-400 border border-emerald-500"></span> Tersedia</div>
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-red-400 border border-red-500"></span> Terpakai</div>
+                    <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-gray-300 border border-gray-400"></span> Maintenance</div>
+                </div>
+            </div>
+
+            <div class="min-w-[1000px] pb-4">
+                <!-- HEADER ROW -->
+                <div class="grid grid-cols-[250px_1fr] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
+                    <div class="pr-4 font-semibold text-gray-700 text-xs self-end pb-1">Nama Fasilitas</div>
+                    
+                    <!-- Time slots header (Static) -->
+                    <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5">
+                        <template x-for="(timeSlot, index) in timeSlots">
+                            <div class="flex flex-col items-center justify-end pb-1 relative">
+                                <div class="w-px h-1.5 bg-gray-200 absolute -bottom-2"></div>
+                                <span x-show="index % 2 === 0" class="text-[11px] font-semibold text-gray-700 mb-0.5" x-text="timeSlot.split(':')[0] + ':00'"></span>
+                                <span x-show="index % 2 === 1" class="text-[9px] text-gray-400 font-medium leading-none mb-0.5">30</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ROWS CONTAINER (Not animated directly anymore) -->
+                <div class="space-y-3">
+                    @foreach ($facilities as $f)
+                    <div class="grid grid-cols-[250px_1fr] gap-1.5 items-center hover:bg-gray-50 py-1.5 px-2 rounded-xl transition">
+                        <!-- Facility Name (Static) -->
+                        <div class="pr-2">
+                            <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
+                            <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
+                        </div>
+                        
+                        <!-- Slots (Animated) -->
+                        <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5 opacity-0" :class="animationClass || 'animate-fade-in'">
+                            <template x-for="timeSlot in timeSlots">
+                                <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
+                                     :class="{{ $f['locked'] ? 'true' : 'false' }} ? 'bg-gray-300' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'bg-red-400' : 'bg-emerald-400')"
+                                     :title="timeSlot + ' - ' + getEndTime(timeSlot) + ' ' + ({{ $f['locked'] ? 'true' : 'false' }} ? 'Maintenance' : (isBooked('{{ $f['id'] }}', timeSlot) ? 'Terpakai' : 'Tersedia'))">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    @endforeach
+                    
+                    @if($facilities->isEmpty())
+                    <div class="py-10 text-center text-gray-500 text-sm">
+                        Belum ada fasilitas yang terdaftar.
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
-
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 3: QUICK CTA & REGULASI PEMINJAMAN                             --}}
-        {{-- ========================================================================= --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            
-            {{-- Card CTA: Masuk SSO untuk Reservasi --}}
-            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-7 text-white shadow-xs flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-bold">Sudah Menemukan Slot Waktu yang Cocok?</h3>
-                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                        Masuk dengan akun SSO Mahasiswa atau Dosen untuk mengajukan permohonan reservasi secara resmi, bebas bentrok jadwal, dan tercatat otomatis.
-                    </p>
-                </div>
-                <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <span class="text-xs text-slate-400">Verifikasi cepat staf sarpras</span>
-                    <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition shadow-xs flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
-                        <span>Masuk SSO & Ajukan</span>
-                    </a>
-                </div>
-            </div>
-
-            {{-- Card Info: Regulasi Peminjaman & Pembatalan --}}
-            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900">Tata Tertib Peminjaman Fasilitas</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        Permohonan reservasi diajukan minimal <strong>H-2</strong> sebelum acara. Pembatalan mandiri dapat dilakukan hingga <strong>H-1</strong> sebelum slot waktu dimulai.
-                    </p>
-                </div>
-                <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <a href="{{ route('public.information', ['section' => 'syarat-ketentuan']) }}" class="text-xs font-semibold text-slate-900 hover:text-blue-900 transition flex items-center gap-1">
-                        <span>Baca Tata Tertib & S&K Selengkapnya</span>
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    {{-- Script Alpine.js Matriks Ketersediaan dengan Paginasi 10 Item --}}
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('availabilityData', () => ({
-                selectedDate: '{{ date('Y-m-d') }}',
-                selectedBuilding: 'semua',
-                currentPage: 1,
-                perPage: 10,
-                timeSlots: [
-                    '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30',
-                    '11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30',
-                    '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30',
-                    '19:00','19:30','20:00'
+            Alpine.data('availabilityMatrix', () => ({
+                currentDate: '',
+                matrixData: {},
+                loading: true,
+                currentDateIndex: 1,
+                animationClass: 'animate-fade-in',
+                timeLabels: [
+                    '07:00','','08:00','','09:00','','10:00','','11:00','','12:00','','13:00','',
+                    '14:00','','15:00','','16:00','','17:00','','18:00','','19:00',''
                 ],
-                rooms: @json($facilities),
-                isLoading: false,
+                timeSlots: [
+                    '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
+                    '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
+                    '17:00','17:30','18:00','18:30','19:00','19:30'
+                ],
                 
-                async fetchAvailability() {
-                    this.isLoading = true;
+                initMatrix(date, index = 1) {
+                    if (this.currentDate !== '' && index !== this.currentDateIndex) {
+                        this.animationClass = ''; // reset
+                        setTimeout(() => {
+                            if (index > this.currentDateIndex) {
+                                this.animationClass = 'animate-slide-in-right';
+                            } else {
+                                this.animationClass = 'animate-slide-in-left';
+                            }
+                            this.currentDateIndex = index;
+                        }, 10);
+                    }
+                    this.currentDate = date;
+                    this.fetchMatrix();
+                },
+
+                formatDate(dateStr) {
+                    if(!dateStr) return '';
+                    const d = new Date(dateStr);
+                    return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
+                },
+
+                getEndTime(timeStr) {
+                    let parts = timeStr.split(':');
+                    let hours = parseInt(parts[0]);
+                    let minutes = parseInt(parts[1]) + 30;
+                    if (minutes >= 60) {
+                        hours += 1;
+                        minutes -= 60;
+                    }
+                    return (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes);
+                },
+                
+                async fetchMatrix() {
+                    this.loading = true;
                     try {
-                        const response = await fetch(`/api/availability/${this.selectedDate}`);
+                        const response = await fetch(`/api/availability/matrix/${this.currentDate}`);
                         if (response.ok) {
-                            const data = await response.json();
-                            this.rooms = this.rooms.map(room => {
-                                room.occupied = data[room.id] || [];
-                                return room;
-                            });
+                            this.matrixData = await response.json();
+                        } else {
+                            console.error('Failed to fetch matrix data');
                         }
                     } catch (error) {
-                        console.error('Error fetching availability:', error);
-                    } finally {
-                        this.isLoading = false;
+                        console.error('Error:', error);
                     }
+                    this.loading = false;
                 },
-
-                init() {
-                    this.fetchAvailability();
-                    
-                    this.$watch('selectedDate', () => {
-                        this.fetchAvailability();
-                    });
-
-                    this.$watch('selectedBuilding', () => {
-                        this.currentPage = 1;
-                    });
-                },
-
-                get filteredRooms() {
-                    return this.rooms.filter(r => {
-                        return this.selectedBuilding === 'semua' || r.building.includes(this.selectedBuilding);
-                    });
-                },
-
-                get totalPages() {
-                    return Math.max(1, Math.ceil(this.filteredRooms.length / this.perPage));
-                },
-
-                get paginatedRooms() {
-                    const start = (this.currentPage - 1) * this.perPage;
-                    return this.filteredRooms.slice(start, start + this.perPage);
-                },
-
-                nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                    }
-                },
-
-                prevPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                    }
-                },
-
-                goToPage(p) {
-                    if (p >= 1 && p <= this.totalPages) {
-                        this.currentPage = p;
-                    }
-                },
-
-                isBooked(room, slot) {
-                    return room.occupied && room.occupied.includes(slot);
+                
+                isBooked(facilityId, slotTime) {
+                    if (!this.matrixData[facilityId]) return false;
+                    return this.matrixData[facilityId].includes(slotTime);
                 }
-            }));
-        });
+            }))
+        })
     </script>
 </x-public-layout>

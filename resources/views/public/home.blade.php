@@ -1,318 +1,424 @@
 {{-- 
   NAMA FILE      : home.blade.php
-  FUNGSIONALITAS : Halaman Beranda (Landing Page) Publik CAVA - Bento UI Modern
-  DESKRIPSI      : Menampilkan Bento Hero Ecosystem 12-kolom, live snapshot operasional kampus, showcase fasilitas unggulan bento cards dengan hover pop-up, serta seksi regulasi & pusat layanan terpadu bersih dari kode, badge redundan, dan simbol dekoratif.
-  CARA KERJA     : Menggunakan master layout <x-public-layout active="home">, menyajikan navigasi cepat dan tautan terpadu menuju katalog fasilitas dan matriks jadwal.
+  FUNGSIONALITAS : Halaman Beranda Publik CAVA (Campus Venue Access)
+  DESKRIPSI      : Menampilkan pendaratan utama publik dengan pencarian cepat fasilitas, filter bertingkat, ringkasan fitur, dan panduan reservasi.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="home">, mengelola state filter pencarian via Alpine.js dan mengarahkan kueri ke public.catalog.
 --}}
 
 <x-public-layout title="Beranda Publik Fasilitas Kampus" active="home">
-    <div class="space-y-10 sm:space-y-12">
-
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 1: HERO ECOSYSTEM (12-KOLOM DENGAN HIERARKI VISUAL KUAT)       --}}
-        {{-- ========================================================================= --}}
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div class="pt-20 pb-20">
+        <main class="px-6 max-w-5xl mx-auto text-center">
+            <h1 class="text-5xl md:text-7xl tracking-tight leading-tight mb-6">
+                <span class="block font-extrabold text-[#86868B] mb-0.5 md:mb-0.5 tracking-widest">CAVA</span>
+                <span class="font-extrabold text-[#1D1D1F]">Reserve and Report</span>
+            </h1>
+            <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light leading-relaxed">Optimalisasi fasilitas kampus dalam satu platform terpadu. Pesan ruang instan dan laporkan kendala seketika.</p>
             
-            {{-- Bento Card 1: Hero Utama dengan Form Pencarian Terpadu (8 Kolom) --}}
-            <div class="lg:col-span-8 bg-slate-900 text-white rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-md flex flex-col justify-between relative overflow-hidden">
-                <div class="relative z-10">
-                    <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
-                        Akses Transparan & Cek Ketersediaan Fasilitas Akademik Kampus
-                    </h1>
-
-                    <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-2xl mb-6">
-                        Pantau ketersediaan auditorium, laboratorium komputer, dan smart classroom secara transparan per slot 30 menit (07:00 - 20:00 WIB) sebelum mengajukan permohonan kegiatan kampus.
-                    </p>
-
-                    <!-- 
-                      ROUTE: Form pencarian GET ke /public/catalog
-                      FUNGSI: Membawa kata kunci pencarian pengunjung langsung menuju katalog fasilitas
-                    -->
-                    <form action="{{ url('/public/catalog') }}" method="GET" class="bg-white p-2 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center gap-2 text-slate-800">
-                        <div class="relative flex-1 w-full">
-                            <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-[20px]">search</span>
-                            <input type="text" 
-                                   name="search" 
-                                   placeholder="Cari ruang: Auditorium, Lab Komputer, Smart Classroom..." 
-                                   class="w-full pl-11 pr-4 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 bg-transparent text-slate-800 placeholder:text-slate-400 font-medium">
-                        </div>
-                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition shadow-xs flex items-center justify-center gap-1.5 shrink-0">
-                            <span>Telusuri</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            <form action="{{ route('public.catalog') }}" method="GET" class="max-w-2xl mx-auto relative" 
+                  @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
+                  x-data="{ 
+                showAdvanced: false,
+                openCategory: false,
+                selectedCategories: [],
+                minCapacity: '',
+                openFacility: false,
+                selectedFacilities: [],
+                get allFilters() {
+                    let filters = [];
+                    this.selectedCategories.forEach(c => filters.push({ type: 'category', value: c }));
+                    if (this.minCapacity !== '') filters.push({ type: 'capacity', value: this.minCapacity });
+                    this.selectedFacilities.forEach(f => filters.push({ type: 'facility', value: f }));
+                    return filters;
+                },
+                removeFilter(filter) {
+                    if (filter.type === 'category') {
+                        let idx = this.selectedCategories.indexOf(filter.value);
+                        if(idx > -1) this.selectedCategories.splice(idx, 1);
+                    } else if (filter.type === 'capacity') {
+                        this.minCapacity = '';
+                    } else if (filter.type === 'facility') {
+                        let idx = this.selectedFacilities.indexOf(filter.value);
+                        if(idx > -1) this.selectedFacilities.splice(idx, 1);
+                    }
+                }
+            }">
+                <div class="relative group" x-data="smartSearch('home')" @click.outside="open = false">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
+                        <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-lg bg-transparent" autocomplete="off">
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-2 mr-2 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[24px]">tune</span>
                         </button>
-                    </form>
-
-                    {{-- Chip Rekomendasi Ruang Populer --}}
-                    <div class="flex flex-wrap items-center gap-2 mt-4 text-xs text-slate-300">
-                        <span class="text-slate-400">Paling Sering Dicari:</span>
-                        <a href="{{ url('/public/catalog?search=Auditorium') }}" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition text-[11px] font-medium text-slate-200">
-                            Auditorium Habibie
-                        </a>
-                        <a href="{{ url('/public/catalog?search=Lab') }}" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition text-[11px] font-medium text-slate-200">
-                            Lab Cloud C201
-                        </a>
-                        <a href="{{ url('/public/catalog?search=Smart') }}" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition text-[11px] font-medium text-slate-200">
-                            Smart Classroom B302
-                        </a>
+                        <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
                     </div>
-                </div>
 
-                <div class="mt-8 pt-5 border-t border-white/10 relative z-10 flex items-center justify-end text-xs">
-                    <a href="{{ url('/public/catalog') }}" class="text-white hover:text-blue-300 font-semibold flex items-center gap-1">
-                        <span>Buka Katalog Lengkap</span>
-                        <span class="material-symbols-outlined text-[14px]">east</span>
-                    </a>
-                </div>
-            </div>
-
-            {{-- Kolom Kanan: 2 Kartu Bento Modular (4 Kolom) --}}
-            <div class="lg:col-span-4 flex flex-col gap-5">
-                
-                {{-- Bento Card 2: Live Snapshot Kampus --}}
-                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs flex-1 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 mb-4">Statistik Ruang Kampus</h3>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                                <span class="text-2xl font-bold font-mono text-slate-900 block">24+</span>
-                                <span class="text-[11px] text-slate-500">Ruang Terdaftar</span>
-                            </div>
-                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                                <span class="text-2xl font-bold font-mono text-slate-900 block">30m</span>
-                                <span class="text-[11px] text-slate-500">Interval Sesi</span>
-                            </div>
+                    <!-- Smart Search Dropdown -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         class="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 pointer-events-auto"
+                         style="display: none;">
+                         
+                        <!-- Loading State -->
+                        <div x-show="loading" class="p-4 flex items-center justify-center text-gray-500">
+                            <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm font-medium">Mencari...</span>
                         </div>
 
-                        <div class="mt-3.5 p-3 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-blue-950 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px] text-blue-900">schedule</span>
-                            <span>Operasional: <strong>07:00 - 20:00 WIB</strong></span>
+                        <!-- Results -->
+                        <div x-show="!loading" class="flex flex-col">
+                            <!-- Text Suggestions -->
+                            <template x-if="suggestions.length > 0">
+                                <div class="px-2 pt-2">
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Rekomendasi</div>
+                                    <template x-for="text in suggestions">
+                                        <button type="button" @click="query = text; open = false; $el.closest('form').submit()" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
+                                            <span class="text-sm text-gray-700" x-html="highlight(text)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+
+                                <!-- Facility Suggestions -->
+                            <template x-if="facilities.length > 0">
+                                <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
+                                    <template x-for="f in facilities">
+                                        <a :href="'/public/catalog?search=' + encodeURIComponent(f.name) + '&auto_open=1'" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition">
+                                            <span class="material-symbols-outlined text-blue-500 text-[20px]">meeting_room</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-medium text-gray-900" x-html="highlight(f.name)"></span>
+                                                <span class="text-[11px] text-gray-500" x-text="f.building"></span>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Empty State Warning -->
+                            <template x-if="emptyState">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
+                                    <p class="text-sm">Ketikkan sesuatu atau pilih filter untuk memulai pencarian</p>
+                                </div>
+                            </template>
+
+                            <!-- No Results -->
+                            <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
+                                <div class="p-6 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
+                                    <p class="text-sm">Tidak ditemukan hasil untuk "<span class="font-medium text-gray-700" x-text="query"></span>"</p>
+                                </div>
+                            </template>
+
+                            <!-- Action Buttons -->
+                            <template x-if="suggestions.length > 0 || facilities.length > 0">
+                                <div class="bg-gray-50 p-3 border-t border-gray-100 flex gap-2">
+                                    <a :href="'/public/catalog?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                        Lihat Fasilitas
+                                    </a>
+                                    <a :href="'/public/availability?search=' + encodeURIComponent(query)" class="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
+                                        Lihat Jadwal
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Absolute Container for Filters and Popup -->
+                <div class="absolute top-full left-0 right-0 w-full z-40 pointer-events-none"
+                     x-data="{ pillsHeight: 0 }"
+                     x-init="
+                        const observer = new ResizeObserver(entries => {
+                            pillsHeight = entries[0].target.offsetHeight;
+                        });
+                        if ($refs.pillContainer) {
+                            observer.observe($refs.pillContainer);
+                        }
+                     ">
+                     
+                    <!-- Filter Aktif (Absolute) -->
+                    <div class="absolute top-0 left-0 right-0 w-full pointer-events-auto"
+                         x-ref="pillContainer">
+                        <div x-show="allFilters.length > 0" 
+                             x-transition.opacity.duration.300ms 
+                             class="flex flex-wrap items-center gap-2 pt-4 pb-1"
+                             style="display: none;">
+                            <span class="text-sm font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
+                            
+                            <template x-for="filter in allFilters.slice(0, 5)" :key="filter.type + '-' + filter.value">
+                                <span x-transition.opacity.scale.90.duration.200ms 
+                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium border shadow-sm"
+                                      :class="filter.type === 'category' ? 'bg-blue-50 text-blue-800 border-blue-200' : (filter.type === 'capacity' ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200')">
+                                    <span x-text="filter.type === 'capacity' ? 'Min. ' + filter.value + ' Kursi' : filter.value"></span>
+                                    <button type="button" @click.prevent.stop="removeFilter(filter)" 
+                                            class="focus:outline-none transition"
+                                            :class="filter.type === 'category' ? 'text-blue-500 hover:text-blue-900' : (filter.type === 'capacity' ? 'text-purple-500 hover:text-purple-900' : 'text-emerald-500 hover:text-emerald-900')">
+                                        <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                                    </button>
+                                </span>
+                            </template>
+                            
+                            <span x-show="allFilters.length > 5" x-transition.opacity.scale.90.duration.200ms 
+                                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-[13px] font-medium border border-gray-200 shadow-sm">
+                                <span x-text="'+' + (allFilters.length - 5) + ' lainnya'"></span>
+                            </span>
+
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                        <span>Mode Privasi UR-01</span>
-                        <span class="font-semibold text-slate-700">Aktif</span>
+                    <!-- Advanced Search Popup (Absolute positioning slides based on pillsHeight) -->
+                    <div class="absolute left-0 right-0 w-full transition-all duration-300 ease-out pointer-events-auto"
+                         :style="`top: ${(allFilters.length > 0) ? pillsHeight : 0}px`">
+                        
+                        <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
+                        <div x-show="showAdvanced" 
+                             @click.away="showAdvanced = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-2"
+                             class="mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 z-50 text-left" style="display: none;">
+                             <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
+                        <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined text-xl">close</span></button>
                     </div>
-                </div>
-
-                {{-- Bento Card 3: Pintasan Cepat Matriks Ketersediaan Ruang --}}
-                <div class="bg-gradient-to-br from-blue-950 via-slate-900 to-slate-900 text-white rounded-3xl p-6 shadow-xs flex-1 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-white mb-1">Matriks Jadwal 30 Menit</h3>
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Cek ketersediaan seluruh ruang kuliah, laboratorium, dan aula tanpa perlu login.
-                        </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
+                            <div class="relative mt-2">
+                                <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
+                                    <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
+                                </button>
+                                
+                                <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                    @foreach($categories as $index => $cat)
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                        <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
+                            <input type="number" name="capacity" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
+                            <div class="relative mt-2">
+                                <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
+                                    <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
+                                </button>
+                                
+                                <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                    @foreach($equipments as $index => $eq)
+                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                        <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="mt-4 pt-3 border-t border-white/10">
-                        <a href="{{ url('/public/availability') }}" class="w-full px-4 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition shadow-xs flex items-center justify-center gap-1.5">
-                            <span>Buka Matriks Jadwal</span>
-                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-                        </a>
+                    <div class="mt-8 flex justify-end gap-3">
+                        <button type="reset" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition text-sm">Reset</button>
+                        <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
                     </div>
                 </div>
             </div>
-        </section>
-
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 2: SHOWCASE FASILITAS KAMPUS UNGGULAN (TANPA KODE TIKET/RUANG)  --}}
-        {{-- ========================================================================= --}}
-        <section class="space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+        </div>
+    </form>
+        </main>
+        
+        <section class="max-w-7xl mx-auto px-6 py-20 mt-14" x-data="{ 
+            showModal: false, 
+            activeFacility: null,
+            get parsedEquipment() {
+                if (!this.activeFacility || !this.activeFacility.equipment) return [];
+                if (Array.isArray(this.activeFacility.equipment)) return this.activeFacility.equipment;
+                try { return JSON.parse(this.activeFacility.equipment); } catch(e) { return []; }
+            }
+        }">
+            <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900 tracking-tight">Fasilitas Kampus Unggulan</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Pilihan ruang pertemuan berkapasitas besar dan laboratorium berteknologi tinggi.</p>
+                    <h2 class="text-3xl font-bold tracking-tight mb-2">Fasilitas Unggulan</h2>
+                    <p class="text-[#86868B] text-lg">Ruang terbaik untuk produktivitas maksimal.</p>
                 </div>
-                <a href="{{ url('/public/catalog') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                    <span>Lihat Seluruh Fasilitas (24 Ruang)</span>
-                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                </a>
+                <a href="{{ route('public.catalog') }}" class="text-blue-600 font-medium hover:underline text-sm">Lihat Semua →</a>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                @foreach($facilities as $facility)
+                <div @click="activeFacility = {{ json_encode($facility) }}; showModal = true" class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300 group cursor-pointer flex flex-col">
+                    <div class="h-48 rounded-2xl bg-gray-50 mb-6 flex items-center justify-center group-hover:scale-[1.02] transition duration-500 overflow-hidden">
+                        @if($facility->image_path)
+                            <img src="{{ asset('storage/' . $facility->image_path) }}" alt="{{ $facility->name }}" class="w-full h-full object-contain">
+                        @else
+                            <span class="material-symbols-outlined text-6xl text-gray-200">meeting_room</span>
+                        @endif
+                    </div>
+                    <div class="flex justify-between items-start mb-2 gap-2">
+                        <h3 class="text-xl font-semibold leading-tight group-hover:text-blue-600 transition-colors duration-300">{{ $facility->name }}</h3>
+                    </div>
+                    <p class="text-[#86868B] text-sm mb-6">{{ $facility->building }} • {{ $facility->capacity }} Kursi</p>
+                    <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 mt-auto">
+                        Lihat Detail <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                    </div>
+                </div>
+                @endforeach
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                
-                {{-- Fasilitas 1: Auditorium B.J. Habibie --}}
-                <div class="group bg-white rounded-3xl border border-slate-200/80 hover:border-slate-300 p-6 shadow-xs hover:shadow-md transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 flex flex-col justify-between cursor-pointer"
-                     onclick="window.location.href='{{ url('/public/catalog?search=Auditorium') }}'">
-                    <div>
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-950 transition leading-snug">Auditorium Utama B.J. Habibie</h3>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span>Tersedia</span>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span>Gedung Rektorat (Lt. 1 & 2)</span>
-                        </p>
+            <!-- Pop-up Modal Detail Fasilitas -->
+            <template x-teleport="body">
+                <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
+                    <!-- Backdrop -->
+                <div x-show="showModal" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0" 
+                     x-transition:enter-end="opacity-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100" 
+                     x-transition:leave-end="opacity-0" 
+                     class="fixed inset-0 bg-black/40 backdrop-blur-sm" 
+                     @click="showModal = false">
+                </div>
 
-                        <div class="space-y-2 text-xs text-slate-600 mb-5">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">group</span>
-                                <span class="font-bold text-slate-800">450 Kursi Peserta</span>
+                <!-- Modal Content -->
+                <div x-show="showModal" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-8 scale-95" 
+                     class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                    
+                    <button @click="showModal = false" class="absolute top-4 right-4 z-20 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition flex items-center justify-center">
+                        <span class="material-symbols-outlined block text-[20px]">close</span>
+                    </button>
+
+                    <div class="h-64 bg-gray-50 relative shrink-0 border-b border-gray-100">
+                        <template x-if="activeFacility && activeFacility.image_path">
+                            <img :src="'/storage/' + activeFacility.image_path" :alt="activeFacility.name" class="w-full h-full object-contain">
+                        </template>
+                        <template x-if="!activeFacility || !activeFacility.image_path">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-7xl text-gray-200">meeting_room</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">tune</span>
-                                <span class="truncate">Sound System 5000W, Laser Projector, AC Central</span>
-                            </div>
-                        </div>
+                        </template>
                     </div>
 
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-semibold text-blue-900 group-hover:underline">Buka Spesifikasi →</span>
-                        <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition" onclick="event.stopPropagation()">
-                            Reservasi
+                    <div class="p-8 overflow-y-auto">
+                        <div class="flex items-start justify-between mb-2">
+                            <h2 class="text-3xl font-bold text-[#1D1D1F] leading-tight" x-text="activeFacility ? activeFacility.name : ''"></h2>
+                        </div>
+                        <div class="text-[#86868B] text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span>
+                            <span x-text="activeFacility ? activeFacility.building : ''"></span>
+                            <span>•</span>
+                            <span class="material-symbols-outlined text-[16px]">group</span>
+                            <span x-text="activeFacility ? activeFacility.capacity + ' Orang' : ''"></span>
+                        </div>
+
+                        <h3 class="text-lg font-semibold mb-2 text-[#1D1D1F]">Deskripsi</h3>
+                        <p class="text-[#86868B] leading-relaxed mb-6 text-sm" x-text="activeFacility && activeFacility.description ? activeFacility.description : 'Tidak ada deskripsi tersedia.'"></p>
+
+                        <h3 class="text-lg font-semibold mb-3 text-[#1D1D1F]">Fasilitas Pendukung</h3>
+                        <div class="flex flex-wrap gap-2 mb-10">
+                            <template x-if="parsedEquipment.length > 0">
+                                <template x-for="item in parsedEquipment">
+                                    <span class="bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium" x-text="item"></span>
+                                </template>
+                            </template>
+                            <template x-if="parsedEquipment.length === 0">
+                                <span class="text-sm text-gray-500 italic">Tidak ada rincian fasilitas pendukung.</span>
+                            </template>
+                        </div>
+
+                        <a href="{{ route('public.availability') }}" class="block w-full text-center bg-[#1D1D1F] text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10">
+                            Cek Jadwal Ketersediaan
                         </a>
                     </div>
                 </div>
+            </template>
 
-                {{-- Fasilitas 2: Lab Komputasi Cloud --}}
-                <div class="group bg-white rounded-3xl border border-slate-200/80 hover:border-slate-300 p-6 shadow-xs hover:shadow-md transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 flex flex-col justify-between cursor-pointer"
-                     onclick="window.location.href='{{ url('/public/catalog?search=Cloud') }}'">
-                    <div>
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-950 transition leading-snug">Lab Komputasi Cloud & Jaringan</h3>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span>Tersedia</span>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span>Gedung Lab Terpadu C (Lt. 2)</span>
-                        </p>
-
-                        <div class="space-y-2 text-xs text-slate-600 mb-5">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">desktop_windows</span>
-                                <span class="font-bold text-slate-800">45 PC High-End Core i7</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">wifi</span>
-                                <span class="truncate">Gigabit LAN, Smart Screen, AC Dual-Split</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-semibold text-blue-900 group-hover:underline">Buka Spesifikasi →</span>
-                        <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition" onclick="event.stopPropagation()">
-                            Reservasi
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Fasilitas 3: Smart Classroom 302 --}}
-                <div class="group bg-white rounded-3xl border border-slate-200/80 hover:border-slate-300 p-6 shadow-xs hover:shadow-md transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 flex flex-col justify-between cursor-pointer"
-                     onclick="window.location.href='{{ url('/public/catalog?search=Smart') }}'">
-                    <div>
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-950 transition leading-snug">Smart Classroom 302</h3>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                <span>Tersedia</span>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span>Gedung Kuliah Bersama B (Lt. 3)</span>
-                        </p>
-
-                        <div class="space-y-2 text-xs text-slate-600 mb-5">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">group</span>
-                                <span class="font-bold text-slate-800">60 Mahasiswa</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[16px] text-slate-400">co_present</span>
-                                <span class="truncate">Interactive Whiteboard, Collab Desk, Mic Wireless</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-semibold text-blue-900 group-hover:underline">Buka Spesifikasi →</span>
-                        <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition" onclick="event.stopPropagation()">
-                            Reservasi
-                        </a>
-                    </div>
-                </div>
-
-            </div>
         </section>
 
-        {{-- ========================================================================= --}}
-        {{-- BENTO GRID 3: REGULASI, TATA TERTIB & PUSAT LAYANAN BENTO (BERSIH DARI LOGO) --}}
-        {{-- ========================================================================= --}}
-        <section class="space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900 tracking-tight">Regulasi, Tata Tertib & Layanan Kampus</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Panduan resmi tata kelola sarana prasarana sebelum melakukan peminjaman fasilitas.</p>
-                </div>
-                <a href="{{ route('public.information') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                    <span>Seluruh Pusat Informasi</span>
-                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                </a>
+        <!-- Pusat Informasi Section (Bento Box Redesign) -->
+        <section class="max-w-7xl mx-auto px-6 py-24 border-t border-gray-100">
+            <!-- Top Header -->
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold tracking-tight text-[#1D1D1F] mb-3">Pusat Bantuan</h2>
+                <p class="text-[#86868B] text-lg leading-relaxed">Panduan dan regulasi penggunaan fasilitas.</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            
+            <!-- 2x2 Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                {{-- Card 1: Kebijakan Privasi & Aset BMN (Tanpa Logo Tameng) --}}
-                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
-                    <div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100/70 text-emerald-800 inline-block mb-3">Privasi & Keamanan</span>
-                        <h3 class="text-base font-bold text-slate-900 mb-2">Kebijakan Fasilitas & Data</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            Jaminan perlindungan data pribadi sivitas, kerahasiaan identitas pelapor kerusakan fasilitas, serta akuntabilitas aset BMN universitas.
-                        </p>
+                <!-- Kebijakan Privasi -->
+                <a href="{{ route('public.information') }}#kebijakan" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
+                    <div class="relative z-10 w-3/4">
+                        <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-blue-600 transition-colors duration-300">Kebijakan Privasi</h3>
+                        <p class="text-sm text-[#86868B]">Transparansi pengelolaan data Anda.</p>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100">
-                        <a href="{{ route('public.information', ['section' => 'kebijakan']) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
-                            <span>Baca Kebijakan Privasi</span>
-                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-                        </a>
+                    <!-- Emote / Giant Icon -->
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-blue-50 transition-colors duration-700 font-light">shield_lock</span>
                     </div>
-                </div>
+                </a>
 
-                {{-- Card 2: Tata Tertib Peminjaman & S&K (Tanpa Logo Palu) --}}
-                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
-                    <div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-100/70 text-blue-800 inline-block mb-3">Tata Tertib Kampus</span>
-                        <h3 class="text-base font-bold text-slate-900 mb-2">Syarat & Ketentuan</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            Ketentuan pengajuan minimal H-2, pembatalan mandiri H-1, pemanfaatan kelipatan slot 30 menit, serta tanggung jawab kebersihan.
-                        </p>
+                <!-- Syarat & Ketentuan -->
+                <a href="{{ route('public.information') }}#syarat" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
+                    <div class="relative z-10 w-3/4">
+                        <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-purple-600 transition-colors duration-300">Syarat & Ketentuan</h3>
+                        <p class="text-sm text-[#86868B]">Aturan main penggunaan ruang.</p>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100">
-                        <a href="{{ route('public.information', ['section' => 'syarat-ketentuan']) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
-                            <span>Pelajari Ketentuan</span>
-                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-                        </a>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-purple-50 transition-colors duration-700 font-light">gavel</span>
                     </div>
-                </div>
+                </a>
 
-                {{-- Card 3: Pelaporan Kerusakan & Helpdesk (Tanpa Logo Call Center) --}}
-                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
-                    <div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-100/70 text-purple-800 inline-block mb-3">Layanan Sarpras</span>
-                        <h3 class="text-base font-bold text-slate-900 mb-2">Lapor Kendala & Helpdesk</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            Laporan kendala fasilitas AC, proyektor, atau kelistrikan direspon petugas dalam &lt; 24 jam. Tersedia kontak resmi biro sarpras.
-                        </p>
+                <!-- Panduan Peminjaman -->
+                <a href="{{ route('public.information') }}#panduan" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
+                    <div class="relative z-10 w-3/4">
+                        <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-emerald-600 transition-colors duration-300">Panduan Peminjaman</h3>
+                        <p class="text-sm text-[#86868B]">Langkah demi langkah reservasi.</p>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100">
-                        <a href="{{ route('public.information', ['section' => 'bantuan']) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:text-blue-900 transition">
-                            <span>Pusat Bantuan & Kontak</span>
-                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-                        </a>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-emerald-50 transition-colors duration-700 font-light">menu_book</span>
                     </div>
-                </div>
+                </a>
 
+                <!-- Lapor Kerusakan -->
+                <a href="{{ route('public.information') }}#lapor" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex items-center">
+                    <div class="relative z-10 w-3/4">
+                        <h3 class="text-xl font-bold text-[#1D1D1F] mb-2 group-hover:text-red-600 transition-colors duration-300">Lapor Kerusakan</h3>
+                        <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
+                    </div>
+                    <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.8] translate-x-6 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out">
+                        <span class="material-symbols-outlined text-[100px] text-gray-200/50 group-hover:text-red-50 transition-colors duration-700 font-light">support_agent</span>
+                    </div>
+                </a>
+                
             </div>
         </section>
-
     </div>
 </x-public-layout>

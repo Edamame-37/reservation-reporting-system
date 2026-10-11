@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : PasswordController.php
  * FUNGSI       : Controller pengubahan kata sandi akun oleh pengguna
- * DESKRIPSI    : Menangani pembaruan password dari profil pengguna (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Memvalidasi isian tanpa kueri hash database, menonaktifkan $user->update(), dan mengembalikan status password-updated.
+ * DESKRIPSI    : Menangani pembaruan kata sandi dari profil pengguna dengan validasi kata sandi lama dan enkripsi sandi baru.
+ * CARA KERJA   : Memvalidasi kecocokan sandi saat ini via aturan 'current_password', mengenkripsi kata sandi baru dengan Hash::make(), dan memperbarui record pengguna di tabel users.
  */
 
 namespace App\Http\Controllers\Auth;
@@ -19,7 +19,7 @@ class PasswordController extends Controller
     /**
      * FUNCTION/PROCEDURE : update()
      * KEGUNAAN           : Memperbarui kata sandi akun pengguna yang sedang login.
-     * CARA KERJA         : [MODE MOCKUP] Operasi update ke database dinonaktifkan sementara dan langsung mengembalikan notifikasi berhasil.
+     * CARA KERJA         : Memvalidasi kata sandi saat ini dan aturan password baru, mengenkripsi dengan Hash::make(), dan menyimpan ke database.
      */
     public function update(Request $request): RedirectResponse
     {

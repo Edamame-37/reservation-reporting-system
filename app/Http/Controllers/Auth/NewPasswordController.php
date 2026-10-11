@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : NewPasswordController.php
  * FUNGSI       : Controller penetapan kata sandi baru
- * DESKRIPSI    : Menangani formulir reset kata sandi baru (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Menerima token dan password baru, menonaktifkan kueri broker password database, dan mengarahkan ke halaman login.
+ * DESKRIPSI    : Menangani formulir reset kata sandi baru, validasi token pemulihan, dan enkripsi kata sandi baru.
+ * CARA KERJA   : Menerima token dan kata sandi baru, memvalidasi integritas data, mengeksekusi Password::reset() untuk memperbarui tabel users, serta memicu event PasswordReset.
  */
 
 namespace App\Http\Controllers\Auth;
@@ -34,8 +34,8 @@ class NewPasswordController extends Controller
 
     /**
      * FUNCTION/PROCEDURE : store()
-     * KEGUNAAN           : Memperbarui kata sandi pengguna.
-     * CARA KERJA         : [MODE MOCKUP] Kueri reset password ke database dinonaktifkan sementara dan mengarahkan langsung ke halaman login.
+     * KEGUNAAN           : Memperbarui kata sandi pengguna berdasarkan token reset.
+     * CARA KERJA         : Memvalidasi token dan kredensial baru, memperbarui hash kata sandi di database via Password::reset(), dan mengarahkan ke login.
      *
      * @throws ValidationException
      */

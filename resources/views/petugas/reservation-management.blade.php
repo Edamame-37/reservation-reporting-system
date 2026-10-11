@@ -427,7 +427,7 @@
                         <label for="rejection_reason" class="block text-xs font-medium text-slate-700 mb-1">
                             Alasan Penolakan:
                         </label>
-                        <textarea id="rejection_reason" name="rejection_reason" rows="3" required placeholder="Contoh: Jadwal bertabrakan dengan kegiatan universitas atau ruang sedang dalam perawatan..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                        <textarea id="rejection_reason" name="rejection_reason" rows="3" required minlength="5" maxlength="1000" placeholder="Contoh: Jadwal bertabrakan dengan kegiatan universitas atau ruang sedang dalam perawatan (5 - 1000 karakter)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
                     </div>
 
                     <div class="flex items-center justify-end gap-2">
@@ -466,7 +466,7 @@
                         <label for="alasan_batal" class="block text-xs font-medium text-slate-700 mb-1">
                             Alasan Pembatalan Darurat:
                         </label>
-                        <textarea id="alasan_batal" name="alasan_batal" rows="3" required minlength="10" placeholder="Jelaskan alasan darurat (contoh: Gangguan instalasi listrik mendadak, ruangan harus diperbaiki segera)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                        <textarea id="alasan_batal" name="alasan_batal" rows="3" required minlength="10" maxlength="1000" placeholder="Jelaskan alasan darurat (contoh: Gangguan instalasi listrik mendadak, ruangan harus diperbaiki segera, min. 10 karakter)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
                     </div>
 
                     <div class="flex items-center justify-end gap-2">

@@ -335,7 +335,7 @@
                         <label for="dashboard_rejection_reason" class="block text-xs font-medium text-slate-700 mb-1">
                             Alasan Penolakan:
                         </label>
-                        <textarea id="dashboard_rejection_reason" name="rejection_reason" rows="3" required placeholder="Contoh: Jadwal bertabrakan dengan kegiatan universitas atau ruang sedang dalam perawatan..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
+                        <textarea id="dashboard_rejection_reason" name="rejection_reason" rows="3" required minlength="5" maxlength="1000" placeholder="Contoh: Jadwal bertabrakan dengan kegiatan universitas atau ruang sedang dalam perawatan (5 - 1000 karakter)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
                     </div>
 
                     <div class="flex items-center justify-end gap-2">

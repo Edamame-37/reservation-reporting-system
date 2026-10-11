@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : RegisteredUserController.php
  * FUNGSI       : Controller pendaftaran akun baru pengguna CAVA
- * DESKRIPSI    : Menangani formulir registrasi dan pencatatan akun (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Menerima form pendaftaran, memvalidasi input dasar tanpa pengecekan unik database, menyimpan data ke session mockup, dan mengarahkan ke dashboard.
+ * DESKRIPSI    : Menangani formulir registrasi mandiri sivitas, pengunggahan dokumen identitas (KTM), dan pencatatan akun ke basis data.
+ * CARA KERJA   : Menerima form pendaftaran, memvalidasi input dan bukti KTM (maks 2MB), merekam akun ke tabel users berstatus 'pending', menugaskan peran 'pengguna', lalu mengarahkan ke halaman login.
  */
 
 namespace App\Http\Controllers\Auth;

@@ -1,208 +1,244 @@
 {{-- 
   NAMA FILE      : dashboard.blade.php
-  FUNGSIONALITAS : Halaman Dasbor Utama Pengguna Mahasiswa & Dosen
-  DESKRIPSI      : Menampilkan kartu sorotan jadwal terdekat, 4 pintasan cepat, 3 data riwayat reservasi preview dengan tombol 'Lihat Semua', serta 2 status laporan kerusakan aktif.
-  CARA KERJA     : Menggunakan layout <x-app-layout active="dashboard">, menyajikan dasbor sentral dengan prinsip progressive disclosure.
+  FUNGSIONALITAS : Halaman Dasbor Utama Pengguna Mahasiswa & Dosen (CAVA Portal)
+  DESKRIPSI      : Menampilkan antarmuka Apple-esque Bento dengan kartu sorotan jadwal terdekat, 
+                   4 pintasan cepat Bento, riwayat reservasi terkini (maks 3 item), serta status laporan kerusakan terkini.
+                   Mengadopsi Status Opsi B: Pure Typographic (bebas dari bulatan titik/dot dan ikon mikro pada status).
+  CARA KERJA     : Menggunakan layout <x-app-layout active="dashboard">, menjaga header dan sidebar bawaan tetap utuh.
 --}}
 
-<x-app-layout title="Dasbor Mahasiswa & Dosen" active="dashboard">
-    <!-- 
-      ELEMEN       : Spotlight Jadwal Terdekat (Upcoming Reservation Highlight)
-      KEGUNAAN     : Memanjakan pengguna dengan menyajikan jadwal kegiatan paling mendesak dalam kartu hero fokus.
-    -->
-    <section class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-md mb-8">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<x-app-layout title="Dasbor Pengguna" active="dashboard">
+    <div class="space-y-10 font-sans text-[#1D1D1F]">
+        {{-- SPOTLIGHT HERO: KARTU SOROTAN BERSIH TANPA KOTAK BADGE & TANPA DOT --}}
+        <section class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
             @if($upcomingReservation)
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-emerald-300 mb-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>Reservasi Aktif Disetujui</span>
-                </div>
-                <h3 class="text-xl font-bold tracking-tight text-white">{{ $upcomingReservation->purpose }}</h3>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 mt-2">
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[16px]">location_on</span>
-                        {{ $upcomingReservation->facility->name ?? 'Fasilitas' }} ({{ $upcomingReservation->facility->building ?? 'Gedung' }})
-                    </span>
-                    <span>•</span>
-                    <span class="flex items-center gap-1 text-emerald-300 font-medium">
-                        <span class="material-symbols-outlined text-[16px]">schedule</span>
-                        {{ \Carbon\Carbon::parse($upcomingReservation->reservation_date)->isoFormat('dddd, D MMMM Y') }} • {{ substr($upcomingReservation->start_time, 0, 5) }} - {{ substr($upcomingReservation->end_time, 0, 5) }} WIB
-                    </span>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <a href="{{ url('/user/reservation-history') }}" class="w-full md:w-auto px-4 py-2 rounded-xl bg-white text-slate-900 text-xs font-semibold hover:bg-slate-100 transition shadow-xs text-center">
-                    Buka Detail Tiket
-                </a>
-            </div>
-            @else
-            <div>
-                <h3 class="text-xl font-bold tracking-tight text-white">Belum Ada Jadwal Terdekat</h3>
-                <p class="text-xs text-slate-300 mt-2">Anda tidak memiliki permohonan reservasi yang telah disetujui untuk waktu dekat.</p>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <a href="{{ url('/user/reservation-history?action=create') }}" class="w-full md:w-auto px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 transition shadow-xs text-center">
-                    Ajukan Reservasi
-                </a>
-            </div>
-            @endif
-        </div>
-    </section>
-
-    <!-- 
-      ELEMEN       : 4 Quick Action Cards
-      KEGUNAAN     : Pintasan cepat menuju aksi utama permohonan dan pemantauan pengguna.
-    -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <a href="{{ url('/user/reservation-history?action=create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
-            <div class="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span class="material-symbols-outlined text-[22px]">add_circle</span>
-            </div>
-            <div>
-                <div class="text-sm font-bold text-slate-900">Ajukan Reservasi</div>
-                <div class="text-[11px] text-slate-500">Pilih slot waktu 30 menit</div>
-            </div>
-        </a>
-
-        <a href="{{ url('/user/reservation-history') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
-            <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span class="material-symbols-outlined text-[22px]">history</span>
-            </div>
-            <div>
-                <div class="text-sm font-bold text-slate-900">Riwayat Reservasi</div>
-                <div class="text-[11px] text-slate-500">Pantau tiket & pembatalan H-1</div>
-            </div>
-        </a>
-
-        <a href="{{ url('/user/report-history?action=create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
-            <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span class="material-symbols-outlined text-[22px]">report_problem</span>
-            </div>
-            <div>
-                <div class="text-sm font-bold text-slate-900">Lapor Kerusakan</div>
-                <div class="text-[11px] text-slate-500">Foto bukti sarpras rusak</div>
-            </div>
-        </a>
-
-        <a href="{{ url('/user/report-history') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-400 transition-all flex items-center gap-3.5 group">
-            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span class="material-symbols-outlined text-[22px]">checklist</span>
-            </div>
-            <div>
-                <div class="text-sm font-bold text-slate-900">Status Laporan</div>
-                <div class="text-[11px] text-slate-500">Pantau tindak lanjut teknisi</div>
-            </div>
-        </a>
-    </div>
-
-    <!-- 
-      ELEMEN       : Section Riwayat Reservasi Terkini (Bento UI List - Maksimal 3 Data)
-      KEGUNAAN     : Menampilkan ringkasan kartu riwayat dengan animasi mikro pop-up saat kursor diarahkan.
-    -->
-    <section class="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-xs mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
-            <div>
-                <h3 class="text-base font-bold text-slate-900">Riwayat Reservasi Terkini</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $recentReservations->take(3)->count() }} pengajuan terakhir dari total {{ $totalReservations }} reservasi Anda.</p>
-            </div>
-            {{-- Tombol Lihat Selengkapnya (Mengarahkan langsung ke section daftar reservasi) --}}
-            <a href="{{ url('/user/reservation-history#daftar-reservasi') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                <span>Lihat Semua Riwayat Reservasi ({{ $totalReservations }} Data)</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </a>
-        </div>
-
-        {{-- Bento List Cards (Maksimal 3 item dengan Micro-Animation Pop-Up saat Hover) --}}
-        <div class="space-y-3">
-            @forelse($recentReservations->take(3) as $reservation)
-                <a href="{{ url('/user/reservation-history#daftar-reservasi') }}" 
-                   class="group block bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 p-4 sm:p-5 transition-all duration-300 transform hover:scale-[1.015] hover:-translate-y-0.5 hover:shadow-md cursor-pointer">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                        
-                        {{-- Kolom Kiri: Kode Tiket, Tanggal & Jam Sesi --}}
-                        <div class="flex-1 min-w-0">
-                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[15px] text-slate-400">calendar_today</span>
-                                    <span>{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</span>
-                                </span>
-                                <span class="text-slate-300">•</span>
-                                <span class="text-xs font-semibold text-slate-700">
-                                    {{ substr($reservation->start_time, 0, 5) }} - {{ substr($reservation->end_time, 0, 5) }} WIB
-                                </span>
-                            </div>
-
-                            <h4 class="text-sm font-bold text-slate-900 group-hover:text-blue-950 transition truncate">
-                                {{ $reservation->facility->name ?? 'Fasilitas Kampus' }}
-                            </h4>
-
-                            <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">location_on</span>
-                                <span>{{ $reservation->facility->building ?? 'Gedung Kampus' }}</span>
-                            </div>
-                        </div>
-
-                        {{-- Kolom Kanan: Status & Aksi --}}
-                        <div class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-                            <x-cava.status-badge :status="$reservation->status" label="{{ ucfirst($reservation->status) }}" />
-
-                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition shadow-2xs">
-                                <span>Buka Riwayat</span>
-                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                            </span>
-                        </div>
+                <div class="space-y-3 flex-1">
+                    {{-- Status Opsi B: Pure Typographic --}}
+                    <div>
+                        <span class="text-xs font-semibold tracking-wide text-emerald-800">
+                            Jadwal Terdekat • Disetujui
+                        </span>
                     </div>
-                </a>
-            @empty
-                <div class="py-8 text-center text-slate-500 text-xs rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
-                    Belum ada riwayat permohonan reservasi.
-                </div>
-            @endforelse
-        </div>
-    </section>
 
-    <!-- 
-      ELEMEN       : Section Laporan Kerusakan Terkini (2 Data Preview + Tombol Lihat Semua)
-      KEGUNAAN     : Menyajikan perkembangan perbaikan fasilitas yang dilaporkan mahasiswa.
-    -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-            <div>
-                <h3 class="text-base font-bold text-slate-900">Status Laporan Kerusakan Terkini</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $activeDamageReports->count() }} laporan aktif dari total {{ $totalDamageReports }} laporan Anda.</p>
-            </div>
-            <a href="{{ url('/user/report-history') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                <span>Lihat Semua Laporan Kerusakan</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </a>
-        </div>
+                    <h2 class="text-2xl font-bold tracking-tight text-[#1D1D1F]">
+                        {{ $upcomingReservation->purpose }}
+                    </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @forelse($activeDamageReports as $report)
-            <div class="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-slate-800">{{ $report->ticket_code }}</span>
-                        <x-cava.status-badge :status="$report->status" label="{{ ucfirst($report->status) }}" />
-                    </div>
-                    <h4 class="text-sm font-bold text-slate-900">{{ $report->title ?? 'Laporan Kerusakan' }}</h4>
-                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                        <span class="material-symbols-outlined text-[15px]">location_on</span>
-                        {{ $report->facility->name ?? 'Fasilitas' }} • {{ $report->facility->building ?? 'Gedung' }}
+                    <p class="text-sm text-[#86868B]">
+                        {{ $upcomingReservation->facility->name ?? 'Fasilitas' }}, {{ $upcomingReservation->facility->building ?? 'Gedung' }} • {{ \Carbon\Carbon::parse($upcomingReservation->reservation_date)->isoFormat('dddd, D MMMM Y') }} ({{ substr($upcomingReservation->start_time, 0, 5) }} - {{ substr($upcomingReservation->end_time, 0, 5) }} WIB)
                     </p>
                 </div>
-                <div class="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
-                    <span>Diperbarui {{ $report->updated_at->diffForHumans() }}</span>
-                    <a href="{{ url('/user/report-history') }}" class="font-semibold text-slate-800 hover:underline">Pantau Log →</a>
+
+                <div class="shrink-0 self-start md:self-center">
+                    <a href="{{ url('/user/reservation-history') }}" class="inline-flex items-center gap-2 bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm">
+                        <span>Buka Detail Tiket</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
                 </div>
-            </div>
-            @empty
-            <div class="col-span-full p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
-                <span class="material-symbols-outlined text-[32px] text-slate-400 mb-2">task_alt</span>
-                <p class="text-sm font-medium">Tidak ada laporan kerusakan yang sedang aktif ditangani teknisi.</p>
-            </div>
-            @endforelse
+            @else
+                <div class="space-y-2 flex-1">
+                    <div>
+                        <span class="text-xs font-semibold tracking-wide text-slate-500">
+                            Jadwal Terdekat
+                        </span>
+                    </div>
+
+                    <h2 class="text-2xl font-bold tracking-tight text-[#1D1D1F]">
+                        Belum Ada Jadwal Terdekat
+                    </h2>
+
+                    <p class="text-sm text-[#86868B]">
+                        Anda belum memiliki permohonan reservasi ruangan yang disetujui untuk waktu dekat.
+                    </p>
+                </div>
+
+                <div class="shrink-0 self-start md:self-center">
+                    <a href="{{ url('/user/reservation-form') }}" class="inline-flex items-center gap-2 bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm">
+                        <span>Ajukan Reservasi Baru</span>
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                    </a>
+                </div>
+            @endif
+        </section>
+
+        {{-- 3. 4 PINTASAN BENTO (PERSIS PUSAT BANTUAN public/home.blade.php) --}}
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {{-- Kartu 1: Ajukan Reservasi --}}
+            <a href="{{ url('/user/reservation-form') }}" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Ajukan Reservasi</h3>
+                    <p class="text-sm text-[#86868B]">Peminjaman ruang kuliah atau lab.</p>
+                </div>
+                <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
+                    <span>Buka Formulir</span>
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </div>
+                <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                    <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">meeting_room</span>
+                </div>
+            </a>
+
+            {{-- Kartu 2: Riwayat Reservasi --}}
+            <a href="{{ url('/user/reservation-history') }}" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Riwayat Reservasi</h3>
+                    <p class="text-sm text-[#86868B]">Pantau tiket dan pembatalan H-1.</p>
+                </div>
+                <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
+                    <span>Lihat Semua Tiket</span>
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </div>
+                <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                    <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">calendar_month</span>
+                </div>
+            </a>
+
+            {{-- Kartu 3: Lapor Kerusakan --}}
+            <a href="{{ url('/user/report-form') }}" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Lapor Kerusakan</h3>
+                    <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
+                </div>
+                <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
+                    <span>Kirim Laporan</span>
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </div>
+                <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                    <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">support_agent</span>
+                </div>
+            </a>
+
+            {{-- Kartu 4: Status Laporan --}}
+            <a href="{{ url('/user/report-history') }}" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Status Perbaikan</h3>
+                    <p class="text-sm text-[#86868B]">Tindak lanjut oleh teknisi.</p>
+                </div>
+                <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
+                    <span>Pantau Progres</span>
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </div>
+                <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                    <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">verified</span>
+                </div>
+            </a>
+
+        </section>
+
+        {{-- 4. DUA KOLOM: RIWAYAT TERKINI & LAPORAN KERUSAKAN (LUAS, BERNAPAS, TIDAK DEMPET) --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+            
+            {{-- Kolom Kiri: Riwayat Permohonan Terkini --}}
+            <section class="bg-white rounded-[2rem] p-8 sm:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <div>
+                        <h3 class="text-xl font-bold text-[#1D1D1F]">Riwayat Permohonan Terkini</h3>
+                        <p class="text-xs text-[#86868B] mt-0.5">Menampilkan {{ $recentReservations->take(3)->count() }} dari total {{ $totalReservations }} pengajuan Anda</p>
+                    </div>
+                    <a href="{{ url('/user/reservation-history') }}" class="text-sm font-semibold text-[#1D1D1F] hover:text-blue-600 flex items-center gap-1 transition">
+                        <span>Lihat Semua ({{ $totalReservations }})</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <div class="space-y-4">
+                    @forelse($recentReservations->take(3) as $reservation)
+                        <a href="{{ url('/user/reservation-history') }}" class="bg-[#F9F9FB] rounded-2xl p-5 sm:p-6 border border-transparent hover:border-gray-200/80 hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300 cursor-pointer group space-y-3 block">
+                            <div class="flex items-start justify-between gap-4">
+                                <h4 class="font-bold text-[#1D1D1F] text-base group-hover:text-blue-600 transition leading-snug">
+                                    {{ $reservation->facility->name ?? 'Fasilitas Kampus' }}
+                                </h4>
+                                {{-- Status Opsi B: Pure Typographic --}}
+                                <div class="shrink-0 pt-0.5">
+                                    @if ($reservation->status === 'approved')
+                                        <span class="text-xs font-semibold tracking-wide text-emerald-800">Disetujui</span>
+                                    @elseif ($reservation->status === 'pending')
+                                        <span class="text-xs font-semibold tracking-wide text-amber-800">Menunggu</span>
+                                    @elseif ($reservation->status === 'rejected')
+                                        <span class="text-xs font-semibold tracking-wide text-rose-700">Ditolak</span>
+                                    @elseif ($reservation->status === 'cancelled')
+                                        <span class="text-xs font-semibold tracking-wide text-slate-500">Dibatalkan</span>
+                                    @else
+                                        <span class="text-xs font-semibold tracking-wide text-slate-600 capitalize">{{ $reservation->status }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                <span>{{ \Carbon\Carbon::parse($reservation->reservation_date)->isoFormat('dddd, D MMMM Y') }}</span>
+                                <span>•</span>
+                                <span>{{ substr($reservation->start_time, 0, 5) }} - {{ substr($reservation->end_time, 0, 5) }} WIB</span>
+                                <span>•</span>
+                                <span class="text-[#1D1D1F] font-medium truncate max-w-[220px]">{{ $reservation->purpose }}</span>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="py-10 text-center text-sm text-[#86868B] rounded-2xl border border-dashed border-gray-200 bg-[#F9F9FB]">
+                            Belum ada riwayat permohonan reservasi ruangan.
+                        </div>
+                    @endforelse
+                </div>
+            </section>
+
+            {{-- Kolom Kanan: Status Laporan Kerusakan --}}
+            <section class="bg-white rounded-[2rem] p-8 sm:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-6">
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="text-xl font-bold text-[#1D1D1F]">Status Laporan Kerusakan</h3>
+                            <p class="text-xs text-[#86868B] mt-0.5">Penanganan fasilitas aktif oleh tim sarpras</p>
+                        </div>
+                        <a href="{{ url('/user/report-history') }}" class="text-sm font-semibold text-[#1D1D1F] hover:text-blue-600 flex items-center gap-1 transition">
+                            <span>Lihat Semua ({{ $totalDamageReports }})</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <div class="space-y-4">
+                        @forelse($activeDamageReports->take(2) as $report)
+                            <a href="{{ url('/user/report-history') }}" class="bg-[#F9F9FB] rounded-2xl p-5 sm:p-6 border border-transparent hover:border-gray-200/80 hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300 cursor-pointer group space-y-3 block">
+                                <div class="flex items-start justify-between gap-4">
+                                    <h4 class="font-bold text-[#1D1D1F] text-base group-hover:text-blue-600 transition leading-snug">
+                                        {{ $report->title ?? 'Laporan Kerusakan' }}
+                                    </h4>
+                                    {{-- Status Opsi B: Pure Typographic --}}
+                                    <div class="shrink-0 pt-0.5">
+                                        @if ($report->status === 'baru')
+                                            <span class="text-xs font-semibold tracking-wide text-amber-800">Laporan Baru</span>
+                                        @elseif ($report->status === 'diproses')
+                                            <span class="text-xs font-semibold tracking-wide text-sky-800">Sedang Ditangani</span>
+                                        @elseif ($report->status === 'selesai')
+                                            <span class="text-xs font-semibold tracking-wide text-emerald-800">Selesai Diperbaiki</span>
+                                        @elseif ($report->status === 'ditolak')
+                                            <span class="text-xs font-semibold tracking-wide text-rose-700">Ditolak</span>
+                                        @else
+                                            <span class="text-xs font-semibold tracking-wide text-slate-600 capitalize">{{ $report->status }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                    <span>{{ $report->facility->name ?? 'Fasilitas' }} ({{ $report->facility->building ?? 'Gedung' }})</span>
+                                    <span>•</span>
+                                    <span>Diperbarui {{ $report->updated_at->diffForHumans() }}</span>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="py-10 text-center text-sm text-[#86868B] rounded-2xl border border-dashed border-gray-200 bg-[#F9F9FB]">
+                                Tidak ada laporan kerusakan fasilitas yang sedang aktif.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <a href="{{ url('/user/report-form') }}" class="w-full py-3.5 rounded-xl bg-[#F9F9FB] hover:bg-gray-100 text-[#1D1D1F] text-sm font-semibold transition flex items-center justify-center gap-2 border border-gray-200/60">
+                        <span>Laporkan Kerusakan Baru</span>
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </a>
+                </div>
+            </section>
+
         </div>
-    </section>
+
+    </div>
 </x-app-layout>

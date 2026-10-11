@@ -33,8 +33,10 @@ class ReservationController extends Controller
             ->get();
 
         $selectedFacilityId = $request->query('facility_id');
+        // Ambil draft tersimpan dari session jika tersedia
+        $draft = session('reservation_draft', []);
 
-        return view('user.reservation-form', compact('facilities', 'selectedFacilityId'));
+        return view('user.reservation-form', compact('facilities', 'selectedFacilityId', 'draft'));
     }
 
     /**
@@ -104,6 +106,9 @@ class ReservationController extends Controller
                 'participants_count' => $request->input('participants_count', 1),
                 'status'             => 'pending',
             ]);
+
+            // Bersihkan draft session setelah permohonan resmi tercatat
+            session()->forget('reservation_draft');
 
             return redirect()
                 ->route('user.reservation-history')
@@ -177,6 +182,13 @@ class ReservationController extends Controller
      */
     public function cancel(Request $request, int|string $id): RedirectResponse
     {
+        // 0. Validasi Input Payload Pembatalan
+        $request->validate([
+            'cancellation_reason' => ['nullable', 'string', 'max:500'],
+        ], [
+            'cancellation_reason.max' => 'Alasan pembatalan maksimal 500 karakter.',
+        ]);
+
         $userId = Auth::id();
 
         $reservation = Reservation::findOrFail($id);

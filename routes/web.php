@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : web.php
  * FUNGSI       : Pendaftaran rute web aplikasi CAVA (Campus Venue Access)
- * DESKRIPSI    : Menyediakan pemetaan endpoint URL ke view mockup antarmuka Blade untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
- * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
+ * DESKRIPSI    : Menyediakan pemetaan endpoint URL terpusat untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
+ * CARA KERJA   : Menerima HTTP Request, menerapkan middleware autentikasi dan Spatie RBAC (role:admin, role:petugas), serta mengarahkan ke Controller terkait dengan integrasi basis data MySQL.
  */
 
 use App\Http\Controllers\DashboardPetugasController;
@@ -30,9 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 // ROUTE: Menerima GET request ke root domain ('/')
 // FUNGSI: Menampilkan halaman beranda (landing page) publik CAVA
-Route::get('/', function () {
-    return view('public.home');
-})->name('home');
+Route::get('/', [PublicFacilityController::class, 'home'])->name('home');
 
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -50,7 +48,7 @@ Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMat
 Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
 // API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
-Route::get('/api/facilities/search', [PublicFacilityController::class, 'autocomplete'])->name('api.facilities.search');
+Route::get('/api/facilities/search', [PublicFacilityController::class, 'searchSuggestions'])->name('api.facilities.search');
 
 // ROUTE: Menerima GET request ke '/informasi/{section?}'
 // FUNGSI: Menampilkan pusat informasi publik (Kebijakan, Syarat & Ketentuan, dan Bantuan)

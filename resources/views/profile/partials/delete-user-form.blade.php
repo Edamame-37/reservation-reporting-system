@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : delete-user-form.blade.php
+  FUNGSIONALITAS : Parsial Formulir & Modal Konfirmasi Penghapusan Akun Pengguna
+  DESKRIPSI      : Menampilkan peringatan risiko penghapusan akun serta modal konfirmasi kata sandi sebelum akun dihapus secara permanen.
+  CARA KERJA     : Memanfaatkan modal Alpine.js dan mengirimkan HTTP DELETE ke route('profile.destroy') yang ditangani ProfileController@destroy.
+--}}
+
 <section class="space-y-6">
     <header>
         <h2 class="text-lg font-bold text-rose-700 tracking-tight">
@@ -38,6 +45,7 @@
                     id="password"
                     name="password"
                     type="password"
+                    required
                     class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition"
                     placeholder="{{ __('Kata Sandi Anda') }}"
                 />

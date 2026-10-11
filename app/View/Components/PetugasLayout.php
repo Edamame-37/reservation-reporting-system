@@ -2,7 +2,7 @@
 /**
  * NAMA FILE    : PetugasLayout.php
  * FUNGSI       : Blade Component Class untuk master layout operasional petugas sarpras CAVA
- * DESKRIPSI    : Menyajikan view layouts.petugas saat tag <x-petugas-layout> dipanggil pada view mockup.
+ * DESKRIPSI    : Menyajikan view layouts.petugas saat tag <x-petugas-layout> dipanggil pada tampilan portal operasional petugas sarpras.
  * CARA KERJA   : Mengembalikan view 'layouts.petugas' untuk merender antarmuka verifikasi dan operasional petugas sarpras.
  */
 
