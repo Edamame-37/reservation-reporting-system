@@ -24,23 +24,39 @@
         $sidebarCounts['petugas_reports'] = \App\Models\DamageReport::whereIn('status', ['baru', 'diproses'])->count();
     } elseif ($role === 'admin') {
         $sidebarCounts['admin_users'] = \App\Models\User::where('status', 'pending')->count();
-    } elseif ($role === 'user' && auth()->check()) {
-        $sidebarCounts['user_reservations'] = auth()->user()->reservations()->count();
-        $sidebarCounts['user_reports'] = auth()->user()->damageReports()->count();
     }
+    // Catatan: Query badge untuk peran user ditiadakan untuk efisiensi karena menu user kini bersih tanpa badge penanda
 @endphp
 
 <!-- 
-  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Top 64px / top-16)
+  ELEMEN       : Sidebar Navigasi Structural Left Rail (Lebar 256px / w-64, Full Height)
   KEGUNAAN     : Menyediakan akses instan ke modul sistem sesuai otorisasi peran pengguna.
   CARA KERJA     : Menerapkan kelas aktif bg-slate-900 text-white pada rute yang sesuai props 'active'.
 -->
 {{-- Sidebar Overlay (Mobile) --}}
-<div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-20 md:hidden" @click="sidebarOpen = false"></div>
+<div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-slate-900/50 z-40 md:hidden" @click="sidebarOpen = false"></div>
 
-<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'transition-transform duration-300': isLoaded}" class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-40">
-    {{-- Header Sidebar --}}
-    <div class="p-5 border-b border-slate-100 bg-slate-50/30">
+<aside :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'transition-transform duration-300': isLoaded}" class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-50">
+    {{-- Header Sidebar (Logo & Brand) --}}
+    @if($role !== 'public')
+    <div class="h-16 px-4 sm:px-5 flex items-center border-b border-slate-200/80 bg-white/95">
+        <a href="{{ url('/') }}" class="flex items-center gap-3 group">
+            <img src="{{ asset('assets/images/logo.webp') }}" alt="CAVA Logo" class="h-8 sm:h-9 w-auto">
+            <div class="flex flex-col">
+                <span class="font-bold text-slate-900 text-sm leading-tight tracking-tight group-hover:text-blue-900 transition-colors">
+                    @if($role === 'admin') CAVA Admin
+                    @elseif($role === 'petugas') CAVA Operasional
+                    @elseif($role === 'user') CAVA Portal
+                    @else CAVA @endif
+                </span>
+                <span class="text-[10px] text-slate-500 font-medium">Campus Venue Access</span>
+            </div>
+        </a>
+    </div>
+    @endif
+
+    {{-- Kategori Navigasi --}}
+    <div class="p-4 border-b border-slate-100 bg-slate-50/30">
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigasi Modul</span>
         <div class="mt-1 text-xs font-bold text-slate-900">
             @if($role === 'admin')
@@ -59,35 +75,38 @@
     <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
         @if($role === 'petugas')
             {{-- Menu Petugas Sarpras --}}
-            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">dashboard</span>
                     <span>Dasbor Operasional</span>
                 </span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded font-bold {{ $active === 'dashboard' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' }}">LIVE</span>
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full {{ $active === 'dashboard' ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Live</span>
+                </span>
             </a>
 
-            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/reservation-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'reservation-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">approval</span>
+                    <span class="material-symbols-outlined text-[18px]">inbox_customize</span>
                     <span>Antrean Reservasi</span>
                 </span>
                 @if($sidebarCounts['petugas_reservations'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['petugas_reservations'] }}</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold {{ $active === 'reservation-management' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $sidebarCounts['petugas_reservations'] }}</span>
                 @endif
             </a>
 
-            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ url('/petugas/report-management') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'report-management' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">build</span>
                     <span>Penanganan Laporan</span>
                 </span>
                 @if($sidebarCounts['petugas_reports'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">{{ $sidebarCounts['petugas_reports'] }}</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold {{ $active === 'report-management' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $sidebarCounts['petugas_reports'] }}</span>
                 @endif
             </a>
 
-            <a href="{{ url('/public/availability') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'availability' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ route('petugas.schedule-matrix') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all {{ $active === 'schedule-matrix' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                     <span>Matriks Jadwal 30m</span>
@@ -128,7 +147,7 @@
             </a>
 
         @elseif($role === 'user')
-            {{-- Menu Mahasiswa / Dosen --}}
+            {{-- Menu Mahasiswa / Dosen (Modul Terpadu 1-Page) --}}
             <a href="{{ url('/user/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'dashboard' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">home</span>
@@ -136,38 +155,20 @@
                 </span>
             </a>
 
-            <a href="{{ url('/user/reservation-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            {{-- Navigasi Reservasi Ruangan (Tampilan Bersih Minimalis Tanpa Angka Penanda) --}}
+            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['reservation-history', 'reservation-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span>Ajukan Reservasi</span>
+                    <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                    <span>Reservasi Ruangan</span>
                 </span>
             </a>
 
-            <a href="{{ url('/user/reservation-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'reservation-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+            {{-- Navigasi Pelaporan Kerusakan (Tampilan Bersih Minimalis Tanpa Angka Penanda) --}}
+            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ in_array($active, ['report-history', 'report-form']) ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">history</span>
-                    <span>Riwayat Reservasi</span>
+                    <span class="material-symbols-outlined text-[18px]">handyman</span>
+                    <span>Pelaporan Kerusakan</span>
                 </span>
-                @if($sidebarCounts['user_reservations'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">{{ $sidebarCounts['user_reservations'] }}</span>
-                @endif
-            </a>
-
-            <a href="{{ url('/user/report-form') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-form' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">report_problem</span>
-                    <span>Lapor Kerusakan</span>
-                </span>
-            </a>
-
-            <a href="{{ url('/user/report-history') }}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all {{ $active === 'report-history' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                <span class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-[18px]">checklist</span>
-                    <span>Status Laporan</span>
-                </span>
-                @if($sidebarCounts['user_reports'] > 0)
-                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">{{ $sidebarCounts['user_reports'] }}</span>
-                @endif
             </a>
 
         @else

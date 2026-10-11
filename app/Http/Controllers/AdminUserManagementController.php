@@ -40,18 +40,20 @@ class AdminUserManagementController extends Controller
 
         // 2. Data Sivitas Akademika Aktif Terdaftar (Mahasiswa, Dosen, Staf)
         $sivitasQuery = User::where('status', 'active')
-            ->whereIn('role', ['mahasiswa', 'dosen', 'staf']);
+            ->whereIn('role', ['mahasiswa', 'dosen', 'staf'])
+            ->withCount(['reservations', 'damageReports']);
         if ($search) {
             $sivitasQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('identity_number', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('department', 'like', "%{$search}%");
             });
         }
         $sivitasUsers = $sivitasQuery->orderBy('created_at', 'desc')->get();
 
         // 3. Data Petugas Sarpras Operasional (UR13)
-        $petugasQuery = User::where('role', 'petugas');
+        $petugasQuery = User::where('role', 'petugas')->where('status', 'active');
         if ($search) {
             $petugasQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -61,18 +63,37 @@ class AdminUserManagementController extends Controller
         }
         $petugasUsers = $petugasQuery->orderBy('created_at', 'desc')->get();
 
+        // 4. Data Akun Non-aktif & Dihapus (Poin 7)
+        $inactiveQuery = User::withTrashed()
+            ->where(function ($q) {
+                $q->where('status', 'inactive')
+                  ->orWhere('status', 'rejected')
+                  ->orWhereNotNull('deleted_at');
+            });
+        if ($search) {
+            $inactiveQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('identity_number', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        $inactiveUsers = $inactiveQuery->orderBy('updated_at', 'desc')->get();
+
         // Agregat Ringkasan Statistik
         $pendingCount = User::where('status', 'pending')->count();
         $sivitasCount = User::where('status', 'active')->whereIn('role', ['mahasiswa', 'dosen', 'staf'])->count();
-        $petugasCount = User::where('role', 'petugas')->count();
+        $petugasCount = User::where('role', 'petugas')->where('status', 'active')->count();
+        $inactiveCount = $inactiveUsers->count();
 
         return view('admin.user-management', compact(
             'pendingUsers',
             'sivitasUsers',
             'petugasUsers',
+            'inactiveUsers',
             'pendingCount',
             'sivitasCount',
-            'petugasCount'
+            'petugasCount',
+            'inactiveCount'
         ));
     }
 
@@ -201,5 +222,68 @@ class AdminUserManagementController extends Controller
         $roleType = $request->input('role_type', 'mahasiswa');
         $request->merge(['role' => $roleType]);
         return $this->storeUser($request);
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : toggleStatus()
+     * KEGUNAAN           : Mengubah status akun pengguna antara aktif dan non-aktif (Poin 5).
+     * CARA KERJA         : Menemukan pengguna, memastikan bukan Super Admin, membalikkan status (active <-> inactive), dan menyimpan log flash message.
+     */
+    public function toggleStatus(int|string $id): RedirectResponse
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        if ($user->hasRole('admin') || $user->role === 'admin') {
+            return back()->withErrors(['error' => 'Status akun Administrator dilindungi dan tidak dapat diubah demi keamanan sistem.']);
+        }
+
+        if ($user->status === 'active') {
+            $user->status = 'inactive';
+            $user->save();
+            return back()->with('success', "Akun {$user->name} berhasil dinonaktifkan. Pengguna tidak dapat login ke sistem.");
+        } else {
+            $user->status = 'active';
+            if ($user->trashed()) {
+                $user->restore();
+            }
+            $user->save();
+            return back()->with('success', "Akun {$user->name} berhasil diaktifkan kembali.");
+        }
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : destroy()
+     * KEGUNAAN           : Menghapus akun pengguna dari direktori aktif dengan soft delete (Poin 7).
+     * CARA KERJA         : Mengubah status menjadi inactive dan memanggil soft delete sehingga akun masuk ke tab Deleted / Non-active.
+     */
+    public function destroy(int|string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->hasRole('admin') || $user->role === 'admin') {
+            return back()->withErrors(['error' => 'Akun Administrator tidak dapat dihapus.']);
+        }
+
+        $userName = $user->name;
+        $user->status = 'inactive';
+        $user->save();
+        $user->delete();
+
+        return back()->with('success', "Akun {$userName} berhasil dihapus dari direktori aktif dan dipindahkan ke arsip.");
+    }
+
+    /**
+     * FUNCTION/PROCEDURE : restore()
+     * KEGUNAAN           : Memulihkan akun pengguna yang di-soft delete (Poin 7).
+     * CARA KERJA         : Memanggil restore() pada model User dan mengembalikan status ke 'active'.
+     */
+    public function restore(int|string $id): RedirectResponse
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+        $user->status = 'active';
+        $user->save();
+
+        return back()->with('success', "Akun {$user->name} berhasil dipulihkan dari arsip dan siap digunakan kembali.");
     }
 }

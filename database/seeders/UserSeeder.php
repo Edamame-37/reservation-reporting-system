@@ -2,7 +2,7 @@
 /**
  * NAMA FILE    : UserSeeder.php
  * FUNGSI       : Seeder inisialisasi akun pengguna awal (Admin, Petugas, dan Sivitas)
- * DESKRIPSI    : Menyediakan akun siap pakai untuk pengujian hak akses sesuai data representatif pada mockup UI.
+ * DESKRIPSI    : Menyediakan akun siap pakai untuk inisialisasi hak akses sistem CAVA (Super Admin, Petugas Sarpras, dan Sivitas Akademika).
  * CARA KERJA   : Membuat akun dengan User::firstOrCreate(), mengenkripsi sandi default ('password'), dan menugaskan role Spatie.
  */
 

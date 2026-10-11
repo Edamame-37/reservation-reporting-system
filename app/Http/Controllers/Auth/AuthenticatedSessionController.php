@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : AuthenticatedSessionController.php
  * FUNGSI       : Controller autentikasi sesi masuk dan keluar pengguna
- * DESKRIPSI    : Menangani tampilan login, verifikasi kredensial (dalam mode mockup dialihkan ke sesi statis), dan logout.
- * CARA KERJA   : Menerima request login, menyimpan session simulasi mockup tanpa menyentuh kueri basis data MySQL, dan mengarahkan ke dashboard.
+ * DESKRIPSI    : Menangani tampilan login, verifikasi kredensial berbasis database MySQL, otorisasi status akun, dan logout.
+ * CARA KERJA   : Menerima request login, mengeksekusi LoginRequest::authenticate(), memverifikasi status aktif akun (ADM-01), meregenerasi sesi, dan mengalihkan pengguna sesuai peran Spatie RBAC.
  */
 
 namespace App\Http\Controllers\Auth;
@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * FUNCTION/PROCEDURE : store()
      * KEGUNAAN           : Memproses autentikasi pengguna ke dalam sistem.
-     * CARA KERJA         : Menjalankan $request->authenticate() untuk memeriksa kredensial dan status akun (ADM-01), dengan penanganan fallback jika basis data belum tersambung.
+     * CARA KERJA         : Menjalankan $request->authenticate() untuk memeriksa kredensial, memvalidasi status akun aktif (ADM-01), meregenerasi sesi, dan mengarahkan sesuai peran.
      */
     public function store(LoginRequest $request): RedirectResponse
     {

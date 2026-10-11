@@ -1,204 +1,109 @@
 {{-- 
   NAMA FILE      : export-report.blade.php
-  FUNGSIONALITAS : Halaman Antarmuka Rekapitulasi, Analitik, dan Ekspor Laporan (Super Admin)
-  DESKRIPSI      : Menampilkan visualisasi data rekap okupansi fasilitas kampus, frekuensi kerusakan aset, dan tombol pencetakan dokumen resmi ke format CSV/Excel dan PDF (UR17).
+  FUNGSIONALITAS : Halaman Antarmuka Rekapitulasi & Ekspor Laporan (100% Sesuai Opsi 1 Prototype 4_try-admin.html)
+  DESKRIPSI      : Menampilkan rentang tanggal periode laporan statuter, tombol unduh Excel/CSV dan PDF resmi, serta data rekapitulasi okupansi fasilitas dan insiden pemeliharaan.
+  DESAIN SISTEM  : Apple Bento & Minimalist Precision (Opsi 1)
   CARA KERJA     : Menggunakan layout <x-admin-layout active="export-report">, memicu download file CSV/Excel atau PDF dari ExportController berdasarkan rentang tanggal aktif.
 --}}
 
 <x-admin-layout title="Rekapitulasi & Ekspor Laporan" active="export-report">
-    <!-- 
-      ELEMEN       : Section Rekapitulasi & Analitik Pelaporan Sistem (UR17)
-      KEGUNAAN     : Menyediakan data agregasi berkala bagi pimpinan universitas dan tombol cetak laporan resmi.
-      CARA KERJA   : Merender tabel rekap okupansi fasilitas, distribusi jenis kerusakan, serta tombol trigger unduh dokumen (Excel/CSV dan PDF).
-    -->
-    <div class="flex flex-col gap-space-xl">
-        {{-- Section Header & Filter Periode --}}
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg border border-outline-variant/50">
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md pb-space-md border-b border-outline-variant mb-space-md">
-                <div class="flex items-center gap-space-md">
-                    <div class="w-10 h-10 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm">
-                        <span class="material-symbols-outlined text-[22px]">analytics</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-space-xs">
-                            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-data-mono text-[11px]">UR17 • REPORTING & ANALYTICS</span>
-                            <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary-container text-on-secondary-container font-semibold">Statuter Ready</span>
-                        </div>
-                        <h2 class="font-headline-md text-headline-md text-primary">Rekapitulasi Okupansi Fasilitas & Insiden Kerusakan</h2>
-                    </div>
-                </div>
-
-                {{-- Action Buttons Ekspor Utama (Reservasi) --}}
-                <div class="flex items-center gap-space-sm flex-wrap">
-                    <!-- 
-                      ROUTE: GET /admin/export/reservations/excel?start_date=...&end_date=...
-                      FUNGSI: Mengunduh data rekapitulasi okupansi peminjaman ruang dalam format spreadsheet Excel/CSV kompatibel
-                    -->
-                    <a href="{{ route('admin.export.reservations.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="h-10 px-space-lg rounded-lg bg-surface-container text-primary font-label-md text-label-md font-semibold hover:bg-surface-container-highest transition-colors flex items-center gap-1 shadow-sm border border-outline-variant/50">
-                        <span class="material-symbols-outlined text-[18px]">table_view</span>
-                        <span>Ekspor Excel / CSV</span>
-                    </a>
-
-                    <!-- 
-                      ROUTE: GET /admin/export/reservations/pdf?start_date=...&end_date=...
-                      FUNGSI: Mencetak dokumen laporan statuter resmi reservasi dalam format PDF kop resmi (DomPDF)
-                    -->
-                    <a href="{{ route('admin.export.reservations.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm">
-                        <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                        <span>Cetak Dokumen PDF Resmi</span>
-                    </a>
-                </div>
+    <div class="space-y-8">
+        
+        {{-- 1. Header Halaman (100% Sesuai 4_try-admin.html Opsi 1) --}}
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Rekapitulasi & Ekspor Laporan</h1>
+                <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Unduh data rekapitulasi okupansi fasilitas dan insiden pemeliharaan dalam format spreadsheet resmi.</p>
             </div>
+        </div>
 
-            <!-- 
-              ROUTE: GET /admin/export-report
-              FUNGSI: Memfilter rekapitulasi data analitik okupansi dan insiden kerusakan berdasarkan rentang tanggal
-            -->
-            <form action="{{ route('admin.export-report') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-space-md items-end">
+        {{-- 2. Rentang Tanggal Filter Box Bergaya Bento Apple (100% Sesuai Prototype) --}}
+        <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <h3 class="text-base font-bold text-[#1D1D1F] mb-1">Periode Waktu Laporan</h3>
+            <p class="text-xs text-[#86868B] mb-6">Tentukan rentang tanggal untuk kompilasi data peminjaman ruangan dan catatan kerusakan.</p>
+
+            <form action="{{ route('admin.export-report') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div>
-                    <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="rep-start">Periode Mulai</label>
-                    <input type="date" id="rep-start" name="start_date" value="{{ $startDate }}" class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none">
+                    <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-start">Tanggal Mulai</label>
+                    <input type="date" 
+                           id="exp-start" 
+                           name="start_date" 
+                           value="{{ $startDate }}" 
+                           onchange="this.form.submit()" 
+                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
                 <div>
-                    <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" for="rep-end">Periode Selesai</label>
-                    <input type="date" id="rep-end" name="end_date" value="{{ $endDate }}" class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm border border-outline-variant/60 focus:border-primary focus:outline-none">
+                    <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-end">Tanggal Selesai</label>
+                    <input type="date" 
+                           id="exp-end" 
+                           name="end_date" 
+                           value="{{ $endDate }}" 
+                           onchange="this.form.submit()" 
+                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
                 <div>
-                    <button type="submit" class="w-full h-10 inline-flex items-center justify-center gap-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors shadow-sm">
-                        <span class="material-symbols-outlined text-[18px]">refresh</span>
-                        <span>Segarkan Data Analitik</span>
-                    </button>
+                    <a href="{{ route('admin.export.reservations.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
+                       class="w-full bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50 py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">table_view</span>
+                        <span>Unduh Excel / CSV</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{{ route('admin.export.reservations.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
+                       class="w-full bg-[#1D1D1F] text-white hover:bg-black py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                        <span>Cetak PDF Resmi</span>
+                    </a>
                 </div>
             </form>
-        </section>
+        </div>
 
-        <!-- 
-          ELEMEN       : 4 Kartu KPI Analitik Sistem
-          KEGUNAAN     : Menyajikan metrik ringkasan performa fasilitas dan penanganan aduan pada rentang tanggal aktif.
-          CARA KERJA   : Menerima kalkulasi dari ExportController (okupansi global, sesi selesai, tiket aduan, indeks SLA).
-        -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-lg">
-            <x-cava.stat-card 
-                title="Okupansi Global" 
-                badgeCode="METRIK-1" 
-                :value="$occupancyRate . '%'" 
-                subtitle="Rata-rata Terpakai" 
-                :footerBadge="$occupancyRate >= 70 ? 'Sangat Optimal' : ($occupancyRate >= 40 ? 'Cukup Optimal' : 'Perlu Peningkatan')" 
-                :footerText="number_format($totalHoursReserved, 1) . ' Jam Peminjaman'" 
-                icon="pie_chart" 
-                variant="secondary" 
-            />
-            <x-cava.stat-card 
-                title="Total Sesi Disetujui" 
-                badgeCode="METRIK-2" 
-                :value="$approvedCount" 
-                subtitle="Kegiatan Sivitas Kampus" 
-                footerBadge="0 Sengketa Waktu" 
-                footerText="100% Concurrency Pass" 
-                icon="event_available" 
-                variant="primary" 
-            />
-            <x-cava.stat-card 
-                title="Frekuensi Kerusakan" 
-                badgeCode="METRIK-3" 
-                :value="$totalDamageReports" 
-                subtitle="Tiket Pengaduan" 
-                :footerBadge="$resolvedDamageCount . ' Selesai Diperbaiki'" 
-                :footerText="$inProgressDamageCount . ' Sedang Dikerjakan'" 
-                icon="build" 
-                variant="tertiary" 
-            />
-            <x-cava.stat-card 
-                title="Indeks Resolusi SLA" 
-                badgeCode="METRIK-4" 
-                :value="$slaResolutionIndex . '%'" 
-                subtitle="Tuntas Sesuai SLA" 
-                :footerBadge="$slaResolutionIndex >= 90 ? 'Optimal Performance' : 'Perlu Evaluasi'" 
-                footerText="Standar Statuter Rektorat" 
-                icon="verified" 
-                variant="primary" 
-            />
-        </section>
-
-        <!-- 
-          ELEMEN       : Tabel 1 - Rekapitulasi Okupansi & Pemanfaatan Fasilitas Kampus
-          KEGUNAAN     : Menyajikan daftar rincian utilisasi setiap ruang pada periode berjalan.
-          CARA KERJA   : Melakukan perulangan data pada $facilityUtilization dengan data permohonan, persetujuan, dan rasio jam.
-        -->
-        <section x-data="{
-            allRows: @json($facilityUtilization),
-            currentPage: 1,
-            perPage: 10,
-            get totalPages() {
-                return Math.max(1, Math.ceil(this.allRows.length / this.perPage));
-            },
-            get displayedRows() {
-                const start = (this.currentPage - 1) * this.perPage;
-                return this.allRows.slice(start, start + this.perPage);
-            },
-            setPage(p) {
-                if (p >= 1 && p <= this.totalPages) {
-                    this.currentPage = p;
-                }
-            },
-            prevPage() {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                }
-            },
-            nextPage() {
-                if (this.currentPage < this.totalPages) {
-                    this.currentPage++;
-                }
-            }
-        }" class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg border border-outline-variant/50 flex flex-col gap-space-md">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-sm border-b border-outline-variant gap-2">
-                <div class="flex items-center gap-space-xs">
-                    <span class="material-symbols-outlined text-primary text-[20px]">table_chart</span>
-                    <h3 class="font-headline-sm text-headline-sm text-primary">Rekapitulasi Okupansi & Pemanfaatan Fasilitas Kampus</h3>
+        {{-- 3. Tabel Rekapitulasi Okupansi Fasilitas --}}
+        <section x-data="facilityReportTable(@js($facilityUtilization))" class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-bold text-[#1D1D1F] font-display">Rekapitulasi Okupansi Fasilitas</h3>
+                    <p class="text-xs text-[#86868B] mt-0.5">Rincian utilisasi dan jam pemakaian setiap ruangan pada periode berjalan.</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">Periode: {{ $startDate }} s.d. {{ $endDate }}</span>
-                </div>
+                <span class="text-xs font-mono text-[#86868B]">{{ $startDate }} s.d. {{ $endDate }}</span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse font-body-sm">
+                <table class="w-full text-left text-sm">
                     <thead>
-                        <tr class="bg-surface-container-high text-on-surface-variant font-label-sm uppercase">
-                            <th class="py-space-sm px-space-md">Kode & Fasilitas</th>
-                            <th class="py-space-sm px-space-md">Lokasi Gedung</th>
-                            <th class="py-space-sm px-space-md">Total Pengajuan</th>
-                            <th class="py-space-sm px-space-md">Disetujui</th>
-                            <th class="py-space-sm px-space-md">Ditolak / Batal</th>
-                            <th class="py-space-sm px-space-md">Total Jam</th>
-                            <th class="py-space-sm px-space-md text-right">Tingkat Utilisasi</th>
+                        <tr class="border-b border-gray-100 text-xs text-[#86868B] font-medium bg-[#FBFBFD]">
+                            <th class="py-4.5 px-6">Kode & Nama Ruangan</th>
+                            <th class="py-4.5 px-6">Lokasi Gedung</th>
+                            <th class="py-4.5 px-6">Total Pengajuan</th>
+                            <th class="py-4.5 px-6">Disetujui</th>
+                            <th class="py-4.5 px-6">Ditolak / Batal</th>
+                            <th class="py-4.5 px-6">Total Jam</th>
+                            <th class="py-4.5 px-6 text-right">Tingkat Okupansi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-surface-container-high/40">
+                    <tbody class="divide-y divide-gray-100">
                         <template x-for="row in displayedRows" :key="row.id">
-                            <tr class="hover:bg-surface-container-low transition-colors">
-                                <td class="py-space-md px-space-md font-bold text-primary" x-text="row.code + ' • ' + row.name"></td>
-                                <td class="py-space-md px-space-md text-on-surface-variant" x-text="row.building"></td>
-                                <td class="py-space-md px-space-md font-data-mono" x-text="row.total_applications"></td>
-                                <td class="py-space-md px-space-md font-data-mono text-secondary font-bold" x-text="row.approved_count"></td>
-                                <td class="py-space-md px-space-md font-data-mono text-error" x-text="row.rejected_count"></td>
-                                <td class="py-space-md px-space-md font-data-mono" x-text="parseFloat(row.total_hours).toFixed(1) + ' Jam'"></td>
-                                <td class="py-space-md px-space-md text-right">
-                                    <span class="px-2 py-0.5 rounded-full font-data-mono font-bold text-[11px]"
-                                          :class="row.utilization_rate >= 70 ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-primary'"
+                            <tr class="hover:bg-[#FBFBFD] transition group">
+                                <td class="py-5 px-6">
+                                    <div class="font-bold text-[#1D1D1F]" x-text="row.name"></div>
+                                    <div class="text-xs font-mono text-[#86868B] mt-0.5" x-text="row.code"></div>
+                                </td>
+                                <td class="py-5 px-6 text-xs text-[#86868B]" x-text="row.building"></td>
+                                <td class="py-5 px-6 font-mono text-xs text-[#1D1D1F]" x-text="row.total_applications"></td>
+                                <td class="py-5 px-6 font-mono text-xs font-semibold text-emerald-800" x-text="row.approved_count"></td>
+                                <td class="py-5 px-6 font-mono text-xs text-[#86868B]" x-text="row.rejected_count"></td>
+                                <td class="py-5 px-6 font-mono text-xs text-[#1D1D1F]" x-text="parseFloat(row.total_hours).toFixed(1) + ' Jam'"></td>
+                                <td class="py-5 px-6 text-right">
+                                    <span class="text-xs font-semibold"
+                                          :class="row.utilization_rate >= 70 ? 'text-emerald-800' : 'text-[#1D1D1F]'"
                                           x-text="row.utilization_rate + '%'"></span>
                                 </td>
                             </tr>
                         </template>
                         <template x-if="allRows.length === 0">
                             <tr>
-                                <td colspan="7" class="py-8 text-center text-on-surface-variant">
-                                    <div class="flex flex-col items-center justify-center gap-1.5">
-                                        <span class="material-symbols-outlined text-outline-variant text-[28px]">event_busy</span>
-                                        <p class="font-medium text-xs">Belum ada rekaman permohonan reservasi fasilitas pada rentang tanggal ini.</p>
-                                        <p class="text-[11px] text-outline">Gunakan filter periode di atas untuk memuat tanggal lainnya.</p>
-                                    </div>
+                                <td colspan="7" class="py-16 text-center text-[#86868B] text-xs">
+                                    Belum ada catatan peminjaman fasilitas pada rentang tanggal ini.
                                 </td>
                             </tr>
                         </template>
@@ -206,123 +111,134 @@
                 </table>
             </div>
 
-            <!-- 
-              ELEMEN       : Kontrol Navigasi Paginasi Interaktif (10 Baris per Halaman)
-              KEGUNAAN     : Memungkinkan Super Admin berpindah halaman data rekapitulasi secara dinamis tanpa reload layar.
-              CARA KERJA   : Alpine.js membagi data menjadi halaman-halaman berukuran 10 baris, menghitung total halaman secara dinamis, dan merender baris sesuai halaman aktif.
-            -->
             <template x-if="allRows.length > 0">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-space-sm border-t border-outline-variant text-xs text-on-surface-variant font-body-sm">
+                <div class="p-6 bg-[#FBFBFD] border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#86868B]">
                     <div>
-                        <span>Menampilkan <strong class="text-primary font-bold" x-text="((currentPage - 1) * perPage) + 1"></strong> s.d. <strong class="text-primary font-bold" x-text="Math.min(currentPage * perPage, allRows.length)"></strong> dari <strong class="text-primary font-bold" x-text="allRows.length"></strong> fasilitas kampus</span>
+                        Menampilkan <strong class="text-[#1D1D1F]" x-text="((currentPage - 1) * perPage) + 1"></strong> - <strong class="text-[#1D1D1F]" x-text="Math.min(currentPage * perPage, allRows.length)"></strong> dari <strong class="text-[#1D1D1F]" x-text="allRows.length"></strong> fasilitas
                     </div>
 
-                    <div class="flex items-center gap-1">
-                        {{-- Tombol Sebelumnya --}}
-                        <button 
-                            type="button" 
-                            @click="prevPage()" 
-                            :disabled="currentPage === 1"
-                            :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-surface-container text-on-surface-variant' : 'hover:bg-surface-container text-primary bg-surface-container-low'"
-                            class="px-2.5 py-1 rounded border border-outline-variant/60 font-semibold transition flex items-center gap-1 text-[11px]">
-                            <span class="material-symbols-outlined text-[14px]">chevron_left</span>
-                            <span>Sebelumnya</span>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" 
+                                @click="prevPage()" 
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
+                            Sebelumnya
                         </button>
 
-                        {{-- Nomor Halaman Dinamis --}}
                         <template x-for="p in totalPages" :key="p">
-                            <button 
-                                type="button" 
-                                @click="setPage(p)"
-                                x-show="p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1"
-                                :class="currentPage === p ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low hover:bg-surface-container text-primary'"
-                                class="w-7 h-7 rounded border border-outline-variant/60 text-[11px] transition flex items-center justify-center font-medium"
-                                x-text="p">
+                            <button type="button" 
+                                    @click="setPage(p)"
+                                    x-show="p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1"
+                                    :class="currentPage === p ? 'bg-[#1D1D1F] text-white font-bold' : 'bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50'"
+                                    class="w-8 h-8 rounded-xl text-xs transition flex items-center justify-center font-medium cursor-pointer"
+                                    x-text="p">
                             </button>
                         </template>
 
-                        {{-- Tombol Selanjutnya --}}
-                        <button 
-                            type="button" 
-                            @click="nextPage()" 
-                            :disabled="currentPage === totalPages"
-                            :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed bg-surface-container text-on-surface-variant' : 'hover:bg-surface-container text-primary bg-surface-container-low'"
-                            class="px-2.5 py-1 rounded border border-outline-variant/60 font-semibold transition flex items-center gap-1 text-[11px]">
-                            <span>Selanjutnya</span>
-                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        <button type="button" 
+                                @click="nextPage()" 
+                                :disabled="currentPage === totalPages"
+                                class="px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-medium hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
+                            Selanjutnya
                         </button>
                     </div>
                 </div>
             </template>
         </section>
 
-        <!-- 
-          ELEMEN       : Tabel 2 - Rekapitulasi Frekuensi Kerusakan Aset per Kategori
-          KEGUNAAN     : Menyajikan data agregasi insiden kerusakan, fasilitas terdampak, rata-rata resolusi, dan kepatuhan SLA.
-          CARA KERJA   : Melakukan perulangan data pada $damageByCategory serta menyediakan tombol ekspor khusus laporan kerusakan (Excel/PDF).
-        -->
-        <section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg border border-outline-variant/50 flex flex-col gap-space-md">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-sm border-b border-outline-variant gap-2">
-                <div class="flex items-center gap-space-xs">
-                    <span class="material-symbols-outlined text-error text-[20px]">build_circle</span>
-                    <h3 class="font-headline-sm text-headline-sm text-primary">Rekapitulasi Frekuensi Kerusakan Aset per Kategori</h3>
+        {{-- 4. Tabel Frekuensi Kerusakan Aset --}}
+        <section class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-bold text-[#1D1D1F] font-display">Frekuensi Kerusakan Aset per Kategori</h3>
+                    <p class="text-xs text-[#86868B] mt-0.5">Ringkasan penanganan gangguan dan kepatuhan SLA sarana prasarana.</p>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <!-- 
-                      ROUTE: GET /admin/export/damage-reports/excel?start_date=...&end_date=...
-                      FUNGSI: Mengunduh data rekapitulasi keluhan kerusakan format Excel/CSV
-                    -->
-                    <a href="{{ route('admin.export.damage-reports.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="px-2.5 py-1 rounded bg-surface-container text-primary font-label-sm text-[11px] font-semibold hover:bg-surface-container-highest transition flex items-center gap-1 border border-outline-variant/50">
-                        <span class="material-symbols-outlined text-[14px]">table_view</span>
+                
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('admin.export.damage-reports.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
+                       class="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-xs flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-emerald-700">table_view</span>
                         <span>Excel Kerusakan</span>
                     </a>
-                    <!-- 
-                      ROUTE: GET /admin/export/damage-reports/pdf?start_date=...&end_date=...
-                      FUNGSI: Mencetak dokumen resmi laporan rekapitulasi kerusakan aset format PDF landscape A4
-                    -->
-                    <a href="{{ route('admin.export.damage-reports.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="px-2.5 py-1 rounded bg-rose-50 text-rose-700 font-label-sm text-[11px] font-semibold hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
-                        <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                    <a href="{{ route('admin.export.damage-reports.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
+                       class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-800 text-xs font-semibold hover:bg-rose-50 transition shadow-xs flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                         <span>PDF Kerusakan</span>
                     </a>
                 </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse font-body-sm">
+                <table class="w-full text-left text-sm">
                     <thead>
-                        <tr class="bg-surface-container-high text-on-surface-variant font-label-sm uppercase">
-                            <th class="py-space-sm px-space-md">Kategori Kerusakan</th>
-                            <th class="py-space-sm px-space-md">Jumlah Insiden</th>
-                            <th class="py-space-sm px-space-md">Fasilitas Paling Sering Terdampak</th>
-                            <th class="py-space-sm px-space-md">Rata-rata Waktu Resolusi</th>
-                            <th class="py-space-sm px-space-md text-right">Status Kepatuhan SLA</th>
+                        <tr class="border-b border-gray-100 text-xs text-[#86868B] font-medium bg-[#FBFBFD]">
+                            <th class="py-4.5 px-6">Kategori Kerusakan</th>
+                            <th class="py-4.5 px-6">Jumlah Insiden</th>
+                            <th class="py-4.5 px-6">Fasilitas Paling Sering Terdampak</th>
+                            <th class="py-4.5 px-6">Rata-rata Waktu Resolusi</th>
+                            <th class="py-4.5 px-6 text-right">Status Kepatuhan SLA</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-surface-container-high/40">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse($damageByCategory as $cat)
-                        <tr class="hover:bg-surface-container-low transition-colors">
-                            <td class="py-space-md px-space-md font-bold">{{ $cat['category'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono font-bold text-primary">{{ $cat['incident_count'] }} Laporan</td>
-                            <td class="py-space-md px-space-md text-on-surface-variant">{{ $cat['most_affected_facility'] }}</td>
-                            <td class="py-space-md px-space-md font-data-mono">{{ $cat['avg_resolution_time'] }}</td>
-                            <td class="py-space-md px-space-md text-right">
-                                <span class="text-secondary font-semibold">{{ $cat['sla_compliance'] }}</span>
-                            </td>
-                        </tr>
+                            <tr class="hover:bg-[#FBFBFD] transition group">
+                                <td class="py-5 px-6 font-bold text-[#1D1D1F]">{{ $cat['category'] }}</td>
+                                <td class="py-5 px-6 font-mono text-xs font-bold text-[#1D1D1F]">{{ $cat['incident_count'] }} Laporan</td>
+                                <td class="py-5 px-6 text-xs text-[#86868B]">{{ $cat['most_affected_facility'] }}</td>
+                                <td class="py-5 px-6 font-mono text-xs text-[#86868B]">{{ $cat['avg_resolution_time'] }}</td>
+                                <td class="py-5 px-6 text-right">
+                                    <span class="text-xs font-semibold text-emerald-800">{{ $cat['sla_compliance'] }}</span>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="5" class="py-8 text-center text-on-surface-variant">
-                                <div class="flex flex-col items-center justify-center gap-1.5">
-                                    <span class="material-symbols-outlined text-outline-variant text-[28px]">task_alt</span>
-                                    <p class="font-medium text-xs">Tidak ada catatan tiket kerusakan pada rentang periode yang dipilih.</p>
-                                    <p class="text-[11px] text-outline">Kondisi seluruh sarana dan prasarana terpantau dalam kondisi optimal.</p>
-                                </div>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="5" class="py-16 text-center text-[#86868B] text-xs">
+                                    Tidak ada catatan insiden kerusakan pada rentang periode yang dipilih.
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <div class="p-5 bg-[#FBFBFD] border-t border-gray-100 flex items-center justify-between text-xs text-[#86868B]">
+                <span>Seluruh laporan diekspor sesuai format audit statuter universitas.</span>
+                <span>CAVA Institutional Analytics</span>
+            </div>
         </section>
+
     </div>
+
+    {{-- Script Pembungkus Komponen Alpine.js Terisolasi Bebas Syntax Leak --}}
+    <script>
+        function facilityReportTable(initialData) {
+            return {
+                allRows: initialData || [],
+                currentPage: 1,
+                perPage: 10,
+                get totalPages() {
+                    return Math.max(1, Math.ceil(this.allRows.length / this.perPage));
+                },
+                get displayedRows() {
+                    const start = (this.currentPage - 1) * this.perPage;
+                    return this.allRows.slice(start, start + this.perPage);
+                },
+                setPage(p) {
+                    if (p >= 1 && p <= this.totalPages) {
+                        this.currentPage = p;
+                    }
+                },
+                prevPage() {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+                nextPage() {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                    }
+                }
+            };
+        }
+    </script>
 </x-admin-layout>

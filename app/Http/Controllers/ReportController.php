@@ -33,8 +33,9 @@ class ReportController extends Controller
             ->get();
 
         $selectedFacilityId = $request->query('facility_id');
+        $draft = session('report_draft', []);
 
-        return view('user.report-form', compact('facilities', 'selectedFacilityId'));
+        return view('user.report-form', compact('facilities', 'selectedFacilityId', 'draft'));
     }
 
     /**
@@ -79,6 +80,9 @@ class ReportController extends Controller
             'is_facility_locked' => false,
         ]);
 
+        // Bersihkan draft session setelah tiket berhasil tercatat
+        session()->forget('report_draft');
+
         return redirect()->route('user.report-history')
             ->with('success', "Laporan kerusakan berhasil dikirim dengan kode tiket {$reportCode}. Petugas sarpras akan segera menindaklanjuti pengaduan Anda.");
     }
@@ -88,7 +92,7 @@ class ReportController extends Controller
      * FITUR              : USR-05 - Pelacakan Status & Riwayat Laporan Pengguna
      * KEGUNAAN           : Menampilkan daftar riwayat tiket kerusakan sarpras milik pengguna aktif dengan filter status dan pencarian dinamis.
      * CARA KERJA         :
-     *   1. Mengidentifikasi ID pengguna aktif (dengan fallback ke pengguna default untuk pengujian/mockup).
+     *   1. Mengidentifikasi ID pengguna aktif yang terautentikasi (Auth::id()).
      *   2. Menghitung rekapitulasi status tiket (all, baru, diproses, selesai, ditolak) secara agregat.
      *   3. Memfilter tiket berdasarkan status terpilih dan kata kunci pencarian (kode tiket, fasilitas, kategori, deskripsi).
      *   4. Melakukan eager loading pada relasi 'facility' dan 'handler' untuk mengeliminasi problem kueri N+1.
@@ -145,7 +149,12 @@ class ReportController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('user.report-history', compact('reports', 'counts', 'activeStatus'));
+        // 4. Ambil Fasilitas Aktif untuk Form Pelaporan Kerusakan Terpadu (Modal)
+        $facilities = Facility::where('status', 'aktif')
+            ->orderBy('name')
+            ->get();
+
+        return view('user.report-history', compact('reports', 'counts', 'activeStatus', 'facilities'));
     }
 }
 

@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : ProfileUpdateRequest.php
+ * FUNGSI       : Form Request validasi pembaruan profil pengguna
+ * DESKRIPSI    : Memvalidasi integritas perubahan nama lengkap dan alamat email pengguna aktif dengan pengecualian ID pengguna sendiri pada keunikan email.
+ * CARA KERJA   : Menerima payload HTTP PATCH dari formulir profil, memastikan format string dan batasan panjang, serta memvalidasi keunikan email di tabel users.
+ */
 
 namespace App\Http\Requests;
 
@@ -10,7 +16,9 @@ use Illuminate\Validation\Rule;
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
+     * FUNCTION/PROCEDURE : rules()
+     * KEGUNAAN           : Mendefinisikan aturan validasi integritas payload profil.
+     * CARA KERJA         : Memeriksa nama wajib diisi dan email unik kecuali ID pengguna saat ini.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

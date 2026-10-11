@@ -1,17 +1,27 @@
 {{-- 
   NAMA FILE      : public.blade.php
   FUNGSIONALITAS : Kerangka Layout Utama (Master) untuk Halaman Publik / Pengunjung
-  DESKRIPSI      : Berisi struktur HTML dasar, Google Fonts (Inter & Material Symbols), Header CAVA 64px, Sidebar Navigasi Publik, dan slot konten utama.
-  CARA KERJA     : Bertindak sebagai master layout. Halaman publik menggunakan layout ini via <x-public-layout> atau @extends('layouts.public').
+  DESKRIPSI      : Layout Apple-esque Minimalist (Option 1) dengan Glassmorphism
 --}}
 
 @props([
     'title' => 'CAVA - Portal Publik Fasilitas Kampus',
-    'active' => 'home'
+    'active' => 'home',
+    'subIndex' => 'null'
 ])
 
+@php
+    $pageIndexes = [
+        'home' => 1,
+        'catalog' => 2,
+        'availability' => 3,
+        'information' => 4
+    ];
+    $currentIndex = $pageIndexes[$active] ?? 1;
+@endphp
+
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,46 +30,238 @@
     <title>{{ $title }} | CAVA</title>
     <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
-    {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
-    {{-- Asset Vite (Tailwind CSS & JavaScript) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Alpine.js CDN Backup --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] { display: none !important; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
         }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
     </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('smartSearch', (pageType) => ({
+                query: '{{ request('search') }}',
+                suggestions: [],
+                facilities: [],
+                loading: false,
+                open: false,
+                emptyState: false,
+                timer: null,
+                pageType: pageType,
+
+                init() {
+                    let formEl = this.$el.closest('form');
+                    if (formEl) {
+                        formEl.addEventListener('submit', (e) => {
+                            let hasFilter = false;
+                            if (formEl.querySelectorAll('input[type="checkbox"]:checked').length > 0) hasFilter = true;
+                            let cap = formEl.querySelector('input[name="capacity"]');
+                            if (cap && cap.value.trim() !== '') hasFilter = true;
+
+                            if (this.query.trim().length === 0 && !hasFilter) {
+                                e.preventDefault();
+                                this.open = true;
+                                this.emptyState = true;
+                                this.suggestions = [];
+                                this.facilities = [];
+                            }
+                        });
+                    }
+
+                    window.addEventListener('close-smart-search', () => {
+                        this.open = false;
+                    });
+
+                    this.$watch('query', value => {
+                        this.emptyState = false;
+                        if (value.trim().length === 0) {
+                            this.suggestions = [];
+                            this.facilities = [];
+                            this.open = false;
+                            return;
+                        }
+                        
+                        this.loading = true;
+                        this.open = true;
+                        this.$dispatch('close-other-popups');
+                        clearTimeout(this.timer);
+                        
+                        this.timer = setTimeout(() => {
+                            this.fetchResults();
+                        }, 1000);
+                    });
+                },
+
+                async fetchResults() {
+                    try {
+                        let params = new URLSearchParams({ q: this.query });
+                        
+                        // Cek apakah ada allFilters di form terdekat
+                        let formEl = this.$el.closest('form');
+                        if (formEl && formEl.__x) {
+                            let formComponent = Alpine.$data(formEl);
+                            if (formComponent.selectedCategories && formComponent.selectedCategories.length > 0) {
+                                formComponent.selectedCategories.forEach(c => params.append('categories[]', c));
+                            }
+                            if (formComponent.selectedFacilities && formComponent.selectedFacilities.length > 0) {
+                                formComponent.selectedFacilities.forEach(f => params.append('equipments[]', f));
+                            }
+                            if (formComponent.minCapacity) {
+                                params.append('capacity', formComponent.minCapacity);
+                            }
+                        }
+
+                        let res = await fetch(`/api/facilities/search?${params.toString()}`);
+                        let data = await res.json();
+                        this.suggestions = data.suggestions || [];
+                        this.facilities = data.facilities || [];
+                        this.emptyState = data.empty_state || false;
+                    } catch (e) {
+                        console.error(e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                highlight(text) {
+                    if (!this.query) return text;
+                    // Escape special regex chars
+                    let escapedQuery = this.query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+                    return text.replace(regex, '<span class="text-blue-600 font-semibold">$1</span>');
+                }
+            }));
+
+            Alpine.data('pageTransition', (pageIndex) => ({
+                animationClass: '',
+                mobileMenuOpen: false,
+                init() {
+                    this.animationClass = 'opacity-0'; // Default hidden
+                    
+                    let prevIndex = sessionStorage.getItem('prevPageIndex');
+                    let categoryClicked = sessionStorage.getItem('categoryClicked');
+                    
+                    if (!prevIndex) {
+                        this.animationClass = 'animate-fade-in';
+                    } else {
+                        prevIndex = parseInt(prevIndex);
+                        pageIndex = parseInt(pageIndex);
+                        
+                        if (pageIndex > prevIndex) {
+                            this.animationClass = 'animate-slide-in-right';
+                        } else if (pageIndex < prevIndex) {
+                            this.animationClass = 'animate-slide-in-left';
+                        } else {
+                            // Jika berada di indeks halaman yang sama
+                            if (categoryClicked === 'true') {
+                                this.animationClass = 'opacity-100'; // Langsung tampil utuh tanpa kedip
+                                sessionStorage.removeItem('categoryClicked');
+                            } else {
+                                this.animationClass = 'animate-fade-in';
+                            }
+                        }
+                    }
+                    
+                    sessionStorage.setItem('prevPageIndex', pageIndex);
+                }
+            }))
+        });
+    </script>
 </head>
-<body x-data="{ sidebarOpen: false }" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
-    {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
-    <x-cava.header 
-        :showProfile="false" 
-        title="CAVA" 
-        subtitle="Campus Venue Access"
-        role="public"
-        :active="$active"
-    />
+<body x-data="pageTransition({{ $currentIndex }})" class="bg-[#FAFAFC] text-[#1D1D1F] antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    {{-- 2. Area Konten Utama Halaman (Tanpa Sidebar) --}}
-    <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16">
+    <nav class="fixed w-full z-40 glass-panel">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center">
+            <!-- Kiri: Logo -->
+            <div class="flex-1 flex justify-start">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold tracking-tight text-lg hover:opacity-80 transition">
+                    <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo CAVA" class="w-8 h-8 object-contain">
+                    <span>CAVA.</span>
+                </a>
+            </div>
+            
+            <!-- Tengah: Menu Navigasi -->
+            <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium justify-center">
+                <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Beranda</a>
+                <a href="{{ route('public.catalog') }}" class="{{ $active === 'catalog' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Katalog</a>
+                <a href="{{ route('public.availability') }}" class="{{ $active === 'availability' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Matriks Jadwal</a>
+                <a href="{{ route('public.information') }}" class="{{ $active === 'information' ? 'text-[#1D1D1F]' : 'hover:text-[#1D1D1F] transition' }}">Informasi</a>
+            </div>
 
-        <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Kanan: Tombol Masuk -->
+            <div class="flex-1 flex justify-end">
+                <a href="{{ route('login') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">Masuk</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-col min-h-screen pt-16 opacity-0" :class="animationClass">
+        <main class="flex-1 w-full mx-auto">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
-
-        {{-- Footer --}}
-        <x-cava.footer />
+        <footer class="py-6 text-center text-xs text-[#86868B] mt-auto">
+            &copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus.
+        </footer>
     </div>
 
-
+    {{-- Cookie & Kebijakan Kampus Consent Banner (Apple-esque Floating Pill) --}}
+    <div x-data="{
+            accepted: document.cookie.split('; ').some(row => row.startsWith('cava_policy_accepted=1')),
+            acceptPolicy() {
+                document.cookie = 'cava_policy_accepted=1;path=/;max-age=' + (60 * 60 * 24 * 365);
+                this.accepted = true;
+            }
+         }"
+         x-show="!accepted"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-4"
+         class="fixed bottom-6 inset-x-6 sm:inset-x-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-gray-200/80 shadow-[0_12px_40px_rgb(0,0,0,0.08)] flex flex-col gap-3 text-xs text-[#1D1D1F]">
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 text-[20px] shrink-0 mt-0.5">cookie</span>
+            <div class="space-y-1">
+                <p class="font-bold text-[#1D1D1F]">Kebijakan & Privasi Layanan CAVA</p>
+                <p class="text-[#86868B] leading-relaxed">
+                    Sistem ini menggunakan cookies dan sesi lokal untuk menyimpan preferensi filter fasilitas dan kelancaran pengajuan reservasi Anda.
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-1 border-t border-gray-100">
+            <a href="{{ route('public.information', ['section' => 'kebijakan']) }}" class="px-3 py-1.5 text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
+                Pelajari Kebijakan
+            </a>
+            <button type="button" @click="acceptPolicy()" class="px-4 py-1.5 rounded-xl bg-[#1D1D1F] hover:bg-black text-white font-medium transition shadow-2xs cursor-pointer">
+                Setujui & Lanjutkan
+            </button>
+        </div>
+    </div>
 </body>
 </html>

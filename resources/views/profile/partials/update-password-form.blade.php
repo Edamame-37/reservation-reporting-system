@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : update-password-form.blade.php
+  FUNGSIONALITAS : Parsial Formulir Pembaruan Kata Sandi Akun Pengguna
+  DESKRIPSI      : Menampilkan input kata sandi saat ini, kata sandi baru (min 8 karakter), dan konfirmasi sandi baru.
+  CARA KERJA     : Mengirimkan HTTP PUT ke route('password.update') yang divalidasi PasswordController@update.
+--}}
+
 <section>
     <header>
         <h2 class="text-lg font-bold text-slate-900 tracking-tight">
@@ -15,7 +22,7 @@
 
         <div>
             <label for="update_password_current_password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{{ __('Kata Sandi Saat Ini') }}</label>
-            <input id="update_password_current_password" name="current_password" type="password" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="current-password" />
+            <input id="update_password_current_password" name="current_password" type="password" required class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="current-password" />
             @error('current_password', 'updatePassword')
                 <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
                     <span class="material-symbols-outlined text-[14px]">error</span>
@@ -26,7 +33,7 @@
 
         <div>
             <label for="update_password_password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{{ __('Kata Sandi Baru') }}</label>
-            <input id="update_password_password" name="password" type="password" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="new-password" />
+            <input id="update_password_password" name="password" type="password" required minlength="8" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="new-password" placeholder="Minimal 8 karakter" />
             @error('password', 'updatePassword')
                 <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
                     <span class="material-symbols-outlined text-[14px]">error</span>
@@ -37,7 +44,7 @@
 
         <div>
             <label for="update_password_password_confirmation" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{{ __('Konfirmasi Kata Sandi Baru') }}</label>
-            <input id="update_password_password_confirmation" name="password_confirmation" type="password" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="new-password" />
+            <input id="update_password_password_confirmation" name="password_confirmation" type="password" required minlength="8" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" autocomplete="new-password" placeholder="Ketik ulang kata sandi baru" />
             @error('password_confirmation', 'updatePassword')
                 <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
                     <span class="material-symbols-outlined text-[14px]">error</span>

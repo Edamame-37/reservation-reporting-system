@@ -20,32 +20,57 @@ class ReportManagementController extends Controller
 {
     /**
      * FUNCTION/PROCEDURE : index()
-     * KEGUNAAN           : Menampilkan lembar kerja manajemen tiket kerusakan fasilitas sarpras.
-     * CARA KERJA         : Mengambil seluruh tiket pengaduan kerusakan beserta relasi user dan facility menggunakan eager loading (with) guna mengeliminasi problem N+1, menghitung kuantitas statistik filter tab, dan mengembalikan view 'petugas.report-management'.
+     * KEGUNAAN           : Menampilkan lembar kerja manajemen tiket kerusakan fasilitas sarpras dengan paginasi server-side.
+     * CARA KERJA         : Mengambil tiket pengaduan kerusakan dengan filter status, pencarian server-side, paginasi paginate(10)->withQueryString(), serta relasi user, facility, dan handler.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        // 1. Penarikan Data Tiket Kerusakan dengan Eager Loading & Prioritas Status Aktif (FIFO)
-        $reports = DamageReport::with(['facility', 'user', 'handler'])
-            ->orderByRaw("CASE WHEN status = 'baru' THEN 0 WHEN status = 'diproses' THEN 1 ELSE 2 END")
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $currentStatus = $request->query('status', 'semua');
+        $search = $request->query('search');
 
-        // 2. Perhitungan Statistik Kuantitas Tiket untuk Tab Filter Antarmuka
-        $totalCount = $reports->count();
-        $newCount = $reports->where('status', 'baru')->count();
-        $inProgressCount = $reports->where('status', 'diproses')->count();
-        $resolvedCount = $reports->where('status', 'selesai')->count();
-        $rejectedCount = $reports->where('status', 'ditolak')->count();
+        $query = DamageReport::with(['facility', 'user', 'handler']);
 
-        // 3. Pengembalian View Antarmuka
+        if ($currentStatus && $currentStatus !== 'semua') {
+            $query->where('status', $currentStatus);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_code', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('identity_number', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('facility', function ($fq) use ($search) {
+                      $fq->where('name', 'like', "%{$search}%")
+                         ->orWhere('building', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $query->orderByRaw("CASE WHEN status = 'baru' THEN 0 WHEN status = 'diproses' THEN 1 ELSE 2 END")
+              ->orderBy('created_at', 'desc');
+
+        // Paginasi server-side (10 per halaman dengan persistensi query)
+        $reports = $query->paginate(10)->withQueryString();
+
+        // Kuantitas statistik agregat untuk tab filter
+        $totalCount = DamageReport::count();
+        $newCount = DamageReport::where('status', 'baru')->count();
+        $inProgressCount = DamageReport::where('status', 'diproses')->count();
+        $resolvedCount = DamageReport::where('status', 'selesai')->count();
+        $rejectedCount = DamageReport::where('status', 'ditolak')->count();
+
         return view('petugas.report-management', compact(
             'reports',
             'totalCount',
             'newCount',
             'inProgressCount',
             'resolvedCount',
-            'rejectedCount'
+            'rejectedCount',
+            'currentStatus',
+            'search'
         ));
     }
 

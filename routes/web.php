@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : web.php
  * FUNGSI       : Pendaftaran rute web aplikasi CAVA (Campus Venue Access)
- * DESKRIPSI    : Menyediakan pemetaan endpoint URL ke view mockup antarmuka Blade untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
- * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
+ * DESKRIPSI    : Menyediakan pemetaan endpoint URL terpusat untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
+ * CARA KERJA   : Menerima HTTP Request, menerapkan middleware autentikasi dan Spatie RBAC (role:admin, role:petugas), serta mengarahkan ke Controller terkait dengan integrasi basis data MySQL.
  */
 
 use App\Http\Controllers\DashboardPetugasController;
@@ -30,9 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 // ROUTE: Menerima GET request ke root domain ('/')
 // FUNGSI: Menampilkan halaman beranda (landing page) publik CAVA
-Route::get('/', function () {
-    return view('public.home');
-})->name('home');
+Route::get('/', [PublicFacilityController::class, 'home'])->name('home');
 
 
 // ROUTE: Menerima GET request ke '/public/catalog'
@@ -50,7 +48,7 @@ Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMat
 Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
 // API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
-Route::get('/api/facilities/search', [PublicFacilityController::class, 'autocomplete'])->name('api.facilities.search');
+Route::get('/api/facilities/search', [PublicFacilityController::class, 'searchSuggestions'])->name('api.facilities.search');
 
 // ROUTE: Menerima GET request ke '/informasi/{section?}'
 // FUNGSI: Menampilkan pusat informasi publik (Kebijakan, Syarat & Ketentuan, dan Bantuan)
@@ -91,6 +89,15 @@ Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagement
 Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
 Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
 Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+
+// ROUTE: Mengubah status akun pengguna (Aktif <-> Non-aktif)
+Route::post('/admin/users/{id}/toggle-status', [AdminUserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+
+// ROUTE: Soft delete akun pengguna (Pindahkan ke tab Non-aktif/Dihapus)
+Route::delete('/admin/users/{id}', [AdminUserManagementController::class, 'destroy'])->name('admin.users.destroy');
+
+// ROUTE: Memulihkan akun pengguna yang di-soft delete atau dinonaktifkan
+Route::post('/admin/users/{id}/restore', [AdminUserManagementController::class, 'restore'])->name('admin.users.restore');
 
 // Master Fasilitas Routes
 Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
@@ -141,6 +148,11 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     // FUNGSI: Menampilkan lembar kerja manajemen dan seluruh antrean persetujuan reservasi (PTG-02 / US-9)
     Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
     Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
+
+    // ROUTE: Menerima GET request ke '/petugas/schedule-matrix'
+    // FUNGSI: Menampilkan matriks jadwal slot 30m operasional untuk peninjauan detail pemohon & reservasi petugas
+    Route::get('/petugas/schedule-matrix', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'index'])->name('petugas.schedule-matrix');
+    Route::get('/api/petugas/matrix/{date}', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'getMatrixData'])->name('api.petugas.matrix');
 
     // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/approve'
     // FUNGSI: Menyetujui permohonan reservasi dengan validasi anti-bentrok jadwal (PTG-02 / US-9)

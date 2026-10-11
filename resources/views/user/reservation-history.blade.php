@@ -1,313 +1,469 @@
 {{-- 
   NAMA FILE      : reservation-history.blade.php
-  FUNGSIONALITAS : Halaman Lengkap Riwayat, Detail, dan Pembatalan Reservasi Pengguna (USR-02 & USR-03)
-  DESKRIPSI      : Menampilkan daftar seluruh tiket permohonan reservasi pengguna dari basis data dengan tab filter status, pencarian dinamis, modal detail lengkap, modal konfirmasi pembatalan mandiri batas H-1, dan paginasi.
-  CARA KERJA     : Menerima koleksi $reservations dari ReservationController@history, menyediakan filter URL query parameters, serta modal pop-up interaktif via Alpine.js.
+  FUNGSIONALITAS : Halaman Terpadu Reservasi & Riwayat Peminjaman Ruang Kampus (USR-01, USR-02, USR-03)
+  DESKRIPSI      : Antarmuka Apple-esque Bento modern yang mengintegrasikan riwayat peminjaman fasilitas, 
+                   metrik status, pencarian dinamis, tab filter underline, modal detail tiket lengkap, 
+                   modal konfirmasi pembatalan mandiri H-1, serta modal formulir pengajuan reservasi terpadu.
+                   Mengadopsi Status Opsi B: Pure Typographic (bebas dari bulatan titik/dot dan ikon mikro pada status).
+  CARA KERJA     : Menerima $reservations, $counts, $activeStatus, dan $facilities dari ReservationController@history. 
+                   Formulir permohonan baru dan aksi pembatalan dikelola secara reaktif via Alpine.js.
 --}}
 
-<x-app-layout title="Riwayat Lengkap Reservasi Saya" active="reservation-history">
+<x-app-layout title="Riwayat Reservasi Saya" active="reservation-history">
+    @php
+        $timeSlots = [
+            '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
+            '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+            '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+            '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+            '19:00', '19:30', '20:00'
+        ];
+
+        // Format data fasilitas ke JSON untuk hierarki 3 dropdown bertingkat di formulir modal
+        $facilitiesMap = [];
+        $hierarchy = [];
+
+        if (isset($facilities)) {
+            foreach ($facilities as $f) {
+                $facilitiesMap[$f->id] = [
+                    'id'       => $f->id,
+                    'code'     => $f->code,
+                    'name'     => $f->name,
+                    'building' => $f->building,
+                    'floor'    => $f->floor_location ?? 'Lantai 1',
+                    'capacity' => $f->capacity,
+                    'category' => ucfirst($f->category),
+                ];
+
+                $bName = $f->building;
+                $floorName = 'Lantai 1';
+                if (preg_match('/Lantai\s*(\d+)/i', $f->floor_location ?? '', $matches)) {
+                    $floorName = 'Lantai ' . $matches[1];
+                } elseif (!empty($f->floor_location)) {
+                    $floorName = $f->floor_location;
+                }
+
+                if (!isset($hierarchy[$bName])) {
+                    $hierarchy[$bName] = [];
+                }
+                if (!isset($hierarchy[$bName][$floorName])) {
+                    $hierarchy[$bName][$floorName] = [];
+                }
+
+                $hierarchy[$bName][$floorName][] = [
+                    'id'       => $f->id,
+                    'code'     => $f->code,
+                    'name'     => $f->name,
+                    'capacity' => $f->capacity,
+                ];
+            }
+        }
+
+        $initFacility = isset($facilities) ? $facilities->first() : null;
+        $initBuilding = $initFacility ? $initFacility->building : (array_key_first($hierarchy) ?? '');
+        $initFloor = 'Lantai 1';
+        if ($initFacility && preg_match('/Lantai\s*(\d+)/i', $initFacility->floor_location ?? '', $matches)) {
+            $initFloor = 'Lantai ' . $matches[1];
+        } elseif ($initFacility && !empty($initFacility->floor_location)) {
+            $initFloor = $initFacility->floor_location;
+        }
+        $initFacilityId = $initFacility ? (string) $initFacility->id : '';
+    @endphp
+
     <div x-data="{
+        showCreateModal: {{ $errors->any() || request('action') === 'create' ? 'true' : 'false' }},
         showDetailModal: false,
         showCancelModal: false,
         selectedTicket: null,
+        submitting: false,
+
+        hierarchy: {{ json_encode($hierarchy) }},
+        facilitiesData: {{ json_encode($facilitiesMap) }},
+        selectedBuilding: '{{ $initBuilding }}',
+        selectedFloor: '{{ $initFloor }}',
+        selectedFacilityId: '{{ $initFacilityId }}',
+        selectedDate: '{{ old('reservation_date', date('Y-m-d', strtotime('+1 day'))) }}',
+        selectedStart: '{{ old('start_time', '09:00') }}',
+        selectedEnd: '{{ old('end_time', '11:00') }}',
+
+        get availableBuildings() {
+            return Object.keys(this.hierarchy);
+        },
+
+        get availableFloors() {
+            if (!this.selectedBuilding || !this.hierarchy[this.selectedBuilding]) {
+                return [];
+            }
+            return Object.keys(this.hierarchy[this.selectedBuilding]);
+        },
+
+        get availableRooms() {
+            if (!this.selectedBuilding || !this.selectedFloor || 
+                !this.hierarchy[this.selectedBuilding] || 
+                !this.hierarchy[this.selectedBuilding][this.selectedFloor]) {
+                return [];
+            }
+            return this.hierarchy[this.selectedBuilding][this.selectedFloor];
+        },
+
+        onBuildingChange() {
+            const floors = this.availableFloors;
+            if (floors.length > 0) {
+                this.selectedFloor = floors[0];
+                this.onFloorChange();
+            } else {
+                this.selectedFloor = '';
+                this.selectedFacilityId = '';
+            }
+        },
+
+        onFloorChange() {
+            const rooms = this.availableRooms;
+            if (rooms.length > 0) {
+                this.selectedFacilityId = String(rooms[0].id);
+            } else {
+                this.selectedFacilityId = '';
+            }
+        },
+
+        get currentVenue() {
+            return this.facilitiesData[this.selectedFacilityId] || {
+                name: 'Pilih Ruangan Kampus',
+                building: 'Lokasi Gedung',
+                capacity: '-',
+                category: '-'
+            };
+        },
+
         openDetail(t) {
             this.selectedTicket = t;
             this.showDetailModal = true;
         },
+
         openCancel(t) {
             this.selectedTicket = t;
             this.showCancelModal = true;
         }
-    }">
+    }" class="space-y-10 font-sans text-[#1D1D1F]">
 
-        {{-- Breadcrumb & Header --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Riwayat Lengkap Reservasi</span>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Riwayat Lengkap Permohonan Reservasi</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Daftar seluruh reservasi aktif dan arsip peminjaman ruang Anda di universitas.</p>
-                </div>
-                <a href="{{ url('/user/reservation-form') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition shadow-xs">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span>Ajukan Reservasi Baru</span>
-                </a>
-            </div>
+        {{-- Toolbar Aksi Cepat (Judul halaman telah terwakili pada Universal Top Header) --}}
+        <div class="flex items-center justify-end">
+            <button type="button" 
+                    @click="showCreateModal = true" 
+                    class="bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-black transition text-sm shadow-xs flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>Permohonan Baru</span>
+            </button>
         </div>
 
-        {{-- Flash Session Sukses --}}
+        {{-- Flash Session Notifikasi Sukses --}}
         @if (session('success'))
-            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-emerald-600 text-[24px]">check_circle</span>
+            <div class="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-900 flex items-center gap-3">
+                <span class="material-symbols-outlined text-emerald-600 text-[22px] shrink-0">check_circle</span>
                 <div>
-                    <h4 class="text-sm font-bold">Berhasil!</h4>
-                    <p class="text-xs text-emerald-700">{{ session('success') }}</p>
+                    <h4 class="text-sm font-bold">Permohonan Berhasil!</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
                 </div>
             </div>
         @endif
 
-        {{-- Flash Session Error / Validation Error --}}
+        {{-- Flash Session Error / Validation Errors --}}
         @if ($errors->any())
-            <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-rose-600 text-[24px]">error</span>
+            <div class="p-5 rounded-2xl bg-rose-50 border border-rose-100 text-rose-900 flex items-start gap-3">
+                <span class="material-symbols-outlined text-rose-600 text-[22px] shrink-0 mt-0.5">error</span>
                 <div>
-                    <h4 class="text-sm font-bold">Terjadi Kesalahan!</h4>
-                    @foreach ($errors->all() as $error)
-                        <p class="text-xs text-rose-700">{{ $error }}</p>
-                    @endforeach
+                    <h4 class="text-sm font-bold">Pengajuan Tidak Dapat Diproses:</h4>
+                    <ul class="list-disc list-inside text-xs text-rose-700 mt-1 space-y-0.5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         @endif
 
-        {{-- Panel Filter & Pencarian --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 mb-6 shadow-xs">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                {{-- Tab Filter Status --}}
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-2 lg:pb-0 scrollbar-none text-xs font-semibold">
-                    @php
-                        $statusTabs = [
-                            'all'       => ['label' => 'Semua', 'count' => $counts['all'] ?? 0],
-                            'pending'   => ['label' => 'Menunggu', 'count' => $counts['pending'] ?? 0],
-                            'approved'  => ['label' => 'Disetujui', 'count' => $counts['approved'] ?? 0],
-                            'rejected'  => ['label' => 'Ditolak', 'count' => $counts['rejected'] ?? 0],
-                            'cancelled' => ['label' => 'Dibatalkan', 'count' => $counts['cancelled'] ?? 0],
-                        ];
-                    @endphp
+        {{-- 2. REKAPITULASI METRIK BENTO (AIRY & CLEAN) --}}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {{-- Metrik 1: Semua --}}
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'all', 'page' => 1]) }}" 
+               class="p-6 rounded-[2rem] transition-all {{ $activeStatus === 'all' ? 'bg-[#1D1D1F] text-white shadow-sm' : 'bg-[#F9F9FB] text-[#1D1D1F] hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]' }}">
+                <span class="text-xs font-medium block opacity-70">Semua Tiket</span>
+                <span class="text-2xl sm:text-3xl font-bold mt-2 block">{{ $counts['all'] ?? 0 }}</span>
+            </a>
 
-                    @foreach ($statusTabs as $key => $tab)
-                        @php
-                            $isActive = ($activeStatus === $key);
-                            $url = request()->fullUrlWithQuery(['status' => $key, 'page' => 1]);
-                        @endphp
-                        <a href="{{ $url }}" 
-                           class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap {{ $isActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200/70' }}">
-                            <span>{{ $tab['label'] }}</span>
-                            <span class="px-1.5 py-0.5 rounded-full text-[10px] {{ $isActive ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                {{ $tab['count'] }}
-                            </span>
-                        </a>
-                    @endforeach
-                </div>
+            {{-- Metrik 2: Menunggu --}}
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1]) }}" 
+               class="p-6 rounded-[2rem] transition-all {{ $activeStatus === 'pending' ? 'bg-[#1D1D1F] text-white shadow-sm' : 'bg-[#F9F9FB] text-[#1D1D1F] hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]' }}">
+                <span class="text-xs font-medium block opacity-70">Menunggu</span>
+                <span class="text-2xl sm:text-3xl font-bold mt-2 block text-amber-700 {{ $activeStatus === 'pending' ? '!text-white' : '' }}">{{ $counts['pending'] ?? 0 }}</span>
+            </a>
 
-                {{-- Kolom Pencarian Kata Kunci --}}
-                <form action="{{ url()->current() }}" method="GET" class="relative w-full lg:w-72">
-                    @if (request('status') && request('status') !== 'all')
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                    @endif
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-                    <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}" 
-                           placeholder="Cari kode tiket, fasilitas..." 
-                           class="w-full pl-9 pr-8 py-2 rounded-xl border-slate-200 text-xs focus:border-slate-900 focus:ring-slate-900 placeholder-slate-400">
-                    @if (request('search'))
-                        <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                        </a>
-                    @endif
-                </form>
+            {{-- Metrik 3: Disetujui --}}
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'approved', 'page' => 1]) }}" 
+               class="p-6 rounded-[2rem] transition-all {{ $activeStatus === 'approved' ? 'bg-[#1D1D1F] text-white shadow-sm' : 'bg-[#F9F9FB] text-[#1D1D1F] hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]' }}">
+                <span class="text-xs font-medium block opacity-70">Disetujui</span>
+                <span class="text-2xl sm:text-3xl font-bold mt-2 block text-emerald-800 {{ $activeStatus === 'approved' ? '!text-white' : '' }}">{{ $counts['approved'] ?? 0 }}</span>
+            </a>
 
-            </div>
+            {{-- Metrik 4: Ditolak / Batal --}}
+            <a href="{{ request()->fullUrlWithQuery(['status' => 'cancelled', 'page' => 1]) }}" 
+               class="p-6 rounded-[2rem] transition-all {{ in_array($activeStatus, ['rejected', 'cancelled']) ? 'bg-[#1D1D1F] text-white shadow-sm' : 'bg-[#F9F9FB] text-[#1D1D1F] hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]' }}">
+                <span class="text-xs font-medium block opacity-70">Ditolak / Batal</span>
+                <span class="text-2xl sm:text-3xl font-bold mt-2 block text-rose-700 {{ in_array($activeStatus, ['rejected', 'cancelled']) ? '!text-white' : '' }}">{{ ($counts['rejected'] ?? 0) + ($counts['cancelled'] ?? 0) }}</span>
+            </a>
         </div>
 
-        {{-- Tabel Data Riwayat --}}
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50/75 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                        <tr>
-                            <th class="py-3 px-4">Kode Tiket</th>
-                            <th class="py-3 px-4">Ruang & Gedung</th>
-                            <th class="py-3 px-4">Jadwal & Waktu</th>
-                            <th class="py-3 px-4">Keperluan / Acara</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse ($reservations as $res)
-                            @php
-                                $isHMinus1 = false;
-                                try {
-                                    $resDateTime = \Carbon\Carbon::parse($res->reservation_date)->setTimeFromTimeString($res->start_time);
-                                    // Sesuai Aturan BR-USR03-02: Selisih waktu minimal 24 jam (86400 detik) dari now()
-                                    $isHMinus1 = in_array($res->status, ['pending', 'approved']) && now()->diffInSeconds($resDateTime, false) >= 86400;
-                                } catch (\Exception $e) {
-                                    $isHMinus1 = false;
-                                }
+        {{-- 3. SEARCH BAR & FILTER AKTIF (DESAIN MENGIKUTI PUBLIC CATALOG) --}}
+        <div id="daftar-reservasi" class="space-y-3 scroll-mt-6">
+            <form action="{{ url()->current() }}" method="GET" class="w-full">
+                @if (request('status') && request('status') !== 'all')
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request('search') }}" 
+                               placeholder="Cari berdasarkan nama ruang, gedung, atau kegiatan..." 
+                               class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-sm md:text-base bg-transparent text-[#1D1D1F] placeholder:text-[#86868B]" 
+                               autocomplete="off">
+                        @if (request('search'))
+                            <a href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => 1]) }}" 
+                               class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 flex items-center justify-center" 
+                               title="Hapus kata kunci pencarian">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </a>
+                        @endif
+                        <button type="submit" 
+                                class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition shrink-0 cursor-pointer shadow-sm">
+                            Cari
+                        </button>
+                    </div>
+                </div>
+            </form>
 
-                                $ticketData = [
-                                    'db_id'       => $res->id,
-                                    'id'          => $res->ticket_code,
-                                    'venue'       => $res->facility->name ?? 'Fasilitas Kampus',
-                                    'building'    => ($res->facility->building ?? 'Gedung Kampus') . ($res->facility->floor_location ? ' - ' . $res->facility->floor_location : ''),
-                                    'date'        => \Carbon\Carbon::parse($res->reservation_date)->translatedFormat('d M Y'),
-                                    'time'        => substr($res->start_time, 0, 5) . ' - ' . substr($res->end_time, 0, 5) . ' WIB',
-                                    'slots'       => $res->total_slots ?? 1,
-                                    'purpose'     => $res->purpose,
-                                    'participants'=> $res->participants_count ?? 1,
-                                    'status'      => $res->status,
-                                    'reviewer'    => $res->reviewer->name ?? 'Belum Diverifikasi',
-                                    'reviewed_at' => $res->reviewed_at ? \Carbon\Carbon::parse($res->reviewed_at)->translatedFormat('d M Y H:i') : null,
-                                    'officerNote' => $res->rejection_reason ?? $res->cancellation_reason ?? ($res->status === 'approved' ? 'Telah disetujui oleh Petugas Sarpras. Harap menjaga kebersihan fasilitas.' : ($res->status === 'cancelled' ? 'Reservasi telah dibatalkan.' : 'Sedang dalam antrean evaluasi dan verifikasi staf sarpras.')),
-                                    'canCancel'   => $isHMinus1,
-                                ];
-                            @endphp
-                            <tr class="hover:bg-slate-50/70 transition">
-                                <td class="py-3.5 px-4 font-mono font-bold text-slate-800">
-                                    {{ $res->ticket_code }}
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    <div class="font-bold text-slate-900">{{ $res->facility->name ?? 'Fasilitas Kampus' }}</div>
-                                    <div class="text-[11px] text-slate-500">{{ $res->facility->building ?? '-' }}</div>
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    <div class="text-slate-800 font-medium">
-                                        {{ \Carbon\Carbon::parse($res->reservation_date)->translatedFormat('d M Y') }}
-                                    </div>
-                                    <div class="text-[11px] text-slate-500 font-mono">
-                                        {{ substr($res->start_time, 0, 5) }} - {{ substr($res->end_time, 0, 5) }} WIB ({{ $res->total_slots ?? 1 }} Slot)
-                                    </div>
-                                </td>
-                                <td class="py-3.5 px-4 max-w-xs truncate text-slate-600" title="{{ $res->purpose }}">
-                                    {{ $res->purpose }}
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    @if ($res->status === 'pending')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Menunggu Persetujuan
-                                        </span>
-                                    @elseif ($res->status === 'approved')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-semibold">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                                            Disetujui Petugas
-                                        </span>
-                                    @elseif ($res->status === 'rejected')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-rose-50 text-rose-700 border border-rose-200/60 font-medium">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                            Ditolak
-                                        </span>
-                                    @elseif ($res->status === 'cancelled')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200 font-medium">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                            Dibatalkan
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                            {{ ucfirst($res->status) }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="py-3.5 px-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <button type="button" @click="openDetail({{ json_encode($ticketData) }})" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                                            Detail
-                                        </button>
-                                        @if ($isHMinus1)
-                                            <button type="button" @click="openCancel({{ json_encode($ticketData) }})" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold hover:bg-rose-100 transition" title="Batalkan Reservasi Mandiri (Maksimal H-1)">
-                                                Batalkan
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="py-12 px-4 text-center">
-                                    <div class="max-w-sm mx-auto flex flex-col items-center">
-                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
-                                            <span class="material-symbols-outlined text-[28px]">calendar_month</span>
-                                        </div>
-                                        <h4 class="text-sm font-bold text-slate-900 mb-1">Belum Ada Riwayat Reservasi</h4>
-                                        <p class="text-xs text-slate-500 mb-4">
-                                            @if (request('search') || request('status', 'all') !== 'all')
-                                                Tidak ditemukan reservasi yang sesuai dengan kriteria filter atau pencarian Anda.
-                                            @else
-                                                Anda belum pernah mengajukan permohonan reservasi fasilitas kampus.
-                                            @endif
-                                        </p>
-                                        <a href="{{ url('/user/reservation-form') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
-                                            <span class="material-symbols-outlined text-[16px]">add</span>
-                                            <span>Ajukan Reservasi Sekarang</span>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            {{-- Filter Aktif Pills (Pola Catalog) --}}
+            @if ((request('status') && request('status') !== 'all') || request()->filled('search'))
+                <div class="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                    <span class="text-xs font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
 
-            {{-- Navigasi Paginasi Laravel --}}
-            @if ($reservations->hasPages())
-                <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                    {{ $reservations->links() }}
+                    @if (request('status') && request('status') !== 'all')
+                        @php
+                            $statusLabels = [
+                                'pending'   => 'Menunggu',
+                                'approved'  => 'Disetujui',
+                                'rejected'  => 'Ditolak',
+                                'cancelled' => 'Ditolak / Batal',
+                            ];
+                            $statusLabel = $statusLabels[request('status')] ?? ucfirst(request('status'));
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-[#1D1D1F] border border-gray-200 shadow-sm">
+                            <span>Status: {{ $statusLabel }}</span>
+                            <a href="{{ request()->fullUrlWithQuery(['status' => 'all', 'page' => 1]) }}" 
+                               class="text-gray-400 hover:text-rose-600 transition" 
+                               title="Hapus filter status">
+                                <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                            </a>
+                        </span>
+                    @endif
+
+                    @if (request()->filled('search'))
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200 shadow-sm">
+                            <span>Pencarian: "{{ request('search') }}"</span>
+                            <a href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => 1]) }}" 
+                               class="text-blue-500 hover:text-blue-900 transition" 
+                               title="Hapus kata kunci pencarian">
+                                <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                            </a>
+                        </span>
+                    @endif
+
+                    {{-- Reset Seluruh Filter ke Tampilan Awal Riwayat Reservasi --}}
+                    <a href="{{ route('user.reservation-history') }}" 
+                       class="text-xs font-medium text-gray-500 hover:text-rose-600 underline px-2 py-1 transition ml-1">
+                        Hapus Semua
+                    </a>
                 </div>
             @endif
         </div>
 
-        {{-- Modal Detail Reservasi --}}
-        <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div @click.away="showDetailModal = false" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative">
-                <button type="button" @click="showDetailModal = false" class="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+        {{-- 4. DAFTAR KARTU RESERVASI BERSIH & LUAS (STATUS OPSI B: PURE TYPOGRAPHIC) --}}
+        <div class="space-y-4">
+            @forelse ($reservations as $res)
+                @php
+                    $isHMinus1 = false;
+                    try {
+                        $resDateTime = \Carbon\Carbon::parse($res->reservation_date)->setTimeFromTimeString($res->start_time);
+                        $isHMinus1 = in_array($res->status, ['pending', 'approved']) && now()->diffInSeconds($resDateTime, false) >= 86400;
+                    } catch (\Exception $e) {
+                        $isHMinus1 = false;
+                    }
 
-                <template x-if="selectedTicket">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 rounded-md bg-slate-100 font-mono text-xs font-bold text-slate-800" x-text="selectedTicket.id"></span>
-                            <span class="text-xs font-semibold text-slate-500">Detail Permohonan</span>
-                        </div>
-                        <h2 class="text-lg font-bold text-slate-900" x-text="selectedTicket.venue"></h2>
-                        <p class="text-xs text-slate-500 mb-4" x-text="selectedTicket.building"></p>
+                    $ticketData = [
+                        'db_id'       => $res->id,
+                        'id'          => $res->ticket_code,
+                        'venue'       => $res->facility->name ?? 'Fasilitas Kampus',
+                        'building'    => ($res->facility->building ?? 'Gedung Kampus') . ($res->facility->floor_location ? ' • ' . $res->facility->floor_location : ''),
+                        'capacity'    => ($res->facility->capacity ?? '-') . ' Kursi',
+                        'date'        => \Carbon\Carbon::parse($res->reservation_date)->isoFormat('dddd, D MMMM Y'),
+                        'time'        => substr($res->start_time, 0, 5) . ' - ' . substr($res->end_time, 0, 5) . ' WIB',
+                        'slots'       => $res->total_slots ?? 1,
+                        'purpose'     => $res->purpose,
+                        'participants'=> ($res->participants_count ?? 1) . ' Orang',
+                        'status'      => $res->status,
+                        'reviewer'    => $res->reviewer->name ?? 'Belum Diverifikasi',
+                        'reviewed_at' => $res->reviewed_at ? \Carbon\Carbon::parse($res->reviewed_at)->isoFormat('dddd, D MMMM Y • H:i') : null,
+                        'officerNote' => $res->rejection_reason ?? $res->cancellation_reason ?? ($res->status === 'approved' ? 'Telah disetujui oleh Petugas Sarpras. Harap menjaga kebersihan fasilitas.' : ($res->status === 'cancelled' ? 'Reservasi telah dibatalkan.' : 'Sedang dalam antrean evaluasi dan verifikasi staf sarpras.')),
+                        'canCancel'   => $isHMinus1,
+                    ];
+                @endphp
 
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4 space-y-2 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Tanggal Kegiatan:</span>
-                                <span class="font-bold text-slate-900" x-text="selectedTicket.date"></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Rentang Waktu:</span>
-                                <span class="font-mono font-bold text-slate-900" x-text="selectedTicket.time + ' (' + selectedTicket.slots + ' Slot)'"></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Estimasi Peserta:</span>
-                                <span class="font-bold text-slate-900" x-text="selectedTicket.participants + ' Orang'"></span>
-                            </div>
-                            <div class="pt-2 border-t border-slate-200/60">
-                                <span class="text-slate-500 block mb-0.5">Tujuan Penggunaan:</span>
-                                <span class="text-slate-800" x-text="selectedTicket.purpose"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <span class="text-xs font-bold text-slate-700 block mb-1">Catatan / Keterangan Resmi:</span>
-                            <div class="p-3 rounded-xl border text-xs" :class="selectedTicket.status === 'rejected' ? 'bg-rose-50 text-rose-800 border-rose-200' : (selectedTicket.status === 'cancelled' ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-blue-50/70 text-blue-900 border-blue-100')">
-                                <p x-text="selectedTicket.officerNote"></p>
-                                <template x-if="selectedTicket.reviewed_at">
-                                    <span class="block mt-1 text-[10px] text-slate-400" x-text="'Diverifikasi oleh: ' + selectedTicket.reviewer + ' pada ' + selectedTicket.reviewed_at"></span>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <div class="bg-white p-7 sm:p-8 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        
+                        <div class="space-y-2 flex-1">
+                            {{-- Status Opsi B: Pure Typographic Tanpa Dot dan Tanpa Ikon --}}
                             <div>
-                                <template x-if="selectedTicket.canCancel">
-                                    <button type="button" @click="showDetailModal = false; openCancel(selectedTicket)" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[15px]">cancel</span>
-                                        <span>Batalkan Tiket Ini</span>
-                                    </button>
-                                </template>
+                                @if ($res->status === 'approved')
+                                    <span class="text-xs font-semibold tracking-wide text-emerald-800">Disetujui</span>
+                                @elseif ($res->status === 'pending')
+                                    <span class="text-xs font-semibold tracking-wide text-amber-800">Menunggu Verifikasi</span>
+                                @elseif ($res->status === 'rejected')
+                                    <span class="text-xs font-semibold tracking-wide text-rose-700">Ditolak</span>
+                                @elseif ($res->status === 'cancelled')
+                                    <span class="text-xs font-semibold tracking-wide text-slate-500">Dibatalkan</span>
+                                @else
+                                    <span class="text-xs font-semibold tracking-wide text-slate-600 capitalize">{{ $res->status }}</span>
+                                @endif
                             </div>
-                            <button type="button" @click="showDetailModal = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
+
+                            <h3 class="text-xl font-bold text-[#1D1D1F]">
+                                {{ $res->facility->name ?? 'Fasilitas Kampus' }} • {{ $res->facility->building ?? 'Gedung' }}
+                            </h3>
+                            <p class="text-sm text-[#86868B]">{{ $res->purpose }}</p>
+                            
+                            <div class="text-xs text-[#86868B] pt-1">
+                                {{ \Carbon\Carbon::parse($res->reservation_date)->isoFormat('dddd, D MMMM Y') }} • {{ substr($res->start_time, 0, 5) }} - {{ substr($res->end_time, 0, 5) }} WIB • Kapasitas {{ $res->facility->capacity ?? '-' }} Kursi
+                            </div>
+                        </div>
+                        
+                        {{-- Tombol Aksi Bersih --}}
+                        <div class="flex items-center gap-3 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100">
+                            <button type="button" 
+                                    @click="openDetail({{ json_encode($ticketData) }})" 
+                                    class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
+                                Lihat Detail Tiket
+                            </button>
+
+                            @if ($isHMinus1)
+                                <button type="button" 
+                                        @click="openCancel({{ json_encode($ticketData) }})" 
+                                        class="text-xs font-medium text-red-600 hover:underline px-3 py-2">
+                                    Batalkan (H-1)
+                                </button>
+                            @endif
+                        </div>
+
+                    </div>
+                </div>
+            @empty
+                <div class="py-16 text-center rounded-[2rem] border border-dashed border-gray-200 bg-[#F9F9FB] space-y-3">
+                    <span class="material-symbols-outlined text-[36px] text-gray-400 font-light">calendar_today</span>
+                    <h4 class="text-base font-bold text-[#1D1D1F]">Belum Ada Riwayat Reservasi</h4>
+                    <p class="text-sm text-[#86868B] max-w-sm mx-auto">
+                        @if (request('search') || request('status', 'all') !== 'all')
+                            Tidak ditemukan permohonan reservasi yang cocok dengan kriteria pencarian Anda.
+                        @else
+                            Anda belum pernah mengajukan permohonan reservasi peminjaman ruangan kampus.
+                        @endif
+                    </p>
+                    <div class="pt-2">
+                        <button type="button" 
+                                @click="showCreateModal = true" 
+                                class="bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
+                            Ajukan Reservasi Baru
+                        </button>
+                    </div>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Navigasi Paginasi Laravel --}}
+        @if ($reservations->hasPages())
+            <div class="pt-4">
+                {{ $reservations->links() }}
+            </div>
+        @endif
+
+        {{-- ========================================================================= --}}
+        {{-- MODAL 1: DETAIL LENGKAP TIKET RESERVASI (APPLE-ESQUE PURE TYPOGRAPHY)     --}}
+        {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+        {{-- ========================================================================= --}}
+        <template x-teleport="body">
+            <div x-show="showDetailModal" 
+                 x-cloak 
+                 class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+                 @click.self="showDetailModal = false">
+                <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
+                <template x-if="selectedTicket">
+                    <div class="space-y-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold text-[#1D1D1F]" x-text="selectedTicket.venue"></h3>
+                                <p class="text-sm text-[#86868B]" x-text="selectedTicket.building"></p>
+                            </div>
+                            <button @click="showDetailModal = false" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-gray-200 text-[#1D1D1F] flex items-center justify-center transition">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        </div>
+
+                        {{-- Status Opsi B: Pure Typographic --}}
+                        <div class="p-4 rounded-xl bg-[#F9F9FB] space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-[#86868B]">Status Verifikasi:</span>
+                                <div>
+                                    <span class="text-xs font-semibold tracking-wide"
+                                          :class="selectedTicket.status === 'approved' ? 'text-emerald-800' : (selectedTicket.status === 'pending' ? 'text-amber-800' : (selectedTicket.status === 'rejected' ? 'text-rose-700' : 'text-slate-500'))"
+                                          x-text="selectedTicket.status === 'approved' ? 'Disetujui' : (selectedTicket.status === 'pending' ? 'Menunggu Verifikasi' : (selectedTicket.status === 'rejected' ? 'Ditolak' : (selectedTicket.status === 'cancelled' ? 'Dibatalkan' : selectedTicket.status)))"></span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-[#86868B]" x-text="selectedTicket.officerNote"></div>
+                            <template x-if="selectedTicket.reviewed_at">
+                                <div class="text-[11px] text-[#86868B] pt-1">
+                                    Diverifikasi oleh: <span class="font-medium text-[#1D1D1F]" x-text="selectedTicket.reviewer"></span> • <span x-text="selectedTicket.reviewed_at"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Sesi & Waktu --}}
+                        <div class="grid grid-cols-2 gap-3 text-[13px]">
+                            <div class="p-3.5 rounded-2xl bg-[#F5F5F7]">
+                                <span class="text-[11px] text-[#86868B] block">Tanggal Kegiatan</span>
+                                <span class="font-semibold text-[#1D1D1F]" x-text="selectedTicket.date"></span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-[#F5F5F7]">
+                                <span class="text-[11px] text-[#86868B] block">Sesi Waktu</span>
+                                <span class="font-semibold text-[#1D1D1F]" x-text="selectedTicket.time"></span>
+                            </div>
+                        </div>
+
+                        {{-- Keperluan --}}
+                        <div>
+                            <span class="text-[12px] font-semibold text-[#86868B] block mb-1">Peruntukan Kegiatan:</span>
+                            <p class="text-[13px] text-[#1D1D1F] bg-[#FAFAFC] p-3.5 rounded-2xl border border-black/[0.04]" x-text="selectedTicket.purpose"></p>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+                            <template x-if="selectedTicket.canCancel">
+                                <button type="button" 
+                                        @click="showDetailModal = false; openCancel(selectedTicket)" 
+                                        class="px-4 py-2.5 rounded-xl text-xs font-medium text-red-600 hover:underline">
+                                    Batalkan Reservasi
+                                </button>
+                            </template>
+                            <button @click="showDetailModal = false" class="px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-[13px] font-medium hover:bg-black transition">
                                 Tutup
                             </button>
                         </div>
@@ -315,54 +471,240 @@
                 </template>
             </div>
         </div>
+    </template>
 
-        {{-- Modal Konfirmasi Pembatalan Mandiri H-1 (USR-03) --}}
-        <div x-show="showCancelModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div @click.away="showCancelModal = false" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+    {{-- ========================================================================= --}}
+    {{-- MODAL 2: KONFIRMASI PEMBATALAN MANDIRI (BATAS MINIMAL H-1)                 --}}
+    {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+    {{-- ========================================================================= --}}
+    <template x-teleport="body">
+        <div x-show="showCancelModal" 
+             x-cloak 
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+             @click.self="showCancelModal = false">
+            <div class="bg-white w-full max-w-md rounded-[32px] p-7 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-5 font-sans my-auto">
                 <template x-if="selectedTicket">
-                    <form :action="'{{ url('/user/reservations') }}/' + selectedTicket.db_id + '/cancel'" method="POST">
-                        @csrf
-                        @method('DELETE')
-
-                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
-                            <span class="material-symbols-outlined text-[28px]">warning</span>
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[26px]">event_busy</span>
                         </div>
-                        <h3 class="text-base font-bold text-slate-900 text-center mb-1">Batalkan Permohonan Reservasi?</h3>
-                        <p class="text-xs text-slate-500 text-center mb-4 leading-relaxed">
-                            Tindakan ini akan membatalkan tiket <strong class="font-mono text-slate-800" x-text="selectedTicket.id"></strong> untuk peminjaman <strong class="text-slate-800" x-text="selectedTicket.venue"></strong>. Fasilitas akan langsung dilepas dan kembali tersedia untuk umum.
-                        </p>
+                        
+                        <div>
+                            <h3 class="text-[18px] font-bold text-[#1D1D1F]">Batalkan Reservasi Ruangan?</h3>
+                            <p class="text-[13px] text-[#86868B] mt-1">
+                                Sesuai ketentuan kampus, pembatalan mandiri hanya dapat dilakukan minimal <strong>1 hari sebelum (H-1)</strong> tanggal pelaksanaan kegiatan.
+                            </p>
+                            <div class="p-3 rounded-xl bg-[#F9F9FB] border border-gray-100 mt-3 text-[12px] text-[#1D1D1F] font-semibold" x-text="selectedTicket.venue"></div>
+                        </div>
 
-                        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 mb-4 text-xs space-y-1.5 text-slate-600">
-                            <div class="flex justify-between">
-                                <span>Tanggal Acara:</span>
-                                <span class="font-bold text-slate-800" x-text="selectedTicket.date"></span>
+                        <form :action="'{{ url('/user/reservations') }}/' + selectedTicket.db_id + '/cancel'" method="POST" class="space-y-3">
+                            @csrf
+                            @method('DELETE')
+
+                            <div>
+                                <label for="cancellation_reason" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-1.5">
+                                    Alasan Pembatalan (Opsional)
+                                </label>
+                                <textarea name="cancellation_reason" 
+                                          id="cancellation_reason" 
+                                          rows="2" 
+                                          maxlength="500" 
+                                          placeholder="Tuliskan alasan pembatalan kegiatan Anda (maks. 500 karakter)..." 
+                                          class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] p-3 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
                             </div>
-                            <div class="flex justify-between">
-                                <span>Waktu Peminjaman:</span>
-                                <span class="font-mono font-bold text-slate-800" x-text="selectedTicket.time"></span>
-                            </div>
-                        </div>
 
-                        <div class="mb-4 text-left">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">
-                                Alasan Pembatalan <span class="text-slate-400 font-normal">(Opsional)</span>
-                            </label>
-                            <textarea name="cancellation_reason" rows="2" class="w-full text-xs rounded-xl border-slate-200 focus:border-rose-500 focus:ring-rose-500 placeholder-slate-400" placeholder="Misal: Agenda acara dibatalkan oleh pimpinan atau dipindahkan tanggalnya..."></textarea>
-                        </div>
-
-                        <div class="flex items-center justify-center gap-2">
-                            <button type="button" @click="showCancelModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition">
-                                Kembali
-                            </button>
-                            <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-sm transition flex items-center justify-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px]">cancel</span>
-                                <span>Ya, Batalkan</span>
-                            </button>
+                            <div class="flex items-center justify-end gap-3 pt-2">
+                                <button type="button" 
+                                        @click="showCancelModal = false" 
+                                        class="px-4 py-2.5 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
+                                    Kembali
+                                </button>
+                                <button type="submit" 
+                                        class="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-xs">
+                                    Ya, Batalkan Reservasi
+                                </button>
                         </div>
                     </form>
-                </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>
+
+{{-- ========================================================================= --}}
+{{-- MODAL 3: FORM PENGAJUAN RESERVASI RUANGAN BARU                            --}}
+{{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+{{-- ========================================================================= --}}
+<template x-teleport="body">
+    <div x-show="showCreateModal" 
+         x-cloak 
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+         @click.self="showCreateModal = false">
+        <div class="bg-white w-full max-w-2xl rounded-[32px] p-7 sm:p-9 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
+                
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#1D1D1F]">Pengajuan Reservasi Ruang</h2>
+                        <p class="text-sm text-[#86868B] mt-0.5">Pilih ruangan akademik, tanggal pelaksanaan, dan slot waktu.</p>
+                    </div>
+                    <button type="button" 
+                            @click="showCreateModal = false" 
+                            class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-gray-200 text-[#1D1D1F] flex items-center justify-center transition">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
+
+                <form action="{{ route('user.reservations.store') }}" 
+                      method="POST" 
+                      @submit="submitting = true" 
+                      class="space-y-6">
+                    @csrf
+
+                    {{-- 1. Pemilihan Fasilitas Bertingkat --}}
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider">
+                            Pilih Ruangan Kampus <span class="text-rose-500">*</span>
+                        </label>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="building-select" class="block text-[11px] font-medium text-[#86868B] mb-1">Gedung</label>
+                                <select id="building-select" 
+                                        x-model="selectedBuilding" 
+                                        @change="onBuildingChange()" 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                    <template x-for="b in availableBuildings" :key="b">
+                                        <option :value="b" x-text="b" :selected="b === selectedBuilding"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="floor-select" class="block text-[11px] font-medium text-[#86868B] mb-1">Lantai</label>
+                                <select id="floor-select" 
+                                        x-model="selectedFloor" 
+                                        @change="onFloorChange()" 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                    <template x-for="f in availableFloors" :key="f">
+                                        <option :value="f" x-text="f" :selected="f === selectedFloor"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="room-select" class="block text-[11px] font-medium text-[#86868B] mb-1">Ruangan</label>
+                                <select id="room-select" 
+                                        name="facility_id" 
+                                        x-model="selectedFacilityId" 
+                                        required 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                    <template x-for="r in availableRooms" :key="r.id">
+                                        <option :value="String(r.id)" x-text="r.name" :selected="String(r.id) === selectedFacilityId"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Ringkasan Ruangan --}}
+                        <div class="p-3.5 rounded-xl bg-[#F9F9FB] text-xs text-[#86868B]">
+                            <strong class="text-[#1D1D1F]" x-text="currentVenue.name"></strong> • <span x-text="currentVenue.building"></span> • Kapasitas <span x-text="currentVenue.capacity"></span> Kursi
+                        </div>
+                    </div>
+
+                    {{-- 2. Tanggal & Waktu --}}
+                    <div class="space-y-3 pt-4 border-t border-gray-100">
+                        <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider">
+                            Waktu & Tanggal Kegiatan <span class="text-rose-500">*</span>
+                        </label>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="modal-date" class="block text-[11px] font-medium text-[#86868B] mb-1">Tanggal</label>
+                                <input type="date" 
+                                       id="modal-date" 
+                                       name="reservation_date" 
+                                       x-model="selectedDate" 
+                                       min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
+                                       required 
+                                       class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                            </div>
+
+                            <div>
+                                <label for="modal-start" class="block text-[11px] font-medium text-[#86868B] mb-1">Mulai</label>
+                                <select id="modal-start" 
+                                        name="start_time" 
+                                        x-model="selectedStart" 
+                                        required 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                    @foreach ($timeSlots as $slot)
+                                        <option value="{{ $slot }}">{{ $slot }} WIB</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="modal-end" class="block text-[11px] font-medium text-[#86868B] mb-1">Selesai</label>
+                                <select id="modal-end" 
+                                        name="end_time" 
+                                        x-model="selectedEnd" 
+                                        required 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                    @foreach ($timeSlots as $slot)
+                                        <option value="{{ $slot }}">{{ $slot }} WIB</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 3. Detail Kegiatan --}}
+                    <div class="space-y-3 pt-4 border-t border-gray-100">
+                        <div>
+                            <label for="modal-purpose" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-1.5">
+                                Tujuan / Nama Acara <span class="text-rose-500">*</span>
+                            </label>
+                            <textarea id="modal-purpose" 
+                                      name="purpose" 
+                                      rows="3" 
+                                      required 
+                                      minlength="10" 
+                                      maxlength="500" 
+                                      placeholder="Jelaskan nama agenda, organisasi penyelenggara, atau keperluan perkuliahan (10 - 500 karakter)..." 
+                                      class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-3.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="modal-participants" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-1.5">
+                                Estimasi Peserta <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   id="modal-participants" 
+                                   name="participants_count" 
+                                   value="{{ old('participants_count', 10) }}" 
+                                   min="1" 
+                                   max="2000" 
+                                   required 
+                                   class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button type="button" 
+                                @click="showCreateModal = false" 
+                                class="px-5 py-2.5 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                :disabled="submitting" 
+                                class="bg-[#1D1D1F] text-white px-7 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
+                            <span x-show="!submitting">Kirim Permohonan</span>
+                            <span x-show="submitting">Mengirimkan...</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+    </template>
 
     </div>
 </x-app-layout>

@@ -20,10 +20,10 @@
     <title>{{ $title }} | CAVA</title>
     <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
-    {{-- Tipografi Google Fonts & Ikon Material Symbols --}}
+    {{-- Tipografi Google Fonts: Inter, Outfit (Display), JetBrains Mono & Ikon Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
     {{-- Asset Vite (Tailwind CSS & JavaScript) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -36,9 +36,12 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        .font-sans { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .font-display { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body x-data="{ sidebarOpen: window.innerWidth >= 768, isLoaded: false }" x-init="$nextTick(() => { isLoaded = true })" class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+<body x-data="{ sidebarOpen: window.innerWidth >= 768, isLoaded: false }" x-init="$nextTick(() => { isLoaded = true })" class="bg-[#F5F5F7] font-sans text-[#1D1D1F] antialiased min-h-screen flex flex-col selection:bg-[#1D1D1F] selection:text-white">
     {{-- 1. Universal Top Header CAVA (Tinggi 64px) --}}
     <x-cava.header 
         :showProfile="true" 
@@ -47,6 +50,7 @@
         userIdentifier="Biro TIK & Rektorat"
         title="CAVA Admin" 
         subtitle="Campus Venue Access"
+        pageName="{{ $title }}"
     />
 
     {{-- 2. Sidebar Navigasi Kiri (Role: Admin) --}}
@@ -55,28 +59,11 @@
     {{-- 3. Area Konten Utama Halaman (Offset md:pl-64 untuk Sidebar) --}}
     <div :class="{'md:pl-64': sidebarOpen, 'transition-all duration-300': isLoaded}" class="flex-1 flex flex-col min-h-screen pt-16">
 
-        <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-            {{-- Governance Context Bar --}}
-            <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                        <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-sm font-bold text-slate-900">Konsol Tata Kelola Biro TIK & Rektorat</h1>
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                Sistem Beroperasi Normal
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-0.5">Otorisasi sentral akun sivitas, inventaris ruang akademik, dan analitik statuter universitas.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <span class="font-mono bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">Tahun Akademik 2024/2025</span>
-                </div>
-            </section>
+        <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            {{-- 
+              Area Konten Utama:
+              Diselaraskan 100% dengan Opsi 1 (max-w-7xl mx-auto px-4 sm:px-6 py-8)
+            --}}
 
             {{ $slot ?? '' }}
             @yield('content')

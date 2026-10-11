@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : update-profile-information-form.blade.php
+  FUNGSIONALITAS : Parsial Formulir Pembaruan Nama Lengkap & Email Pengguna
+  DESKRIPSI      : Menampilkan input nama dan email aktif pengguna dengan validasi real-time status verifikasi email.
+  CARA KERJA     : Mengirimkan HTTP PATCH ke route('profile.update') yang divalidasi oleh ProfileUpdateRequest.
+--}}
+
 <section>
     <header>
         <h2 class="text-lg font-bold text-slate-900 tracking-tight">
@@ -19,7 +26,7 @@
 
         <div>
             <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{{ __('Nama Lengkap') }}</label>
-            <input id="name" name="name" type="text" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
+            <input id="name" name="name" type="text" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition" value="{{ old('name', $user->name) }}" required maxlength="255" autofocus autocomplete="name" />
             @error('name')
                 <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
                     <span class="material-symbols-outlined text-[14px]">error</span>

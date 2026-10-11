@@ -33,8 +33,10 @@ class ReservationController extends Controller
             ->get();
 
         $selectedFacilityId = $request->query('facility_id');
+        // Ambil draft tersimpan dari session jika tersedia
+        $draft = session('reservation_draft', []);
 
-        return view('user.reservation-form', compact('facilities', 'selectedFacilityId'));
+        return view('user.reservation-form', compact('facilities', 'selectedFacilityId', 'draft'));
     }
 
     /**
@@ -105,6 +107,9 @@ class ReservationController extends Controller
                 'status'             => 'pending',
             ]);
 
+            // Bersihkan draft session setelah permohonan resmi tercatat
+            session()->forget('reservation_draft');
+
             return redirect()
                 ->route('user.reservation-history')
                 ->with('success', 'Permohonan reservasi untuk ' . $facility->name . ' (Kode Tiket: ' . $ticketCode . ') berhasil diajukan dan sedang menunggu verifikasi Petugas Sarpras.');
@@ -156,7 +161,12 @@ class ReservationController extends Controller
         // 6. Paginasi Hasil Kueri (Maksimal 10 Baris per Halaman - BR-USR02-05)
         $reservations = $query->paginate(10)->withQueryString();
 
-        return view('user.reservation-history', compact('reservations', 'counts', 'activeStatus', 'keyword'));
+        // 7. Ambil Seluruh Fasilitas Aktif untuk Form Pengajuan Reservasi Terpadu (Modal / Drawer)
+        $facilities = Facility::where('status', 'aktif')
+            ->orderBy('name')
+            ->get();
+
+        return view('user.reservation-history', compact('reservations', 'counts', 'activeStatus', 'keyword', 'facilities'));
     }
 
     /**
@@ -172,6 +182,13 @@ class ReservationController extends Controller
      */
     public function cancel(Request $request, int|string $id): RedirectResponse
     {
+        // 0. Validasi Input Payload Pembatalan
+        $request->validate([
+            'cancellation_reason' => ['nullable', 'string', 'max:500'],
+        ], [
+            'cancellation_reason.max' => 'Alasan pembatalan maksimal 500 karakter.',
+        ]);
+
         $userId = Auth::id();
 
         $reservation = Reservation::findOrFail($id);

@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : ConfirmablePasswordController.php
  * FUNGSI       : Controller konfirmasi kata sandi sebelum aksi krusial
- * DESKRIPSI    : Menangani formulir konfirmasi password (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Memvalidasi keberadaan input password tanpa kueri tabel users, lalu mengarahkan ke intended route.
+ * DESKRIPSI    : Menangani formulir konfirmasi kata sandi sebelum pengguna menjalankan operasi berisiko tinggi.
+ * CARA KERJA   : Memvalidasi kecocokan kata sandi aktif pengguna via Auth guard, mencatat timestamp konfirmasi ke sesi, lalu mengarahkan ke rute tujuan.
  */
 
 namespace App\Http\Controllers\Auth;
@@ -29,8 +29,8 @@ class ConfirmablePasswordController extends Controller
 
     /**
      * FUNCTION/PROCEDURE : store()
-     * KEGUNAAN           : Memvalidasi kata sandi terkonfirmasi.
-     * CARA KERJA         : [MODE MOCKUP] Pengecekan database dinonaktifkan sementara dan langsung menandai sesi password telah terkonfirmasi.
+     * KEGUNAAN           : Memvalidasi kata sandi pengguna sebelum melanjutkan aksi sensitif.
+     * CARA KERJA         : Memvalidasi kredensial via Auth::guard('web')->validate(), menyimpan waktu konfirmasi ke sesi, dan melanjutkan request.
      */
     public function store(Request $request): RedirectResponse
     {

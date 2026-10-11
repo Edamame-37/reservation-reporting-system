@@ -32,7 +32,8 @@ class StoreReservationRequest extends FormRequest
             'reservation_date' => ['required', 'date', 'after_or_equal:today'],
             'start_time'       => ['required', 'date_format:H:i', 'regex:/^(0[7-9]|1[0-9]|20):(00|30)$/'],
             'end_time'         => ['required', 'date_format:H:i', 'after:start_time', 'regex:/^(0[7-9]|1[0-9]|20):(00|30)$/'],
-            'purpose'          => ['required', 'string', 'min:10', 'max:500'],
+            'purpose'            => ['required', 'string', 'min:10', 'max:500'],
+            'participants_count' => ['nullable', 'integer', 'min:1', 'max:2000'],
         ];
     }
 
@@ -59,6 +60,9 @@ class StoreReservationRequest extends FormRequest
             'purpose.required'             => 'Tujuan penggunaan fasilitas wajib diisi.',
             'purpose.min'                  => 'Deskripsi tujuan minimal berisi 10 karakter agar dapat dievaluasi petugas.',
             'purpose.max'                  => 'Deskripsi tujuan maksimal 500 karakter.',
+            'participants_count.integer'   => 'Estimasi jumlah peserta harus berupa angka bulat.',
+            'participants_count.min'       => 'Estimasi jumlah peserta minimal 1 orang.',
+            'participants_count.max'       => 'Estimasi jumlah peserta maksimal 2000 orang.',
         ];
     }
 }

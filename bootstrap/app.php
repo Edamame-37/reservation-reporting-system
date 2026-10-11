@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : app.php
+ * FUNGSI       : Berkas bootstrap dan konfigurasi orkestrasi aplikasi Laravel 11
+ * DESKRIPSI    : Mengonfigurasi perutean (routing web, console, health check), alias middleware Spatie RBAC, dan penanganan exception API.
+ * CARA KERJA   : Membangun instance Application dengan konfigurasi terpusat (ApplicationBuilder) dan mengembalikan kernel aplikasi.
+ */
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;

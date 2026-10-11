@@ -2,7 +2,7 @@
 /**
  * NAMA FILE    : FacilitySeeder.php
  * FUNGSI       : Seeder inisialisasi master inventaris fasilitas dan ruang kampus
- * DESKRIPSI    : Menanamkan 6 fasilitas representatif kampus yang tertera pada rancangan mockup katalog dan matriks jadwal.
+ * DESKRIPSI    : Menanamkan 6 fasilitas representatif utama kampus untuk inisialisasi katalog ruangan dan matriks jadwal.
  * CARA KERJA   : Mengiterasi data array fasilitas dan mengeksekusi Facility::firstOrCreate() dengan atribut JSON equipment.
  */
 

@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : edit.blade.php
+  FUNGSIONALITAS : Halaman Induk Manajemen Profil Akun & Keamanan Pengguna
+  DESKRIPSI      : Menampilkan form pembaruan profil pengguna, ubah kata sandi, dan opsi penghapusan akun mandiri secara modular.
+  CARA KERJA     : Memilih layout dinamis sesuai peran pengguna (Admin/Petugas/User), lalu mengikutsertakan (include) formulir parsial profil.
+--}}
+
 @php
     $layout = 'app-layout';
     if(auth()->user()->hasRole('admin')) $layout = 'admin-layout';

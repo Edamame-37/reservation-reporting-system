@@ -2,6 +2,7 @@
   NAMA FILE      : report-form.blade.php
   FUNGSIONALITAS : Formulir Pelaporan Kerusakan & Malfungsi Fasilitas Kampus (USR-04)
   DESKRIPSI      : Form pengaduan malfungsi atau kerusakan fisik fasilitas kampus dengan dropdown dinamis, kategori kerusakan, deskripsi masalah, dan pratinjau unggah foto bukti (Maks 2MB).
+  DESAIN         : Opsi 1 (Apple-esque Bento) dengan styling borderless soft gray (bg-[#F5F5F7] border-0), tipografi bersih Outfit/Inter, tanpa AI slop / tanpa border hitam pekat.
   CARA KERJA     : Menerima koleksi $facilities dari ReportController@create, mengirimkan multipart POST ke user.reports.store, divalidasi via StoreDamageReportRequest.
 --}}
 
@@ -25,13 +26,7 @@
         fileName: '',
         imagePreview: null,
         fileError: '',
-        selectCategory(cat) {
-            if (this.selectedCategory === cat) {
-                this.selectedCategory = '';
-            } else {
-                this.selectedCategory = cat;
-            }
-        },
+
         handleFile(e) {
             const file = e.target.files[0];
             this.fileError = '';
@@ -61,6 +56,7 @@
                 reader.readAsDataURL(file);
             }
         },
+
         resetFile() {
             this.imagePreview = null;
             this.fileName = '';
@@ -68,45 +64,37 @@
             const input = document.getElementById('photo-file');
             if (input) input.value = '';
         }
-    }">
+    }" class="max-w-4xl mx-auto space-y-8">
 
-        {{-- Breadcrumb & Header --}}
-        <div class="mb-6">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                <a href="{{ url('/user/dashboard') }}" class="hover:text-slate-900 transition">Dasbor Saya</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-slate-900">Form Lapor Kerusakan</span>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pelaporan Kerusakan Sarana & Fasilitas</h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Sampaikan kendala fasilitas rusak atau malfungsi agar segera ditindaklanjuti oleh staf sarpras.</p>
-                </div>
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
-                    <span class="material-symbols-outlined text-[16px] text-amber-600">timer</span>
-                    <span>Target Respon SLA: &lt; 24 Jam</span>
-                </div>
-            </div>
+        {{-- Top Navigation & Indikator Status (Judul halaman telah terwakili pada Universal Top Header) --}}
+        <div class="flex items-center justify-between">
+            <a href="{{ route('user.report-history') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Kembali ke Riwayat Laporan</span>
+            </a>
+            <span class="text-xs font-semibold tracking-wide text-emerald-800">
+                Respon Petugas &lt; 24 Jam Kerja
+            </span>
         </div>
 
         {{-- Flash Session Sukses --}}
         @if (session('success'))
-            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-emerald-600 text-[24px]">check_circle</span>
+            <div class="p-6 rounded-[2rem] bg-emerald-50/70 border border-emerald-100 text-emerald-900 flex items-center gap-4">
+                <span class="material-symbols-outlined text-emerald-600 text-[24px] shrink-0">check_circle</span>
                 <div>
                     <h4 class="text-sm font-bold">Laporan Berhasil Terkirim!</h4>
-                    <p class="text-xs text-emerald-700">{{ session('success') }}</p>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
                 </div>
             </div>
         @endif
 
         {{-- Flash Session Error / Validation Errors --}}
         @if ($errors->any())
-            <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-rose-600 text-[24px]">error</span>
-                <div>
+            <div class="p-6 rounded-[2rem] bg-rose-50/70 border border-rose-100 text-rose-900 flex items-start gap-4">
+                <span class="material-symbols-outlined text-rose-600 text-[24px] shrink-0 mt-0.5">error</span>
+                <div class="space-y-1">
                     <h4 class="text-sm font-bold">Terdapat Kesalahan pada Formulir!</h4>
-                    <ul class="list-disc list-inside text-xs text-rose-700 mt-1 space-y-0.5">
+                    <ul class="list-disc list-inside text-xs text-rose-700 space-y-0.5">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -123,149 +111,135 @@
               method="POST" 
               enctype="multipart/form-data" 
               @submit="submitting = true" 
-              class="max-w-2xl bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs flex flex-col gap-6">
+              class="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
             @csrf
 
-            {{-- Fasilitas Bermasalah --}}
-            <div>
-                <label for="rep-facility" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                    Fasilitas / Ruangan yang Mengalami Kerusakan <span class="text-rose-500">*</span>
-                </label>
-                <select id="rep-facility" 
-                        name="facility_id" 
-                        required 
-                        class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border {{ $errors->has('facility_id') ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200' }} focus:border-slate-900 focus:bg-white focus:outline-none transition">
-                    <option value="">-- Pilih Fasilitas / Ruangan Kampus --</option>
-                    @if (isset($facilities))
-                        @foreach ($facilities as $facility)
-                            <option value="{{ $facility->id }}" {{ old('facility_id', $selectedFacilityId ?? '') == $facility->id ? 'selected' : '' }}>
-                                {{ $facility->name }} - {{ $facility->building ?? 'Kampus' }} (Kapasitas {{ $facility->capacity ?? '-' }} Orang)
-                            </option>
-                        @endforeach
-                    @endif
-                </select>
-                @error('facility_id')
-                    <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
-                        <span class="material-symbols-outlined text-[14px]">error</span>
-                        <span>{{ $message }}</span>
-                    </p>
-                @enderror
-            </div>
+            <div class="space-y-6">
+                {{-- 1. Fasilitas Bermasalah --}}
+                <div>
+                    <label for="rep-facility" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                        Fasilitas / Ruangan yang Mengalami Kerusakan <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="rep-facility" 
+                            name="facility_id" 
+                            required 
+                            class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3.5 rounded-xl text-sm {{ $errors->has('facility_id') ? 'ring-2 ring-rose-400 bg-rose-50/50' : '' }} focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
+                        <option value="">-- Pilih Fasilitas / Ruangan Kampus --</option>
+                        @if (isset($facilities))
+                            @foreach ($facilities as $facility)
+                                <option value="{{ $facility->id }}" {{ old('facility_id', $selectedFacilityId ?? '') == $facility->id ? 'selected' : '' }}>
+                                    {{ $facility->name }} - {{ $facility->building ?? 'Kampus' }} (Kapasitas {{ $facility->capacity ?? '-' }} Orang)
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('facility_id')
+                        <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            {{-- Kategori Kerusakan (Opsional) --}}
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                {{-- 2. Kategori Kerusakan --}}
+                <div>
+                    <label for="rep-category" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                         Kategori Kerusakan Sarana
                     </label>
-                    <span class="text-[11px] text-slate-500 font-medium">Opsional (dapat dilewati)</span>
-                </div>
-                <input type="hidden" name="category" :value="selectedCategory">
-
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($categories as $cat)
-                        <button type="button" 
-                                @click="selectCategory('{{ $cat }}')"
-                                :class="selectedCategory === '{{ $cat }}' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60'"
-                                class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5">
-                            <span x-show="selectedCategory === '{{ $cat }}'" class="material-symbols-outlined text-[14px]">check</span>
-                            <span>{{ $cat }}</span>
-                        </button>
-                    @endforeach
-                </div>
-                <p class="mt-1.5 text-[11px] text-slate-400">
-                    Jika jenis kerusakan tidak ada pada opsi di atas, Anda dapat melewatinya dan menguraikannya pada deskripsi di bawah.
-                </p>
-                @error('category')
-                    <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
-                        <span class="material-symbols-outlined text-[14px]">error</span>
-                        <span>{{ $message }}</span>
+                    <select id="rep-category" 
+                            name="category" 
+                            class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
+                        <option value="">-- Pilih Kategori Kendala (Opsional) --</option>
+                        @foreach ($categories as $cat)
+                            <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>
+                                {{ $cat }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1.5 text-xs text-[#86868B]">
+                        Pilih kategori yang paling sesuai atau dapat dikosongkan dan diuraikan pada deskripsi masalah.
                     </p>
-                @enderror
-            </div>
+                    @error('category')
+                        <p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            {{-- Deskripsi Masalah (Wajib) --}}
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <label for="rep-desc" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Deskripsi Masalah / Lokasi Spesifik <span class="text-rose-500">*</span>
+                {{-- 3. Deskripsi Masalah (Wajib) --}}
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="rep-desc" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider">
+                            Deskripsi Rinci Kendala / Lokasi Spesifik <span class="text-rose-500">*</span>
+                        </label>
+                        <span class="text-xs text-[#86868B]">Minimal 10 karakter</span>
+                    </div>
+                    <textarea id="rep-desc" 
+                              name="description" 
+                              rows="5" 
+                              required 
+                              minlength="10" 
+                              maxlength="1000" 
+                              placeholder="Jelaskan secara spesifik kerusakan yang terjadi, misalnya: 'Unit AC di dekat pintu keluar mengeluarkan suara bising dan proyektor tidak merespon saat disambungkan ke kabel HDMI di meja dosen...' (Maks. 1.000 karakter)" 
+                              class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm {{ $errors->has('description') ? 'ring-2 ring-rose-400 bg-rose-50/50' : '' }} focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition leading-relaxed">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- 4. Upload Foto Bukti --}}
+                <div>
+                    <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                        Unggah Foto Bukti Kerusakan <span class="text-rose-500">*</span>
+                        <span class="text-[#86868B] font-normal lowercase">(Maks. 2 MB - JPG/PNG)</span>
                     </label>
-                    <span class="text-[11px] text-rose-600 font-semibold">Wajib Diisi (Min. 10 karakter)</span>
+                    
+                    {{-- Banner Error Klien --}}
+                    <div x-show="fileError" x-cloak class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-rose-600">warning</span>
+                        <span x-text="fileError"></span>
+                    </div>
+
+                    <div class="border border-dashed border-gray-200 bg-[#F9F9FB] rounded-2xl p-8 text-center hover:bg-gray-50 transition relative">
+                        <input type="file" 
+                               id="photo-file" 
+                               name="attachment_photo" 
+                               accept="image/png, image/jpeg, image/jpg" 
+                               required 
+                               @change="handleFile" 
+                               class="hidden">
+                        
+                        <template x-if="!imagePreview">
+                            <div class="flex flex-col items-center">
+                                <span class="material-symbols-outlined text-[#86868B] text-[40px] mb-2 font-light">add_photo_alternate</span>
+                                <div class="text-sm font-medium text-[#1D1D1F]">Pilih foto bukti dari perangkat Anda</div>
+                                <div class="text-xs text-[#86868B] mt-0.5">Format file JPG atau PNG hingga ukuran 2 MB</div>
+                                <label for="photo-file" class="mt-4 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-medium text-[#1D1D1F] hover:bg-gray-50 shadow-xs cursor-pointer transition">
+                                    Telusuri Foto
+                                </label>
+                            </div>
+                        </template>
+
+                        <template x-if="imagePreview">
+                            <div class="flex flex-col items-center">
+                                <img :src="imagePreview" alt="Pratinjau Foto" class="h-48 w-auto object-cover rounded-2xl border border-gray-100 mb-3 shadow-xs">
+                                <div class="text-xs font-mono font-medium text-[#1D1D1F] truncate max-w-xs" x-text="fileName"></div>
+                                <button type="button" @click="resetFile()" class="mt-2 text-xs font-medium text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                                    <span>Hapus & Ganti Foto</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    @error('attachment_photo')
+                        <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
-                <textarea id="rep-desc" 
-                          name="description" 
-                          rows="4" 
-                          required 
-                          minlength="10"
-                          placeholder="Jelaskan secara spesifik kerusakan yang terjadi, misalnya: 'Kabel proyektor HDMI putus dan remote AC tidak merespon saat dinyalakan di baris depan...'" 
-                          class="w-full p-3.5 bg-slate-50 rounded-xl text-sm text-slate-800 border {{ $errors->has('description') ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200' }} focus:border-slate-900 focus:bg-white focus:outline-none transition">{{ old('description') }}</textarea>
-                @error('description')
-                    <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
-                        <span class="material-symbols-outlined text-[14px]">error</span>
-                        <span>{{ $message }}</span>
-                    </p>
-                @enderror
             </div>
 
-            {{-- Upload Foto Bukti --}}
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                    Unggah Foto Bukti Kerusakan <span class="text-rose-500">*</span>
-                    <span class="text-slate-400 font-normal lowercase">(Maks. 2 MB - JPG/PNG)</span>
-                </label>
-                
-                {{-- Banner Error Klien --}}
-                <div x-show="fileError" x-cloak class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[16px] text-rose-600">warning</span>
-                    <span x-text="fileError"></span>
-                </div>
-
-                <div class="border-2 border-dashed {{ $errors->has('attachment_photo') ? 'border-rose-300 bg-rose-50/20' : 'border-slate-200 bg-slate-50/50' }} rounded-2xl p-6 text-center hover:border-slate-400 transition">
-                    <input type="file" 
-                           id="photo-file" 
-                           name="attachment_photo" 
-                           accept="image/png, image/jpeg, image/jpg" 
-                           required
-                           @change="handleFile" 
-                           class="hidden">
-                    <template x-if="!imagePreview">
-                        <div class="flex flex-col items-center">
-                            <span class="material-symbols-outlined text-slate-400 text-[36px] mb-2">add_photo_alternate</span>
-                            <span class="text-xs font-semibold text-slate-700">Pilih foto bukti dari perangkat</span>
-                            <span class="text-[11px] text-slate-400 mt-0.5">Format file JPG atau PNG hingga ukuran 2 MB</span>
-                            <label for="photo-file" class="mt-3 px-4 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer transition">
-                                Telusuri Berkas
-                            </label>
-                        </div>
-                    </template>
-
-                    <template x-if="imagePreview">
-                        <div class="flex flex-col items-center">
-                            <img :src="imagePreview" alt="Pratinjau Foto" class="h-40 w-auto object-cover rounded-xl border border-slate-200 mb-2 shadow-xs">
-                            <span class="text-xs font-mono font-medium text-slate-700" x-text="fileName"></span>
-                            <button type="button" @click="resetFile()" class="mt-2 text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">delete</span>
-                                <span>Hapus & Ganti Foto</span>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-                @error('attachment_photo')
-                    <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
-                        <span class="material-symbols-outlined text-[14px]">error</span>
-                        <span>{{ $message }}</span>
-                    </p>
-                @enderror
-            </div>
-
-            {{-- Tombol Aksi --}}
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <a href="{{ url('/user/dashboard') }}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+            {{-- Tombol Aksi Formulir --}}
+            <div class="pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+                <a href="{{ route('user.report-history') }}" class="px-5 py-3 text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
                     Batal
                 </a>
                 <button type="submit" 
                         :disabled="submitting" 
-                        class="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 disabled:opacity-50 transition shadow-xs flex items-center gap-2">
+                        class="px-8 py-3.5 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black disabled:opacity-50 transition shadow-sm flex items-center gap-2">
                     <span x-show="!submitting" class="material-symbols-outlined text-[18px]">send</span>
                     <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span x-text="submitting ? 'Mengirim Laporan...' : 'Kirim Laporan Kerusakan'"></span>

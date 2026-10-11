@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAVA Public UI Prototypes (All Pages)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    <style>
+        [x-cloak] { display: none !important; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        /* Option 1 Specifics */
+        .opt1-font { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .opt1-hide-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Option 2 Specifics */
+        .opt2-font-display { font-family: 'Space Grotesk', sans-serif; }
+        .opt2-font-body { font-family: 'Inter', sans-serif; }
+        .grid-bg { background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Option 3 Specifics */
+        .opt3-font { font-family: 'Outfit', sans-serif; }
+        .soft-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body x-data="{ activeOption: 1, activePage: 'home' }" class="antialiased overflow-x-hidden">
+
+    <!-- ==========================================
+         OPTION 1: APPLE-ESQUE MINIMALIST (PREMIUM CLEAN)
+         ========================================== -->
+    <div x-show="activeOption === 1" x-transition.opacity.duration.500ms class="opt1-font bg-[#FAFAFC] text-[#1D1D1F] min-h-screen">
+        <!-- Navbar -->
+        <nav class="fixed w-full z-40 glass-panel">
+            <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <div class="font-semibold tracking-tight text-lg cursor-pointer" @click="activePage = 'home'">CAVA.</div>
+                <div class="hidden md:flex gap-8 text-sm text-[#86868B] font-medium">
+                    <a href="#" @click.prevent="activePage = 'home'" :class="{'text-[#1D1D1F]': activePage === 'home', 'hover:text-[#1D1D1F] transition': activePage !== 'home'}">Beranda</a>
+                    <a href="#" @click.prevent="activePage = 'catalog'" :class="{'text-[#1D1D1F]': activePage === 'catalog', 'hover:text-[#1D1D1F] transition': activePage !== 'catalog'}">Katalog</a>
+                    <a href="#" @click.prevent="activePage = 'availability'" :class="{'text-[#1D1D1F]': activePage === 'availability', 'hover:text-[#1D1D1F] transition': activePage !== 'availability'}">Matriks Jadwal</a>
+                    <a href="#" @click.prevent="activePage = 'information'" :class="{'text-[#1D1D1F]': activePage === 'information', 'hover:text-[#1D1D1F] transition': activePage !== 'information'}">Informasi</a>
+                </div>
+                <div>
+                    <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-700">Masuk</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- PAGE 1: HOME -->
+        <div x-show="activePage === 'home'" class="pt-32 pb-20">
+            <main class="px-6 max-w-5xl mx-auto text-center">
+                <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-[#1D1D1F] leading-tight mb-6">Ruang Anda.<br>Waktu Anda.</h1>
+                <p class="text-xl text-[#86868B] max-w-2xl mx-auto mb-10 font-light">Platform reservasi fasilitas kampus yang elegan, cepat, dan transparan. Temukan ruang yang sempurna untuk ide brilian Anda berikutnya.</p>
+                <div class="max-w-2xl mx-auto relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-4 mr-2">search</span>
+                        <input type="text" placeholder="Cari Auditorium, Lab, atau Kelas..." class="flex-1 py-4 px-2 outline-none text-lg bg-transparent">
+                        <button @click="activePage = 'catalog'" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">Cari</button>
+                    </div>
+                </div>
+            </main>
+            <section class="max-w-7xl mx-auto px-6 py-20 mt-10">
+                <div class="flex justify-between items-end mb-12">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight mb-2">Fasilitas Unggulan.</h2>
+                        <p class="text-[#86868B] text-lg">Ruang terbaik untuk produktivitas maksimal.</p>
+                    </div>
+                    <a href="#" @click.prevent="activePage = 'catalog'" class="text-blue-600 font-medium hover:underline text-sm">Lihat Semua →</a>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Card 1 -->
+                    <div class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition duration-300 group cursor-pointer">
+                        <div class="h-48 rounded-2xl bg-gray-50 mb-6 flex items-center justify-center group-hover:scale-[1.02] transition duration-500">
+                            <span class="material-symbols-outlined text-6xl text-gray-200">meeting_room</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Auditorium Habibie</h3>
+                        <p class="text-[#86868B] text-sm mb-6">Gedung Rektorat • 450 Kursi</p>
+                    </div>
+                    <!-- Card 2 & 3 Similar to earlier (omitted for brevity) -->
+                    <div class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition duration-300 group cursor-pointer">
+                        <div class="h-48 rounded-2xl bg-gray-50 mb-6 flex items-center justify-center group-hover:scale-[1.02] transition duration-500">
+                            <span class="material-symbols-outlined text-6xl text-gray-200">desktop_windows</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Lab Komputasi Cloud</h3>
+                        <p class="text-[#86868B] text-sm mb-6">Gedung Lab Terpadu C • 45 PC</p>
+                    </div>
+                    <div class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition duration-300 group cursor-pointer">
+                        <div class="h-48 rounded-2xl bg-gray-50 mb-6 flex items-center justify-center group-hover:scale-[1.02] transition duration-500">
+                            <span class="material-symbols-outlined text-6xl text-gray-200">cast_for_education</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Smart Classroom 302</h3>
+                        <p class="text-[#86868B] text-sm mb-6">Gedung B • 60 Kursi</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 2: CATALOG -->
+        <div x-show="activePage === 'catalog'" class="pt-24 pb-20 max-w-7xl mx-auto px-6">
+            <h1 class="text-4xl font-bold tracking-tight mb-2">Katalog Fasilitas.</h1>
+            <p class="text-lg text-[#86868B] mb-8">Temukan ruang yang sesuai dengan kebutuhan spesifik kegiatan Anda.</p>
+            
+            <!-- Filters (Pills) -->
+            <div class="flex gap-3 mb-10 overflow-x-auto opt1-hide-scroll pb-2">
+                <button class="px-5 py-2.5 rounded-full bg-[#1D1D1F] text-white text-sm font-medium whitespace-nowrap">Semua Fasilitas</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Auditorium & Aula</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Laboratorium Komputer</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Ruang Kelas Terpadu</button>
+                <button class="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#1D1D1F] hover:border-gray-400 transition text-sm font-medium whitespace-nowrap">Fasilitas Olahraga</button>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Repeated Catalog Cards -->
+                <template x-for="i in 8">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300 group cursor-pointer" @click="activePage = 'availability'">
+                        <div class="h-40 rounded-xl bg-gray-50 mb-5 flex items-center justify-center group-hover:bg-gray-100 transition">
+                            <span class="material-symbols-outlined text-5xl text-gray-300">meeting_room</span>
+                        </div>
+                        <h3 class="font-semibold text-[#1D1D1F] mb-1">Ruang Seminar B<span x-text="i"></span></h3>
+                        <p class="text-xs text-[#86868B] mb-4">Gedung B • Kapasitas 40 Orang</p>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia</span>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] transition text-[18px]">arrow_forward</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- PAGE 3: AVAILABILITY MATRIX -->
+        <div x-show="activePage === 'availability'" class="pt-24 pb-20 max-w-7xl mx-auto px-6">
+            <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal.</h1>
+            <p class="text-lg text-[#86868B] mb-8">Pantau ketersediaan slot waktu untuk hari ini secara transparan.</p>
+
+            <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto">
+                <div class="flex justify-between items-center mb-6 min-w-[800px]">
+                    <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]">10 Oktober 2026</span></h2>
+                    <div class="flex gap-4">
+                        <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-full bg-gray-100 border border-gray-200"></span> Tersedia</div>
+                        <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-full bg-red-100 border border-red-200"></span> Dipakai</div>
+                    </div>
+                </div>
+
+                <div class="min-w-[1000px]">
+                    <!-- Time Header -->
+                    <div class="grid grid-cols-[200px_repeat(13,1fr)] gap-2 mb-4 border-b border-gray-100 pb-4 text-xs font-medium text-[#86868B]">
+                        <div>Nama Fasilitas</div>
+                        <div class="text-center">07:00</div><div class="text-center">08:00</div>
+                        <div class="text-center">09:00</div><div class="text-center">10:00</div>
+                        <div class="text-center">11:00</div><div class="text-center">12:00</div>
+                        <div class="text-center">13:00</div><div class="text-center">14:00</div>
+                        <div class="text-center">15:00</div><div class="text-center">16:00</div>
+                        <div class="text-center">17:00</div><div class="text-center">18:00</div>
+                        <div class="text-center">19:00</div>
+                    </div>
+
+                    <!-- Rows -->
+                    <div class="space-y-3">
+                        <template x-for="i in 5">
+                            <div class="grid grid-cols-[200px_repeat(13,1fr)] gap-2 items-center">
+                                <div class="text-sm font-medium text-[#1D1D1F]">Auditorium <span x-text="i"></span></div>
+                                <!-- Slots (2 halves per hour visually grouped) -->
+                                <template x-for="j in 13">
+                                    <div class="h-8 rounded-md w-full" :class="(j > 3 && j < 6 && i % 2 === 0) || (j > 8 && j < 11 && i % 3 === 0) ? 'bg-red-50 border border-red-100' : 'bg-gray-50 border border-gray-100 hover:bg-gray-100 cursor-pointer transition'"></div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: INFORMATION -->
+        <div x-show="activePage === 'information'" class="pt-24 pb-20 max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row gap-12">
+                <!-- Sidebar -->
+                <div class="w-full md:w-64 shrink-0">
+                    <div class="sticky top-24">
+                        <h3 class="text-xs font-semibold text-[#86868B] tracking-wider uppercase mb-4">Pusat Informasi</h3>
+                        <ul class="space-y-3 text-sm font-medium">
+                            <li><a href="#" class="text-[#1D1D1F] block">Kebijakan Privasi</a></li>
+                            <li><a href="#" class="text-[#86868B] hover:text-[#1D1D1F] transition block">Syarat & Ketentuan</a></li>
+                            <li><a href="#" class="text-[#86868B] hover:text-[#1D1D1F] transition block">Panduan Peminjaman</a></li>
+                            <li><a href="#" class="text-[#86868B] hover:text-[#1D1D1F] transition block">Lapor Kerusakan (Helpdesk)</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Content -->
+                <div class="flex-1 max-w-3xl">
+                    <h1 class="text-4xl font-bold tracking-tight mb-8">Kebijakan Privasi & Aset</h1>
+                    <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
+                        <p>Kami sangat menghargai privasi data sivitas akademika. Seluruh data peminjaman yang dilakukan melalui sistem CAVA (Campus Venue Access) dilindungi dengan standar keamanan tinggi.</p>
+                        <h2 class="text-xl font-semibold mt-8 mb-4">1. Transparansi Data Publik</h2>
+                        <p>Pada fitur matriks ketersediaan yang dapat diakses publik, kami sengaja <strong>menyembunyikan identitas peminjam</strong> dan tujuan peminjaman. Hal ini bertujuan untuk melindungi privasi kegiatan internal yang mungkin bersifat rahasia. Publik hanya akan melihat blok warna yang menandakan fasilitas sedang digunakan.</p>
+                        <h2 class="text-xl font-semibold mt-8 mb-4">2. Pengelolaan Aset BMN</h2>
+                        <p>Fasilitas yang terdapat di dalam sistem ini berstatus sebagai Barang Milik Negara (BMN) institusi. Pengguna yang berhasil melakukan peminjaman memikul tanggung jawab atas kebersihan, keamanan, dan keutuhan fasilitas selama masa peminjaman.</p>
+                        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 mt-8">
+                            <p class="text-sm m-0">Setiap pelanggaran terhadap kebijakan tata kelola aset dapat mengakibatkan pencabutan akses akun CAVA secara permanen oleh Administrator.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         OPTION 2: DARK MODE NEO-BRUTALISM (MODERN & BOLD)
+         ========================================== -->
+    <div x-show="activeOption === 2" x-transition.opacity.duration.500ms class="bg-[#0A0A0A] text-[#F3F4F6] min-h-screen grid-bg relative" x-cloak>
+        <!-- Navbar -->
+        <nav class="border-b border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <div class="opt2-font-display font-bold text-xl tracking-tight text-white flex items-center gap-2 cursor-pointer" @click="activePage = 'home'">
+                    <div class="w-4 h-4 bg-[#CCFF00]"></div> CAVA_
+                </div>
+                <div class="hidden md:flex gap-8 text-sm opt2-font-body text-gray-400 font-bold tracking-widest">
+                    <a href="#" @click.prevent="activePage = 'home'" :class="{'text-white': activePage === 'home', 'hover:text-[#CCFF00] transition': activePage !== 'home'}">HOME</a>
+                    <a href="#" @click.prevent="activePage = 'catalog'" :class="{'text-white': activePage === 'catalog', 'hover:text-[#CCFF00] transition': activePage !== 'catalog'}">CATALOG</a>
+                    <a href="#" @click.prevent="activePage = 'availability'" :class="{'text-white': activePage === 'availability', 'hover:text-[#CCFF00] transition': activePage !== 'availability'}">MATRIX</a>
+                    <a href="#" @click.prevent="activePage = 'information'" :class="{'text-white': activePage === 'information', 'hover:text-[#CCFF00] transition': activePage !== 'information'}">INFO</a>
+                </div>
+                <div>
+                    <a href="#" class="text-xs font-bold tracking-widest bg-white text-black px-4 py-2 hover:bg-[#CCFF00] transition-colors">LOGIN</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- PAGE 1: HOME -->
+        <div x-show="activePage === 'home'">
+            <main class="max-w-7xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-block border border-[#CCFF00] text-[#CCFF00] px-3 py-1 text-xs font-mono mb-6">SYSTEM_ONLINE // V.2.0</div>
+                    <h1 class="opt2-font-display text-5xl md:text-6xl font-bold leading-[1.1] mb-6 text-white">RESERVE <br>YOUR <span class="text-[#CCFF00]">WORKSPACE.</span></h1>
+                    <p class="opt2-font-body text-gray-400 text-lg mb-8 max-w-md">Seamlessly book campus facilities, monitor availability in real-time, and report issues instantly.</p>
+                    <div class="flex gap-4">
+                        <button @click="activePage = 'catalog'" class="bg-[#CCFF00] text-black font-bold py-3 px-8 text-sm tracking-wider hover:bg-white transition flex items-center gap-2">
+                            BROWSE CATALOG <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="bg-[#111111] border border-white/20 p-6 relative z-10 shadow-[8px_8px_0px_rgba(204,255,0,0.2)]">
+                        <h3 class="opt2-font-display font-bold text-xl mb-4 text-white border-b border-white/10 pb-4">QUICK_SEARCH</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-mono text-gray-500 mb-2">FACILITY_NAME</label>
+                                <input type="text" class="w-full bg-black border border-white/20 p-3 text-white focus:outline-none focus:border-[#CCFF00] font-mono text-sm" placeholder="Enter keyword...">
+                            </div>
+                            <button @click="activePage = 'catalog'" class="w-full bg-white text-black font-bold py-3 mt-2 hover:bg-[#CCFF00] transition-colors">SEARCH_DATABASE</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- PAGE 2: CATALOG -->
+        <div x-show="activePage === 'catalog'" class="max-w-7xl mx-auto px-6 py-24">
+            <div class="border-b border-white/10 pb-8 mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
+                <div>
+                    <h1 class="opt2-font-display text-5xl font-bold text-white mb-2">DB_CATALOG</h1>
+                    <p class="font-mono text-sm text-[#CCFF00]">QUERYING: 24 ACTIVE FACILITIES...</p>
+                </div>
+                <!-- Filters Neo-brutalism style -->
+                <div class="flex flex-wrap gap-2 font-mono text-xs">
+                    <button class="border border-[#CCFF00] bg-[#CCFF00]/10 text-[#CCFF00] px-4 py-2">ALL_TYPES</button>
+                    <button class="border border-white/20 text-gray-400 hover:border-white px-4 py-2 transition">AUDITORIUM</button>
+                    <button class="border border-white/20 text-gray-400 hover:border-white px-4 py-2 transition">LABORATORY</button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <template x-for="i in 9">
+                    <div class="bg-[#111] border border-white/10 p-6 hover:border-[#CCFF00] transition-colors group cursor-pointer" @click="activePage = 'availability'">
+                        <div class="flex justify-between items-start mb-12">
+                            <span class="material-symbols-outlined text-4xl text-gray-600 group-hover:text-white transition">meeting_room</span>
+                            <span class="bg-[#CCFF00]/20 text-[#CCFF00] text-[10px] font-mono px-2 py-1 border border-[#CCFF00]/30">ONLINE</span>
+                        </div>
+                        <h3 class="opt2-font-display font-bold text-xl mb-2 text-white">Auditorium_V<span x-text="i"></span></h3>
+                        <p class="font-mono text-xs text-gray-500 mb-6">CAPACITY: 450 // LOC: BLD_A</p>
+                        <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                            <a href="#" class="text-sm font-bold text-gray-400 group-hover:text-[#CCFF00] transition-all">ACCESS_NOW -></a>
+                            <span class="w-2 h-2 bg-gray-600 group-hover:bg-[#CCFF00]"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- PAGE 3: AVAILABILITY MATRIX -->
+        <div x-show="activePage === 'availability'" class="max-w-7xl mx-auto px-6 py-24">
+            <h1 class="opt2-font-display text-5xl font-bold text-white mb-2">MATRIX_MONITOR</h1>
+            <p class="font-mono text-sm text-gray-500 mb-12">LIVE STATUS: 2026-10-10 // REFRESH_RATE: 60s</p>
+
+            <div class="bg-[#111] border border-white/20 overflow-x-auto shadow-[8px_8px_0px_rgba(255,255,255,0.05)]">
+                <div class="min-w-[1000px] p-6">
+                    <!-- Legend -->
+                    <div class="flex gap-6 font-mono text-xs mb-8 border-b border-white/10 pb-4">
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 border border-gray-600"></div> [FREE_SLOT]</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-red-600"></div> [RESERVED]</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-yellow-500"></div> [MAINTENANCE]</div>
+                    </div>
+
+                    <!-- Matrix Grid -->
+                    <div class="font-mono text-[10px] text-gray-400 mb-2 flex">
+                        <div class="w-48 shrink-0">FACILITY_ID</div>
+                        <div class="flex-1 flex justify-between px-2">
+                            <span>07:00</span><span>09:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span>17:00</span><span>19:00</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <template x-for="i in 8">
+                            <div class="flex group">
+                                <div class="w-48 shrink-0 border border-white/10 bg-black p-2 font-mono text-xs text-white flex items-center">AUD_V<span x-text="i"></span></div>
+                                <div class="flex-1 flex gap-1 bg-[#1A1A1A] border border-white/10 p-1">
+                                    <template x-for="j in 26">
+                                        <!-- 26 slots of 30 mins (07:00 to 20:00) -->
+                                        <div class="h-6 flex-1 transition-colors hover:bg-white/20 cursor-crosshair border-r border-black" 
+                                             :class="(j > 4 && j < 8 && i % 2 === 0) ? 'bg-red-600' : (j > 15 && j < 20 && i === 3) ? 'bg-yellow-500 pattern-diagonal-lines-sm text-black' : 'bg-transparent'"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: INFORMATION -->
+        <div x-show="activePage === 'information'" class="max-w-7xl mx-auto px-6 py-24">
+            <h1 class="opt2-font-display text-5xl font-bold text-white mb-12 border-b border-white/10 pb-6">SYSTEM_DOCS</h1>
+            
+            <div class="grid md:grid-cols-4 gap-12">
+                <!-- Sidebar -->
+                <div class="font-mono text-sm space-y-4">
+                    <a href="#" class="block px-4 py-2 border-l-2 border-[#CCFF00] text-[#CCFF00] bg-[#CCFF00]/10">01. PRIVACY_POLICY</a>
+                    <a href="#" class="block px-4 py-2 border-l-2 border-transparent text-gray-500 hover:text-white transition">02. TERMS_OF_SERVICE</a>
+                    <a href="#" class="block px-4 py-2 border-l-2 border-transparent text-gray-500 hover:text-white transition">03. HELPDESK_PORTAL</a>
+                </div>
+                <!-- Content -->
+                <div class="md:col-span-3">
+                    <div class="bg-[#111] border border-white/20 p-8 shadow-[8px_8px_0px_rgba(204,255,0,0.2)]">
+                        <h2 class="opt2-font-display text-2xl font-bold text-white mb-6">> DATA_PROTECTION_PROTOCOL</h2>
+                        <div class="font-mono text-sm text-gray-400 space-y-6 leading-relaxed">
+                            <p>WARNING: Unauthorized access to the CAVA system is strictly prohibited. All interactions are logged and monitored.</p>
+                            <div class="border-l-4 border-yellow-500 bg-yellow-500/10 p-4 text-yellow-500">
+                                [ALERT] Public Matrix Visualization Anonymity
+                                <br><br>
+                                To protect the privacy of campus organizations, the public availability matrix will NOT output user IDs or purpose metadata. It will only render boolean availability blocks.
+                            </div>
+                            <p>Asset management falls under the State-Owned Property (BMN) jurisdiction. Misuse or intentional damage to reserved facilities will result in immediate system ban and academic penalties.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         OPTION 3: MODERN SAAS / CORPORATE (TRUSTWORTHY)
+         ========================================== -->
+    <div x-show="activeOption === 3" x-transition.opacity.duration.500ms class="opt3-font bg-slate-50 text-slate-800 min-h-screen" x-cloak>
+        <!-- Navbar -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center gap-2 cursor-pointer" @click="activePage = 'home'">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">C</div>
+                        <span class="font-bold text-xl text-slate-900 tracking-tight">CAVA</span>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#" @click.prevent="activePage = 'home'" :class="{'text-blue-600': activePage === 'home', 'text-slate-500 hover:text-slate-900 transition': activePage !== 'home'}" class="font-semibold text-sm">Beranda</a>
+                        <a href="#" @click.prevent="activePage = 'catalog'" :class="{'text-blue-600': activePage === 'catalog', 'text-slate-500 hover:text-slate-900 transition': activePage !== 'catalog'}" class="font-semibold text-sm">Katalog Ruang</a>
+                        <a href="#" @click.prevent="activePage = 'availability'" :class="{'text-blue-600': activePage === 'availability', 'text-slate-500 hover:text-slate-900 transition': activePage !== 'availability'}" class="font-semibold text-sm">Matriks Jadwal</a>
+                        <a href="#" @click.prevent="activePage = 'information'" :class="{'text-blue-600': activePage === 'information', 'text-slate-500 hover:text-slate-900 transition': activePage !== 'information'}" class="font-semibold text-sm">Informasi & Bantuan</a>
+                    </div>
+                    <div class="flex items-center">
+                        <button class="bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-sm">
+                            Masuk Portal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- PAGE 1: HOME -->
+        <div x-show="activePage === 'home'">
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="inline-block py-1.5 px-4 rounded-full bg-blue-50 text-blue-700 text-sm font-bold mb-6 border border-blue-100">Portal Manajemen Fasilitas Kampus v2</span>
+                    <h1 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">Kelola dan Pinjam Fasilitas <br>dengan <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Lebih Cerdas</span></h1>
+                    <p class="text-lg text-slate-500 mb-8">Cek jadwal secara real-time, ajukan peminjaman, dan laporkan kerusakan fasilitas dalam satu platform terpadu.</p>
+                    <div class="flex justify-center gap-4">
+                        <button @click="activePage = 'catalog'" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-sm">Telusuri Katalog</button>
+                        <button @click="activePage = 'availability'" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-3.5 rounded-xl font-bold transition shadow-sm">Lihat Matriks Jadwal</button>
+                    </div>
+                </div>
+                <!-- Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center soft-shadow">
+                        <div class="text-3xl font-extrabold text-slate-900 mb-1">24+</div>
+                        <div class="text-sm text-slate-500 font-semibold">Fasilitas Tersedia</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center soft-shadow">
+                        <div class="text-3xl font-extrabold text-slate-900 mb-1">100%</div>
+                        <div class="text-sm text-slate-500 font-semibold">Jadwal Real-time</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center soft-shadow">
+                        <div class="text-3xl font-extrabold text-slate-900 mb-1">H-1</div>
+                        <div class="text-sm text-slate-500 font-semibold">Batas Reservasi</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center soft-shadow">
+                        <div class="text-3xl font-extrabold text-slate-900 mb-1">24/7</div>
+                        <div class="text-sm text-slate-500 font-semibold">Helpdesk Support</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- PAGE 2: CATALOG -->
+        <div x-show="activePage === 'catalog'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Katalog Fasilitas</h1>
+                    <p class="text-sm text-slate-500">Pilih dari 24 ruang yang tersedia untuk kegiatan Anda.</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-64">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                        <input type="text" class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Cari fasilitas...">
+                    </div>
+                    <button class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-5">
+                <template x-for="i in 8">
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all duration-300 group flex flex-col" @click="activePage = 'availability'">
+                        <div class="h-32 bg-slate-100 relative flex items-center justify-center border-b border-slate-100">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 group-hover:scale-110 group-hover:text-blue-500 transition duration-300">meeting_room</span>
+                            <div class="absolute top-3 right-3 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200">TERSEDIA</div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <h3 class="text-base font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition">Ruang Seminar <span x-text="i"></span></h3>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-3">
+                                <span class="material-symbols-outlined text-[14px]">group</span> 40 Kapasitas
+                            </div>
+                            <button class="w-full mt-auto py-2 rounded-lg border border-slate-200 text-slate-700 font-bold text-xs hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition">
+                                Cek Jadwal
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- PAGE 3: AVAILABILITY MATRIX -->
+        <div x-show="activePage === 'availability'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h1 class="text-2xl font-bold text-slate-900 mb-1">Matriks Jadwal Real-time</h1>
+            <p class="text-sm text-slate-500 mb-8">Tampilan jadwal seperti kalender profesional. Drag atau klik slot kosong untuk memesan (khusus pengguna login).</p>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <button class="p-1 rounded hover:bg-slate-200 text-slate-600"><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+                        <span class="font-bold text-slate-800">Senin, 10 Okt 2026</span>
+                        <button class="p-1 rounded hover:bg-slate-200 text-slate-600"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+                    </div>
+                    <div class="flex gap-4 text-xs font-bold text-slate-600">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-slate-200"></span> Tersedia</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-200"></span> Dipinjam</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-100 border border-red-200"></span> Maintenance</div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[900px] text-sm text-left">
+                        <thead class="bg-white border-b border-slate-200 text-xs text-slate-500">
+                            <tr>
+                                <th class="py-3 px-4 w-48 border-r border-slate-100 font-semibold">Fasilitas</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">07:00</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">09:00</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">11:00</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">13:00</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">15:00</th>
+                                <th class="py-3 text-center border-r border-slate-100 w-24">17:00</th>
+                                <th class="py-3 text-center w-24">19:00</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="i in 6">
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                    <td class="py-3 px-4 border-r border-slate-100 font-medium text-slate-800">Ruang Kelas A<span x-text="i"></span></td>
+                                    <td colspan="7" class="p-1">
+                                        <div class="flex h-10 w-full gap-1">
+                                            <!-- Example Blocks representing 2-hour segments visually -->
+                                            <div class="flex-1 rounded-md bg-white border border-slate-200 hover:border-blue-400 cursor-pointer transition"></div>
+                                            <div class="flex-1 rounded-md cursor-not-allowed transition" :class="i % 2 === 0 ? 'bg-blue-50 border border-blue-200 flex items-center justify-center' : 'bg-white border border-slate-200'">
+                                                <span x-show="i % 2 === 0" class="text-[10px] font-bold text-blue-700">DIPESAN</span>
+                                            </div>
+                                            <div class="flex-1 rounded-md bg-white border border-slate-200 hover:border-blue-400 cursor-pointer transition"></div>
+                                            <div class="flex-1 rounded-md bg-white border border-slate-200 hover:border-blue-400 cursor-pointer transition"></div>
+                                            <div class="flex-1 rounded-md cursor-not-allowed transition" :class="i === 3 ? 'bg-red-50 border border-red-200 flex items-center justify-center' : 'bg-white border border-slate-200'">
+                                                <span x-show="i === 3" class="text-[10px] font-bold text-red-700">PERBAIKAN</span>
+                                            </div>
+                                            <div class="flex-1 rounded-md bg-white border border-slate-200 hover:border-blue-400 cursor-pointer transition"></div>
+                                            <div class="flex-1 rounded-md bg-white border border-slate-200 hover:border-blue-400 cursor-pointer transition"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: INFORMATION -->
+        <div x-show="activePage === 'information'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-8">
+            <!-- Sidebar Navigation -->
+            <div class="w-full md:w-64 shrink-0">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 sticky top-24">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Navigasi Informasi</h3>
+                    <nav class="space-y-1">
+                        <a href="#" class="block px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm">Kebijakan Privasi</a>
+                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition">Syarat & Ketentuan</a>
+                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition">Layanan Bantuan</a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1">
+                <div class="bg-white border border-slate-200 rounded-xl p-8 soft-shadow">
+                    <div class="inline-block px-3 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-bold mb-4">Terakhir Diperbarui: 1 Okt 2026</div>
+                    <h1 class="text-3xl font-bold text-slate-900 mb-6">Kebijakan Privasi & Keamanan</h1>
+                    
+                    <div class="prose prose-slate max-w-none text-slate-600">
+                        <p class="text-lg mb-6">Kami berkomitmen untuk melindungi informasi identitas pribadi (*Personally Identifiable Information*) dari seluruh sivitas akademika yang menggunakan platform CAVA.</p>
+                        
+                        <h2 class="text-xl font-bold text-slate-900 mt-8 mb-4">1. Transparansi Data pada Matriks Publik</h2>
+                        <p class="mb-4">Sesuai standar operasional, matriks ketersediaan fasilitas yang dapat diakses tanpa *login* didesain untuk **hanya menampilkan status boolean (Tersedia/Dipinjam)**.</p>
+                        <ul class="list-disc pl-5 mb-6 space-y-2">
+                            <li>Nama peminjam akan dirahasiakan.</li>
+                            <li>Tujuan dan agenda kegiatan tidak akan ditampilkan publik.</li>
+                        </ul>
+                        
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mt-8">
+                            <p class="text-sm text-blue-800 m-0 font-medium">
+                                <strong>Catatan Penting:</strong> Khusus untuk Petugas Sarpras dan Admin, seluruh detail reservasi dapat diakses secara utuh melalui *Dashboard* internal untuk keperluan validasi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         FLOATING SWITCHER
+         ========================================== -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-2xl border border-gray-200 flex gap-2 z-[100]">
+        <button @click="activeOption = 1" :class="{'bg-blue-600 text-white': activeOption === 1, 'text-gray-600 hover:bg-gray-100': activeOption !== 1}" class="px-4 py-2 rounded-full text-sm font-semibold transition-colors">
+            Option 1 (Apple-esque)
+        </button>
+        <button @click="activeOption = 2" :class="{'bg-black text-[#CCFF00]': activeOption === 2, 'text-gray-600 hover:bg-gray-100': activeOption !== 2}" class="px-4 py-2 rounded-full text-sm font-semibold transition-colors">
+            Option 2 (Neo-Brutalism)
+        </button>
+        <button @click="activeOption = 3" :class="{'bg-blue-600 text-white': activeOption === 3, 'text-gray-600 hover:bg-gray-100': activeOption !== 3}" class="px-4 py-2 rounded-full text-sm font-semibold transition-colors">
+            Option 3 (Modern SaaS)
+        </button>
+    </div>
+
+</body>
+</html>
