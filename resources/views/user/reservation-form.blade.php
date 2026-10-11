@@ -2,6 +2,7 @@
   NAMA FILE      : reservation-form.blade.php
   FUNGSIONALITAS : Formulir Pengajuan Reservasi Ruang & Fasilitas Kampus
   DESKRIPSI      : Form interaktif pemilihan fasilitas aktif dari basis data, tanggal pelaksanaan, pemilihan slot 30 menit (07:00 - 20:00 WIB), tujuan kegiatan, dan proteksi anti-bentrok.
+  DESAIN         : Opsi 1 (Apple-esque Bento) dengan styling borderless soft gray (bg-[#F5F5F7] border-0), tipografi bersih Outfit/Inter, tanpa AI slop / tanpa border hitam pekat.
   CARA KERJA     : Mengirimkan HTTP POST ke route('user.reservations.store') dengan validasi StoreReservationRequest, menangani error session dan old values secara dinamis.
 --}}
 
@@ -124,27 +125,34 @@
                 category: '-'
             };
         }
-    }">
+    }" class="space-y-8">
 
-        {{-- Header Judul --}}
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Form Permohonan Reservasi Fasilitas</h1>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih fasilitas, tanggal pelaksanaan, dan rentang slot waktu operasional (07:00 - 20:00 WIB).</p>
-            </div>
-            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Pengecekan Bentrok Jadwal: Aktif</span>
+        {{-- Top Navigation: Link Kembali & Header Halaman Apple-Style --}}
+        <div>
+            <a href="{{ route('user.reservations.index') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition mb-4">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Kembali ke Riwayat Reservasi</span>
+            </a>
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1D1D1F]">Formulir Pengajuan Reservasi Ruang</h1>
+                    <p class="text-base sm:text-lg text-[#86868B] font-light mt-1">Lengkapi data berikut untuk mengajukan izin penggunaan fasilitas dan ruang akademik.</p>
+                </div>
+                <div class="shrink-0">
+                    <span class="text-xs font-semibold tracking-wide text-emerald-800">
+                        Pengecekan Bentrok Jadwal Aktif
+                    </span>
+                </div>
             </div>
         </div>
 
-        {{-- Banner Error Validasi Server --}}
+        {{-- Banner Error Validasi Server (Soft Apple Tone tanpa border hitam) --}}
         @if ($errors->any())
-            <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3 shadow-xs">
+            <div class="p-6 rounded-[2rem] bg-rose-50/70 border border-rose-100 text-rose-900 flex items-start gap-4">
                 <span class="material-symbols-outlined text-rose-600 text-[24px] shrink-0 mt-0.5">error</span>
-                <div>
+                <div class="space-y-1">
                     <h4 class="text-sm font-bold">Pengajuan Reservasi Tidak Dapat Diproses</h4>
-                    <ul class="mt-1 list-disc list-inside text-xs text-rose-700 space-y-0.5">
+                    <ul class="list-disc list-inside text-xs text-rose-700 space-y-0.5">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -155,45 +163,43 @@
 
         {{-- Toast / Session Flash Sukses --}}
         @if (session('success'))
-            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-emerald-600 text-[24px]">check_circle</span>
+            <div class="p-6 rounded-[2rem] bg-emerald-50/70 border border-emerald-100 text-emerald-900 flex items-center gap-4">
+                <span class="material-symbols-outlined text-emerald-600 text-[24px] shrink-0">check_circle</span>
                 <div>
                     <h4 class="text-sm font-bold">Permohonan Berhasil Dikirim!</h4>
-                    <p class="text-xs text-emerald-700">{{ session('success') }}</p>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
                 </div>
             </div>
         @endif
 
         <!-- 
           ROUTE: POST /user/reservations
-          FUNGSI: Mengirimkan permohonan reservasi baru dengan proteksi interval 30 menit
+          FUNGSI: Mengirimkan permohonan reservasi baru dengan validasi slot & proteksi anti bentrok
         -->
-        <form action="{{ route('user.reservations.store') }}" method="POST" @submit="submitting = true" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <form action="{{ route('user.reservations.store') }}" method="POST" @submit="submitting = true" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             @csrf
 
-            {{-- Kolom Kiri: Form Input Data (7 Kolom) --}}
-            <div class="lg:col-span-7 flex flex-col gap-6">
-                {{-- Card Input Utama --}}
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col gap-5">
-                    {{-- Pemilihan Fasilitas Bertingkat (Gedung -> Lantai -> Ruangan) --}}
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                Pilih Fasilitas & Ruang Akademik <span class="text-rose-500">*</span>
-                            </label>
-                            <span class="text-[11px] text-slate-500 font-medium">Hierarki: Gedung ➔ Lantai ➔ Ruangan</span>
+            {{-- Kolom Kiri: Form Input Data Utama (7 Kolom Bento) --}}
+            <div class="lg:col-span-7 space-y-8">
+                <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
+                    
+                    {{-- Bagian 1: Pemilihan Ruang Bertingkat --}}
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">1. Pilih Ruangan Kampus</h2>
+                            <span class="text-xs text-[#86868B]">Gedung ➔ Lantai ➔ Ruangan</span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {{-- Dropdown 1: Pilih Gedung --}}
                             <div>
-                                <label for="building-select" class="block text-[11px] font-bold text-slate-600 mb-1">
-                                    1. Gedung
+                                <label for="building-select" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                    Gedung
                                 </label>
                                 <select id="building-select" 
                                         x-model="selectedBuilding" 
                                         @change="onBuildingChange()" 
-                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
                                     <template x-for="b in availableBuildings" :key="b">
                                         <option :value="b" x-text="b" :selected="b === selectedBuilding"></option>
                                     </template>
@@ -202,13 +208,13 @@
 
                             {{-- Dropdown 2: Pilih Lantai --}}
                             <div>
-                                <label for="floor-select" class="block text-[11px] font-bold text-slate-600 mb-1">
-                                    2. Lantai
+                                <label for="floor-select" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                    Lantai
                                 </label>
                                 <select id="floor-select" 
                                         x-model="selectedFloor" 
                                         @change="onFloorChange()" 
-                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
                                     <template x-for="fl in availableFloors" :key="fl">
                                         <option :value="fl" x-text="fl" :selected="fl === selectedFloor"></option>
                                     </template>
@@ -217,14 +223,14 @@
 
                             {{-- Dropdown 3: Pilih Ruangan (Mengikat facility_id ke Form Request) --}}
                             <div>
-                                <label for="venue-select" class="block text-[11px] font-bold text-slate-600 mb-1">
-                                    3. Ruangan
+                                <label for="venue-select" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                    Ruangan <span class="text-rose-500">*</span>
                                 </label>
                                 <select name="facility_id" 
                                         id="venue-select" 
                                         x-model="selectedFacilityId" 
                                         required 
-                                        class="w-full h-11 px-3 bg-slate-50 rounded-xl text-xs sm:text-sm font-bold text-slate-900 border @error('facility_id') border-rose-400 bg-rose-50/50 @else border-slate-200 @enderror focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] font-medium px-4 py-3 rounded-xl text-sm @error('facility_id') ring-2 ring-rose-400 bg-rose-50/50 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
                                     <template x-for="room in availableRooms" :key="room.id">
                                         <option :value="String(room.id)" 
                                                 x-text="room.code + ' - ' + room.name + ' (' + room.capacity + ' org)'" 
@@ -235,37 +241,48 @@
                             </div>
                         </div>
                         @error('facility_id')
-                            <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                            <p class="text-xs text-rose-600 font-medium">{{ $message }}</p>
                         @enderror
-                    </div>
 
-                    {{-- Tanggal Pelaksanaan --}}
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label for="res-date" class="text-xs font-bold uppercase tracking-wider text-slate-700">
-                                Tanggal Pelaksanaan Kegiatan <span class="text-rose-500">*</span>
-                            </label>
-                            <span class="text-[11px] text-emerald-700 font-semibold">Tersedia Mulai Hari Ini</span>
+                        {{-- Ringkasan Ruangan Teks Bersih Bento --}}
+                        <div class="p-4 rounded-xl bg-[#F9F9FB] text-sm text-[#86868B]">
+                            <strong class="text-[#1D1D1F]" x-text="currentVenue.name"></strong> • <span x-text="currentVenue.building"></span> • Kapasitas <span x-text="currentVenue.capacity"></span> Orang • <span x-text="currentVenue.category"></span>
                         </div>
-                        <input type="date" id="res-date" name="reservation_date" x-model="selectedDate" min="{{ date('Y-m-d') }}" required class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border @error('reservation_date') border-rose-400 bg-rose-50/50 @else border-slate-200 @enderror focus:border-slate-900 focus:bg-white focus:outline-none transition">
-                        @error('reservation_date')
-                            <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
-                        @enderror
                     </div>
 
-                    {{-- Pemilih Rentang Waktu (Jam Mulai & Jam Selesai Slot 30 Menit) --}}
-                    <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80">
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-700">
-                                Rentang Waktu Operasional (07:00 - 20:00 WIB) <span class="text-rose-500">*</span>
+                    {{-- Bagian 2: Waktu & Rentang Penggunaan --}}
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">2. Waktu & Sesi Pelaksanaan</h2>
+                            <span class="text-xs text-[#86868B]">Operasional 07:00 - 20:00 WIB</span>
+                        </div>
+
+                        <div>
+                            <label for="res-date" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                Tanggal Pelaksanaan <span class="text-rose-500">*</span>
                             </label>
-                            <span class="text-[11px] text-slate-500 font-medium">Slot Kelipatan 30 Menit</span>
+                            <input type="date" 
+                                   id="res-date" 
+                                   name="reservation_date" 
+                                   x-model="selectedDate" 
+                                   min="{{ date('Y-m-d') }}" 
+                                   required 
+                                   class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm @error('reservation_date') ring-2 ring-rose-400 bg-rose-50/50 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
+                            @error('reservation_date')
+                                <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="start_time" class="block text-xs font-semibold text-slate-600 mb-1.5">Jam Mulai</label>
-                                <select name="start_time" id="start_time" x-model="selectedStart" required class="w-full h-10 px-3 bg-white rounded-lg text-sm font-semibold text-slate-800 border @error('start_time') border-rose-400 @else border-slate-200 @enderror focus:border-slate-900 focus:outline-none transition">
+                                <label for="start_time" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                    Jam Mulai <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="start_time" 
+                                        id="start_time" 
+                                        x-model="selectedStart" 
+                                        required 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm @error('start_time') ring-2 ring-rose-400 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
                                     @foreach (array_slice($timeSlots, 0, -1) as $slot)
                                         <option value="{{ $slot }}" {{ old('start_time', '09:00') === $slot ? 'selected' : '' }}>
                                             {{ $slot }} WIB
@@ -273,13 +290,19 @@
                                     @endforeach
                                 </select>
                                 @error('start_time')
-                                    <p class="mt-1 text-[11px] text-rose-600 font-medium">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="end_time" class="block text-xs font-semibold text-slate-600 mb-1.5">Jam Selesai</label>
-                                <select name="end_time" id="end_time" x-model="selectedEnd" required class="w-full h-10 px-3 bg-white rounded-lg text-sm font-semibold text-slate-800 border @error('end_time') border-rose-400 @else border-slate-200 @enderror focus:border-slate-900 focus:outline-none transition">
+                                <label for="end_time" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                    Jam Selesai <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="end_time" 
+                                        id="end_time" 
+                                        x-model="selectedEnd" 
+                                        required 
+                                        class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm @error('end_time') ring-2 ring-rose-400 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition cursor-pointer">
                                     @foreach (array_slice($timeSlots, 1) as $slot)
                                         <option value="{{ $slot }}" {{ old('end_time', '11:00') === $slot ? 'selected' : '' }}>
                                             {{ $slot }} WIB
@@ -287,97 +310,112 @@
                                     @endforeach
                                 </select>
                                 @error('end_time')
-                                    <p class="mt-1 text-[11px] text-rose-600 font-medium">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
-                        <div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span>Durasi: <strong class="text-slate-800" x-text="selectedStart + ' - ' + selectedEnd + ' WIB'"></strong></span>
-                            </span>
-                            <span>Min. 30 menit (1 slot)</span>
+                        <div class="text-xs text-[#86868B] flex items-center justify-between pt-1">
+                            <span>Durasi kegiatan: <strong class="text-[#1D1D1F]" x-text="selectedStart + ' - ' + selectedEnd + ' WIB'"></strong></span>
+                            <span>Slot kelipatan 30 menit</span>
                         </div>
                     </div>
 
-                    {{-- Estimasi Peserta (Pendukung) --}}
-                    <div>
-                        <label for="participants_count" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                            Estimasi Jumlah Peserta (Orang)
-                        </label>
-                        <input type="number" id="participants_count" name="participants_count" min="1" max="1000" value="{{ old('participants_count', 1) }}" class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition">
+                    {{-- Bagian 3: Rincian Kegiatan & Peserta --}}
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">3. Rincian Kegiatan</h2>
+
+                        <div>
+                            <label for="participants_count" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                Estimasi Jumlah Peserta (Orang)
+                            </label>
+                            <input type="number" 
+                                   id="participants_count" 
+                                   name="participants_count" 
+                                   min="1" 
+                                   max="1000" 
+                                   value="{{ old('participants_count', 1) }}" 
+                                   class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                        </div>
+
+                        <div>
+                            <label for="purpose" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
+                                Tujuan Penggunaan, Nama Acara & PIC <span class="text-rose-500">*</span>
+                            </label>
+                            <textarea id="purpose" 
+                                      name="purpose" 
+                                      rows="4" 
+                                      required 
+                                      placeholder="Contoh: Seminar Nasional Web Development HMIF - Estimasi 75 Peserta Mahasiswa. PIC: Dimas Pratama (08123456789)" 
+                                      class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm @error('purpose') ring-2 ring-rose-400 bg-rose-50/50 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition leading-relaxed">{{ old('purpose') }}</textarea>
+                            @error('purpose')
+                                <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
-                    {{-- Tujuan Penggunaan & Nama Acara --}}
-                    <div>
-                        <label for="purpose" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                            Tujuan Penggunaan, Nama Acara & PIC <span class="text-rose-500">*</span>
-                        </label>
-                        <textarea id="purpose" name="purpose" rows="3" required placeholder="Contoh: Seminar Nasional Web Development HMIF - Estimasi 75 Peserta Mahasiswa. PIC: Dimas Pratama (08123456789)" class="w-full p-3.5 bg-slate-50 rounded-xl text-sm text-slate-800 border @error('purpose') border-rose-400 bg-rose-50/50 @else border-slate-200 @enderror focus:border-slate-900 focus:bg-white focus:outline-none transition">{{ old('purpose') }}</textarea>
-                        @error('purpose')
-                            <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
             </div>
 
-            {{-- Kolom Kanan: Preview Validasi & Submit (5 Kolom) --}}
-            <div class="lg:col-span-5 flex flex-col gap-6">
-                {{-- Box Ringkasan & Validasi --}}
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-emerald-600 text-[20px]">verified</span>
-                                <span>Ringkasan Validasi Sistem</span>
-                            </h3>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">BEBAS BENTROK</span>
+            {{-- Kolom Kanan: Preview Validasi Sistem & Aksi Submit (5 Kolom Sticky Bento) --}}
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+                <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+                    
+                    {{-- Header Ringkasan --}}
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                        <h3 class="text-base font-bold text-[#1D1D1F]">Ringkasan Permohonan</h3>
+                        <span class="text-xs font-semibold tracking-wide text-emerald-800">Bebas Bentrok</span>
+                    </div>
+
+                    {{-- Item Ringkasan --}}
+                    <div class="space-y-3 text-xs">
+                        <div class="bg-[#F9F9FB] p-4 rounded-2xl space-y-1">
+                            <span class="text-[#86868B] block">Ruangan Terpilih</span>
+                            <div class="font-bold text-[#1D1D1F] text-sm" x-text="currentVenue.name"></div>
+                            <div class="text-[#86868B]" x-text="currentVenue.building + ' • Kapasitas: ' + currentVenue.capacity + ' Orang'"></div>
                         </div>
 
-                        <div class="space-y-3 text-xs mb-6">
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                                <span class="text-slate-400 block mb-0.5">Ruang Terpilih:</span>
-                                <span class="font-bold text-slate-900 text-sm" x-text="currentVenue.name"></span>
-                                <span class="text-slate-500 block text-[11px]" x-text="currentVenue.building + ' • Kapasitas: ' + currentVenue.capacity + ' Orang'"></span>
+                        <div class="grid grid-cols-2 gap-3 text-[#86868B]">
+                            <div class="bg-[#F9F9FB] p-4 rounded-2xl space-y-1">
+                                <span class="block">Tanggal</span>
+                                <div class="font-bold text-[#1D1D1F] text-sm" x-text="selectedDate"></div>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-2 text-slate-600">
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="text-slate-400 block mb-0.5">Tanggal Kegiatan:</span>
-                                    <span class="font-bold text-slate-900" x-text="selectedDate"></span>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="text-slate-400 block mb-0.5">Jam Operasional:</span>
-                                    <span class="font-bold text-slate-900" x-text="selectedStart + ' - ' + selectedEnd + ' WIB'"></span>
-                                </div>
+                            <div class="bg-[#F9F9FB] p-4 rounded-2xl space-y-1">
+                                <span class="block">Sesi Waktu</span>
+                                <div class="font-bold text-[#1D1D1F] text-sm" x-text="selectedStart + ' - ' + selectedEnd"></div>
                             </div>
-                        </div>
-
-                        {{-- Panduan Kebijakan Kampus --}}
-                        <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-600 mb-6 space-y-1.5">
-                            <div class="font-bold text-blue-950 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">rule</span>
-                                Aturan Penggunaan Fasilitas:
-                            </div>
-                            <p class="text-[11px] leading-relaxed">
-                                1. Pengajuan diverifikasi oleh petugas sarpras maksimal 1x24 jam.<br>
-                                2. Pembatalan mandiri hanya diizinkan maksimal <strong>H-1</strong> sebelum kegiatan.<br>
-                                3. Wajib menjaga kebersihan dan mengembalikan tata letak fasilitas.
-                            </p>
                         </div>
                     </div>
 
-                    {{-- Tombol Submit --}}
-                    <div>
-                        <button type="submit" :disabled="submitting" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50">
+                    {{-- Panduan Kebijakan Kampus Teks Bersih --}}
+                    <div class="p-4 rounded-2xl bg-[#F9F9FB] text-xs text-[#86868B] space-y-1.5 leading-relaxed">
+                        <div class="font-semibold text-[#1D1D1F]">Kebijakan Penggunaan Fasilitas:</div>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Pengajuan diverifikasi oleh petugas sarpras maksimal 1x24 jam kerja.</li>
+                            <li>Pembatalan mandiri hanya diizinkan maksimal <strong>H-1</strong> sebelum kegiatan.</li>
+                            <li>Wajib menjaga kebersihan dan mengembalikan tata letak fasilitas seperti semula.</li>
+                        </ul>
+                    </div>
+
+                    {{-- Tombol Aksi --}}
+                    <div class="space-y-3 pt-2">
+                        <button type="submit" 
+                                :disabled="submitting" 
+                                class="w-full py-3.5 px-6 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50">
                             <span x-show="!submitting" class="material-symbols-outlined text-[18px]">send</span>
                             <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                             <span x-text="submitting ? 'Memproses Validasi...' : 'Kirim Permohonan Reservasi'"></span>
                         </button>
+
+                        <a href="{{ route('user.reservations.index') }}" 
+                           class="block text-center w-full py-2.5 text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
+                            Batal dan Kembali
+                        </a>
                     </div>
+
                 </div>
             </div>
+
         </form>
 
     </div>
