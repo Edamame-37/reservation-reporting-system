@@ -57,27 +57,10 @@
     <div :class="{'md:pl-64': sidebarOpen, 'transition-all duration-300': isLoaded}" class="flex-1 flex flex-col min-h-screen pt-16">
 
         <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-            {{-- Governance Context Bar --}}
-            <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                        <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-sm font-bold text-slate-900">Konsol Tata Kelola Biro TIK & Rektorat</h1>
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                Sistem Beroperasi Normal
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-0.5">Otorisasi sentral akun sivitas, inventaris ruang akademik, dan analitik statuter universitas.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <span class="font-mono bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">Tahun Akademik 2024/2025</span>
-                </div>
-            </section>
+            {{-- 
+              Area Konten Utama:
+              Governance Context Bar dihilangkan agar tampilan halaman admin lebih lapang, bersih, dan fokus pada bento card
+            --}}
 
             {{ $slot ?? '' }}
             @yield('content')
