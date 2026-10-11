@@ -146,15 +146,15 @@
         }
     }" class="space-y-10 font-sans text-[#1D1D1F]">
 
-        {{-- 1. Header Judul & Tombol Aksi Utama --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1D1D1F]">Riwayat Reservasi Saya</h1>
-                <p class="text-base sm:text-lg text-[#86868B] font-light">Daftar permohonan peminjaman ruangan kampus beserta status persetujuan.</p>
-            </div>
+        {{-- Toolbar Aksi Cepat (Judul halaman telah terwakili pada Universal Top Header) --}}
+        <div class="flex items-center justify-end gap-3">
+            <a href="{{ route('user.reservation-form') }}" 
+               class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-[#1D1D1F] hover:bg-gray-100 transition">
+                <span>Halaman Form Penuh</span>
+            </a>
             <button type="button" 
                     @click="showCreateModal = true" 
-                    class="bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm self-start sm:self-center shadow-xs flex items-center gap-2">
+                    class="bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-black transition text-sm shadow-xs flex items-center gap-2">
                 <span class="material-symbols-outlined text-[18px]">add</span>
                 <span>Permohonan Baru</span>
             </button>
