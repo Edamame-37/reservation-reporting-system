@@ -343,13 +343,15 @@
 
         {{-- ========================================================================= --}}
         {{-- MODAL POP-UP TERPADU: FORM PENGAJUAN LAPORAN KERUSAKAN BARU               --}}
+        {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
         {{-- ========================================================================= --}}
-        <div x-show="showCreateModal" 
-             x-cloak 
-             class="fixed inset-0 z-[70] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
-             @click.self="showCreateModal = false">
-            
-            <div class="bg-white rounded-[32px] max-w-2xl w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-auto max-h-[85vh] overflow-y-auto no-scrollbar font-sans">
+        <template x-teleport="body">
+            <div x-show="showCreateModal" 
+                 x-cloak 
+                 class="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+                 @click.self="showCreateModal = false">
+                
+                <div class="bg-white rounded-[32px] max-w-2xl w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-auto max-h-[85vh] overflow-y-auto no-scrollbar font-sans">
                 
                 {{-- Tombol Tutup --}}
                 <button type="button" 
@@ -496,13 +498,16 @@
                 </form>
             </div>
         </div>
+    </template>
 
-        {{-- ========================================================================= --}}
-        {{-- MODAL POP-UP: DETAIL LENGKAP LAPORAN KERUSAKAN & RESOLUSI TEKNISI         --}}
-        {{-- ========================================================================= --}}
+    {{-- ========================================================================= --}}
+    {{-- MODAL POP-UP: DETAIL LENGKAP LAPORAN KERUSAKAN & RESOLUSI TEKNISI         --}}
+    {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+    {{-- ========================================================================= --}}
+    <template x-teleport="body">
         <div x-show="showDetailModal" 
              x-cloak 
-             class="fixed inset-0 z-[70] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+             class="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
              @click.self="showDetailModal = false">
             
             <div class="bg-white rounded-[32px] max-w-lg w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-auto max-h-[85vh] overflow-y-auto no-scrollbar font-sans">
@@ -599,6 +604,7 @@
                 </template>
             </div>
         </div>
+    </template>
 
     </div>
 </x-app-layout>

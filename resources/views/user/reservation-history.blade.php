@@ -399,12 +399,14 @@
 
         {{-- ========================================================================= --}}
         {{-- MODAL 1: DETAIL LENGKAP TIKET RESERVASI (APPLE-ESQUE PURE TYPOGRAPHY)     --}}
+        {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
         {{-- ========================================================================= --}}
-        <div x-show="showDetailModal" 
-             x-cloak 
-             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
-             @click.self="showDetailModal = false">
-            <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
+        <template x-teleport="body">
+            <div x-show="showDetailModal" 
+                 x-cloak 
+                 class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+                 @click.self="showDetailModal = false">
+                <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
                 <template x-if="selectedTicket">
                     <div class="space-y-6">
                         <div class="flex items-start justify-between">
@@ -469,13 +471,16 @@
                 </template>
             </div>
         </div>
+    </template>
 
-        {{-- ========================================================================= --}}
-        {{-- MODAL 2: KONFIRMASI PEMBATALAN MANDIRI (BATAS MINIMAL H-1)                 --}}
-        {{-- ========================================================================= --}}
+    {{-- ========================================================================= --}}
+    {{-- MODAL 2: KONFIRMASI PEMBATALAN MANDIRI (BATAS MINIMAL H-1)                 --}}
+    {{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+    {{-- ========================================================================= --}}
+    <template x-teleport="body">
         <div x-show="showCancelModal" 
              x-cloak 
-             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
              @click.self="showCancelModal = false">
             <div class="bg-white w-full max-w-md rounded-[32px] p-7 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-5 font-sans my-auto">
                 <template x-if="selectedTicket">
@@ -517,21 +522,24 @@
                                         class="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-xs">
                                     Ya, Batalkan Reservasi
                                 </button>
-                            </div>
-                        </form>
-                    </div>
-                </template>
-            </div>
+                        </div>
+                    </form>
+                </div>
+            </template>
         </div>
+    </div>
+</template>
 
-        {{-- ========================================================================= --}}
-        {{-- MODAL 3: FORM PENGAJUAN RESERVASI RUANGAN BARU                            --}}
-        {{-- ========================================================================= --}}
-        <div x-show="showCreateModal" 
-             x-cloak 
-             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
-             @click.self="showCreateModal = false">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] p-7 sm:p-9 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
+{{-- ========================================================================= --}}
+{{-- MODAL 3: FORM PENGAJUAN RESERVASI RUANGAN BARU                            --}}
+{{-- DITELEPORTASI KE <body> UNTUK MENCEGAH OVERLAP HEADER / STACKING CONTEXT  --}}
+{{-- ========================================================================= --}}
+<template x-teleport="body">
+    <div x-show="showCreateModal" 
+         x-cloak 
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
+         @click.self="showCreateModal = false">
+        <div class="bg-white w-full max-w-2xl rounded-[32px] p-7 sm:p-9 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
                 
                 <div class="flex items-start justify-between">
                     <div>
@@ -693,6 +701,7 @@
                 </form>
             </div>
         </div>
+    </template>
 
     </div>
 </x-app-layout>
