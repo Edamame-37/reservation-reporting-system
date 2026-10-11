@@ -25,7 +25,7 @@
     } elseif ($role === 'admin') {
         $sidebarCounts['admin_users'] = \App\Models\User::where('status', 'pending')->count();
     }
-    {{-- Catatan: Query badge untuk peran user ditiadakan untuk efisiensi karena menu user kini bersih tanpa badge penanda --}}
+    // Catatan: Query badge untuk peran user ditiadakan untuk efisiensi karena menu user kini bersih tanpa badge penanda
 @endphp
 
 <!-- 
