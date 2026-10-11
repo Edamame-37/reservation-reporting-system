@@ -201,244 +201,195 @@
 
 
     <!-- ############################################################## -->
-    <!-- OPTION 1: APPLE-ESQUE CLEAN BENTO (AUTENTIK CAVA - 100% ANTI-AI SLOP) -->
+    <!-- OPTION 1: MURNI MINIMALIS (SELARAS DENGAN DESAIN PUBLIC CAVA) -->
     <!-- ############################################################## -->
-    <div x-show="option === 1" class="font-sans-inter min-h-screen bg-[#FAFAFC] text-[#1D1D1F] pb-32 pt-20">
+    <div x-show="option === 1" class="font-sans-inter min-h-screen bg-[#FAFAFC] text-[#1D1D1F] pb-32 pt-24">
         
         <!-- ========================================================== -->
-        <!-- Universal Top Header CAVA Portal (Glassmorphic 64px)       -->
+        <!-- Universal Top Header CAVA Portal (Sesuai Layout Public)    -->
         <!-- ========================================================== -->
-        <header class="fixed top-0 inset-x-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100 z-40 px-6 sm:px-10 flex items-center justify-between">
-            <div class="flex items-center gap-8">
-                <a href="#" @click.prevent="page = 'dashboard'" class="flex items-center gap-3 group">
-                    <span class="w-8 h-8 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center font-extrabold text-sm tracking-tight shadow-xs group-hover:scale-105 transition-transform">C</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold text-[15px] tracking-tight text-[#1D1D1F] leading-tight">CAVA <span class="text-[#86868B] font-medium">Portal</span></span>
-                        <span class="text-[10px] text-[#86868B] font-medium leading-none">Mahasiswa & Dosen</span>
-                    </div>
+        <header class="fixed top-0 inset-x-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100 z-40 px-6 sm:px-12 flex items-center justify-between">
+            <div class="flex items-center gap-10">
+                <a href="#" @click.prevent="page = 'dashboard'" class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center font-bold text-sm tracking-tight">C</span>
+                    <span class="font-bold text-base tracking-tight text-[#1D1D1F]">CAVA <span class="text-[#86868B] font-normal">Portal</span></span>
                 </a>
 
-                <!-- Navigasi Modul (Pill Highlight Bersih) -->
-                <nav class="hidden md:flex items-center gap-1.5">
+                <!-- Navigasi Teks Murni (Sesuai Public Navbar) -->
+                <nav class="hidden md:flex items-center gap-8 text-sm">
                     <button @click="page = 'dashboard'" 
-                            :class="page === 'dashboard' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" 
-                            class="px-4 py-2 rounded-full text-[13px] font-semibold transition-all">
+                            :class="page === 'dashboard' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] font-medium'" 
+                            class="transition-colors">
                         Dasbor
                     </button>
                     <button @click="page = 'reservations'" 
-                            :class="page === 'reservations' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" 
-                            class="px-4 py-2 rounded-full text-[13px] font-semibold transition-all">
-                        Reservasi Ruangan
+                            :class="page === 'reservations' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] font-medium'" 
+                            class="transition-colors">
+                        Reservasi Ruang
                     </button>
                     <button @click="page = 'reports'" 
-                            :class="page === 'reports' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" 
-                            class="px-4 py-2 rounded-full text-[13px] font-semibold transition-all">
+                            :class="page === 'reports' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] font-medium'" 
+                            class="transition-colors">
                         Laporan Kerusakan
                     </button>
                 </nav>
             </div>
             
-            <div class="flex items-center gap-4">
-                <!-- Tombol Pintas Ajukan Reservasi -->
-                <button @click="page = 'reservation-form'" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1D1D1F] text-white text-[12px] font-semibold hover:bg-black transition shadow-[0_4px_14px_rgba(0,0,0,0.08)]">
+            <div class="flex items-center gap-5">
+                <button @click="page = 'reservation-form'" class="hidden sm:inline-flex items-center gap-2 bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
                     <span class="material-symbols-outlined text-[16px]">add</span>
                     <span>Reservasi Baru</span>
                 </button>
 
-                <!-- Identitas Profil Mahasiswa / Sivitas -->
-                <div class="flex items-center gap-3 pl-3 sm:border-l border-gray-200">
-                    <div class="w-8 h-8 rounded-full bg-slate-200 text-[#1D1D1F] font-bold text-xs flex items-center justify-center ring-2 ring-black/[0.04]">
+                <!-- Identitas Sivitas -->
+                <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-[#1D1D1F] font-bold text-xs flex items-center justify-center">
                         DP
                     </div>
                     <div class="hidden lg:block text-left leading-tight">
-                        <div class="text-[13px] font-semibold text-[#1D1D1F]">Dimas Pratama</div>
-                        <div class="text-[11px] text-[#86868B]">2110512044 • Mahasiswa TI</div>
+                        <div class="text-sm font-semibold text-[#1D1D1F]">Dimas Pratama</div>
+                        <div class="text-xs text-[#86868B]">Mahasiswa TI</div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Area Konten Utama -->
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <!-- Area Konten Utama Terbuka & Bernapas -->
+        <main class="max-w-6xl mx-auto px-6 sm:px-8">
 
             <!-- ========================================================== -->
             <!-- 1. HALAMAN DASBOR UTAMA (dashboard)                         -->
             <!-- ========================================================== -->
-            <div x-show="page === 'dashboard'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-10">
+            <div x-show="page === 'dashboard'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-12">
                 
-                <!-- Salam Pembuka Bersih -->
+                <!-- Judul Halaman Murni Minimalis -->
                 <div class="space-y-1">
-                    <h1 class="text-[32px] sm:text-[36px] font-extrabold tracking-tight text-[#1D1D1F] leading-tight">
-                        Selamat Datang, Dimas
-                    </h1>
-                    <p class="text-[15px] text-[#86868B] max-w-2xl leading-relaxed">
-                        Pantau permohonan peminjaman ruangan kampus, periksa jadwal terdekat, dan sampaikan kendala sarana prasarana secara transparan.
-                    </p>
+                    <h1 class="text-4xl font-bold tracking-tight text-[#1D1D1F]">Dasbor Pengguna</h1>
+                    <p class="text-lg text-[#86868B] font-light">Kelola permohonan ruang kuliah dan pantau perbaikan fasilitas kampus secara terpadu.</p>
                 </div>
 
-                <!-- SPOTLIGHT HERO: APPLE EVENT PASS / BOARDING PASS (100% BEBAS AI SLOP) -->
-                <!-- Menggantikan background hitam pekat + blur orb generik dengan kartu tiket pass yang elegan -->
-                <section class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
-                    <div class="flex flex-col lg:flex-row items-stretch justify-between gap-6">
-                        
-                        <!-- Kolom Kiri: Blok Tanggal Kalender Vertikal Minimalis -->
-                        <div class="flex items-center sm:items-start gap-5 flex-1">
-                            <!-- Box Tanggal Minimalis -->
-                            <div class="bg-[#F9F9FB] border border-gray-100 rounded-2xl p-4 min-w-[96px] text-center flex flex-col items-center justify-center shrink-0">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">OKTOBER</span>
-                                <span class="text-[36px] font-extrabold tracking-tight text-[#1D1D1F] leading-none my-0.5">15</span>
-                                <span class="text-[11px] font-medium text-[#86868B]">Kamis</span>
-                            </div>
-
-                            <!-- Detail Jadwal & Acara -->
-                            <div class="space-y-2 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-semibold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span>Jadwal Terdekat Disetujui</span>
-                                    </span>
-                                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2 py-0.5 rounded-md">RSV-2026-0042</span>
-                                </div>
-                                
-                                <h2 class="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#1D1D1F] leading-snug">
-                                    Seminar Nasional AI & Teknologi Komputasi 2026
-                                </h2>
-
-                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-[#86868B]">
-                                    <span class="flex items-center gap-1 text-[#1D1D1F] font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">location_on</span>
-                                        <span>Auditorium Utama • Gedung Rektorat Lt. 3</span>
-                                    </span>
-                                    <span>•</span>
-                                    <span class="flex items-center gap-1 text-[#1D1D1F] font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">schedule</span>
-                                        <span>09:00 - 12:00 WIB (3 Jam)</span>
-                                    </span>
-                                </div>
-
-                                <div class="p-3 rounded-xl bg-[#FAFAFC] border border-gray-100 text-[12px] text-[#86868B] flex items-center gap-2 mt-2">
-                                    <span class="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">info</span>
-                                    <span>Kunci ruangan & modul presentasi dapat diambil di meja piket sarpras Lt. 1 mulai pukul 08:30 WIB.</span>
-                                </div>
-                            </div>
+                <!-- SPOTLIGHT HERO: SATU KESATUAN BERSIH TANPA KOTAK ID & TANPA BADGE BER-BORDER -->
+                <section class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="space-y-3 flex-1">
+                        <!-- Indikator Status Dot Murni (Sesuai public/catalog.blade.php) -->
+                        <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Jadwal Terdekat • Disetujui</span>
                         </div>
 
-                        <!-- Kolom Kanan: Aksi Cepat Buka Tiket Digital -->
-                        <div class="flex lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 shrink-0">
-                            <button @click="openTicketDetail(selectedTicket)" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#1D1D1F] text-white text-[13px] font-semibold hover:bg-black transition shadow-sm flex items-center justify-center gap-2 group">
-                                <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
-                                <span>Buka Tiket Elektronik</span>
-                            </button>
-                            <span class="text-[11px] text-[#86868B] hidden lg:block">Barcode & QR siap ditunjukkan ke petugas</span>
-                        </div>
+                        <h2 class="text-2xl font-bold tracking-tight text-[#1D1D1F]">
+                            Seminar Nasional AI & Teknologi Komputasi 2026
+                        </h2>
 
+                        <p class="text-sm text-[#86868B]">
+                            Auditorium Utama, Gedung Rektorat Lt. 3 • Kamis, 15 Oktober 2026 (09:00 - 12:00 WIB)
+                        </p>
+                    </div>
+
+                    <div class="shrink-0 self-start md:self-center">
+                        <button @click="openTicketDetail(selectedTicket)" class="bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm">
+                            Buka Detail Tiket
+                        </button>
                     </div>
                 </section>
 
-                <!-- 4 PINTASAN AKSI CEPAT BENTO (PERSIS GAYA public/home.blade.php) -->
-                <!-- Menggantikan kotak-kotak icon warna generik dengan kartu bento lapang + giant faint watermark icon -->
+                <!-- 4 PINTASAN BENTO (PERSIS PUSAT BANTUAN public/home.blade.php) -->
                 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     
                     <!-- Kartu 1: Ajukan Reservasi -->
-                    <a href="#" @click.prevent="page = 'reservation-form'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-7 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] border border-transparent hover:border-gray-100 cursor-pointer">
+                    <a href="#" @click.prevent="page = 'reservation-form'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
                         <div class="relative z-10">
-                            <h3 class="text-lg font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors duration-300">Ajukan Reservasi</h3>
-                            <p class="text-sm text-[#86868B] leading-relaxed">Pilih slot sesi ruangan 30 menit.</p>
+                            <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Ajukan Reservasi</h3>
+                            <p class="text-sm text-[#86868B]">Peminjaman ruang kuliah atau lab.</p>
                         </div>
-                        <div class="relative z-10 inline-flex items-center gap-1 text-[12px] font-semibold text-[#1D1D1F] group-hover:translate-x-1 transition-transform duration-300">
+                        <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
                             <span>Buka Formulir</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </div>
-                        <!-- Watermark Icon Tipis Raksasa -->
-                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.7] translate-x-4 group-hover:scale-110 group-hover:-translate-x-1 transition-all duration-700 ease-out pointer-events-none select-none">
-                            <span class="material-symbols-outlined text-[85px] text-gray-200/50 group-hover:text-blue-50 transition-colors duration-700 font-light">calendar_add_on</span>
+                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                            <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">meeting_room</span>
                         </div>
                     </a>
 
                     <!-- Kartu 2: Riwayat Reservasi -->
-                    <a href="#" @click.prevent="page = 'reservations'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-7 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] border border-transparent hover:border-gray-100 cursor-pointer">
+                    <a href="#" @click.prevent="page = 'reservations'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
                         <div class="relative z-10">
-                            <h3 class="text-lg font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors duration-300">Riwayat Reservasi</h3>
-                            <p class="text-sm text-[#86868B] leading-relaxed">Pantau status & pembatalan H-1.</p>
+                            <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Riwayat Reservasi</h3>
+                            <p class="text-sm text-[#86868B]">Pantau tiket dan pembatalan H-1.</p>
                         </div>
-                        <div class="relative z-10 inline-flex items-center gap-1 text-[12px] font-semibold text-[#1D1D1F] group-hover:translate-x-1 transition-transform duration-300">
+                        <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
                             <span>Lihat Semua Tiket</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </div>
-                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.7] translate-x-4 group-hover:scale-110 group-hover:-translate-x-1 transition-all duration-700 ease-out pointer-events-none select-none">
-                            <span class="material-symbols-outlined text-[85px] text-gray-200/50 group-hover:text-purple-50 transition-colors duration-700 font-light">history_edu</span>
+                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                            <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">calendar_month</span>
                         </div>
                     </a>
 
                     <!-- Kartu 3: Lapor Kerusakan -->
-                    <a href="#" @click.prevent="page = 'report-form'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-7 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] border border-transparent hover:border-gray-100 cursor-pointer">
+                    <a href="#" @click.prevent="page = 'report-form'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
                         <div class="relative z-10">
-                            <h3 class="text-lg font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors duration-300">Lapor Kerusakan</h3>
-                            <p class="text-sm text-[#86868B] leading-relaxed">Unggah bukti foto sarpras rusak.</p>
+                            <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Lapor Kerusakan</h3>
+                            <p class="text-sm text-[#86868B]">Pusat bantuan teknis fasilitas.</p>
                         </div>
-                        <div class="relative z-10 inline-flex items-center gap-1 text-[12px] font-semibold text-[#1D1D1F] group-hover:translate-x-1 transition-transform duration-300">
+                        <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
                             <span>Kirim Laporan</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </div>
-                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.7] translate-x-4 group-hover:scale-110 group-hover:-translate-x-1 transition-all duration-700 ease-out pointer-events-none select-none">
-                            <span class="material-symbols-outlined text-[85px] text-gray-200/50 group-hover:text-rose-50 transition-colors duration-700 font-light">support_agent</span>
+                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                            <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">support_agent</span>
                         </div>
                     </a>
 
                     <!-- Kartu 4: Status Laporan -->
-                    <a href="#" @click.prevent="page = 'reports'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-7 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] border border-transparent hover:border-gray-100 cursor-pointer">
+                    <a href="#" @click.prevent="page = 'reports'" class="group relative overflow-hidden bg-[#F9F9FB] rounded-[2rem] p-8 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-between min-h-[160px] cursor-pointer">
                         <div class="relative z-10">
-                            <h3 class="text-lg font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors duration-300">Status Perbaikan</h3>
-                            <p class="text-sm text-[#86868B] leading-relaxed">Pantau penanganan teknisi.</p>
+                            <h3 class="text-xl font-bold text-[#1D1D1F] mb-1 group-hover:text-black transition-colors">Status Perbaikan</h3>
+                            <p class="text-sm text-[#86868B]">Tindak lanjut oleh teknisi.</p>
                         </div>
-                        <div class="relative z-10 inline-flex items-center gap-1 text-[12px] font-semibold text-[#1D1D1F] group-hover:translate-x-1 transition-transform duration-300">
+                        <div class="relative z-10 inline-flex items-center gap-1 text-sm font-medium text-[#1D1D1F] mt-4">
                             <span>Pantau Progres</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </div>
-                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.7] translate-x-4 group-hover:scale-110 group-hover:-translate-x-1 transition-all duration-700 ease-out pointer-events-none select-none">
-                            <span class="material-symbols-outlined text-[85px] text-gray-200/50 group-hover:text-amber-50 transition-colors duration-700 font-light">verified</span>
+                        <div class="absolute right-0 inset-y-0 flex items-center pr-2 transform scale-[1.6] translate-x-4 group-hover:scale-100 group-hover:-translate-x-2 transition-all duration-700 ease-out pointer-events-none select-none">
+                            <span class="material-symbols-outlined text-[90px] text-gray-200/50 group-hover:text-gray-300/40 transition-colors duration-700 font-light">verified</span>
                         </div>
                     </a>
 
                 </section>
 
-                <!-- DUA KOLOM BENTO: RIWAYAT RESERVASI (2/3) & LAPORAN SARPRAS (1/3) -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- DUA KOLOM: RIWAYAT TERKINI & LAPORAN KERUSAKAN (BERSIH TANPA KOTAK BADGE) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
-                    <!-- Kolom Kiri: Riwayat Reservasi Terkini -->
-                    <section class="lg:col-span-2 bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+                    <!-- Kolom Kiri: Riwayat Permohonan Terkini -->
+                    <section class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
                         <div class="flex items-center justify-between pb-4 border-b border-gray-100">
-                            <div>
-                                <h3 class="text-[18px] font-bold text-[#1D1D1F]">Riwayat Reservasi Terkini</h3>
-                                <p class="text-[13px] text-[#86868B] mt-0.5">Menampilkan permohonan peminjaman ruangan aktif Anda</p>
-                            </div>
-                            <button @click="page = 'reservations'" class="text-[13px] font-semibold text-[#1D1D1F] hover:underline flex items-center gap-1">
+                            <h3 class="text-xl font-bold text-[#1D1D1F]">Riwayat Permohonan Terkini</h3>
+                            <button @click="page = 'reservations'" class="text-sm font-medium text-[#1D1D1F] hover:underline flex items-center gap-1">
                                 <span>Lihat Semua (12)</span>
                                 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </button>
                         </div>
 
-                        <!-- Daftar Item Reservasi Berbentuk Strip Pass -->
-                        <div class="space-y-3.5">
-                            <!-- Item 1 (Approved) -->
-                            <div @click="openTicketDetail(selectedTicket)" class="p-5 rounded-2xl bg-[#F9F9FB] hover:bg-white border border-transparent hover:border-gray-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
-                                <div class="space-y-1.5 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">Disetujui</span>
-                                        <span class="text-[12px] text-[#86868B]">Kamis, 15 Okt 2026 • 09:00 - 12:00 WIB</span>
-                                    </div>
-                                    <div class="text-[15px] font-bold text-[#1D1D1F] group-hover:text-blue-900 transition">Auditorium Utama • Gedung Rektorat Lt. 3</div>
-                                    <div class="text-[12px] text-[#86868B]">Seminar Nasional AI & Teknologi Komputasi 2026</div>
+                        <div class="divide-y divide-gray-50">
+                            <!-- Baris 1: Disetujui -->
+                            <div @click="openTicketDetail(selectedTicket)" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
+                                <div class="space-y-0.5">
+                                    <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">Auditorium Utama, Gedung Rektorat</h4>
+                                    <p class="text-xs text-[#86868B]">Kamis, 15 Okt 2026 • 09:00 - 12:00 WIB • Seminar Nasional AI</p>
                                 </div>
-                                <span class="text-[12px] font-semibold text-[#1D1D1F] flex items-center gap-1 self-start sm:self-center shrink-0">
-                                    <span>Buka Tiket</span>
-                                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
-                                </span>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span>Disetujui</span>
+                                    </span>
+                                    <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
+                                </div>
                             </div>
 
-                            <!-- Item 2 (Pending) -->
+                            <!-- Baris 2: Menunggu -->
                             <div @click="openTicketDetail({
-                                id: 'RSV-2026-0043',
+                                id: '',
                                 room: 'Lab Jaringan Komputer',
                                 building: 'Gedung Fasilkom Lt. 2',
                                 capacity: '35 Orang',
@@ -451,87 +402,85 @@
                                 statusLabel: 'Menunggu Verifikasi',
                                 adminNote: 'Permohonan sedang dalam antrean verifikasi Kepala Laboratorium.',
                                 canCancel: true
-                            })" class="p-5 rounded-2xl bg-[#F9F9FB] hover:bg-white border border-transparent hover:border-gray-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
-                                <div class="space-y-1.5 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800">Menunggu Verifikasi</span>
-                                        <span class="text-[12px] text-[#86868B]">Selasa, 20 Okt 2026 • 13:00 - 15:30 WIB</span>
-                                    </div>
-                                    <div class="text-[15px] font-bold text-[#1D1D1F] group-hover:text-blue-900 transition">Lab Jaringan Komputer • Gedung Fasilkom Lt. 2</div>
-                                    <div class="text-[12px] text-[#86868B]">Praktikum Pengganti Jaringan Komputer Kelas B</div>
+                            })" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
+                                <div class="space-y-0.5">
+                                    <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">Lab Jaringan Komputer, Gedung Fasilkom</h4>
+                                    <p class="text-xs text-[#86868B]">Selasa, 20 Okt 2026 • 13:00 - 15:30 WIB • Praktikum Pengganti</p>
                                 </div>
-                                <span class="text-[12px] font-semibold text-[#1D1D1F] flex items-center gap-1 self-start sm:self-center shrink-0">
-                                    <span>Buka Tiket</span>
-                                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
-                                </span>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <span class="flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        <span>Menunggu</span>
+                                    </span>
+                                    <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
+                                </div>
                             </div>
 
-                            <!-- Item 3 (Completed) -->
-                            <div class="p-5 rounded-2xl bg-[#F9F9FB] border border-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 opacity-80">
-                                <div class="space-y-1.5 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700">Selesai</span>
-                                        <span class="text-[12px] text-[#86868B]">Senin, 05 Okt 2026 • 10:00 - 12:00 WIB</span>
-                                    </div>
-                                    <div class="text-[15px] font-bold text-[#1D1D1F]">Ruang Kuliah Teori B.301</div>
-                                    <div class="text-[12px] text-[#86868B]">Diskusi Kelompok Capstone Project Semester 7</div>
+                            <!-- Baris 3: Selesai -->
+                            <div class="py-4.5 flex items-center justify-between gap-4 px-2 opacity-80">
+                                <div class="space-y-0.5">
+                                    <h4 class="font-semibold text-[#1D1D1F] text-base">Ruang Kuliah Teori B.301, Gedung Perkuliahan</h4>
+                                    <p class="text-xs text-[#86868B]">Senin, 05 Okt 2026 • 10:00 - 12:00 WIB • Diskusi Kelompok</p>
                                 </div>
-                                <span class="text-[12px] font-medium text-[#86868B]">Arsip Tiket</span>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <span class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                        <span>Selesai</span>
+                                    </span>
+                                    <span class="material-symbols-outlined text-gray-300 text-[18px]">arrow_forward</span>
+                                </div>
                             </div>
                         </div>
                     </section>
 
                     <!-- Kolom Kanan: Status Laporan Kerusakan -->
-                    <section class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col justify-between">
-                        <div class="space-y-5">
-                            <div class="flex items-center justify-between pb-4 border-b border-gray-100">
-                                <div>
-                                    <h3 class="text-[18px] font-bold text-[#1D1D1F]">Status Kerusakan</h3>
-                                    <p class="text-[13px] text-[#86868B] mt-0.5">Tindak lanjut sarpras</p>
-                                </div>
-                                <button @click="page = 'reports'" class="text-[13px] font-semibold text-[#1D1D1F] hover:underline">Semua (5)</button>
+                    <section class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-2">
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">Status Laporan Kerusakan</h3>
+                                <button @click="page = 'reports'" class="text-sm font-medium text-[#1D1D1F] hover:underline flex items-center gap-1">
+                                    <span>Lihat Semua (5)</span>
+                                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                </button>
                             </div>
 
-                            <div class="space-y-3.5">
-                                <!-- Card Laporan 1 -->
-                                <div @click="openReportDetail(selectedReport)" class="p-4 rounded-2xl bg-[#F9F9FB] hover:bg-white border border-transparent hover:border-gray-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.04)] transition-all cursor-pointer">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <span class="font-mono text-[11px] font-bold text-[#86868B]">TKT-2026-081</span>
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-800">Diproses Teknisi</span>
+                            <div class="divide-y divide-gray-50">
+                                <!-- Baris Laporan 1: Diproses -->
+                                <div @click="openReportDetail(selectedReport)" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
+                                    <div class="space-y-0.5">
+                                        <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">AC Central Lab RPL Bocor</h4>
+                                        <p class="text-xs text-[#86868B]">Lab RPL, Gedung FTIK Lt. 2 • Dilaporkan 10 Okt 2026</p>
                                     </div>
-                                    <div class="text-[14px] font-bold text-[#1D1D1F] line-clamp-1">AC Central Lab RPL Mengalami Kebocoran</div>
-                                    <div class="text-[12px] text-[#86868B] mt-1 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[15px]">location_on</span>
-                                        <span>Lab RPL • Gd. FTIK Lt. 2</span>
-                                    </div>
-                                    <div class="mt-3 pt-2.5 border-t border-gray-200/60 text-[11px] text-[#86868B] flex items-center justify-between">
-                                        <span>Update: 2 jam lalu</span>
-                                        <span class="font-semibold text-[#1D1D1F]">Lihat Log →</span>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <span class="flex items-center gap-1.5 text-xs font-medium text-blue-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                            <span>Diproses</span>
+                                        </span>
+                                        <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
                                     </div>
                                 </div>
 
-                                <!-- Card Laporan 2 -->
-                                <div class="p-4 rounded-2xl bg-[#F9F9FB] border border-transparent">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <span class="font-mono text-[11px] font-bold text-[#86868B]">TKT-2026-079</span>
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800">Selesai</span>
+                                <!-- Baris Laporan 2: Selesai -->
+                                <div class="py-4.5 flex items-center justify-between gap-4 px-2 opacity-80">
+                                    <div class="space-y-0.5">
+                                        <h4 class="font-semibold text-[#1D1D1F] text-base">Proyektor HDMI Ruang Kuliah Mati Total</h4>
+                                        <p class="text-xs text-[#86868B]">Ruang Teori B.204 • Dilaporkan 03 Okt 2026</p>
                                     </div>
-                                    <div class="text-[14px] font-bold text-[#1D1D1F] line-clamp-1">Proyektor HDMI Ruang Kuliah Mati Total</div>
-                                    <div class="text-[12px] text-[#86868B] mt-1 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[15px]">location_on</span>
-                                        <span>Ruang Teori B.204</span>
-                                    </div>
-                                    <div class="mt-3 pt-2.5 border-t border-gray-200/60 text-[11px] text-emerald-700 font-medium">
-                                        Modul lampu telah diganti
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            <span>Selesai</span>
+                                        </span>
+                                        <span class="material-symbols-outlined text-gray-300 text-[18px]">arrow_forward</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-6 pt-4 border-t border-gray-100">
-                            <button @click="page = 'report-form'" class="w-full py-3 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[13px] font-semibold transition flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+                        <div class="pt-4 border-t border-gray-100">
+                            <button @click="page = 'report-form'" class="w-full py-3.5 rounded-xl bg-[#F9F9FB] hover:bg-gray-100 text-[#1D1D1F] text-sm font-medium transition flex items-center justify-center gap-2">
                                 <span>Laporkan Kerusakan Baru</span>
+                                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                             </button>
                         </div>
                     </section>
@@ -543,92 +492,75 @@
             <!-- ========================================================== -->
             <!-- 2. HALAMAN RIWAYAT RESERVASI (reservations)                -->
             <!-- ========================================================== -->
-            <div x-show="page === 'reservations'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+            <div x-show="page === 'reservations'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-10">
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="space-y-1">
-                        <h1 class="text-[32px] font-extrabold tracking-tight text-[#1D1D1F]">Riwayat Reservasi Saya</h1>
-                        <p class="text-[14px] text-[#86868B]">Daftar lengkap permohonan peminjaman ruangan kampus beserta riwayat status dan pembatalan H-1</p>
+                        <h1 class="text-4xl font-bold tracking-tight text-[#1D1D1F]">Riwayat Reservasi Saya</h1>
+                        <p class="text-lg text-[#86868B] font-light">Daftar permohonan peminjaman ruangan kampus beserta status persetujuan.</p>
                     </div>
-                    <button @click="page = 'reservation-form'" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1D1D1F] text-white text-[13px] font-semibold hover:bg-black transition shadow-xs self-start sm:self-center">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span>Buat Permohonan Baru</span>
+                    <button @click="page = 'reservation-form'" class="bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm self-start sm:self-center">
+                        + Permohonan Baru
                     </button>
                 </div>
 
-                <!-- Status Strip Bar (Terpadu, Tenang, Anti-Angka Norak) -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Total Permohonan</span>
-                        <div class="text-[24px] font-bold text-[#1D1D1F] mt-1">12 <span class="text-[12px] font-normal text-[#86868B]">Tiket</span></div>
+                <!-- Toolbar Filter Minimalis (Sesuai Gaya Tab Public) -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-gray-100">
+                    <div class="flex items-center gap-8 text-sm font-medium overflow-x-auto no-scrollbar">
+                        <button @click="resFilter = 'all'" 
+                                :class="resFilter === 'all' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Semua Reservasi (12)
+                        </button>
+                        <button @click="resFilter = 'pending'" 
+                                :class="resFilter === 'pending' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Menunggu (2)
+                        </button>
+                        <button @click="resFilter = 'approved'" 
+                                :class="resFilter === 'approved' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Disetujui (3)
+                        </button>
+                        <button @click="resFilter = 'completed'" 
+                                :class="resFilter === 'completed' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Selesai (7)
+                        </button>
                     </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Menunggu Verifikasi</span>
-                        <div class="text-[24px] font-bold text-amber-700 mt-1">2 <span class="text-[12px] font-normal text-[#86868B]">Antrean</span></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Disetujui / Aktif</span>
-                        <div class="text-[24px] font-bold text-emerald-700 mt-1">3 <span class="text-[12px] font-normal text-[#86868B]">Jadwal</span></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Selesai / Riwayat</span>
-                        <div class="text-[24px] font-bold text-slate-700 mt-1">7 <span class="text-[12px] font-normal text-[#86868B]">Arsip</span></div>
+
+                    <div class="w-full md:w-80">
+                        <input type="text" x-model="searchRes" placeholder="Cari nama ruang atau kegiatan..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                     </div>
                 </div>
 
-                <!-- Filter & Search Toolbar (Bebas Border Kasar) -->
-                <div class="bg-white p-4 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar w-full md:w-auto">
-                        <button @click="resFilter = 'all'" :class="resFilter === 'all' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Semua</button>
-                        <button @click="resFilter = 'pending'" :class="resFilter === 'pending' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Menunggu</button>
-                        <button @click="resFilter = 'approved'" :class="resFilter === 'approved' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Disetujui</button>
-                        <button @click="resFilter = 'completed'" :class="resFilter === 'completed' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Selesai</button>
-                    </div>
-
-                    <div class="w-full md:w-80 relative">
-                        <span class="material-symbols-outlined text-[18px] text-[#86868B] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
-                        <input type="text" x-model="searchRes" placeholder="Cari nama ruang atau kegiatan..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] pl-11 pr-4 py-3 rounded-2xl text-[13px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition-all">
-                    </div>
-                </div>
-
-                <!-- Daftar Kartu Reservasi Gaya Pass -->
+                <!-- Daftar Kartu Reservasi Bersih (Tanpa Kode ID & Tanpa Kotak Badge) -->
                 <div class="space-y-4">
                     
                     <!-- Kartu 1: Disetujui -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] transition-all">
+                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-2.5 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-md">RSV-2026-0042</span>
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">Disetujui</span>
-                                    <span class="text-[12px] text-[#86868B]">• Diajukan pada 12 Okt 2026</span>
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Disetujui</span>
                                 </div>
-                                <h3 class="text-[19px] font-bold text-[#1D1D1F]">Auditorium Utama • Gedung Rektorat Lt. 3</h3>
-                                <p class="text-[13px] text-[#86868B]">Seminar Nasional AI & Teknologi Komputasi 2026</p>
+
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">Auditorium Utama • Gedung Rektorat Lt. 3</h3>
+                                <p class="text-sm text-[#86868B]">Seminar Nasional AI & Teknologi Komputasi 2026</p>
                                 
-                                <div class="flex flex-wrap items-center gap-4 text-[13px] text-[#1D1D1F] pt-1">
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">calendar_month</span>
-                                        <span>Kamis, 15 Oktober 2026</span>
-                                    </span>
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">schedule</span>
-                                        <span>09:00 - 12:00 WIB (3 Jam)</span>
-                                    </span>
-                                    <span class="flex items-center gap-1.5 text-[#86868B]">
-                                        <span class="material-symbols-outlined text-[17px]">groups</span>
-                                        <span>Kapasitas 250 Kursi</span>
-                                    </span>
+                                <div class="text-xs text-[#86868B] pt-1">
+                                    Kamis, 15 Oktober 2026 • 09:00 - 12:00 WIB • Kapasitas 250 Kursi
                                 </div>
                             </div>
                             
-                            <!-- Tombol Aksi -->
+                            <!-- Tombol Aksi Bersih -->
                             <div class="flex items-center gap-3 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100">
-                                <button @click="openTicketDetail(selectedTicket)" class="px-5 py-3 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[13px] font-semibold transition">
-                                    Lihat Tiket
+                                <button @click="openTicketDetail(selectedTicket)" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
+                                    Lihat Detail Tiket
                                 </button>
-                                <button @click="openCancelConfirm(selectedTicket)" class="px-5 py-3 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-[13px] font-semibold transition">
+                                <button @click="openCancelConfirm(selectedTicket)" class="text-xs font-medium text-red-600 hover:underline px-3 py-2">
                                     Batalkan (H-1)
                                 </button>
                             </div>
@@ -637,33 +569,26 @@
                     </div>
 
                     <!-- Kartu 2: Menunggu -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] transition-all">
+                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-2.5 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-md">RSV-2026-0043</span>
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800">Menunggu Verifikasi</span>
-                                    <span class="text-[12px] text-[#86868B]">• Diajukan kemarin</span>
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2 text-xs font-medium text-amber-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span>Menunggu Verifikasi</span>
                                 </div>
-                                <h3 class="text-[19px] font-bold text-[#1D1D1F]">Lab Jaringan Komputer • Gedung Fasilkom Lt. 2</h3>
-                                <p class="text-[13px] text-[#86868B]">Praktikum Pengganti Jaringan Komputer Kelas B</p>
+
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">Lab Jaringan Komputer • Gedung Fasilkom Lt. 2</h3>
+                                <p class="text-sm text-[#86868B]">Praktikum Pengganti Jaringan Komputer Kelas B</p>
                                 
-                                <div class="flex flex-wrap items-center gap-4 text-[13px] text-[#1D1D1F] pt-1">
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">calendar_month</span>
-                                        <span>Selasa, 20 Oktober 2026</span>
-                                    </span>
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="material-symbols-outlined text-[17px] text-[#86868B]">schedule</span>
-                                        <span>13:00 - 15:30 WIB (2.5 Jam)</span>
-                                    </span>
+                                <div class="text-xs text-[#86868B] pt-1">
+                                    Selasa, 20 Oktober 2026 • 13:00 - 15:30 WIB • Kapasitas 35 Kursi
                                 </div>
                             </div>
                             
                             <div class="flex items-center gap-3 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100">
                                 <button @click="openTicketDetail({
-                                    id: 'RSV-2026-0043',
+                                    id: '',
                                     room: 'Lab Jaringan Komputer',
                                     building: 'Gedung Fasilkom Lt. 2',
                                     capacity: '35 Orang',
@@ -676,13 +601,13 @@
                                     statusLabel: 'Menunggu Verifikasi',
                                     adminNote: 'Sedang diperiksa oleh Kepala Lab Fasilkom.',
                                     canCancel: true
-                                })" class="px-5 py-3 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[13px] font-semibold transition">
+                                })" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
                                     Lihat Detail
                                 </button>
                                 <button @click="openCancelConfirm({
-                                    id: 'RSV-2026-0043',
+                                    id: '',
                                     room: 'Lab Jaringan Komputer'
-                                })" class="px-5 py-3 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-[13px] font-semibold transition">
+                                })" class="text-xs font-medium text-red-600 hover:underline px-3 py-2">
                                     Batalkan
                                 </button>
                             </div>
@@ -697,30 +622,27 @@
             <!-- ========================================================== -->
             <!-- 3. HALAMAN FORMULIR RESERVASI (reservation-form)           -->
             <!-- ========================================================== -->
-            <div x-show="page === 'reservation-form'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto space-y-8">
+            <div x-show="page === 'reservation-form'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto space-y-10">
                 
                 <div>
-                    <button @click="page = 'reservations'" class="inline-flex items-center gap-1.5 text-[13px] text-[#86868B] hover:text-[#1D1D1F] font-semibold transition mb-3">
-                        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <button @click="page = 'reservations'" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition mb-4">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                         <span>Kembali ke Riwayat Reservasi</span>
                     </button>
-                    <h1 class="text-[32px] font-extrabold tracking-tight text-[#1D1D1F]">Formulir Pengajuan Reservasi Ruang</h1>
-                    <p class="text-[14px] text-[#86868B] mt-1">Lengkapi data di bawah ini untuk mengajukan izin penggunaan fasilitas kampus</p>
+                    <h1 class="text-4xl font-bold tracking-tight text-[#1D1D1F]">Formulir Pengajuan Reservasi Ruang</h1>
+                    <p class="text-lg text-[#86868B] font-light mt-1">Lengkapi data berikut untuk mengajukan izin penggunaan fasilitas kampus.</p>
                 </div>
 
-                <form class="space-y-8" @submit.prevent="alert('Simulasi: Permohonan reservasi berhasil diajukan!'); page = 'reservations';">
+                <form class="bg-white p-8 md:p-12 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8" @submit.prevent="alert('Permohonan reservasi berhasil dikirim!'); page = 'reservations';">
                     
-                    <!-- Langkah 1: Lokasi & Fasilitas -->
-                    <div class="bg-white p-8 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white text-[13px] font-bold flex items-center justify-center">1</span>
-                            <h2 class="text-[18px] font-bold text-[#1D1D1F]">Pilih Fasilitas & Ruangan Kampus</h2>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Bagian 1: Pemilihan Ruang -->
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-bold text-[#1D1D1F]">1. Pilih Ruangan Kampus</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">1. Pilih Gedung</label>
-                                <select x-model="selectedBuilding" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                                <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Gedung</label>
+                                <select x-model="selectedBuilding" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                                     <option>Gedung Fasilkom</option>
                                     <option>Gedung Rektorat</option>
                                     <option>Gedung Perkuliahan Terpadu</option>
@@ -729,8 +651,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">2. Pilih Lantai</label>
-                                <select x-model="selectedFloor" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                                <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Lantai</label>
+                                <select x-model="selectedFloor" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                                     <option>Lantai 1</option>
                                     <option>Lantai 2</option>
                                     <option>Lantai 3</option>
@@ -739,8 +661,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">3. Pilih Ruangan</label>
-                                <select x-model="selectedRoom" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                                <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Ruangan</label>
+                                <select x-model="selectedRoom" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                                     <option>Lab Artificial Intelligence & Robotics</option>
                                     <option>Lab Rekayasa Perangkat Lunak</option>
                                     <option>Lab Jaringan Komputer</option>
@@ -749,37 +671,25 @@
                             </div>
                         </div>
 
-                        <!-- Venue Summary Card (Sesuai gaya amenities public/home.blade.php) -->
-                        <div class="p-6 rounded-[1.5rem] bg-[#F9F9FB] border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div class="space-y-1">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-[#86868B]">Fasilitas yang Dipilih:</span>
-                                <div class="text-[17px] font-bold text-[#1D1D1F]" x-text="selectedRoom"></div>
-                                <div class="text-[13px] text-[#86868B]" x-text="selectedBuilding + ' • ' + selectedFloor"></div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="bg-white border border-gray-200 text-[#1D1D1F] px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-2xs">Kapasitas 40 Kursi</span>
-                                <span class="bg-white border border-gray-200 text-[#1D1D1F] px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-2xs">Dual AC</span>
-                                <span class="bg-white border border-gray-200 text-[#1D1D1F] px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-2xs">Smart TV 75"</span>
-                            </div>
+                        <!-- Ringkasan Ruangan Teks Bersih (Tanpa Kotak Badge) -->
+                        <div class="p-4 rounded-xl bg-[#F9F9FB] text-sm text-[#86868B]">
+                            <strong class="text-[#1D1D1F]" x-text="selectedRoom"></strong> • <span x-text="selectedBuilding"></span> • Kapasitas 40 Kursi • Dilengkapi AC & Smart TV
                         </div>
                     </div>
 
-                    <!-- Langkah 2: Sesi Waktu & Tanggal -->
-                    <div class="bg-white p-8 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white text-[13px] font-bold flex items-center justify-center">2</span>
-                            <h2 class="text-[18px] font-bold text-[#1D1D1F]">Waktu & Sesi Penggunaan</h2>
-                        </div>
+                    <!-- Bagian 2: Waktu Pelaksanaan -->
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <h2 class="text-xl font-bold text-[#1D1D1F]">2. Waktu & Sesi Penggunaan</h2>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Tanggal Pelaksanaan Kegiatan</label>
-                                <input type="date" x-model="resDate" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                                <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Tanggal Kegiatan</label>
+                                <input type="date" x-model="resDate" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                             </div>
 
                             <div>
-                                <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Sesi Waktu (Slot 30 Menit)</label>
-                                <select x-model="selectedTimeSlot" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                                <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Sesi Waktu</label>
+                                <select x-model="selectedTimeSlot" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                                     <option>08:00 - 10:00 WIB (2 Jam)</option>
                                     <option>09:00 - 11:30 WIB (2.5 Jam)</option>
                                     <option>10:00 - 12:00 WIB (2 Jam)</option>
@@ -789,41 +699,37 @@
                             </div>
                         </div>
 
-                        <!-- Indikator Anti-Bentrok -->
-                        <div class="flex items-center gap-2.5 p-4 rounded-2xl bg-emerald-50 text-emerald-800 text-[13px] font-medium">
-                            <span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
-                            <span>Slot waktu tersedia dan aman dari bentrok kegiatan lain pada jadwal yang dipilih.</span>
+                        <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Slot waktu tersedia dan aman dari bentrok kegiatan lain.</span>
                         </div>
                     </div>
 
-                    <!-- Langkah 3: Tujuan Kegiatan & Berkas -->
-                    <div class="bg-white p-8 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white text-[13px] font-bold flex items-center justify-center">3</span>
-                            <h2 class="text-[18px] font-bold text-[#1D1D1F]">Tujuan Kegiatan & Berkas Ormawa</h2>
+                    <!-- Bagian 3: Keperluan & Berkas -->
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <h2 class="text-xl font-bold text-[#1D1D1F]">3. Rincian Kegiatan</h2>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Tujuan / Nama Kegiatan</label>
+                            <textarea rows="3" x-model="resPurpose" placeholder="Jelaskan agenda kegiatan, estimasi peserta, penanggung jawab..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Keperluan / Nama Kegiatan</label>
-                            <textarea rows="3" x-model="resPurpose" placeholder="Jelaskan nama kegiatan, penanggung jawab, estimasi peserta..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-5 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Dokumen Pendukung / Surat Izin (Opsional)</label>
-                            <div class="p-8 rounded-[1.5rem] border-2 border-dashed border-gray-200 bg-[#F9F9FB] text-center hover:bg-gray-50 transition cursor-pointer">
-                                <span class="material-symbols-outlined text-[36px] text-[#86868B] mb-2 font-light">upload_file</span>
-                                <div class="text-[14px] font-semibold text-[#1D1D1F]">Klik untuk unggah surat izin ormawa atau proposal</div>
-                                <div class="text-[12px] text-[#86868B] mt-1">Mendukung format PDF atau DOCX (Maksimal 5 MB)</div>
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Surat Izin / Dokumen Pendukung (Opsional)</label>
+                            <div class="p-6 rounded-xl border border-dashed border-gray-200 bg-[#F9F9FB] text-center hover:bg-gray-50 transition cursor-pointer">
+                                <span class="material-symbols-outlined text-[32px] text-[#86868B] font-light mb-1">upload_file</span>
+                                <div class="text-sm font-medium text-[#1D1D1F]">Klik untuk unggah surat izin ormawa atau proposal</div>
+                                <div class="text-xs text-[#86868B] mt-0.5">Format PDF atau DOCX (Maksimal 5 MB)</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Aksi Submit -->
-                    <div class="flex items-center justify-end gap-3 pt-4">
-                        <button type="button" @click="page = 'reservations'" class="px-7 py-4 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[14px] font-semibold transition">
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+                        <button type="button" @click="page = 'reservations'" class="text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] px-5 py-3 transition">
                             Batal
                         </button>
-                        <button type="submit" class="px-9 py-4 rounded-xl bg-[#1D1D1F] hover:bg-black text-white text-[14px] font-semibold transition shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
+                        <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm">
                             Kirim Permohonan Reservasi
                         </button>
                     </div>
@@ -834,110 +740,97 @@
             <!-- ========================================================== -->
             <!-- 4. HALAMAN RIWAYAT LAPORAN KERUSAKAN (reports)             -->
             <!-- ========================================================== -->
-            <div x-show="page === 'reports'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+            <div x-show="page === 'reports'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-10">
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="space-y-1">
-                        <h1 class="text-[32px] font-extrabold tracking-tight text-[#1D1D1F]">Status Pelaporan Kerusakan</h1>
-                        <p class="text-[14px] text-[#86868B]">Pantau perkembangan laporan kerusakan sarana prasarana yang Anda sampaikan kepada teknisi</p>
+                        <h1 class="text-4xl font-bold tracking-tight text-[#1D1D1F]">Status Pelaporan Kerusakan</h1>
+                        <p class="text-lg text-[#86868B] font-light">Pantau penanganan kendala fasilitas sarana prasarana yang Anda laporkan.</p>
                     </div>
-                    <button @click="page = 'report-form'" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1D1D1F] text-white text-[13px] font-semibold hover:bg-black transition shadow-xs self-start sm:self-center">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span>Buat Laporan Baru</span>
+                    <button @click="page = 'report-form'" class="bg-[#1D1D1F] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm self-start sm:self-center">
+                        + Laporkan Kendala
                     </button>
                 </div>
 
-                <!-- Status Strip Bar -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Total Laporan</span>
-                        <div class="text-[24px] font-bold text-[#1D1D1F] mt-1">5 <span class="text-[12px] font-normal text-[#86868B]">Kasus</span></div>
+                <!-- Toolbar Filter Minimalis -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-gray-100">
+                    <div class="flex items-center gap-8 text-sm font-medium overflow-x-auto no-scrollbar">
+                        <button @click="repFilter = 'all'" 
+                                :class="repFilter === 'all' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Semua Laporan (5)
+                        </button>
+                        <button @click="repFilter = 'baru'" 
+                                :class="repFilter === 'baru' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Menunggu (1)
+                        </button>
+                        <button @click="repFilter = 'diproses'" 
+                                :class="repFilter === 'diproses' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Diproses (1)
+                        </button>
+                        <button @click="repFilter = 'selesai'" 
+                                :class="repFilter === 'selesai' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] pb-3 -mb-px font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] pb-3 -mb-px'" 
+                                class="transition whitespace-nowrap">
+                            Selesai (3)
+                        </button>
                     </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Menunggu Verifikasi</span>
-                        <div class="text-[24px] font-bold text-amber-700 mt-1">1 <span class="text-[12px] font-normal text-[#86868B]">Tiket</span></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Diproses Teknisi</span>
-                        <div class="text-[24px] font-bold text-blue-700 mt-1">1 <span class="text-[12px] font-normal text-[#86868B]">Tiket</span></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                        <span class="text-[12px] font-medium text-[#86868B]">Selesai Diperbaiki</span>
-                        <div class="text-[24px] font-bold text-emerald-700 mt-1">3 <span class="text-[12px] font-normal text-[#86868B]">Tiket</span></div>
+
+                    <div class="w-full md:w-80">
+                        <input type="text" x-model="searchRep" placeholder="Cari nama fasilitas atau kendala..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                     </div>
                 </div>
 
-                <!-- Filter & Search Toolbar -->
-                <div class="bg-white p-4 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar w-full md:w-auto">
-                        <button @click="repFilter = 'all'" :class="repFilter === 'all' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Semua</button>
-                        <button @click="repFilter = 'baru'" :class="repFilter === 'baru' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Menunggu</button>
-                        <button @click="repFilter = 'diproses'" :class="repFilter === 'diproses' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Diproses</button>
-                        <button @click="repFilter = 'selesai'" :class="repFilter === 'selesai' ? 'bg-[#1D1D1F] text-white shadow-xs' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100/60'" class="px-4 py-2 rounded-full text-[13px] font-semibold transition">Selesai</button>
-                    </div>
-
-                    <div class="w-full md:w-80 relative">
-                        <span class="material-symbols-outlined text-[18px] text-[#86868B] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
-                        <input type="text" x-model="searchRep" placeholder="Cari kode tiket atau sarpras..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] pl-11 pr-4 py-3 rounded-2xl text-[13px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition-all">
-                    </div>
-                </div>
-
-                <!-- Daftar Tiket Kerusakan -->
+                <!-- Daftar Tiket Kerusakan Bersih (Tanpa Kode ID & Tanpa Kotak Badge) -->
                 <div class="space-y-4">
                     
-                    <!-- Laporan 1: Sedang Ditangani -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.06)] transition-all">
+                    <!-- Laporan 1: Diproses -->
+                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-2.5 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-md">TKT-2026-081</span>
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800">Sedang Ditangani Teknisi</span>
-                                    <span class="text-[12px] text-[#86868B]">• 10 Okt 2026, 08:30 WIB</span>
-                                </div>
-                                <h3 class="text-[19px] font-bold text-[#1D1D1F]">AC Central Lab RPL Mengalami Kebocoran Air & Tidak Dingin</h3>
-                                
-                                <div class="text-[13px] text-[#86868B] flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[17px]">location_on</span>
-                                    <span>Laboratorium RPL • Gedung FTIK Lt. 2</span>
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2 text-xs font-medium text-blue-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    <span>Sedang Ditangani Teknisi</span>
+                                    <span class="text-[#86868B]">• 10 Okt 2026, 08:30 WIB</span>
                                 </div>
 
-                                <div class="bg-[#F9F9FB] p-4 rounded-xl border border-gray-100 text-[13px] text-[#1D1D1F] mt-2">
-                                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#86868B] block mb-0.5">Catatan Penanganan (Bpk. Hendra):</span>
-                                    Unit indoor telah dicek. Pipa drainase dan pengisian refrigerant dijadwalkan selesai hari ini pukul 14:00 WIB.
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">AC Central Lab RPL Mengalami Kebocoran Air & Tidak Dingin</h3>
+                                <p class="text-sm text-[#86868B]">Laboratorium RPL, Gedung FTIK Lt. 2</p>
+
+                                <div class="p-3.5 rounded-xl bg-[#F9F9FB] text-xs text-[#86868B] mt-2">
+                                    <strong class="text-[#1D1D1F]">Catatan Teknisi (Bpk. Hendra):</strong> Pipa drainase dan pengisian refrigerant dijadwalkan selesai siang ini.
                                 </div>
                             </div>
                             
                             <div class="shrink-0 self-end lg:self-center">
-                                <button @click="openReportDetail(selectedReport)" class="px-6 py-3 rounded-xl bg-[#1D1D1F] text-white text-[13px] font-semibold hover:bg-black transition shadow-xs">
-                                    Lihat Detail Laporan
+                                <button @click="openReportDetail(selectedReport)" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-800 transition">
+                                    Detail Laporan
                                 </button>
                             </div>
 
                         </div>
                     </div>
 
-                    <!-- Laporan 2: Selesai Diperbaiki -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] transition-all opacity-85">
+                    <!-- Laporan 2: Selesai -->
+                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 transition opacity-85">
                         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-2.5 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-md">TKT-2026-079</span>
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">Selesai Diperbaiki</span>
-                                    <span class="text-[12px] text-[#86868B]">• 03 Okt 2026</span>
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Selesai Diperbaiki</span>
+                                    <span class="text-[#86868B]">• 03 Okt 2026</span>
                                 </div>
-                                <h3 class="text-[19px] font-bold text-[#1D1D1F]">Proyektor HDMI Ruang Kuliah Mati Total</h3>
-                                
-                                <div class="text-[13px] text-[#86868B] flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[17px]">location_on</span>
-                                    <span>Ruang Teori B.204 • Gedung Kuliah Bersama</span>
-                                </div>
+
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">Proyektor HDMI Ruang Kuliah Mati Total</h3>
+                                <p class="text-sm text-[#86868B]">Ruang Teori B.204, Gedung Perkuliahan</p>
                             </div>
                             
                             <div class="shrink-0 self-end lg:self-center">
                                 <button @click="openReportDetail({
-                                    id: 'TKT-2026-079',
+                                    id: '',
                                     facility: 'Ruang Teori B.204',
                                     building: 'Gedung Kuliah Bersama',
                                     category: 'Proyektor & Audio',
@@ -947,8 +840,8 @@
                                     statusLabel: 'Selesai Diperbaiki',
                                     technician: 'Tim Multimedia Sarpras',
                                     reportedAt: '03 Okt 2026',
-                                    technicianNote: 'Lampu proyektor diganti dengan sparepart baru dan telah lulus uji display.'
-                                })" class="px-5 py-3 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[13px] font-semibold transition">
+                                    technicianNote: 'Lampu proyektor diganti dengan modul baru dan telah lulus uji display.'
+                                })" class="text-xs font-medium text-[#1D1D1F] hover:underline px-4 py-2">
                                     Lihat Riwayat
                                 </button>
                             </div>
@@ -963,25 +856,24 @@
             <!-- ========================================================== -->
             <!-- 5. HALAMAN FORMULIR LAPOR KERUSAKAN (report-form)          -->
             <!-- ========================================================== -->
-            <div x-show="page === 'report-form'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto space-y-8">
+            <div x-show="page === 'report-form'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto space-y-10">
                 
                 <div>
-                    <button @click="page = 'reports'" class="inline-flex items-center gap-1.5 text-[13px] text-[#86868B] hover:text-[#1D1D1F] font-semibold transition mb-3">
-                        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <button @click="page = 'reports'" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition mb-4">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                         <span>Kembali ke Riwayat Laporan</span>
                     </button>
-                    <h1 class="text-[32px] font-extrabold tracking-tight text-[#1D1D1F]">Formulir Pelaporan Kerusakan Sarpras</h1>
-                    <p class="text-[14px] text-[#86868B] mt-1">Sampaikan kendala kerusakan atau malfungsi sarana prasarana agar segera ditangani teknisi</p>
+                    <h1 class="text-4xl font-bold tracking-tight text-[#1D1D1F]">Formulir Pelaporan Kerusakan Fasilitas</h1>
+                    <p class="text-lg text-[#86868B] font-light mt-1">Sampaikan kendala kerusakan sarana prasarana agar segera ditangani tim teknisi kampus.</p>
                 </div>
 
-                <form class="space-y-8" @submit.prevent="alert('Simulasi: Laporan berhasil dikirim ke teknisi sarpras!'); page = 'reports';">
+                <form class="bg-white p-8 md:p-12 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8" @submit.prevent="alert('Laporan berhasil dikirim ke teknisi sarpras!'); page = 'reports';">
                     
-                    <div class="bg-white p-8 rounded-[2rem] border border-gray-150/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
-                        
+                    <div class="space-y-6">
                         <!-- Pilihan Fasilitas -->
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Fasilitas yang Mengalami Kendala</label>
-                            <select x-model="reportFacility" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Fasilitas yang Bermasalah</label>
+                            <select x-model="reportFacility" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                                 <option>Lab Artificial Intelligence & Robotics (Gd. Fasilkom Lt. 3)</option>
                                 <option>Laboratorium Rekayasa Perangkat Lunak (Gd. FTIK Lt. 2)</option>
                                 <option>Auditorium Utama (Gd. Rektorat Lt. 3)</option>
@@ -989,64 +881,64 @@
                             </select>
                         </div>
 
-                        <!-- Kategori Kerusakan (Pill Selector Rapi) -->
+                        <!-- Kategori Masalah (Pilihan Teks Bersih Sederhana) -->
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Kategori Masalah</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <template x-for="cat in ['AC & Pendingin', 'Kelistrikan', 'Proyektor & Audio', 'Mebel & Kursi', 'Jaringan & WiFi', 'Fisik Bangunan', 'Kebersihan', 'Lainnya']" :key="cat">
-                                    <button type="button" 
-                                            @click="reportCategory = cat" 
-                                            :class="reportCategory === cat ? 'bg-[#1D1D1F] text-white shadow-xs font-semibold' : 'bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#EBEBEF] font-medium'" 
-                                            class="py-3 px-4 rounded-xl text-[13px] transition text-center" 
-                                            x-text="cat"></button>
-                                </template>
-                            </div>
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Kategori Kerusakan</label>
+                            <select x-model="reportCategory" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                <option>AC & Pendingin Ruangan</option>
+                                <option>Kelistrikan & Stop Kontak</option>
+                                <option>Proyektor & Sound System</option>
+                                <option>Mebel (Meja / Kursi)</option>
+                                <option>Jaringan Internet & WiFi</option>
+                                <option>Fisik Bangunan (Pintu / Jendela)</option>
+                                <option>Kebersihan Ruangan</option>
+                                <option>Lainnya</option>
+                            </select>
                         </div>
 
                         <!-- Judul Ringkas & Deskripsi -->
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Judul Ringkas Masalah</label>
-                            <input type="text" x-model="reportTitle" placeholder="Misal: AC bocor air menetes ke meja komputer no. 12" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition">
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Judul Ringkas Masalah</label>
+                            <input type="text" x-model="reportTitle" placeholder="Misal: AC bocor air menetes ke meja komputer no. 12" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                         </div>
 
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Deskripsi Rinci Kendala</label>
-                            <textarea rows="4" x-model="reportDesc" placeholder="Jelaskan secara detail kronologi kendala atau titik spesifik kerusakan sarpras..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-5 rounded-2xl text-[14px] focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition"></textarea>
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Deskripsi Rinci Kendala</label>
+                            <textarea rows="4" x-model="reportDesc" placeholder="Jelaskan secara detail titik kerusakan atau kendala yang dialami..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
                         </div>
 
-                        <!-- Unggah Foto Bukti Fisik (Live Client Validation max 2MB) -->
+                        <!-- Unggah Foto Bukti Fisik Sederhana -->
                         <div>
-                            <label class="block text-[13px] font-semibold text-[#1D1D1F] mb-2">Foto Bukti Fisik Kerusakan (Maksimal 2 MB)</label>
+                            <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">Foto Bukti Kerusakan (Maksimal 2 MB)</label>
                             
-                            <div class="p-8 rounded-[1.5rem] border-2 border-dashed border-gray-200 bg-[#F9F9FB] text-center hover:bg-gray-50 transition relative">
+                            <div class="p-8 rounded-xl border border-dashed border-gray-200 bg-[#F9F9FB] text-center hover:bg-gray-50 transition relative">
                                 <input type="file" accept="image/jpeg,image/png,image/jpg" @change="handleFileUpload($event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                                 
                                 <div x-show="!imagePreview" class="space-y-1">
-                                    <span class="material-symbols-outlined text-[40px] text-[#86868B] font-light">add_photo_alternate</span>
-                                    <div class="text-[14px] font-semibold text-[#1D1D1F]">Klik atau seret foto bukti kerusakan ke sini</div>
-                                    <div class="text-[12px] text-[#86868B]">Mendukung format JPG atau PNG (Maksimal 2 MB)</div>
+                                    <span class="material-symbols-outlined text-[36px] text-[#86868B] font-light">add_photo_alternate</span>
+                                    <div class="text-sm font-medium text-[#1D1D1F]">Klik atau seret foto bukti kerusakan ke sini</div>
+                                    <div class="text-xs text-[#86868B]">Format JPG atau PNG (Maksimal 2 MB)</div>
                                 </div>
 
-                                <!-- Image Preview Section -->
                                 <div x-show="imagePreview" class="flex flex-col items-center gap-3">
-                                    <img :src="imagePreview" alt="Bukti Kerusakan" class="h-44 w-auto rounded-xl object-cover shadow-sm ring-1 ring-black/10">
+                                    <img :src="imagePreview" alt="Bukti Kerusakan" class="h-44 w-auto rounded-xl object-cover shadow-sm">
                                     <div class="flex items-center gap-3">
-                                        <div class="text-[12px] font-medium text-[#1D1D1F]" x-text="uploadedFileName + ' (' + uploadedFileSize + ')'"></div>
-                                        <button type="button" @click.stop="removeUploadedFile()" class="px-3 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-[11px] font-semibold transition">Hapus Foto</button>
+                                        <div class="text-xs font-medium text-[#1D1D1F]" x-text="uploadedFileName + ' (' + uploadedFileSize + ')'"></div>
+                                        <button type="button" @click.stop="removeUploadedFile()" class="text-xs font-medium text-red-600 hover:underline">Hapus Foto</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <p x-show="fileError" x-text="fileError" class="text-[12px] text-rose-600 mt-2 font-medium"></p>
+                            <p x-show="fileError" x-text="fileError" class="text-xs text-red-600 mt-2 font-medium"></p>
                         </div>
                     </div>
 
-                    <!-- Aksi Submit -->
-                    <div class="flex items-center justify-end gap-3 pt-4">
-                        <button type="button" @click="page = 'reports'" class="px-7 py-4 rounded-xl bg-[#F5F5F7] hover:bg-[#EBEBEF] text-[#1D1D1F] text-[14px] font-semibold transition">
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+                        <button type="button" @click="page = 'reports'" class="text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] px-5 py-3 transition">
                             Batal
                         </button>
-                        <button type="submit" class="px-9 py-4 rounded-xl bg-[#1D1D1F] hover:bg-black text-white text-[14px] font-semibold transition shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
+                        <button type="submit" class="bg-[#1D1D1F] text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition text-sm">
                             Kirim Laporan Kerusakan
                         </button>
                     </div>
@@ -1324,22 +1216,24 @@
         <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar font-sans-inter">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-lg" x-text="selectedTicket.id"></span>
-                    <h3 class="text-[20px] font-bold text-[#1D1D1F] mt-2" x-text="selectedTicket.room"></h3>
-                    <p class="text-[13px] text-[#86868B]" x-text="selectedTicket.building"></p>
+                    <h3 class="text-xl font-bold text-[#1D1D1F]" x-text="selectedTicket.room"></h3>
+                    <p class="text-sm text-[#86868B]" x-text="selectedTicket.building"></p>
                 </div>
                 <button @click="showDetailModal = false" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-gray-200 text-[#1D1D1F] flex items-center justify-center transition">
                     <span class="material-symbols-outlined text-[18px]">close</span>
                 </button>
             </div>
 
-            <!-- Status Pill -->
-            <div class="p-4 rounded-2xl bg-[#FAFAFC] border border-black/[0.04] space-y-2">
+            <!-- Status Bersih -->
+            <div class="p-4 rounded-xl bg-[#F9F9FB] space-y-2">
                 <div class="flex items-center justify-between">
-                    <span class="text-[12px] font-semibold text-[#86868B]">Status Verifikasi:</span>
-                    <span class="px-3 py-0.5 rounded-full text-[12px] font-semibold bg-emerald-50 text-emerald-700" x-text="selectedTicket.statusLabel"></span>
+                    <span class="text-xs font-medium text-[#86868B]">Status Verifikasi:</span>
+                    <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span x-text="selectedTicket.statusLabel"></span>
+                    </span>
                 </div>
-                <div class="text-[12px] text-[#1D1D1F]/80" x-text="selectedTicket.adminNote"></div>
+                <div class="text-xs text-[#86868B]" x-text="selectedTicket.adminNote"></div>
             </div>
 
             <!-- Sesi & Waktu -->
@@ -1405,24 +1299,26 @@
         <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar font-sans-inter">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="font-mono text-[11px] font-bold text-[#86868B] bg-[#F5F5F7] px-2.5 py-1 rounded-lg" x-text="selectedReport.id"></span>
-                    <h3 class="text-[18px] font-bold text-[#1D1D1F] mt-2" x-text="selectedReport.title"></h3>
-                    <p class="text-[13px] text-[#86868B]" x-text="selectedReport.facility + ' • ' + selectedReport.building"></p>
+                    <h3 class="text-xl font-bold text-[#1D1D1F]" x-text="selectedReport.title"></h3>
+                    <p class="text-sm text-[#86868B]" x-text="selectedReport.facility + ' • ' + selectedReport.building"></p>
                 </div>
                 <button @click="showReportDetailModal = false" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-gray-200 text-[#1D1D1F] flex items-center justify-center transition">
                     <span class="material-symbols-outlined text-[18px]">close</span>
                 </button>
             </div>
 
-            <div class="p-4 rounded-2xl bg-[#FAFAFC] border border-black/[0.04] space-y-2">
+            <div class="p-4 rounded-xl bg-[#F9F9FB] space-y-2">
                 <div class="flex items-center justify-between">
-                    <span class="text-[12px] font-semibold text-[#86868B]">Status Penanganan:</span>
-                    <span class="px-3 py-0.5 rounded-full text-[12px] font-semibold bg-blue-50 text-blue-700" x-text="selectedReport.statusLabel"></span>
+                    <span class="text-xs font-medium text-[#86868B]">Status Penanganan:</span>
+                    <span class="flex items-center gap-1.5 text-xs font-medium text-blue-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        <span x-text="selectedReport.statusLabel"></span>
+                    </span>
                 </div>
-                <div class="text-[12px] text-[#1D1D1F]">
-                    <span class="text-[#86868B]">Teknisi Bertugas:</span> <strong x-text="selectedReport.technician"></strong>
+                <div class="text-xs text-[#86868B]">
+                    <span>Teknisi Bertugas:</span> <strong class="text-[#1D1D1F]" x-text="selectedReport.technician"></strong>
                 </div>
-                <p class="text-[12px] text-slate-700 bg-white p-3 rounded-xl border border-gray-100" x-text="selectedReport.technicianNote"></p>
+                <p class="text-xs text-[#86868B] bg-white p-3 rounded-xl border border-gray-100" x-text="selectedReport.technicianNote"></p>
             </div>
 
             <div>
