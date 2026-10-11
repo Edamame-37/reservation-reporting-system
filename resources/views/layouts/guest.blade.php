@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : guest.blade.php
+  FUNGSIONALITAS : Master Layout Khusus Halaman Tamu / Autentikasi Pengunjung
+  DESKRIPSI      : Menampilkan wadah minimalis terpusat untuk kartu formulir login, registrasi, dan lupa kata sandi.
+  CARA KERJA     : Bertindak sebagai layout dasar. Seluruh view autentikasi membungkus kontennya dengan tag <x-guest-layout>.
+--}}
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>

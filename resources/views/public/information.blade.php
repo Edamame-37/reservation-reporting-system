@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : information.blade.php
+  FUNGSIONALITAS : Pusat Informasi, Regulasi, dan Panduan Bantuan Publik CAVA
+  DESKRIPSI      : Menampilkan panduan kebijakan kampus, syarat dan ketentuan peminjaman, serta petunjuk operasional dalam antarmuka tab interaktif.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="information">, mengelola scroll spy dan tab seleksi via Alpine.js.
+--}}
+
 <x-public-layout title="Pusat Informasi & Regulasi" active="information">
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" 
          x-data="{ 

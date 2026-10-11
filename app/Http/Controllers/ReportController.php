@@ -88,7 +88,7 @@ class ReportController extends Controller
      * FITUR              : USR-05 - Pelacakan Status & Riwayat Laporan Pengguna
      * KEGUNAAN           : Menampilkan daftar riwayat tiket kerusakan sarpras milik pengguna aktif dengan filter status dan pencarian dinamis.
      * CARA KERJA         :
-     *   1. Mengidentifikasi ID pengguna aktif (dengan fallback ke pengguna default untuk pengujian/mockup).
+     *   1. Mengidentifikasi ID pengguna aktif yang terautentikasi (Auth::id()).
      *   2. Menghitung rekapitulasi status tiket (all, baru, diproses, selesai, ditolak) secara agregat.
      *   3. Memfilter tiket berdasarkan status terpilih dan kata kunci pencarian (kode tiket, fasilitas, kategori, deskripsi).
      *   4. Melakukan eager loading pada relasi 'facility' dan 'handler' untuk mengeliminasi problem kueri N+1.

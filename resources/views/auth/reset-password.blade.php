@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : reset-password.blade.php
+  FUNGSIONALITAS : Formulir Pembaruan Kata Sandi Baru via Token Reset
+  DESKRIPSI      : Menampilkan form input email, kata sandi baru (min 8 karakter), dan konfirmasi sandi dengan token terenkripsi.
+  CARA KERJA     : Menggunakan layout <x-guest-layout>, mengirimkan POST request ke route('password.store') yang ditangani oleh NewPasswordController@store.
+--}}
+
 <x-guest-layout>
     <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-[14px] text-[#86868B] hover:text-[#1D1D1F] font-medium transition-colors mb-10 group">
         <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>

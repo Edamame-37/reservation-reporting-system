@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : ProfileController.php
  * FUNGSI       : Controller pengelolaan data profil pengguna
- * DESKRIPSI    : Menyajikan formulir pengubahan informasi profil dan penghapusan akun (dalam mode mockup dialihkan tanpa kueri database MySQL).
- * CARA KERJA   : Menyediakan mock user object jika tidak ada session auth aktif, serta menonaktifkan operasi update() dan destroy() ke tabel users.
+ * DESKRIPSI    : Menyajikan formulir pengubahan informasi identitas profil dan mekanisme penghapusan akun pengguna terotentikasi.
+ * CARA KERJA   : Menerima HTTP Request terotentikasi, memvalidasi input perubahan profil via ProfileUpdateRequest, menyimpan pembaruan ke tabel users, serta menangani penghapusan akun mandiri.
  */
 
 namespace App\Http\Controllers;

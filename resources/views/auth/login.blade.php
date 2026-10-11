@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : login.blade.php
+  FUNGSIONALITAS : Formulir Autentikasi Masuk Pengguna CAVA SSO
+  DESKRIPSI      : Menampilkan form login dengan input email kampus, password, opsi ingat saya, tautan lupa sandi, dan tombol kembali ke beranda.
+  CARA KERJA     : Menggunakan layout <x-guest-layout>, mengirimkan POST request ke route('login') yang divalidasi oleh LoginRequest.
+--}}
+
 <x-guest-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-6" :status="session('status')" />

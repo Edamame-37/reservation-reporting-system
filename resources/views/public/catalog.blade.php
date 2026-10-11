@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : catalog.blade.php
+  FUNGSIONALITAS : Katalog Publik Daftar Fasilitas & Ruangan Kampus
+  DESKRIPSI      : Menampilkan daftar seluruh fasilitas kampus dengan filter kategori, pencarian nama/gedung, kartu bento detail, dan modal pratinjau spesifikasi.
+  CARA KERJA     : Menerima koleksi $facilities dan $categories dari PublicFacilityController@index, merender layout <x-public-layout active="catalog">.
+--}}
+
 @php
     $currentCategory = request('category', 'semua');
     $categoryIndexes = ['semua' => 1];

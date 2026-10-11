@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : verify-email.blade.php
+  FUNGSIONALITAS : Tampilan Pemberitahuan Verifikasi Alamat Email Pengguna
+  DESKRIPSI      : Menampilkan instruksi untuk memeriksa tautan verifikasi yang dikirimkan ke email pendaftaran beserta tombol kirim ulang.
+  CARA KERJA     : Menggunakan layout <x-guest-layout>, memicu POST request ke route('verification.send') dan tombol keluar akun via route('logout').
+--}}
+
 <x-guest-layout>
     <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-[14px] text-[#86868B] hover:text-[#1D1D1F] font-medium transition-colors mb-10 group">
         <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>

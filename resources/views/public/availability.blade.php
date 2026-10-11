@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : availability.blade.php
+  FUNGSIONALITAS : Matriks Transparan Slot Waktu Ketersediaan Fasilitas Publik
+  DESKRIPSI      : Menampilkan kalender visual slot 30 menit (07:00-20:00 WIB) untuk seluruh ruang kampus dengan indikator status terpakai, terkunci, dan tersedia secara real-time.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menarik matriks slot waktu via API endpoint /api/availability/{date} dan dirender dengan Alpine.js.
+--}}
+
 <x-public-layout title="Matriks Jadwal Ketersediaan" active="availability">
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="availabilityMatrix()" x-init="initMatrix('{{ request('date', date('Y-m-d')) }}')">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8">

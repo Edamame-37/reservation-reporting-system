@@ -1,4 +1,10 @@
 <?php
+/**
+ * NAMA FILE    : LoginRequest.php
+ * FUNGSI       : Form Request validasi kredensial dan mitigasi serangan brute-force login
+ * DESKRIPSI    : Memvalidasi keberadaan email dan kata sandi, memeriksa pembatasan laju percobaan login (Rate Limiting), dan memproses percobaan otentikasi via Auth::attempt().
+ * CARA KERJA   : Memeriksa rate limiter IP/email, menjalankan Auth::attempt() dengan opsi remember-me, dan melempar Lockout event serta ValidationException jika terdeteksi kegagalan berulang.
+ */
 
 namespace App\Http\Requests\Auth;
 
@@ -13,7 +19,9 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * FUNCTION/PROCEDURE : authorize()
+     * KEGUNAAN           : Menentukan apakah pengguna diizinkan mengeksekusi request ini.
+     * CARA KERJA         : Mengembalikan true untuk mengizinkan seluruh request login publik.
      */
     public function authorize(): bool
     {

@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : update-profile-information-form.blade.php
+  FUNGSIONALITAS : Parsial Formulir Pembaruan Nama Lengkap & Email Pengguna
+  DESKRIPSI      : Menampilkan input nama dan email aktif pengguna dengan validasi real-time status verifikasi email.
+  CARA KERJA     : Mengirimkan HTTP PATCH ke route('profile.update') yang divalidasi oleh ProfileUpdateRequest.
+--}}
+
 <section>
     <header>
         <h2 class="text-lg font-bold text-slate-900 tracking-tight">

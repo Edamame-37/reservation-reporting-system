@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : home.blade.php
+  FUNGSIONALITAS : Halaman Beranda Publik CAVA (Campus Venue Access)
+  DESKRIPSI      : Menampilkan pendaratan utama publik dengan pencarian cepat fasilitas, filter bertingkat, ringkasan fitur, dan panduan reservasi.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="home">, mengelola state filter pencarian via Alpine.js dan mengarahkan kueri ke public.catalog.
+--}}
+
 <x-public-layout title="Beranda Publik Fasilitas Kampus" active="home">
     <div class="pt-20 pb-20">
         <main class="px-6 max-w-5xl mx-auto text-center">

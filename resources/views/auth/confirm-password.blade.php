@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : confirm-password.blade.php
+  FUNGSIONALITAS : Formulir Konfirmasi Kata Sandi Keamanan
+  DESKRIPSI      : Menampilkan form verifikasi sandi sebelum pengguna diizinkan mengakses area atau operasi berisiko tinggi.
+  CARA KERJA     : Menggunakan layout <x-guest-layout>, mengirimkan POST request ke route('password.confirm') yang divalidasi ConfirmablePasswordController@store.
+--}}
+
 <x-guest-layout>
     <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-[14px] text-[#86868B] hover:text-[#1D1D1F] font-medium transition-colors mb-10 group">
         <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>

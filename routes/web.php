@@ -2,8 +2,8 @@
 /**
  * NAMA FILE    : web.php
  * FUNGSI       : Pendaftaran rute web aplikasi CAVA (Campus Venue Access)
- * DESKRIPSI    : Menyediakan pemetaan endpoint URL ke view mockup antarmuka Blade untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
- * CARA KERJA   : Menerima HTTP GET request dari peramban dan merender berkas Blade mockup terkait secara langsung tanpa ketergantungan kueri database.
+ * DESKRIPSI    : Menyediakan pemetaan endpoint URL terpusat untuk portal publik, operasional petugas, konsol admin, dan portal pengguna.
+ * CARA KERJA   : Menerima HTTP Request, menerapkan middleware autentikasi dan Spatie RBAC (role:admin, role:petugas), serta mengarahkan ke Controller terkait dengan integrasi basis data MySQL.
  */
 
 use App\Http\Controllers\DashboardPetugasController;

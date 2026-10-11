@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : register.blade.php
+  FUNGSIONALITAS : Formulir Pendaftaran Mandiri Akun Sivitas Akademika (Mahasiswa/Dosen/Staf)
+  DESKRIPSI      : Menampilkan formulir pendaftaran dengan input identitas, pemilihan peran, unggah bukti KTM/dokumen (maks 2MB) dengan validasi client-side Alpine.js, dan password confirmation.
+  CARA KERJA     : Menggunakan layout <x-guest-layout>, mengirimkan POST multipart/form-data ke route('register') yang ditangani oleh RegisteredUserController@store.
+--}}
+
 <x-guest-layout>
     <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-[14px] text-[#86868B] hover:text-[#1D1D1F] font-medium transition-colors mb-10 group">
         <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>

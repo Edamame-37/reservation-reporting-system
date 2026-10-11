@@ -1,3 +1,10 @@
+{{-- 
+  NAMA FILE      : update-password-form.blade.php
+  FUNGSIONALITAS : Parsial Formulir Pembaruan Kata Sandi Akun Pengguna
+  DESKRIPSI      : Menampilkan input kata sandi saat ini, kata sandi baru (min 8 karakter), dan konfirmasi sandi baru.
+  CARA KERJA     : Mengirimkan HTTP PUT ke route('password.update') yang divalidasi PasswordController@update.
+--}}
+
 <section>
     <header>
         <h2 class="text-lg font-bold text-slate-900 tracking-tight">
