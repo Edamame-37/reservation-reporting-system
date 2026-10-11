@@ -40,6 +40,8 @@
 <body x-data="{
     // Pilihan Desain Utama (1, 2, atau 3)
     option: 1,
+    // Gaya Tampilan Status (Opsi 1): 'icon' (Semantic Micro-Icon), 'text' (Pure Text), 'chip' (Subtle Chip)
+    statusStyle: 'icon',
     // Halaman Aktif: 'dashboard', 'reservations', 'reservation-form', 'reports', 'report-form'
     page: 'dashboard',
 
@@ -164,6 +166,35 @@
     </header>
 
     <!-- ============================================================== -->
+    <!-- SUB-SWITCHER: 3 GAYA STATUS INDIKATOR (KHUSUS OPSI 1)           -->
+    <!-- Menggantikan status titik / dot AI slop dengan 3 variasi elegan-->
+    <!-- ============================================================== -->
+    <div x-show="option === 1" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="fixed top-20 left-1/2 -translate-x-1/2 z-[89] flex items-center gap-1.5 p-1 rounded-full bg-white/95 backdrop-blur-xl border border-black/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.08)] text-xs">
+        <span class="pl-3 pr-1 text-[11px] font-bold uppercase tracking-wider text-[#86868B] hidden sm:inline-block">Gaya Status:</span>
+        <button @click="statusStyle = 'icon'" 
+                :class="statusStyle === 'icon' ? 'bg-[#1D1D1F] text-white shadow-xs font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.03]'" 
+                class="px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px]">check_circle</span>
+            <span>A. Semantic Icon</span>
+        </button>
+        <button @click="statusStyle = 'text'" 
+                :class="statusStyle === 'text' ? 'bg-[#1D1D1F] text-white shadow-xs font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.03]'" 
+                class="px-3.5 py-1.5 rounded-full transition-all">
+            <span>B. Pure Text</span>
+        </button>
+        <button @click="statusStyle = 'chip'" 
+                :class="statusStyle === 'chip' ? 'bg-[#1D1D1F] text-white shadow-xs font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/[0.03]'" 
+                class="px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>C. Subtle Chip</span>
+        </button>
+    </div>
+
+    <!-- ============================================================== -->
     <!-- 2. BOTTOM FLOATING SWITCHER: 5 HALAMAN USER                    -->
     <!-- ============================================================== -->
     <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[90] flex items-center gap-1 p-1.5 rounded-full bg-white/85 backdrop-blur-xl border border-black/[0.06] shadow-[0_12px_36px_rgba(0,0,0,0.08)] max-w-[94vw] overflow-x-auto no-scrollbar">
@@ -203,7 +234,7 @@
     <!-- ############################################################## -->
     <!-- OPTION 1: MURNI MINIMALIS (SELARAS DENGAN DESAIN PUBLIC CAVA) -->
     <!-- ############################################################## -->
-    <div x-show="option === 1" class="font-sans-inter min-h-screen bg-[#FAFAFC] text-[#1D1D1F] pb-32 pt-24">
+    <div x-show="option === 1" class="font-sans-inter min-h-screen bg-[#FAFAFC] text-[#1D1D1F] pb-32 pt-32 sm:pt-36">
         
         <!-- ========================================================== -->
         <!-- Universal Top Header CAVA Portal (Sesuai Layout Public)    -->
@@ -271,10 +302,24 @@
                 <!-- SPOTLIGHT HERO: SATU KESATUAN BERSIH TANPA KOTAK ID & TANPA BADGE BER-BORDER -->
                 <section class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div class="space-y-3 flex-1">
-                        <!-- Indikator Status Dot Murni (Sesuai public/catalog.blade.php) -->
-                        <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>Jadwal Terdekat • Disetujui</span>
+                        <!-- Indikator Status Reaktif (A. Semantic Icon, B. Pure Text, C. Subtle Chip) -->
+                        <div>
+                            <template x-if="statusStyle === 'icon'">
+                                <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                    <span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                                    <span>Jadwal Terdekat • Disetujui</span>
+                                </div>
+                            </template>
+                            <template x-if="statusStyle === 'text'">
+                                <div class="text-xs font-semibold tracking-wide text-emerald-800">
+                                    Jadwal Terdekat • Disetujui
+                                </div>
+                            </template>
+                            <template x-if="statusStyle === 'chip'">
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">
+                                    Jadwal Terdekat • Disetujui
+                                </div>
+                            </template>
                         </div>
 
                         <h2 class="text-2xl font-bold tracking-tight text-[#1D1D1F]">
@@ -358,36 +403,55 @@
 
                 </section>
 
-                <!-- DUA KOLOM: RIWAYAT TERKINI & LAPORAN KERUSAKAN (BERSIH TANPA KOTAK BADGE) -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- DUA KOLOM: RIWAYAT TERKINI & LAPORAN KERUSAKAN (LUAS, BERNAPAS, TIDAK DEMPET) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                     
                     <!-- Kolom Kiri: Riwayat Permohonan Terkini -->
-                    <section class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+                    <section class="bg-white rounded-[2rem] p-8 sm:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
                         <div class="flex items-center justify-between pb-4 border-b border-gray-100">
-                            <h3 class="text-xl font-bold text-[#1D1D1F]">Riwayat Permohonan Terkini</h3>
-                            <button @click="page = 'reservations'" class="text-sm font-medium text-[#1D1D1F] hover:underline flex items-center gap-1">
+                            <div>
+                                <h3 class="text-xl font-bold text-[#1D1D1F]">Riwayat Permohonan Terkini</h3>
+                                <p class="text-xs text-[#86868B] mt-0.5">Aktivitas pengajuan ruang terbaru Anda</p>
+                            </div>
+                            <button @click="page = 'reservations'" class="text-sm font-semibold text-[#1D1D1F] hover:text-blue-600 flex items-center gap-1 transition">
                                 <span>Lihat Semua (12)</span>
                                 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </button>
                         </div>
 
-                        <div class="divide-y divide-gray-50">
-                            <!-- Baris 1: Disetujui -->
-                            <div @click="openTicketDetail(selectedTicket)" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
-                                <div class="space-y-0.5">
-                                    <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">Auditorium Utama, Gedung Rektorat</h4>
-                                    <p class="text-xs text-[#86868B]">Kamis, 15 Okt 2026 • 09:00 - 12:00 WIB • Seminar Nasional AI</p>
+                        <div class="space-y-4">
+                            <!-- Kartu 1: Disetujui -->
+                            <div @click="openTicketDetail(selectedTicket)" class="bg-[#F9F9FB] rounded-2xl p-5 sm:p-6 border border-transparent hover:border-gray-200/80 hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300 cursor-pointer group space-y-3">
+                                <div class="flex items-start justify-between gap-4">
+                                    <h4 class="font-bold text-[#1D1D1F] text-base group-hover:text-blue-600 transition leading-snug">
+                                        Auditorium Utama, Gedung Rektorat
+                                    </h4>
+                                    <!-- Dynamic Status Indicator -->
+                                    <div class="shrink-0 pt-0.5">
+                                        <template x-if="statusStyle === 'icon'">
+                                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                                <span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                                                <span>Disetujui</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="statusStyle === 'text'">
+                                            <span class="text-xs font-semibold tracking-wide text-emerald-800">Disetujui</span>
+                                        </template>
+                                        <template x-if="statusStyle === 'chip'">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">Disetujui</span>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        <span>Disetujui</span>
-                                    </span>
-                                    <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                    <span>Kamis, 15 Okt 2026</span>
+                                    <span>•</span>
+                                    <span>09:00 - 12:00 WIB</span>
+                                    <span>•</span>
+                                    <span class="text-[#1D1D1F] font-medium">Seminar Nasional AI & Komputasi</span>
                                 </div>
                             </div>
 
-                            <!-- Baris 2: Menunggu -->
+                            <!-- Kartu 2: Menunggu -->
                             <div @click="openTicketDetail({
                                 id: '',
                                 room: 'Lab Jaringan Komputer',
@@ -402,83 +466,146 @@
                                 statusLabel: 'Menunggu Verifikasi',
                                 adminNote: 'Permohonan sedang dalam antrean verifikasi Kepala Laboratorium.',
                                 canCancel: true
-                            })" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
-                                <div class="space-y-0.5">
-                                    <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">Lab Jaringan Komputer, Gedung Fasilkom</h4>
-                                    <p class="text-xs text-[#86868B]">Selasa, 20 Okt 2026 • 13:00 - 15:30 WIB • Praktikum Pengganti</p>
+                            })" class="bg-[#F9F9FB] rounded-2xl p-5 sm:p-6 border border-transparent hover:border-gray-200/80 hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300 cursor-pointer group space-y-3">
+                                <div class="flex items-start justify-between gap-4">
+                                    <h4 class="font-bold text-[#1D1D1F] text-base group-hover:text-blue-600 transition leading-snug">
+                                        Lab Jaringan Komputer, Gedung Fasilkom
+                                    </h4>
+                                    <!-- Dynamic Status Indicator -->
+                                    <div class="shrink-0 pt-0.5">
+                                        <template x-if="statusStyle === 'icon'">
+                                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800">
+                                                <span class="material-symbols-outlined text-[16px] text-amber-600">schedule</span>
+                                                <span>Menunggu</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="statusStyle === 'text'">
+                                            <span class="text-xs font-semibold tracking-wide text-amber-800">Menunggu</span>
+                                        </template>
+                                        <template x-if="statusStyle === 'chip'">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800">Menunggu</span>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <span class="flex items-center gap-1.5 text-xs font-medium text-amber-600">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                        <span>Menunggu</span>
-                                    </span>
-                                    <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                    <span>Selasa, 20 Okt 2026</span>
+                                    <span>•</span>
+                                    <span>13:00 - 15:30 WIB</span>
+                                    <span>•</span>
+                                    <span class="text-[#1D1D1F] font-medium">Praktikum Jaringan Komputer</span>
                                 </div>
                             </div>
 
-                            <!-- Baris 3: Selesai -->
-                            <div class="py-4.5 flex items-center justify-between gap-4 px-2 opacity-80">
-                                <div class="space-y-0.5">
-                                    <h4 class="font-semibold text-[#1D1D1F] text-base">Ruang Kuliah Teori B.301, Gedung Perkuliahan</h4>
-                                    <p class="text-xs text-[#86868B]">Senin, 05 Okt 2026 • 10:00 - 12:00 WIB • Diskusi Kelompok</p>
+                            <!-- Kartu 3: Selesai -->
+                            <div class="bg-[#F9F9FB]/60 rounded-2xl p-5 sm:p-6 border border-transparent transition-all space-y-3 opacity-80">
+                                <div class="flex items-start justify-between gap-4">
+                                    <h4 class="font-bold text-[#1D1D1F] text-base leading-snug">
+                                        Ruang Kuliah Teori B.301, Gedung Perkuliahan
+                                    </h4>
+                                    <!-- Dynamic Status Indicator -->
+                                    <div class="shrink-0 pt-0.5">
+                                        <template x-if="statusStyle === 'icon'">
+                                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                                                <span class="material-symbols-outlined text-[16px] text-slate-400">task_alt</span>
+                                                <span>Selesai</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="statusStyle === 'text'">
+                                            <span class="text-xs font-semibold tracking-wide text-slate-600">Selesai</span>
+                                        </template>
+                                        <template x-if="statusStyle === 'chip'">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700">Selesai</span>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <span class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                        <span>Selesai</span>
-                                    </span>
-                                    <span class="material-symbols-outlined text-gray-300 text-[18px]">arrow_forward</span>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                    <span>Senin, 05 Okt 2026</span>
+                                    <span>•</span>
+                                    <span>10:00 - 12:00 WIB</span>
+                                    <span>•</span>
+                                    <span class="text-[#1D1D1F] font-medium">Diskusi Kelompok</span>
                                 </div>
                             </div>
                         </div>
                     </section>
 
                     <!-- Kolom Kanan: Status Laporan Kerusakan -->
-                    <section class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-4">
-                        <div>
-                            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-2">
-                                <h3 class="text-xl font-bold text-[#1D1D1F]">Status Laporan Kerusakan</h3>
-                                <button @click="page = 'reports'" class="text-sm font-medium text-[#1D1D1F] hover:underline flex items-center gap-1">
+                    <section class="bg-white rounded-[2rem] p-8 sm:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-6">
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                                <div>
+                                    <h3 class="text-xl font-bold text-[#1D1D1F]">Status Laporan Kerusakan</h3>
+                                    <p class="text-xs text-[#86868B] mt-0.5">Penanganan fasilitas oleh sarana prasarana</p>
+                                </div>
+                                <button @click="page = 'reports'" class="text-sm font-semibold text-[#1D1D1F] hover:text-blue-600 flex items-center gap-1 transition">
                                     <span>Lihat Semua (5)</span>
                                     <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                                 </button>
                             </div>
 
-                            <div class="divide-y divide-gray-50">
+                            <div class="space-y-4">
                                 <!-- Baris Laporan 1: Diproses -->
-                                <div @click="openReportDetail(selectedReport)" class="py-4.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 px-2 rounded-xl transition group">
-                                    <div class="space-y-0.5">
-                                        <h4 class="font-semibold text-[#1D1D1F] text-base group-hover:text-blue-600 transition">AC Central Lab RPL Bocor</h4>
-                                        <p class="text-xs text-[#86868B]">Lab RPL, Gedung FTIK Lt. 2 • Dilaporkan 10 Okt 2026</p>
+                                <div @click="openReportDetail(selectedReport)" class="bg-[#F9F9FB] rounded-2xl p-5 sm:p-6 border border-transparent hover:border-gray-200/80 hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300 cursor-pointer group space-y-3">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <h4 class="font-bold text-[#1D1D1F] text-base group-hover:text-blue-600 transition leading-snug">
+                                            AC Central Lab RPL Bocor
+                                        </h4>
+                                        <!-- Dynamic Status Indicator -->
+                                        <div class="shrink-0 pt-0.5">
+                                            <template x-if="statusStyle === 'icon'">
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-800">
+                                                    <span class="material-symbols-outlined text-[16px] text-sky-600">build</span>
+                                                    <span>Diproses</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="statusStyle === 'text'">
+                                                <span class="text-xs font-semibold tracking-wide text-sky-800">Diproses</span>
+                                            </template>
+                                            <template x-if="statusStyle === 'chip'">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800">Diproses</span>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-3 shrink-0">
-                                        <span class="flex items-center gap-1.5 text-xs font-medium text-blue-600">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                            <span>Diproses</span>
-                                        </span>
-                                        <span class="material-symbols-outlined text-gray-300 group-hover:text-[#1D1D1F] text-[18px] transition">arrow_forward</span>
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                        <span>Lab RPL, Gedung FTIK Lt. 2</span>
+                                        <span>•</span>
+                                        <span>Dilaporkan 10 Okt 2026</span>
                                     </div>
                                 </div>
 
                                 <!-- Baris Laporan 2: Selesai -->
-                                <div class="py-4.5 flex items-center justify-between gap-4 px-2 opacity-80">
-                                    <div class="space-y-0.5">
-                                        <h4 class="font-semibold text-[#1D1D1F] text-base">Proyektor HDMI Ruang Kuliah Mati Total</h4>
-                                        <p class="text-xs text-[#86868B]">Ruang Teori B.204 • Dilaporkan 03 Okt 2026</p>
+                                <div class="bg-[#F9F9FB]/60 rounded-2xl p-5 sm:p-6 border border-transparent transition-all space-y-3 opacity-80">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <h4 class="font-bold text-[#1D1D1F] text-base leading-snug">
+                                            Proyektor HDMI Ruang Kuliah Mati Total
+                                        </h4>
+                                        <!-- Dynamic Status Indicator -->
+                                        <div class="shrink-0 pt-0.5">
+                                            <template x-if="statusStyle === 'icon'">
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                                    <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                                                    <span>Selesai</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="statusStyle === 'text'">
+                                                <span class="text-xs font-semibold tracking-wide text-emerald-800">Selesai</span>
+                                            </template>
+                                            <template x-if="statusStyle === 'chip'">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">Selesai</span>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-3 shrink-0">
-                                        <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            <span>Selesai</span>
-                                        </span>
-                                        <span class="material-symbols-outlined text-gray-300 text-[18px]">arrow_forward</span>
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#86868B] pt-1 border-t border-gray-100/70">
+                                        <span>Ruang Teori B.204</span>
+                                        <span>•</span>
+                                        <span>Dilaporkan 03 Okt 2026</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-gray-100">
-                            <button @click="page = 'report-form'" class="w-full py-3.5 rounded-xl bg-[#F9F9FB] hover:bg-gray-100 text-[#1D1D1F] text-sm font-medium transition flex items-center justify-center gap-2">
+                        <div class="pt-2">
+                            <button @click="page = 'report-form'" class="w-full py-3.5 rounded-xl bg-[#F9F9FB] hover:bg-gray-100 text-[#1D1D1F] text-sm font-semibold transition flex items-center justify-center gap-2 border border-gray-200/60">
                                 <span>Laporkan Kerusakan Baru</span>
                                 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                             </button>
@@ -538,13 +665,27 @@
                 <div class="space-y-4">
                     
                     <!-- Kartu 1: Disetujui -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-1.5 flex-1">
-                                <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    <span>Disetujui</span>
+                            <div class="space-y-2 flex-1">
+                                <div>
+                                    <template x-if="statusStyle === 'icon'">
+                                        <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                            <span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                                            <span>Disetujui</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'text'">
+                                        <div class="text-xs font-semibold tracking-wide text-emerald-800">
+                                            Disetujui
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'chip'">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">
+                                            Disetujui
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <h3 class="text-xl font-bold text-[#1D1D1F]">Auditorium Utama • Gedung Rektorat Lt. 3</h3>
@@ -569,13 +710,27 @@
                     </div>
 
                     <!-- Kartu 2: Menunggu -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-1.5 flex-1">
-                                <div class="flex items-center gap-2 text-xs font-medium text-amber-600">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    <span>Menunggu Verifikasi</span>
+                            <div class="space-y-2 flex-1">
+                                <div>
+                                    <template x-if="statusStyle === 'icon'">
+                                        <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800">
+                                            <span class="material-symbols-outlined text-[16px] text-amber-600">schedule</span>
+                                            <span>Menunggu Verifikasi</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'text'">
+                                        <div class="text-xs font-semibold tracking-wide text-amber-800">
+                                            Menunggu Verifikasi
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'chip'">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800">
+                                            Menunggu Verifikasi
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <h3 class="text-xl font-bold text-[#1D1D1F]">Lab Jaringan Komputer • Gedung Fasilkom Lt. 2</h3>
@@ -699,8 +854,8 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                            <span class="material-symbols-outlined text-[15px] text-emerald-600">check_circle</span>
                             <span>Slot waktu tersedia dan aman dari bentrok kegiatan lain.</span>
                         </div>
                     </div>
@@ -786,14 +941,28 @@
                 <div class="space-y-4">
                     
                     <!-- Laporan 1: Diproses -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300">
                         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-1.5 flex-1">
-                                <div class="flex items-center gap-2 text-xs font-medium text-blue-600">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                    <span>Sedang Ditangani Teknisi</span>
-                                    <span class="text-[#86868B]">• 10 Okt 2026, 08:30 WIB</span>
+                            <div class="space-y-2 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <template x-if="statusStyle === 'icon'">
+                                        <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-800">
+                                            <span class="material-symbols-outlined text-[16px] text-sky-600">build</span>
+                                            <span>Sedang Ditangani Teknisi</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'text'">
+                                        <div class="text-xs font-semibold tracking-wide text-sky-800">
+                                            Sedang Ditangani Teknisi
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'chip'">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800">
+                                            Sedang Ditangani Teknisi
+                                        </div>
+                                    </template>
+                                    <span class="text-xs text-[#86868B]">• 10 Okt 2026, 08:30 WIB</span>
                                 </div>
 
                                 <h3 class="text-xl font-bold text-[#1D1D1F]">AC Central Lab RPL Mengalami Kebocoran Air & Tidak Dingin</h3>
@@ -814,14 +983,28 @@
                     </div>
 
                     <!-- Laporan 2: Selesai -->
-                    <div class="bg-white p-7 rounded-[2rem] border border-gray-100 transition opacity-85">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 transition opacity-85">
                         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                             
-                            <div class="space-y-1.5 flex-1">
-                                <div class="flex items-center gap-2 text-xs font-medium text-emerald-600">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    <span>Selesai Diperbaiki</span>
-                                    <span class="text-[#86868B]">• 03 Okt 2026</span>
+                            <div class="space-y-2 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <template x-if="statusStyle === 'icon'">
+                                        <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                            <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                                            <span>Selesai Diperbaiki</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'text'">
+                                        <div class="text-xs font-semibold tracking-wide text-emerald-800">
+                                            Selesai Diperbaiki
+                                        </div>
+                                    </template>
+                                    <template x-if="statusStyle === 'chip'">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800">
+                                            Selesai Diperbaiki
+                                        </div>
+                                    </template>
+                                    <span class="text-xs text-[#86868B]">• 03 Okt 2026</span>
                                 </div>
 
                                 <h3 class="text-xl font-bold text-[#1D1D1F]">Proyektor HDMI Ruang Kuliah Mati Total</h3>
@@ -1224,14 +1407,24 @@
                 </button>
             </div>
 
-            <!-- Status Bersih -->
+            <!-- Status Bersih & Reaktif -->
             <div class="p-4 rounded-xl bg-[#F9F9FB] space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium text-[#86868B]">Status Verifikasi:</span>
-                    <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span x-text="selectedTicket.statusLabel"></span>
-                    </span>
+                    <div>
+                        <template x-if="statusStyle === 'icon'">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                <span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                                <span x-text="selectedTicket.statusLabel"></span>
+                            </span>
+                        </template>
+                        <template x-if="statusStyle === 'text'">
+                            <span class="text-xs font-semibold tracking-wide text-emerald-800" x-text="selectedTicket.statusLabel"></span>
+                        </template>
+                        <template x-if="statusStyle === 'chip'">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800" x-text="selectedTicket.statusLabel"></span>
+                        </template>
+                    </div>
                 </div>
                 <div class="text-xs text-[#86868B]" x-text="selectedTicket.adminNote"></div>
             </div>
@@ -1310,10 +1503,20 @@
             <div class="p-4 rounded-xl bg-[#F9F9FB] space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium text-[#86868B]">Status Penanganan:</span>
-                    <span class="flex items-center gap-1.5 text-xs font-medium text-blue-600">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        <span x-text="selectedReport.statusLabel"></span>
-                    </span>
+                    <div>
+                        <template x-if="statusStyle === 'icon'">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-800">
+                                <span class="material-symbols-outlined text-[16px] text-sky-600">build</span>
+                                <span x-text="selectedReport.statusLabel"></span>
+                            </span>
+                        </template>
+                        <template x-if="statusStyle === 'text'">
+                            <span class="text-xs font-semibold tracking-wide text-sky-800" x-text="selectedReport.statusLabel"></span>
+                        </template>
+                        <template x-if="statusStyle === 'chip'">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800" x-text="selectedReport.statusLabel"></span>
+                        </template>
+                    </div>
                 </div>
                 <div class="text-xs text-[#86868B]">
                     <span>Teknisi Bertugas:</span> <strong class="text-[#1D1D1F]" x-text="selectedReport.technician"></strong>
