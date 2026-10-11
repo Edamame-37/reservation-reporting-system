@@ -74,11 +74,7 @@
     }" class="space-y-10">
 
         {{-- Toolbar Aksi Cepat (Judul halaman telah terwakili pada Universal Top Header) --}}
-        <div class="flex items-center justify-end gap-3">
-            <a href="{{ route('user.report-form') }}" 
-               class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-[#1D1D1F] hover:bg-gray-100 transition">
-                <span>Halaman Form Penuh</span>
-            </a>
+        <div class="flex items-center justify-end">
             <button type="button" 
                     @click="showCreateModal = true" 
                     class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black transition shadow-sm active:scale-[0.98]">
@@ -309,10 +305,10 @@
         {{-- ========================================================================= --}}
         <div x-show="showCreateModal" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+             class="fixed inset-0 z-[70] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+             @click.self="showCreateModal = false">
             
-            <div @click.away="showCreateModal = false" 
-                 class="bg-white rounded-[32px] max-w-2xl w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-8">
+            <div class="bg-white rounded-[32px] max-w-2xl w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-auto max-h-[85vh] overflow-y-auto no-scrollbar font-sans">
                 
                 {{-- Tombol Tutup --}}
                 <button type="button" 
@@ -465,10 +461,10 @@
         {{-- ========================================================================= --}}
         <div x-show="showDetailModal" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+             class="fixed inset-0 z-[70] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+             @click.self="showDetailModal = false">
             
-            <div @click.away="showDetailModal = false" 
-                 class="bg-white rounded-[32px] max-w-lg w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-8">
+            <div class="bg-white rounded-[32px] max-w-lg w-full p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] relative my-auto max-h-[85vh] overflow-y-auto no-scrollbar font-sans">
                 
                 <button type="button" 
                         @click="showDetailModal = false" 
