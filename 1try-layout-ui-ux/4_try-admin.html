@@ -87,7 +87,7 @@
     <header class="sticky top-0 z-50 glass-panel border-b border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
             
-            {{-- Brand & Context Tag --}}
+            <!-- Brand & Context Tag -->
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-sm">
                     CAVA
@@ -103,7 +103,7 @@
                 </div>
             </div>
 
-            {{-- 3-Design Options Switcher --}}
+            <!-- 3-Design Options Switcher -->
             <div class="flex items-center gap-2 bg-[#E5E5EA]/70 p-1 rounded-2xl border border-gray-200/50">
                 <button type="button" 
                         @click="option = 1" 
@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        {{-- Sub-Navigation Tab Admin Pages --}}
+        <!-- Sub-Navigation Tab Admin Pages -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-1 pb-2 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-gray-100">
             <span class="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider mr-2 shrink-0">Modul Admin:</span>
             
@@ -192,10 +192,10 @@
         <!-- ========================================================== -->
         <div x-show="option === 1" x-transition.opacity.duration.200ms class="space-y-8">
 
-            {{-- 1.A. SUB-HALAMAN: DASBOR EKSEKUTIF (OPSI 1) --}}
+            <!-- 1.A. SUB-HALAMAN: DASBOR EKSEKUTIF (OPSI 1) -->
             <div x-show="activePage === 'dashboard'" class="space-y-8">
                 
-                {{-- Welcome & Subtitle --}}
+                <!-- Welcome & Subtitle -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <span class="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Biro Sarana Prasarana & TIK</span>
@@ -209,7 +209,7 @@
                     </div>
                 </div>
 
-                {{-- Bento Grid Baris Atas: 4 Kartu Metrik Apple-esque --}}
+                <!-- Bento Grid Baris Atas: 4 Kartu Metrik Apple-esque -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
                         <span class="text-xs text-[#86868B] font-medium block">Antrean Akun Pending</span>
@@ -233,10 +233,10 @@
                     </div>
                 </div>
 
-                {{-- Bento Row 2: Antrean Cepat & Status Ruang Populer --}}
+                <!-- Bento Row 2: Antrean Cepat & Status Ruang Populer -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
-                    {{-- Kolom Kiri: Antrean Verifikasi Akun Cepat --}}
+                    <!-- Kolom Kiri: Antrean Verifikasi Akun Cepat -->
                     <div class="lg:col-span-7 bg-white rounded-[2rem] p-6 sm:p-7 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                         <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
                             <div>
@@ -271,9 +271,9 @@
                         </div>
                     </div>
 
-                    {{-- Kolom Kanan: Utilisasi Gedung & Ketersediaan --}}
+                    <!-- Kolom Kanan: Utilisasi Gedung & Ketersediaan -->
                     <div class="lg:col-span-5 bg-white rounded-[2rem] p-6 sm:p-7 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                        <div class="pb-4 mb-4 border-b border-gray-100">
+                        <div class="pb-4 mb-4 border-gray-100 border-b">
                             <h3 class="text-base font-bold text-[#1D1D1F]">Utilisasi Fasilitas Kampus</h3>
                             <p class="text-xs text-[#86868B] mt-0.5">Ringkasan okupansi per zona gedung bulan ini.</p>
                         </div>
@@ -311,10 +311,10 @@
                 </div>
             </div>
 
-            {{-- 1.B. SUB-HALAMAN: MANAJEMEN PENGGUNA (OPSI 1) --}}
+            <!-- 1.B. SUB-HALAMAN: MANAJEMEN PENGGUNA (OPSI 1) -->
             <div x-show="activePage === 'users'" class="space-y-6">
                 
-                {{-- Header & Action Button --}}
+                <!-- Header & Action Button -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 class="text-2xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Manajemen & Otorisasi Sivitas Kampus</h1>
@@ -328,7 +328,7 @@
                     </div>
                 </div>
 
-                {{-- Search Bar Apple Catalog Style (Aura Glow) --}}
+                <!-- Search Bar Apple Catalog Style (Aura Glow) -->
                 <div class="space-y-3">
                     <div class="relative group">
                         <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
@@ -339,7 +339,7 @@
                         </div>
                     </div>
 
-                    {{-- Category / Status Filter Chips (Subtle Pure Typographic) --}}
+                    <!-- Category / Status Filter Chips (Subtle Pure Typographic) -->
                     <div class="flex items-center gap-2 pt-1 flex-wrap">
                         <button type="button" @click="userTab = 'all'" :class="userTab === 'all' ? 'bg-[#1D1D1F] text-white' : 'bg-white text-[#86868B] hover:text-[#1D1D1F] border border-gray-200'" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
                             Semua Sivitas (6)
@@ -356,7 +356,7 @@
                     </div>
                 </div>
 
-                {{-- Tabel Data Bersih Apple-Style Tanpa Garis Kaku --}}
+                <!-- Tabel Data Bersih Apple-Style Tanpa Garis Kaku -->
                 <div class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
@@ -382,7 +382,7 @@
                                             <div class="text-xs text-[#86868B]" x-text="user.dept"></div>
                                         </td>
                                         <td class="py-4 px-6">
-                                            {{-- Status Opsi B: Pure Typographic --}}
+                                            <!-- Status Opsi B: Pure Typographic -->
                                             <span class="text-xs font-semibold"
                                                   :class="user.status === 'active' ? 'text-emerald-800' : (user.status === 'pending' ? 'text-amber-800' : 'text-rose-800')"
                                                   x-text="user.status === 'active' ? 'Aktif' : (user.status === 'pending' ? 'Menunggu Otorisasi' : 'Dinonaktifkan')">
@@ -409,7 +409,7 @@
 
             </div>
 
-            {{-- 1.C. SUB-HALAMAN: MASTER FASILITAS (OPSI 1) --}}
+            <!-- 1.C. SUB-HALAMAN: MASTER FASILITAS (OPSI 1) -->
             <div x-show="activePage === 'facilities'" class="space-y-6">
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -423,7 +423,7 @@
                     </button>
                 </div>
 
-                {{-- Catalog Grid Style Fasilitas --}}
+                <!-- Catalog Grid Style Fasilitas -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <template x-for="f in facilities" :key="f.id">
                         <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:border-gray-300 transition">
@@ -466,7 +466,7 @@
 
             </div>
 
-            {{-- 1.D. SUB-HALAMAN: EKSPOR & LAPORAN (OPSI 1) --}}
+            <!-- 1.D. SUB-HALAMAN: EKSPOR & LAPORAN (OPSI 1) -->
             <div x-show="activePage === 'exports'" class="space-y-6">
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -486,7 +486,7 @@
                     </div>
                 </div>
 
-                {{-- Rentang Tanggal Filter Box --}}
+                <!-- Rentang Tanggal Filter Box -->
                 <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                     <h3 class="text-sm font-bold text-[#1D1D1F] mb-3">Filter Rentang Waktu Rekapitulasi</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -516,7 +516,7 @@
         <!-- ========================================================== -->
         <div x-show="option === 2" x-transition.opacity.duration.200ms class="space-y-6">
 
-            {{-- Toolbar Kompak Monokrom --}}
+            <!-- Toolbar Kompak Monokrom -->
             <div class="bg-white p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs font-mono">
                 <div class="flex items-center gap-3">
                     <span class="px-2 py-0.5 rounded bg-zinc-900 text-white font-medium">SYS.ADMIN.PRO</span>
@@ -533,10 +533,10 @@
                 </div>
             </div>
 
-            {{-- 2.A. DASBOR EKSEKUTIF (OPSI 2) --}}
+            <!-- 2.A. DASBOR EKSEKUTIF (OPSI 2) -->
             <div x-show="activePage === 'dashboard'" class="space-y-6">
                 
-                {{-- KPI Linear Metric Tiles (High Contrast Mono) --}}
+                <!-- KPI Linear Metric Tiles (High Contrast Mono) -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
                     <div class="bg-white p-4 rounded-xl border border-zinc-200 hover:border-zinc-400 transition">
                         <div class="text-[11px] text-zinc-500 uppercase tracking-wider">QUEUE.VERIFICATION</div>
@@ -560,7 +560,7 @@
                     </div>
                 </div>
 
-                {{-- Table Dense Linear Style --}}
+                <!-- Table Dense Linear Style -->
                 <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden font-sans">
                     <div class="p-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
                         <span class="text-xs font-bold text-zinc-800 font-mono uppercase tracking-wider">Incoming Account Verification Queue</span>
@@ -601,7 +601,7 @@
 
             </div>
 
-            {{-- 2.B. MANAJEMEN PENGGUNA (OPSI 2) --}}
+            <!-- 2.B. MANAJEMEN PENGGUNA (OPSI 2) -->
             <div x-show="activePage === 'users'" class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-base font-bold text-zinc-900 font-mono">USER_DIRECTORY / SIVITAS</h2>
@@ -610,7 +610,7 @@
                     </button>
                 </div>
 
-                {{-- Linear Dense Table --}}
+                <!-- Linear Dense Table -->
                 <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden text-xs">
                     <table class="w-full text-left">
                         <thead class="border-b border-zinc-200 bg-zinc-50 font-mono text-zinc-500 uppercase text-[11px]">
@@ -651,7 +651,7 @@
                 </div>
             </div>
 
-            {{-- 2.C. MASTER FASILITAS (OPSI 2) --}}
+            <!-- 2.C. MASTER FASILITAS (OPSI 2) -->
             <div x-show="activePage === 'facilities'" class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-base font-bold text-zinc-900 font-mono">FACILITY_REGISTRY / MASTER</h2>
@@ -701,7 +701,7 @@
                 </div>
             </div>
 
-            {{-- 2.D. EKSPOR LAPORAN (OPSI 2) --}}
+            <!-- 2.D. EKSPOR LAPORAN (OPSI 2) -->
             <div x-show="activePage === 'exports'" class="space-y-4">
                 <div class="bg-white p-5 rounded-xl border border-zinc-200">
                     <h3 class="text-sm font-bold text-zinc-900 font-mono">DATA_PIPELINE / EXPORT_DISPATCHER</h3>
@@ -725,21 +725,21 @@
         <!-- ========================================================== -->
         <div x-show="option === 3" x-transition.opacity.duration.200ms class="space-y-8">
 
-            {{-- 3.A. DASBOR EKSEKUTIF (OPSI 3) --}}
+            <!-- 3.A. DASBOR EKSEKUTIF (OPSI 3) -->
             <div x-show="activePage === 'dashboard'" class="space-y-8">
                 
-                {{-- Hero Banner Glassmorphic --}}
+                <!-- Hero Banner Glassmorphic -->
                 <div class="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl">
                     <div class="relative z-10 max-w-2xl">
                         <span class="text-xs font-bold tracking-widest uppercase text-blue-300">Executive Overview</span>
                         <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 font-display">Pusat Kendali Sumber Daya Kampus</h1>
                         <p class="text-sm text-blue-100/80 mt-2">Visualisasi dinamis seluruh pergerakan reservasi sivitas dan pengelolaan aset ruang secara komprehensif.</p>
                     </div>
-                    {{-- Decorative Blur Orb --}}
+                    <!-- Decorative Blur Orb -->
                     <div class="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
                 </div>
 
-                {{-- 4 Stat Cards Glass Elevation --}}
+                <!-- 4 Stat Cards Glass Elevation -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-md transition">
                         <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
@@ -777,7 +777,7 @@
 
             </div>
 
-            {{-- 3.B. MANAJEMEN PENGGUNA (OPSI 3) --}}
+            <!-- 3.B. MANAJEMEN PENGGUNA (OPSI 3) -->
             <div x-show="activePage === 'users'" class="space-y-6">
                 <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
                     <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
@@ -814,7 +814,7 @@
                 </div>
             </div>
 
-            {{-- 3.C. MASTER FASILITAS VISUAL CARD (OPSI 3) --}}
+            <!-- 3.C. MASTER FASILITAS VISUAL CARD (OPSI 3) -->
             <div x-show="activePage === 'facilities'" class="space-y-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -826,7 +826,7 @@
                     </button>
                 </div>
 
-                {{-- Visual Image Cards Grid --}}
+                <!-- Visual Image Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <template x-for="f in facilities" :key="f.id">
                         <div class="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 group">
@@ -859,7 +859,7 @@
                 </div>
             </div>
 
-            {{-- 3.D. EKSPOR LAPORAN (OPSI 3) --}}
+            <!-- 3.D. EKSPOR LAPORAN (OPSI 3) -->
             <div x-show="activePage === 'exports'" class="space-y-6">
                 <div class="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 max-w-2xl mx-auto text-center">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-900 mx-auto flex items-center justify-center mb-4">
@@ -889,7 +889,7 @@
     <!-- 4. INTERACTIVE MODAL DIALOGS (PREVIEW)                        -->
     <!-- ============================================================== -->
 
-    {{-- Modal Tambah / Detail Pengguna --}}
+    <!-- Modal Tambah / Detail Pengguna -->
     <div x-show="showUserModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showUserModal = false"></div>
         <div class="relative w-full max-w-md bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100 z-10">
@@ -925,7 +925,7 @@
         </div>
     </div>
 
-    {{-- Modal Tambah / Edit Fasilitas --}}
+    <!-- Modal Tambah / Edit Fasilitas -->
     <div x-show="showFacilityModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showFacilityModal = false"></div>
         <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100 z-10">
