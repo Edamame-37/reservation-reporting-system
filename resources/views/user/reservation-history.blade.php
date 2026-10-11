@@ -213,45 +213,79 @@
             </a>
         </div>
 
-        {{-- 3. TOOLBAR FILTER TAB UNDERLINE & FORM PENCARIAN --}}
-        <div id="daftar-reservasi" class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-gray-100 scroll-mt-6">
-            <div class="flex items-center gap-8 text-sm font-medium overflow-x-auto no-scrollbar">
-                <a href="{{ request()->fullUrlWithQuery(['status' => 'all', 'page' => 1]) }}" 
-                   class="pb-3 -mb-px transition whitespace-nowrap {{ $activeStatus === 'all' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]' }}">
-                    Semua Reservasi ({{ $counts['all'] ?? 0 }})
-                </a>
-                <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1]) }}" 
-                   class="pb-3 -mb-px transition whitespace-nowrap {{ $activeStatus === 'pending' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]' }}">
-                    Menunggu ({{ $counts['pending'] ?? 0 }})
-                </a>
-                <a href="{{ request()->fullUrlWithQuery(['status' => 'approved', 'page' => 1]) }}" 
-                   class="pb-3 -mb-px transition whitespace-nowrap {{ $activeStatus === 'approved' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]' }}">
-                    Disetujui ({{ $counts['approved'] ?? 0 }})
-                </a>
-                <a href="{{ request()->fullUrlWithQuery(['status' => 'cancelled', 'page' => 1]) }}" 
-                   class="pb-3 -mb-px transition whitespace-nowrap {{ in_array($activeStatus, ['rejected', 'cancelled']) ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]' }}">
-                    Ditolak/Batal ({{ ($counts['rejected'] ?? 0) + ($counts['cancelled'] ?? 0) }})
-                </a>
-            </div>
-
-            <form action="{{ url()->current() }}" method="GET" class="w-full md:w-80">
+        {{-- 3. SEARCH BAR & FILTER AKTIF (DESAIN MENGIKUTI PUBLIC CATALOG) --}}
+        <div id="daftar-reservasi" class="space-y-3 scroll-mt-6">
+            <form action="{{ url()->current() }}" method="GET" class="w-full">
                 @if (request('status') && request('status') !== 'all')
                     <input type="hidden" name="status" value="{{ request('status') }}">
                 @endif
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868B] text-[18px]">search</span>
-                    <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}" 
-                           placeholder="Cari nama ruang atau kegiatan..." 
-                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] pl-10 pr-8 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
-                    @if (request('search'))
-                        <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#86868B] hover:text-[#1D1D1F]">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                        </a>
-                    @endif
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
+                        <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request('search') }}" 
+                               placeholder="Cari berdasarkan nama ruang, gedung, atau kegiatan..." 
+                               class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-sm md:text-base bg-transparent text-[#1D1D1F] placeholder:text-[#86868B]" 
+                               autocomplete="off">
+                        @if (request('search'))
+                            <a href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => 1]) }}" 
+                               class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 flex items-center justify-center" 
+                               title="Hapus kata kunci pencarian">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </a>
+                        @endif
+                        <button type="submit" 
+                                class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition shrink-0 cursor-pointer shadow-sm">
+                            Cari
+                        </button>
+                    </div>
                 </div>
             </form>
+
+            {{-- Filter Aktif Pills (Pola Catalog) --}}
+            @if ((request('status') && request('status') !== 'all') || request()->filled('search'))
+                <div class="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                    <span class="text-xs font-medium text-gray-500 py-1 mr-1">Filter Aktif:</span>
+
+                    @if (request('status') && request('status') !== 'all')
+                        @php
+                            $statusLabels = [
+                                'pending'   => 'Menunggu',
+                                'approved'  => 'Disetujui',
+                                'rejected'  => 'Ditolak',
+                                'cancelled' => 'Ditolak / Batal',
+                            ];
+                            $statusLabel = $statusLabels[request('status')] ?? ucfirst(request('status'));
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-[#1D1D1F] border border-gray-200 shadow-sm">
+                            <span>Status: {{ $statusLabel }}</span>
+                            <a href="{{ request()->fullUrlWithQuery(['status' => 'all', 'page' => 1]) }}" 
+                               class="text-gray-400 hover:text-rose-600 transition" 
+                               title="Hapus filter status">
+                                <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                            </a>
+                        </span>
+                    @endif
+
+                    @if (request()->filled('search'))
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200 shadow-sm">
+                            <span>Pencarian: "{{ request('search') }}"</span>
+                            <a href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => 1]) }}" 
+                               class="text-blue-500 hover:text-blue-900 transition" 
+                               title="Hapus kata kunci pencarian">
+                                <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+                            </a>
+                        </span>
+                    @endif
+
+                    <a href="{{ route('user.reservation.history') }}" 
+                       class="text-xs font-medium text-gray-500 hover:text-rose-600 underline px-2 py-1 transition ml-1">
+                        Hapus Semua
+                    </a>
+                </div>
+            @endif
         </div>
 
         {{-- 4. DAFTAR KARTU RESERVASI BERSIH & LUAS (STATUS OPSI B: PURE TYPOGRAPHIC) --}}
