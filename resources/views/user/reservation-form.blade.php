@@ -127,23 +127,15 @@
         }
     }" class="space-y-8">
 
-        {{-- Top Navigation: Link Kembali & Header Halaman Apple-Style --}}
-        <div>
-            <a href="{{ route('user.reservations.index') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition mb-4">
+        {{-- Top Navigation & Indikator Status (Judul halaman telah terwakili pada Universal Top Header) --}}
+        <div class="flex items-center justify-between">
+            <a href="{{ route('user.reservation-history') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span>Kembali ke Riwayat Reservasi</span>
             </a>
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1D1D1F]">Formulir Pengajuan Reservasi Ruang</h1>
-                    <p class="text-base sm:text-lg text-[#86868B] font-light mt-1">Lengkapi data berikut untuk mengajukan izin penggunaan fasilitas dan ruang akademik.</p>
-                </div>
-                <div class="shrink-0">
-                    <span class="text-xs font-semibold tracking-wide text-emerald-800">
-                        Pengecekan Bentrok Jadwal Aktif
-                    </span>
-                </div>
-            </div>
+            <span class="text-xs font-semibold tracking-wide text-emerald-800">
+                Pengecekan Bentrok Jadwal Aktif
+            </span>
         </div>
 
         {{-- Banner Error Validasi Server (Soft Apple Tone tanpa border hitam) --}}
@@ -407,7 +399,7 @@
                             <span x-text="submitting ? 'Memproses Validasi...' : 'Kirim Permohonan Reservasi'"></span>
                         </button>
 
-                        <a href="{{ route('user.reservations.index') }}" 
+                        <a href="{{ route('user.reservation-history') }}" 
                            class="block text-center w-full py-2.5 text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
                             Batal dan Kembali
                         </a>
