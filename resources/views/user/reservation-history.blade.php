@@ -280,7 +280,8 @@
                         </span>
                     @endif
 
-                    <a href="{{ route('user.reservation.history') }}" 
+                    {{-- Reset Seluruh Filter ke Tampilan Awal Riwayat Reservasi --}}
+                    <a href="{{ route('user.reservation-history') }}" 
                        class="text-xs font-medium text-gray-500 hover:text-rose-600 underline px-2 py-1 transition ml-1">
                         Hapus Semua
                     </a>
