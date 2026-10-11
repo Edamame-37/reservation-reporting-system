@@ -147,11 +147,7 @@
     }" class="space-y-10 font-sans text-[#1D1D1F]">
 
         {{-- Toolbar Aksi Cepat (Judul halaman telah terwakili pada Universal Top Header) --}}
-        <div class="flex items-center justify-end gap-3">
-            <a href="{{ route('user.reservation-form') }}" 
-               class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-[#1D1D1F] hover:bg-gray-100 transition">
-                <span>Halaman Form Penuh</span>
-            </a>
+        <div class="flex items-center justify-end">
             <button type="button" 
                     @click="showCreateModal = true" 
                     class="bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-black transition text-sm shadow-xs flex items-center gap-2">
@@ -371,9 +367,9 @@
         {{-- ========================================================================= --}}
         <div x-show="showDetailModal" 
              x-cloak 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" 
+             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
              @click.self="showDetailModal = false">
-            <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
+            <div class="bg-white w-full max-w-lg rounded-[32px] p-7 sm:p-8 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
                 <template x-if="selectedTicket">
                     <div class="space-y-6">
                         <div class="flex items-start justify-between">
@@ -444,9 +440,9 @@
         {{-- ========================================================================= --}}
         <div x-show="showCancelModal" 
              x-cloak 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" 
+             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
              @click.self="showCancelModal = false">
-            <div class="bg-white w-full max-w-md rounded-[32px] p-7 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-5 font-sans">
+            <div class="bg-white w-full max-w-md rounded-[32px] p-7 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-5 font-sans my-auto">
                 <template x-if="selectedTicket">
                     <div class="space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -498,9 +494,9 @@
         {{-- ========================================================================= --}}
         <div x-show="showCreateModal" 
              x-cloak 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" 
+             class="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto" 
              @click.self="showCreateModal = false">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] p-7 sm:p-9 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
+            <div class="bg-white w-full max-w-2xl rounded-[32px] p-7 sm:p-9 border border-black/[0.05] shadow-[0_24px_64px_rgba(0,0,0,0.12)] space-y-6 relative max-h-[85vh] overflow-y-auto no-scrollbar font-sans my-auto">
                 
                 <div class="flex items-start justify-between">
                     <div>
