@@ -29,11 +29,14 @@ class PublicFacilityController extends Controller
             });
         }
 
-        // Filter multiple category (dari parameter categories[] di form baru atau category di form lama)
+        // Filter multiple category (dari parameter categories[] di form baru atau category di form lama / cookie fallback)
+        $cookieCategory = $request->cookie('cava_pref_category', 'semua');
         if ($request->filled('categories') && is_array($request->categories)) {
             $query->whereIn('category', $request->categories);
         } elseif ($request->filled('category') && $request->category !== 'semua') {
             $query->where('category', $request->category);
+        } elseif (!$request->has('category') && $cookieCategory !== 'semua') {
+            $query->where('category', $cookieCategory);
         }
 
         // Filter multiple equipments (dari parameter equipments[])
@@ -128,7 +131,13 @@ class PublicFacilityController extends Controller
         $categories = $filterOptions['categories'];
         $equipments = $filterOptions['equipments'];
 
-        return view('public.catalog', compact('facilities', 'categories', 'equipments'));
+        // Jika kategori diisi lewat request, simpan ke cookie preferensi selama 30 hari
+        $response = response()->view('public.catalog', compact('facilities', 'categories', 'equipments'));
+        if ($request->filled('category')) {
+            $response->cookie('cava_pref_category', $request->category, 60 * 24 * 30);
+        }
+
+        return $response;
     }
 
     /**

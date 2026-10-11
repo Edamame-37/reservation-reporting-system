@@ -228,5 +228,40 @@
             &copy; {{ date('Y') }} CAVA - Biro Sarana & Prasarana Kampus.
         </footer>
     </div>
+
+    {{-- Cookie & Kebijakan Kampus Consent Banner (Apple-esque Floating Pill) --}}
+    <div x-data="{
+            accepted: document.cookie.split('; ').some(row => row.startsWith('cava_policy_accepted=1')),
+            acceptPolicy() {
+                document.cookie = 'cava_policy_accepted=1;path=/;max-age=' + (60 * 60 * 24 * 365);
+                this.accepted = true;
+            }
+         }"
+         x-show="!accepted"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-4"
+         class="fixed bottom-6 inset-x-6 sm:inset-x-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-gray-200/80 shadow-[0_12px_40px_rgb(0,0,0,0.08)] flex flex-col gap-3 text-xs text-[#1D1D1F]">
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 text-[20px] shrink-0 mt-0.5">cookie</span>
+            <div class="space-y-1">
+                <p class="font-bold text-[#1D1D1F]">Kebijakan & Privasi Layanan CAVA</p>
+                <p class="text-[#86868B] leading-relaxed">
+                    Sistem ini menggunakan cookies dan sesi lokal untuk menyimpan preferensi filter fasilitas dan kelancaran pengajuan reservasi Anda.
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-1 border-t border-gray-100">
+            <a href="{{ route('public.information', ['section' => 'kebijakan']) }}" class="px-3 py-1.5 text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
+                Pelajari Kebijakan
+            </a>
+            <button type="button" @click="acceptPolicy()" class="px-4 py-1.5 rounded-xl bg-[#1D1D1F] hover:bg-black text-white font-medium transition shadow-2xs cursor-pointer">
+                Setujui & Lanjutkan
+            </button>
+        </div>
+    </div>
 </body>
 </html>

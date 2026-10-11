@@ -33,8 +33,9 @@ class ReportController extends Controller
             ->get();
 
         $selectedFacilityId = $request->query('facility_id');
+        $draft = session('report_draft', []);
 
-        return view('user.report-form', compact('facilities', 'selectedFacilityId'));
+        return view('user.report-form', compact('facilities', 'selectedFacilityId', 'draft'));
     }
 
     /**
@@ -78,6 +79,9 @@ class ReportController extends Controller
             'status'             => 'baru',
             'is_facility_locked' => false,
         ]);
+
+        // Bersihkan draft session setelah tiket berhasil tercatat
+        session()->forget('report_draft');
 
         return redirect()->route('user.report-history')
             ->with('success', "Laporan kerusakan berhasil dikirim dengan kode tiket {$reportCode}. Petugas sarpras akan segera menindaklanjuti pengaduan Anda.");

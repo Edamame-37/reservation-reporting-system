@@ -106,10 +106,10 @@
                     </button>
                 </div>
 
-                {{-- Filter Gedung --}}
+                {{-- Filter Gedung (Tersinkronisasi Cookie cava_pref_building) --}}
                 <div class="flex items-center gap-1.5">
                     <label for="matrix-building" class="text-xs font-medium text-slate-600">Gedung:</label>
-                    <select id="matrix-building" x-model="selectedBuilding" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition">
+                    <select id="matrix-building" x-model="selectedBuilding" @change="document.cookie = 'cava_pref_building=' + encodeURIComponent(selectedBuilding) + ';path=/;max-age=' + (60*60*24*30)" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition">
                         <option value="semua">Semua Gedung</option>
                         @foreach($buildings as $b)
                             <option value="{{ $b }}">{{ $b }}</option>

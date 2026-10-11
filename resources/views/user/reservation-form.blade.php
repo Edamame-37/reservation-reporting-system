@@ -54,7 +54,8 @@
             ];
         }
 
-        $initFacilityId = old('facility_id', $selectedFacilityId ?? ($facilities->first()->id ?? '1'));
+        $draft = $draft ?? [];
+        $initFacilityId = old('facility_id', $draft['facility_id'] ?? ($selectedFacilityId ?? ($facilities->first()->id ?? '1')));
         $initFacility = $facilities->firstWhere('id', $initFacilityId) ?? $facilities->first();
         $initBuilding = $initFacility ? $initFacility->building : (array_key_first($hierarchy) ?? '');
 
@@ -73,9 +74,9 @@
         selectedBuilding: '{{ $initBuilding }}',
         selectedFloor: '{{ $initFloor }}',
         selectedFacilityId: '{{ $initFacilityId }}',
-        selectedDate: '{{ old('reservation_date', date('Y-m-d', strtotime('+1 day'))) }}',
-        selectedStart: '{{ old('start_time', '09:00') }}',
-        selectedEnd: '{{ old('end_time', '11:00') }}',
+        selectedDate: '{{ old('reservation_date', $draft['reservation_date'] ?? date('Y-m-d', strtotime('+1 day'))) }}',
+        selectedStart: '{{ old('start_time', $draft['start_time'] ?? '09:00') }}',
+        selectedEnd: '{{ old('end_time', $draft['end_time'] ?? '11:00') }}',
 
         get availableBuildings() {
             return Object.keys(this.hierarchy);

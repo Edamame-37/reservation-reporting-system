@@ -24,7 +24,8 @@ class PetugasScheduleMatrixController extends Controller
     public function index(Request $request): View
     {
         $selectedDate = $request->query('date', now()->format('Y-m-d'));
-        $selectedBuilding = $request->query('building', 'semua');
+        // Ambil filter gedung dari query string, atau fallback ke preferensi cookie 'cava_pref_building', atau default 'semua'
+        $selectedBuilding = $request->query('building', $request->cookie('cava_pref_building', 'semua'));
 
         // 1. Ambil daftar seluruh gedung unik untuk filter dropdown
         $buildings = Facility::where('status', '!=', 'nonaktif')
