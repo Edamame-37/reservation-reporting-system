@@ -25,7 +25,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Custom soft glass effect */
+        /* Subtle Apple Glassmorphism Header */
         .glass-panel {
             background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(20px);
@@ -39,7 +39,7 @@
     // Halaman Admin Aktif: 'dashboard', 'users', 'facilities', 'exports'
     activePage: 'dashboard',
 
-    // Filter status sivitas di Opsi 1/2/3
+    // Filter status sivitas
     userTab: 'all',
     userSearch: '',
 
@@ -66,10 +66,10 @@
 
     // Data Mock Realistis Fasilitas
     facilities: [
-        { id: 1, code: 'AUD-AC-01', name: 'Auditorium Prof. Soedarto', building: 'Gedung Utama Lt. 1', category: 'Auditorium', capacity: 450, status: 'aktif', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80', equipment: ['Videotron 4K', 'Sound System 10kW', 'AC Central', 'Podium VIP'] },
-        { id: 2, code: 'LAB-KOMP-3', name: 'Laboratorium Rekayasa Perangkat Lunak', building: 'Gedung E FSM Lt. 3', category: 'Laboratorium', capacity: 45, status: 'aktif', image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80', equipment: ['45 PC Workstation', 'Dual Proyektor', 'Gigabit Switch', 'AC Split'] },
-        { id: 3, code: 'R-SEM-204', name: 'Ruang Seminar Sains Terpadu', building: 'Gedung Acintya Prasada Lt. 2', category: 'Seminar', capacity: 90, status: 'maintenance', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80', equipment: ['Smart Screen 85 inch', 'Mic Wireless', 'Kamera Hybrid Zoom'] },
-        { id: 4, code: 'RK-B-101', name: 'Ruang Kuliah Teori B.101', building: 'Gedung Kuliah Bersama Lt. 1', category: 'Ruang Kelas', capacity: 80, status: 'aktif', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80', equipment: ['Proyektor Laser', 'Papan Whiteboard', 'Speaker Dinding'] }
+        { id: 1, code: 'AUD-AC-01', name: 'Auditorium Prof. Soedarto', building: 'Gedung Utama Lantai 1', category: 'Auditorium', capacity: 450, status: 'aktif', equipmentText: 'Videotron 4K, Tata Suara 10kW, Tata Udara Sentral, dan Podium VIP' },
+        { id: 2, code: 'LAB-KOMP-3', name: 'Laboratorium Rekayasa Perangkat Lunak', building: 'Gedung E FSM Lantai 3', category: 'Laboratorium', capacity: 45, status: 'aktif', equipmentText: '45 Unit PC Workstation, Dual Proyektor Laser, dan Jaringan Gigabit' },
+        { id: 3, code: 'R-SEM-204', name: 'Ruang Seminar Sains Terpadu', building: 'Gedung Acintya Prasada Lantai 2', category: 'Ruang Seminar', capacity: 90, status: 'maintenance', equipmentText: 'Layar Cerdas Interaktif 85 Inci, Mikrofon Nirkabel, dan Kamera Hybrid' },
+        { id: 4, code: 'RK-B-101', name: 'Ruang Kuliah Teori B.101', building: 'Gedung Kuliah Bersama Lantai 1', category: 'Ruang Kelas', capacity: 80, status: 'aktif', equipmentText: 'Proyektor HD, Papan Tulis Kaca, dan Pengeras Suara Dinding' }
     ],
 
     // Toast trigger
@@ -82,34 +82,34 @@
 }" class="bg-[#F5F5F7] text-[#1D1D1F] min-h-screen font-sans antialiased selection:bg-[#1D1D1F] selection:text-white">
 
     <!-- ============================================================== -->
-    <!-- 1. FLOATING CONTROL SWITCHER BAR (PERSISTENT PROTOTYPE CONTROLLER) -->
+    <!-- 1. FLOATING CONTROL SWITCHER BAR                               -->
     <!-- ============================================================== -->
     <header class="sticky top-0 z-50 glass-panel border-b border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
             
-            <!-- Brand & Context Tag -->
+            <!-- Brand & Context -->
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-sm">
                     CAVA
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-[#1D1D1F] font-display">Super Admin Portal Design Preview</span>
-                        <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                            1try Prototype
+                        <span class="text-sm font-bold text-[#1D1D1F] font-display">Pratinjau Desain Super Admin</span>
+                        <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-gray-100 text-[#86868B] border border-gray-200">
+                            Prototipe UI/UX
                         </span>
                     </div>
-                    <p class="text-[11px] text-[#86868B] hidden sm:block">Uji coba langsung 3 arah desain tanpa AI slop sebelum diaplikasikan ke kode Laravel.</p>
+                    <p class="text-[11px] text-[#86868B] hidden sm:block">Perbandingan 3 pendekatan desain tata kelola kampus tanpa AI slop.</p>
                 </div>
             </div>
 
             <!-- 3-Design Options Switcher -->
-            <div class="flex items-center gap-2 bg-[#E5E5EA]/70 p-1 rounded-2xl border border-gray-200/50">
+            <div class="flex items-center gap-1.5 bg-[#E5E5EA]/70 p-1 rounded-2xl border border-gray-200/50">
                 <button type="button" 
                         @click="option = 1" 
                         :class="option === 1 ? 'bg-white text-[#1D1D1F] shadow-sm font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'"
                         class="px-3.5 py-1.5 rounded-xl text-xs transition duration-200 flex items-center gap-1.5 cursor-pointer">
-                    <span class="w-2 h-2 rounded-full" :class="option === 1 ? 'bg-blue-600' : 'bg-transparent'"></span>
+                    <span class="w-2 h-2 rounded-full" :class="option === 1 ? 'bg-[#1D1D1F]' : 'bg-transparent'"></span>
                     <span>Opsi 1: Apple Bento</span>
                 </button>
                 <button type="button" 
@@ -129,140 +129,119 @@
             </div>
         </div>
 
-        <!-- Sub-Navigation Tab Admin Pages -->
+        <!-- Sub-Navigation Tab Modul Admin -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-1 pb-2 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-gray-100">
-            <span class="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider mr-2 shrink-0">Modul Admin:</span>
+            <span class="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider mr-2 shrink-0">Modul:</span>
             
             <button type="button" @click="activePage = 'dashboard'" 
                     :class="activePage === 'dashboard' ? 'bg-[#1D1D1F] text-white' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100'"
-                    class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap">
-                1. Dasbor Eksekutif
+                    class="px-3.5 py-1 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">
+                Dasbor Eksekutif
             </button>
             <button type="button" @click="activePage = 'users'" 
                     :class="activePage === 'users' ? 'bg-[#1D1D1F] text-white' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100'"
-                    class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap">
-                2. Manajemen Pengguna (UR15)
+                    class="px-3.5 py-1 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">
+                Manajemen Sivitas
             </button>
             <button type="button" @click="activePage = 'facilities'" 
                     :class="activePage === 'facilities' ? 'bg-[#1D1D1F] text-white' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100'"
-                    class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap">
-                3. Master Fasilitas (UR16)
+                    class="px-3.5 py-1 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">
+                Master Fasilitas
             </button>
             <button type="button" @click="activePage = 'exports'" 
                     :class="activePage === 'exports' ? 'bg-[#1D1D1F] text-white' : 'text-[#86868B] hover:text-[#1D1D1F] hover:bg-gray-100'"
-                    class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap">
-                4. Rekapitulasi & Ekspor (UR17)
+                    class="px-3.5 py-1 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">
+                Rekapitulasi & Ekspor
             </button>
         </div>
     </header>
 
 
     <!-- ============================================================== -->
-    <!-- 2. DESIGN PHILOSOPHY CALLOUT CARD (EXPLANATION PILL)           -->
-    <!-- ============================================================== -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        <div class="p-4 rounded-2xl bg-white border border-gray-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                     :class="option === 1 ? 'bg-blue-50 text-blue-600' : (option === 2 ? 'bg-zinc-100 text-zinc-900' : 'bg-purple-50 text-purple-600')">
-                    <span class="material-symbols-outlined text-[20px]" 
-                          x-text="option === 1 ? 'view_quilt' : (option === 2 ? 'table_chart' : 'auto_awesome')"></span>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-[#1D1D1F]" 
-                        x-text="option === 1 ? 'Opsi 1: Executive Bento & Minimalist Precision (Apple-esque Enterprise)' : (option === 2 ? 'Opsi 2: High-Density Monolithic Data Hub (Linear / Vercel Pro Style)' : 'Opsi 3: Executive Glassmorphism & Visual Campus Dashboard (Stripe / macOS Sonoma Style)')"></h3>
-                    <p class="text-xs text-[#86868B]"
-                       x-text="option === 1 ? 'Tata letak berjarak luas, bento kartu rounded-[2rem], search bar dengan aura glow halus, bebas ikon kotak warna-warni sempit.' : (option === 2 ? 'Mengutamakan kecepatan eksekusi data bervolume tinggi, tipografi tabular-nums, status dot monokrom presisi, dan quick inline actions.' : 'Kartu visual fasilitas dengan preview ruangan, floating elevations berbayang halus, badge filter dinamis, dan representasi okupansi interaktif.')"></p>
-                </div>
-            </div>
-            <span class="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider bg-gray-100 px-3 py-1 rounded-full shrink-0">
-                Anti AI Slop Certified
-            </span>
-        </div>
-    </div>
-
-
-    <!-- ============================================================== -->
-    <!-- 3. MAIN WORKSPACE CONTENT CONTAINER                            -->
+    <!-- 2. MAIN WORKSPACE CONTENT CONTAINER                            -->
     <!-- ============================================================== -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
         <!-- ========================================================== -->
-        <!-- OPSI 1: APPLE BENTO & MINIMALIST PRECISION                 -->
+        <!-- OPSI 1: APPLE BENTO & MINIMALIST PRECISION (REDESIGNED)    -->
         <!-- ========================================================== -->
-        <div x-show="option === 1" x-transition.opacity.duration.200ms class="space-y-8">
+        <div x-show="option === 1" x-transition.opacity.duration.200ms class="space-y-10">
 
             <!-- 1.A. SUB-HALAMAN: DASBOR EKSEKUTIF (OPSI 1) -->
-            <div x-show="activePage === 'dashboard'" class="space-y-8">
+            <div x-show="activePage === 'dashboard'" class="space-y-10">
                 
-                <!-- Welcome & Subtitle -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <!-- Welcome & Subtitle: Tenang, Lapang, & Elegan -->
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Biro Sarana Prasarana & TIK</span>
-                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1D1D1F] mt-1 font-display">Dasbor Eksekutif Kampus</h1>
-                        <p class="text-sm text-[#86868B] mt-1">Monitoring real-time permohonan sivitas, ketersediaan ruang kuliah, dan stabilitas aset sarpras.</p>
+                        <span class="text-xs font-medium uppercase tracking-wider text-[#86868B] block">Biro Sarana Prasarana & TIK Universitas</span>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-1 font-display">Dasbor Eksekutif</h1>
+                        <p class="text-sm text-[#86868B] mt-1.5 max-w-2xl leading-relaxed">Pemantauan sentral aktivitas peminjaman ruang, validasi sivitas akademik, dan ketersediaan sarana kampus.</p>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 shrink-0">
                         <button type="button" @click="activePage = 'users'" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition shadow-sm cursor-pointer">
-                            Tinjau Antrean Akun
+                            Tinjau Pendaftar Baru
                         </button>
                     </div>
                 </div>
 
-                <!-- Bento Grid Baris Atas: 4 Kartu Metrik Apple-esque -->
+                <!-- Bento Grid Baris Atas: 4 Kartu Metrik Apple Bersih & Bernapas Lega -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
-                        <span class="text-xs text-[#86868B] font-medium block">Antrean Akun Pending</span>
-                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-2 block">2</span>
-                        <span class="text-[11px] text-amber-800 mt-2 block font-medium">+2 pendaftar hari ini (UR15)</span>
+                    <!-- Kartu 1: Total Sivitas -->
+                    <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
+                        <span class="text-xs text-[#86868B] font-medium block">Total Sivitas Terdaftar</span>
+                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">1.428</span>
+                        <span class="text-[11px] text-[#86868B] mt-3 block">Mahasiswa, dosen, dan staf aktif</span>
                     </div>
-                    <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
-                        <span class="text-xs text-[#86868B] font-medium block">Master Fasilitas Aktif</span>
-                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-2 block">4</span>
-                        <span class="text-[11px] text-[#86868B] mt-2 block">3 aktif • 1 pemeliharaan</span>
+
+                    <!-- Kartu 2: Antrean Verifikasi -->
+                    <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
+                        <span class="text-xs text-[#86868B] font-medium block">Antrean Verifikasi</span>
+                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">2</span>
+                        <span class="text-[11px] text-[#86868B] mt-3 block">Menunggu otorisasi akun baru</span>
                     </div>
-                    <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
+
+                    <!-- Kartu 3: Total Fasilitas -->
+                    <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
+                        <span class="text-xs text-[#86868B] font-medium block">Master Fasilitas Kampus</span>
+                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">24</span>
+                        <span class="text-[11px] text-[#86868B] mt-3 block">21 siap digunakan • 3 pemeliharaan</span>
+                    </div>
+
+                    <!-- Kartu 4: Okupansi -->
+                    <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
                         <span class="text-xs text-[#86868B] font-medium block">Tingkat Okupansi Ruang</span>
-                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-2 block">78%</span>
-                        <span class="text-[11px] text-emerald-800 mt-2 block font-medium">Penggunaan sangat optimal</span>
-                    </div>
-                    <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
-                        <span class="text-xs text-[#86868B] font-medium block">Tiket Kerusakan Terbuka</span>
-                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-2 block">1</span>
-                        <span class="text-[11px] text-[#86868B] mt-2 block">SLA tindak lanjut 94%</span>
+                        <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">78%</span>
+                        <span class="text-[11px] text-[#86868B] mt-3 block">Rata-rata utilisasi bulan berjalan</span>
                     </div>
                 </div>
 
-                <!-- Bento Row 2: Antrean Cepat & Status Ruang Populer -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Bento Row 2: Antrean Pendaftar Cepat & Ringkasan Ketersediaan Gedung -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
                     
-                    <!-- Kolom Kiri: Antrean Verifikasi Akun Cepat -->
-                    <div class="lg:col-span-7 bg-white rounded-[2rem] p-6 sm:p-7 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+                    <!-- Kolom Kiri: Antrean Pendaftar Baru (List Bersih Tanpa Border Ramai) -->
+                    <div class="lg:col-span-7 bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                        <div class="flex items-center justify-between pb-5 mb-5 border-b border-gray-100">
                             <div>
-                                <h3 class="text-base font-bold text-[#1D1D1F]">Verifikasi Registrasi Mandiri Terbaru</h3>
-                                <p class="text-xs text-[#86868B] mt-0.5">Pemohon baru yang membutuhkan validasi identitas kampus.</p>
+                                <h3 class="text-base font-bold text-[#1D1D1F]">Pendaftar Mandiri Menunggu Otorisasi</h3>
+                                <p class="text-xs text-[#86868B] mt-0.5">Verifikasi identitas akademik sivitas sebelum dapat mengajukan reservasi.</p>
                             </div>
                             <button type="button" @click="activePage = 'users'" class="text-xs font-semibold text-[#1D1D1F] hover:underline cursor-pointer">
-                                Lihat Semua &rarr;
+                                Buka Seluruh Direktori &rarr;
                             </button>
                         </div>
 
                         <div class="space-y-3">
                             <template x-for="user in users.filter(u => u.status === 'pending')" :key="user.id">
-                                <div class="p-4 rounded-2xl bg-[#FBFBFD] border border-gray-100 flex items-center justify-between gap-4 hover:border-gray-200 transition">
+                                <div class="py-4 px-5 rounded-2xl bg-[#FBFBFD] border border-gray-100/80 flex items-center justify-between gap-4 hover:border-gray-200 transition">
                                     <div class="min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-sm font-bold text-[#1D1D1F] truncate" x-text="user.name"></span>
-                                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-[#86868B]" x-text="user.role"></span>
-                                        </div>
-                                        <p class="text-xs text-[#86868B] mt-0.5" x-text="user.nim + ' • ' + user.dept"></p>
+                                        <div class="text-sm font-bold text-[#1D1D1F]" x-text="user.name"></div>
+                                        <div class="text-xs text-[#86868B] mt-0.5" x-text="user.role + ' • ' + user.dept + ' • ' + user.nim"></div>
                                     </div>
                                     <div class="flex items-center gap-2 shrink-0">
-                                        <button type="button" @click="triggerToast('Akun ' + user.name + ' berhasil disetujui')" class="px-3 py-1.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
+                                        <button type="button" @click="triggerToast('Akun ' + user.name + ' telah berhasil diotorisasi')" class="px-4 py-2 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
                                             Setujui
                                         </button>
-                                        <button type="button" @click="triggerToast('Permohonan ' + user.name + ' ditolak')" class="px-3 py-1.5 rounded-xl bg-gray-100 text-rose-700 text-xs font-medium hover:bg-rose-50 transition cursor-pointer">
+                                        <button type="button" @click="triggerToast('Permohonan ' + user.name + ' ditolak')" class="px-3 py-2 text-xs font-medium text-[#86868B] hover:text-rose-600 transition cursor-pointer">
                                             Tolak
                                         </button>
                                     </div>
@@ -271,39 +250,36 @@
                         </div>
                     </div>
 
-                    <!-- Kolom Kanan: Utilisasi Gedung & Ketersediaan -->
-                    <div class="lg:col-span-5 bg-white rounded-[2rem] p-6 sm:p-7 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                        <div class="pb-4 mb-4 border-gray-100 border-b">
-                            <h3 class="text-base font-bold text-[#1D1D1F]">Utilisasi Fasilitas Kampus</h3>
-                            <p class="text-xs text-[#86868B] mt-0.5">Ringkasan okupansi per zona gedung bulan ini.</p>
+                    <!-- Kolom Kanan: Status Kesiapan Fasilitas (Bebas Progress Bar Dempet) -->
+                    <div class="lg:col-span-5 bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                        <div class="pb-5 mb-5 border-b border-gray-100">
+                            <h3 class="text-base font-bold text-[#1D1D1F]">Kesiapan Operasional Fasilitas</h3>
+                            <p class="text-xs text-[#86868B] mt-0.5">Status inventaris ruang berdasarkan kluster kampus.</p>
                         </div>
+
                         <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-xs font-medium mb-1.5">
-                                    <span class="text-[#1D1D1F]">Gedung Prof. Soedarto (Auditorium)</span>
-                                    <span class="text-[#86868B]">92% Penuh</span>
+                            <div class="py-2.5 flex items-center justify-between border-b border-gray-50">
+                                <div>
+                                    <span class="text-sm font-semibold text-[#1D1D1F] block">Auditorium & Ruang Serbaguna</span>
+                                    <span class="text-xs text-[#86868B]">Kapasitas besar 300 - 500 kursi</span>
                                 </div>
-                                <div class="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
-                                    <div class="h-full rounded-full bg-[#1D1D1F]" style="width: 92%"></div>
-                                </div>
+                                <span class="text-xs font-medium text-[#1D1D1F] text-right">4 Siap Digunakan</span>
                             </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-medium mb-1.5">
-                                    <span class="text-[#1D1D1F]">Gedung Laboratorium Komputer</span>
-                                    <span class="text-[#86868B]">74% Penuh</span>
+
+                            <div class="py-2.5 flex items-center justify-between border-b border-gray-50">
+                                <div>
+                                    <span class="text-sm font-semibold text-[#1D1D1F] block">Laboratorium Komputer & Riset</span>
+                                    <span class="text-xs text-[#86868B]">Dilengkapi workstation & jaringan</span>
                                 </div>
-                                <div class="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
-                                    <div class="h-full rounded-full bg-[#1D1D1F]" style="width: 74%"></div>
-                                </div>
+                                <span class="text-xs font-medium text-[#1D1D1F] text-right">8 Siap Digunakan</span>
                             </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-medium mb-1.5">
-                                    <span class="text-[#1D1D1F]">Gedung Kuliah Bersama (GKB)</span>
-                                    <span class="text-[#86868B]">68% Penuh</span>
+
+                            <div class="py-2.5 flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm font-semibold text-[#1D1D1F] block">Ruang Kuliah Teori & Seminar</span>
+                                    <span class="text-xs text-[#86868B]">Kelas kuliah reguler & ujian</span>
                                 </div>
-                                <div class="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
-                                    <div class="h-full rounded-full bg-[#1D1D1F]" style="width: 68%"></div>
-                                </div>
+                                <span class="text-xs font-medium text-[#1D1D1F] text-right">12 Siap Digunakan</span>
                             </div>
                         </div>
                     </div>
@@ -312,91 +288,91 @@
             </div>
 
             <!-- 1.B. SUB-HALAMAN: MANAJEMEN PENGGUNA (OPSI 1) -->
-            <div x-show="activePage === 'users'" class="space-y-6">
+            <div x-show="activePage === 'users'" class="space-y-8">
                 
                 <!-- Header & Action Button -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Manajemen & Otorisasi Sivitas Kampus</h1>
-                        <p class="text-sm text-[#86868B] mt-1">Kelola verifikasi pendaftar mandiri (UR15), hak akses, dan direktori sivitas akademik.</p>
+                        <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Manajemen Sivitas</h1>
+                        <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Direktori seluruh civitas akademika, verifikasi pendaftar mandiri, dan penugasan peran sistem.</p>
                     </div>
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-3">
                         <button type="button" @click="showUserModal = true" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition shadow-sm cursor-pointer flex items-center gap-2">
                             <span class="material-symbols-outlined text-[18px]">add</span>
-                            <span>Tambah Sivitas / Petugas</span>
+                            <span>Tambah Akun Baru</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Search Bar Apple Catalog Style (Aura Glow) -->
+                <!-- Search Bar Desain Katalog Publik (Aura Glow Halus) -->
                 <div class="space-y-3">
                     <div class="relative group">
                         <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                         <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                             <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
-                            <input type="text" x-model="userSearch" placeholder="Cari nama sivitas, NIM/NIP, email, atau jurusan..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-sm md:text-base bg-transparent text-[#1D1D1F] placeholder:text-[#86868B]" autocomplete="off">
+                            <input type="text" x-model="userSearch" placeholder="Cari nama sivitas, NIM/NIP, alamat email, atau jurusan..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-sm md:text-base bg-transparent text-[#1D1D1F] placeholder:text-[#86868B]" autocomplete="off">
                             <button type="button" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition cursor-pointer">Cari</button>
                         </div>
                     </div>
 
-                    <!-- Category / Status Filter Chips (Subtle Pure Typographic) -->
-                    <div class="flex items-center gap-2 pt-1 flex-wrap">
-                        <button type="button" @click="userTab = 'all'" :class="userTab === 'all' ? 'bg-[#1D1D1F] text-white' : 'bg-white text-[#86868B] hover:text-[#1D1D1F] border border-gray-200'" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
+                    <!-- Underline Tabs Filter Kategori (Bebas Kotak Warna-Warni) -->
+                    <div class="flex items-center gap-8 text-sm font-medium overflow-x-auto no-scrollbar pt-2 border-b border-gray-100">
+                        <button type="button" @click="userTab = 'all'" :class="userTab === 'all' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
                             Semua Sivitas (6)
                         </button>
-                        <button type="button" @click="userTab = 'pending'" :class="userTab === 'pending' ? 'bg-[#1D1D1F] text-white' : 'bg-white text-[#86868B] hover:text-[#1D1D1F] border border-gray-200'" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
-                            Antrean Verifikasi (2)
+                        <button type="button" @click="userTab = 'pending'" :class="userTab === 'pending' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
+                            Menunggu Otorisasi (2)
                         </button>
-                        <button type="button" @click="userTab = 'active'" :class="userTab === 'active' ? 'bg-[#1D1D1F] text-white' : 'bg-white text-[#86868B] hover:text-[#1D1D1F] border border-gray-200'" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
+                        <button type="button" @click="userTab = 'active'" :class="userTab === 'active' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
                             Akun Aktif (3)
                         </button>
-                        <button type="button" @click="userTab = 'suspended'" :class="userTab === 'suspended' ? 'bg-[#1D1D1F] text-white' : 'bg-white text-[#86868B] hover:text-[#1D1D1F] border border-gray-200'" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
-                            Nonaktif (1)
+                        <button type="button" @click="userTab = 'suspended'" :class="userTab === 'suspended' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
+                            Dinonaktifkan (1)
                         </button>
                     </div>
                 </div>
 
-                <!-- Tabel Data Bersih Apple-Style Tanpa Garis Kaku -->
+                <!-- Tabel Data Sivitas: Bersih, Lega, dan Status Tipografis Murni -->
                 <div class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-gray-100 text-xs text-[#86868B] font-medium bg-[#FBFBFD]">
-                                    <th class="py-4 px-6">Identitas Sivitas</th>
-                                    <th class="py-4 px-6">NIM / NIP</th>
-                                    <th class="py-4 px-6">Peran & Departemen</th>
-                                    <th class="py-4 px-6">Status Akun</th>
-                                    <th class="py-4 px-6 text-right">Tindakan</th>
+                                    <th class="py-4.5 px-6">Identitas Sivitas</th>
+                                    <th class="py-4.5 px-6">NIM / NIP</th>
+                                    <th class="py-4.5 px-6">Peran & Departemen</th>
+                                    <th class="py-4.5 px-6">Status Akun</th>
+                                    <th class="py-4.5 px-6 text-right">Tindakan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 <template x-for="user in users.filter(u => userTab === 'all' || u.status === userTab)" :key="user.id">
-                                    <tr class="hover:bg-gray-50/60 transition group">
-                                        <td class="py-4 px-6">
+                                    <tr class="hover:bg-[#FBFBFD] transition group">
+                                        <td class="py-5 px-6">
                                             <div class="font-bold text-[#1D1D1F]" x-text="user.name"></div>
-                                            <div class="text-xs text-[#86868B]" x-text="user.email"></div>
+                                            <div class="text-xs text-[#86868B] mt-0.5" x-text="user.email"></div>
                                         </td>
-                                        <td class="py-4 px-6 font-mono text-xs text-[#1D1D1F]" x-text="user.nim"></td>
-                                        <td class="py-4 px-6">
+                                        <td class="py-5 px-6 font-mono text-xs text-[#1D1D1F]" x-text="user.nim"></td>
+                                        <td class="py-5 px-6">
                                             <div class="font-medium text-[#1D1D1F]" x-text="user.role"></div>
-                                            <div class="text-xs text-[#86868B]" x-text="user.dept"></div>
+                                            <div class="text-xs text-[#86868B] mt-0.5" x-text="user.dept"></div>
                                         </td>
-                                        <td class="py-4 px-6">
-                                            <!-- Status Opsi B: Pure Typographic -->
-                                            <span class="text-xs font-semibold"
+                                        <td class="py-5 px-6">
+                                            <!-- Status Opsi B: Pure Typographic Murni -->
+                                            <span class="text-xs font-semibold block"
                                                   :class="user.status === 'active' ? 'text-emerald-800' : (user.status === 'pending' ? 'text-amber-800' : 'text-rose-800')"
                                                   x-text="user.status === 'active' ? 'Aktif' : (user.status === 'pending' ? 'Menunggu Otorisasi' : 'Dinonaktifkan')">
                                             </span>
                                         </td>
-                                        <td class="py-4 px-6 text-right">
-                                            <div class="flex items-center justify-end gap-2">
+                                        <td class="py-5 px-6 text-right">
+                                            <div class="flex items-center justify-end gap-3">
                                                 <template x-if="user.status === 'pending'">
-                                                    <button type="button" @click="triggerToast('Akun ' + user.name + ' berhasil diverifikasi')" class="px-3 py-1.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
+                                                    <button type="button" @click="triggerToast('Akun ' + user.name + ' berhasil disetujui')" class="px-3.5 py-1.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
                                                         Verifikasi
                                                     </button>
                                                 </template>
-                                                <button type="button" @click="selectedUser = user; showUserModal = true" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1D1D1F] text-xs font-medium transition cursor-pointer">
-                                                    Detail
+                                                <button type="button" @click="selectedUser = user; showUserModal = true" class="text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition cursor-pointer">
+                                                    Lihat Detail
                                                 </button>
                                             </div>
                                         </td>
@@ -410,54 +386,52 @@
             </div>
 
             <!-- 1.C. SUB-HALAMAN: MASTER FASILITAS (OPSI 1) -->
-            <div x-show="activePage === 'facilities'" class="space-y-6">
+            <div x-show="activePage === 'facilities'" class="space-y-8">
                 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Master Data Inventaris Fasilitas Kampus</h1>
-                        <p class="text-sm text-[#86868B] mt-1">Kelola direktori ruang, spesifikasi kapasitas, fasilitas kelengkapan, dan status operasional.</p>
+                        <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Master Fasilitas Kampus</h1>
+                        <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Inventaris ruangan, daya tampung peserta, dan kontrol ketersediaan sarana prasarana.</p>
                     </div>
                     <button type="button" @click="selectedFacility = null; showFacilityModal = true" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition shadow-sm cursor-pointer flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span>Tambah Fasilitas Baru (UR16)</span>
+                        <span>Tambah Ruang Baru</span>
                     </button>
                 </div>
 
-                <!-- Catalog Grid Style Fasilitas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Bento Cards Fasilitas: Elegan, Bersih, Tanpa Pill Warna-Warni Berisik -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                     <template x-for="f in facilities" :key="f.id">
-                        <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:border-gray-300 transition">
+                        <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between hover:border-gray-300 transition">
                             <div>
-                                <div class="flex items-start justify-between gap-4 pb-3 mb-3 border-b border-gray-100">
+                                <div class="flex items-start justify-between gap-4 pb-4 mb-4 border-b border-gray-100">
                                     <div>
                                         <span class="text-xs font-mono text-[#86868B]" x-text="f.code"></span>
-                                        <h3 class="text-lg font-bold text-[#1D1D1F] mt-0.5" x-text="f.name"></h3>
-                                        <p class="text-xs text-[#86868B] mt-0.5" x-text="f.building"></p>
+                                        <h3 class="text-xl font-bold text-[#1D1D1F] mt-1" x-text="f.name"></h3>
+                                        <p class="text-xs text-[#86868B] mt-1" x-text="f.building"></p>
                                     </div>
-                                    <span class="text-xs font-semibold"
+                                    <span class="text-xs font-semibold shrink-0"
                                           :class="f.status === 'aktif' ? 'text-emerald-800' : 'text-amber-800'"
-                                          x-text="f.status === 'aktif' ? 'Siap Digunakan' : 'Dalam Pemeliharaan'">
+                                          x-text="f.status === 'aktif' ? 'Tersedia' : 'Pemeliharaan'">
                                     </span>
                                 </div>
 
-                                <div class="flex items-center gap-4 text-xs text-[#86868B] my-3">
-                                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">groups</span> <strong class="text-[#1D1D1F]" x-text="f.capacity + ' Kursi'"></strong></span>
-                                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">category</span> <span x-text="f.category"></span></span>
-                                </div>
-
-                                <div class="flex flex-wrap gap-1.5 my-3">
-                                    <template x-for="eq in f.equipment" :key="eq">
-                                        <span class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-[#F5F5F7] text-[#1D1D1F]" x-text="eq"></span>
-                                    </template>
+                                <div class="space-y-2 text-xs text-[#86868B] my-4 leading-relaxed">
+                                    <div>
+                                        <strong class="text-[#1D1D1F]">Kapasitas:</strong> <span x-text="f.capacity + ' Kursi'"></span> • <strong class="text-[#1D1D1F]">Kategori:</strong> <span x-text="f.category"></span>
+                                    </div>
+                                    <div>
+                                        <strong class="text-[#1D1D1F]">Kelengkapan:</strong> <span x-text="f.equipmentText"></span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="pt-4 mt-2 border-t border-gray-100 flex items-center justify-between gap-3">
-                                <button type="button" @click="f.status = f.status === 'aktif' ? 'maintenance' : 'aktif'; triggerToast('Status ' + f.name + ' diperbarui')" class="text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition cursor-pointer">
-                                    <span x-text="f.status === 'aktif' ? 'Kunci untuk Pemeliharaan' : 'Buka Kunci Operasional'"></span>
+                            <div class="pt-5 mt-3 border-t border-gray-100 flex items-center justify-between gap-4">
+                                <button type="button" @click="f.status = f.status === 'aktif' ? 'maintenance' : 'aktif'; triggerToast('Status operasional ' + f.name + ' diperbarui')" class="text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition cursor-pointer">
+                                    <span x-text="f.status === 'aktif' ? 'Kunci untuk Pemeliharaan' : 'Buka Akses Reservasi'"></span>
                                 </button>
                                 <button type="button" @click="selectedFacility = f; showFacilityModal = true" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#1D1D1F] text-xs font-medium transition cursor-pointer">
-                                    Ubah Data
+                                    Sunting Data
                                 </button>
                             </div>
                         </div>
@@ -467,40 +441,39 @@
             </div>
 
             <!-- 1.D. SUB-HALAMAN: EKSPOR & LAPORAN (OPSI 1) -->
-            <div x-show="activePage === 'exports'" class="space-y-6">
+            <div x-show="activePage === 'exports'" class="space-y-8">
                 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Rekapitulasi Okupansi & Laporan Kerusakan</h1>
-                        <p class="text-sm text-[#86868B] mt-1">Ekspor laporan resmi berkala untuk keperluan akreditasi dan evaluasi pimpinan (UR17).</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" @click="triggerToast('Menyiapkan berkas Excel CSV...')" class="bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50 px-4 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2 cursor-pointer shadow-xs">
-                            <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
-                            <span>Unduh Excel / CSV</span>
-                        </button>
-                        <button type="button" @click="triggerToast('Mencetak dokumen resmi PDF dengan kop universitas...')" class="bg-[#1D1D1F] text-white hover:bg-black px-4 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2 cursor-pointer shadow-xs">
-                            <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                            <span>Cetak PDF Resmi</span>
-                        </button>
+                        <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Rekapitulasi & Ekspor Laporan</h1>
+                        <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Unduh data rekapitulasi okupansi fasilitas dan insiden pemeliharaan dalam format spreadsheet resmi.</p>
                     </div>
                 </div>
 
-                <!-- Rentang Tanggal Filter Box -->
-                <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                    <h3 class="text-sm font-bold text-[#1D1D1F] mb-3">Filter Rentang Waktu Rekapitulasi</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <!-- Rentang Tanggal Filter Box Bergaya Bento Apple -->
+                <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                    <h3 class="text-base font-bold text-[#1D1D1F] mb-1">Periode Waktu Laporan</h3>
+                    <p class="text-xs text-[#86868B] mb-6">Tentukan rentang tanggal untuk kompilasi data peminjaman ruangan dan catatan kerusakan.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         <div>
-                            <label class="block text-xs font-medium text-[#86868B] mb-1">Tanggal Mulai</label>
+                            <label class="block text-xs font-medium text-[#86868B] mb-1.5">Tanggal Mulai</label>
                             <input type="date" value="2026-10-01" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-[#86868B] mb-1">Tanggal Selesai</label>
+                            <label class="block text-xs font-medium text-[#86868B] mb-1.5">Tanggal Selesai</label>
                             <input type="date" value="2026-10-31" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div>
-                            <button type="button" @click="triggerToast('Data filter periode diperbarui')" class="w-full bg-[#1D1D1F] text-white py-2.5 rounded-xl text-sm font-medium hover:bg-black transition cursor-pointer">
-                                Terapkan Periode
+                            <button type="button" @click="triggerToast('Menyiapkan berkas Excel CSV...')" class="w-full bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50 py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">table_view</span>
+                                <span>Unduh Excel / CSV</span>
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" @click="triggerToast('Mencetak dokumen resmi PDF dengan kop universitas...')" class="w-full bg-[#1D1D1F] text-white hover:bg-black py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                                <span>Cetak PDF Resmi</span>
                             </button>
                         </div>
                     </div>
@@ -535,8 +508,6 @@
 
             <!-- 2.A. DASBOR EKSEKUTIF (OPSI 2) -->
             <div x-show="activePage === 'dashboard'" class="space-y-6">
-                
-                <!-- KPI Linear Metric Tiles (High Contrast Mono) -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
                     <div class="bg-white p-4 rounded-xl border border-zinc-200 hover:border-zinc-400 transition">
                         <div class="text-[11px] text-zinc-500 uppercase tracking-wider">QUEUE.VERIFICATION</div>
@@ -560,7 +531,6 @@
                     </div>
                 </div>
 
-                <!-- Table Dense Linear Style -->
                 <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden font-sans">
                     <div class="p-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
                         <span class="text-xs font-bold text-zinc-800 font-mono uppercase tracking-wider">Incoming Account Verification Queue</span>
@@ -598,7 +568,6 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
 
             <!-- 2.B. MANAJEMEN PENGGUNA (OPSI 2) -->
@@ -610,7 +579,6 @@
                     </button>
                 </div>
 
-                <!-- Linear Dense Table -->
                 <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden text-xs">
                     <table class="w-full text-left">
                         <thead class="border-b border-zinc-200 bg-zinc-50 font-mono text-zinc-500 uppercase text-[11px]">
@@ -727,19 +695,15 @@
 
             <!-- 3.A. DASBOR EKSEKUTIF (OPSI 3) -->
             <div x-show="activePage === 'dashboard'" class="space-y-8">
-                
-                <!-- Hero Banner Glassmorphic -->
                 <div class="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl">
                     <div class="relative z-10 max-w-2xl">
                         <span class="text-xs font-bold tracking-widest uppercase text-blue-300">Executive Overview</span>
                         <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 font-display">Pusat Kendali Sumber Daya Kampus</h1>
                         <p class="text-sm text-blue-100/80 mt-2">Visualisasi dinamis seluruh pergerakan reservasi sivitas dan pengelolaan aset ruang secara komprehensif.</p>
                     </div>
-                    <!-- Decorative Blur Orb -->
                     <div class="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
                 </div>
 
-                <!-- 4 Stat Cards Glass Elevation -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-md transition">
                         <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
@@ -774,7 +738,6 @@
                         <div class="text-xs text-slate-500 mt-2">SLA 94%</div>
                     </div>
                 </div>
-
             </div>
 
             <!-- 3.B. MANAJEMEN PENGGUNA (OPSI 3) -->
@@ -826,12 +789,11 @@
                     </button>
                 </div>
 
-                <!-- Visual Image Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <template x-for="f in facilities" :key="f.id">
                         <div class="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 group">
                             <div class="relative h-44 w-full overflow-hidden bg-slate-100">
-                                <img :src="f.image" :alt="f.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80" :alt="f.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 <div class="absolute top-3 right-3">
                                     <span class="px-3 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-xs"
                                           :class="f.status === 'aktif' ? 'bg-emerald-900/80 text-white' : 'bg-amber-900/80 text-white'"
@@ -886,31 +848,31 @@
 
 
     <!-- ============================================================== -->
-    <!-- 4. INTERACTIVE MODAL DIALOGS (PREVIEW)                        -->
+    <!-- 3. INTERACTIVE MODAL DIALOGS                                   -->
     <!-- ============================================================== -->
 
     <!-- Modal Tambah / Detail Pengguna -->
     <div x-show="showUserModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showUserModal = false"></div>
-        <div class="relative w-full max-w-md bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100 z-10">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
-                <h3 class="text-base font-bold text-[#1D1D1F]" x-text="selectedUser ? 'Detail Sivitas Kampus' : 'Tambah Akun Sivitas / Petugas'"></h3>
+        <div class="relative w-full max-w-md bg-white rounded-[2rem] p-7 sm:p-8 shadow-2xl border border-gray-100 z-10">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-gray-100">
+                <h3 class="text-base font-bold text-[#1D1D1F]" x-text="selectedUser ? 'Detail Data Sivitas' : 'Tambah Akun Baru'"></h3>
                 <button type="button" @click="showUserModal = false" class="text-gray-400 hover:text-[#1D1D1F]">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
             </div>
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-medium text-[#86868B] mb-1">Nama Lengkap</label>
-                    <input type="text" :value="selectedUser ? selectedUser.name : ''" placeholder="Nama lengkap..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none">
+                    <label class="block font-medium text-[#86868B] mb-1.5">Nama Lengkap</label>
+                    <input type="text" :value="selectedUser ? selectedUser.name : ''" placeholder="Nama lengkap sivitas..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
                 <div>
-                    <label class="block font-medium text-[#86868B] mb-1">NIM / NIP</label>
-                    <input type="text" :value="selectedUser ? selectedUser.nim : ''" placeholder="NIM mahasiswa atau NIP pegawai..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none font-mono">
+                    <label class="block font-medium text-[#86868B] mb-1.5">NIM / NIP</label>
+                    <input type="text" :value="selectedUser ? selectedUser.nim : ''" placeholder="Nomor induk mahasiswa atau pegawai..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono">
                 </div>
                 <div>
-                    <label class="block font-medium text-[#86868B] mb-1">Peran Akun</label>
-                    <select class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none">
+                    <label class="block font-medium text-[#86868B] mb-1.5">Peran Sivitas</label>
+                    <select class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         <option>Mahasiswa</option>
                         <option>Dosen</option>
                         <option>Tendik</option>
@@ -918,9 +880,9 @@
                     </select>
                 </div>
             </div>
-            <div class="pt-4 mt-6 border-t border-gray-100 flex items-center justify-end gap-2">
+            <div class="pt-5 mt-6 border-t border-gray-100 flex items-center justify-end gap-3">
                 <button type="button" @click="showUserModal = false" class="px-4 py-2 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F]">Batal</button>
-                <button type="button" @click="showUserModal = false; triggerToast('Data pengguna berhasil disimpan')" class="px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition">Simpan Akun</button>
+                <button type="button" @click="showUserModal = false; triggerToast('Data sivitas berhasil disimpan')" class="px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -928,43 +890,47 @@
     <!-- Modal Tambah / Edit Fasilitas -->
     <div x-show="showFacilityModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showFacilityModal = false"></div>
-        <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100 z-10">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
-                <h3 class="text-base font-bold text-[#1D1D1F]" x-text="selectedFacility ? 'Perbarui Fasilitas: ' + selectedFacility.name : 'Tambah Fasilitas Kampus Baru (UR16)'"></h3>
+        <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-7 sm:p-8 shadow-2xl border border-gray-100 z-10">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-gray-100">
+                <h3 class="text-base font-bold text-[#1D1D1F]" x-text="selectedFacility ? 'Perbarui Fasilitas: ' + selectedFacility.name : 'Tambah Fasilitas Kampus Baru'"></h3>
                 <button type="button" @click="showFacilityModal = false" class="text-gray-400 hover:text-[#1D1D1F]">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
             </div>
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-medium text-[#86868B] mb-1">Nama Fasilitas</label>
-                    <input type="text" :value="selectedFacility ? selectedFacility.name : ''" placeholder="Nama ruangan / gedung..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none">
+                    <label class="block font-medium text-[#86868B] mb-1.5">Nama Fasilitas</label>
+                    <input type="text" :value="selectedFacility ? selectedFacility.name : ''" placeholder="Nama ruangan / gedung..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-medium text-[#86868B] mb-1">Kode Ruang</label>
-                        <input type="text" :value="selectedFacility ? selectedFacility.code : ''" placeholder="AUD-01..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none font-mono">
+                        <label class="block font-medium text-[#86868B] mb-1.5">Kode Ruang</label>
+                        <input type="text" :value="selectedFacility ? selectedFacility.code : ''" placeholder="AUD-01..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono">
                     </div>
                     <div>
-                        <label class="block font-medium text-[#86868B] mb-1">Kapasitas (Kursi)</label>
-                        <input type="number" :value="selectedFacility ? selectedFacility.capacity : 50" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none">
+                        <label class="block font-medium text-[#86868B] mb-1.5">Kapasitas (Kursi)</label>
+                        <input type="number" :value="selectedFacility ? selectedFacility.capacity : 50" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                     </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-[#86868B] mb-1">Gedung & Lokasi Lantai</label>
-                    <input type="text" :value="selectedFacility ? selectedFacility.building : ''" placeholder="Gedung FSM Lt. 2..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none">
+                    <label class="block font-medium text-[#86868B] mb-1.5">Gedung & Lokasi Lantai</label>
+                    <input type="text" :value="selectedFacility ? selectedFacility.building : ''" placeholder="Gedung FSM Lantai 2..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                </div>
+                <div>
+                    <label class="block font-medium text-[#86868B] mb-1.5">Deskripsi Kelengkapan Fasilitas</label>
+                    <input type="text" :value="selectedFacility ? selectedFacility.equipmentText : ''" placeholder="Contoh: Videotron 4K, Tata Suara Sentral, AC..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
             </div>
-            <div class="pt-4 mt-6 border-t border-gray-100 flex items-center justify-end gap-2">
+            <div class="pt-5 mt-6 border-t border-gray-100 flex items-center justify-end gap-3">
                 <button type="button" @click="showFacilityModal = false" class="px-4 py-2 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F]">Batal</button>
-                <button type="button" @click="showFacilityModal = false; triggerToast('Data fasilitas berhasil disimpan')" class="px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition">Simpan Fasilitas</button>
+                <button type="button" @click="showFacilityModal = false; triggerToast('Data fasilitas berhasil disimpan')" class="px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">Simpan Fasilitas</button>
             </div>
         </div>
     </div>
 
 
     <!-- ============================================================== -->
-    <!-- 5. TOAST NOTIFICATION                                         -->
+    <!-- 4. TOAST NOTIFICATION                                         -->
     <!-- ============================================================== -->
     <div x-show="showExportToast" x-cloak
          x-transition:enter="transition ease-out duration-300"
