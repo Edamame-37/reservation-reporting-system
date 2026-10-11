@@ -1,258 +1,174 @@
 {{-- 
   NAMA FILE      : dashboard.blade.php
-  FUNGSIONALITAS : Halaman Dasbor Utama Super Admin CAVA
-  DESKRIPSI      : Menampilkan metrik tata kelola kampus (Verifikasi User Pending, Total Fasilitas, Okupansi Rata-rata, Tiket Kerusakan), antrean verifikasi akun sivitas, ringkasan master fasilitas, dan utilisasi gedung.
-  CARA KERJA     : Memanfaatkan layout <x-admin-layout active="dashboard">, menyajikan monitoring sentral administrasi sistem secara minimalis dan profesional dari AdminDashboardController.
+  FUNGSIONALITAS : Halaman Dasbor Utama Super Admin CAVA (Desain Apple Bento Minimalis)
+  DESKRIPSI      : Menampilkan ringkasan metrik eksekutif tata kelola kampus (Verifikasi User Pending, Total Fasilitas, Okupansi Rata-rata, Tiket Kerusakan), antrean otorisasi sivitas baru, pratinjau master fasilitas, dan utilisasi gedung.
+  CARA KERJA     : Memanfaatkan layout <x-admin-layout active="dashboard">, menyajikan monitoring sentral administrasi sistem yang lapang, elegan, dan bebas dari AI slop.
 --}}
 
 <x-admin-layout title="Dasbor Super Admin" active="dashboard">
-    {{-- Umpan Balik Flash Message & Notifikasi Sistem --}}
-    @if(session('success'))
-    <!-- 
-      ELEMEN       : Banner Notifikasi Sukses
-      KEGUNAAN     : Memberikan umpan balik visual saat aksi otorisasi berhasil dieksekusi.
-      CARA KERJA   : Muncul secara kondisional jika session('success') memiliki pesan.
-    -->
-    <div class="p-4 mb-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 shadow-xs">
-        <span class="material-symbols-outlined text-[18px]">check_circle</span>
-        <span>{{ session('success') }}</span>
-    </div>
-    @endif
+    <div class="space-y-8 sm:space-y-10">
 
-    @if(session('error') || (isset($errors) && $errors->any()))
-    <!-- 
-      ELEMEN       : Banner Peringatan Kesalahan / Validasi
-      KEGUNAAN     : Memberitahukan adanya kendala pada saat eksekusi aksi pengguna.
-      CARA KERJA   : Muncul jika terdapat error pada session atau pesan validasi $errors.
-    -->
-    <div class="p-4 mb-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 shadow-xs">
-        <span class="material-symbols-outlined text-[18px]">error</span>
-        <span>{{ session('error') ?? (isset($errors) ? $errors->first() : '') }}</span>
-    </div>
-    @endif
-
-    <!-- 
-      ELEMEN       : 4 KPI Stat Cards Eksekutif
-      KEGUNAAN     : Menyajikan gambaran umum tata kelola ruang dan pengguna kampus secara real-time.
-      CARA KERJA   : Merender komponen kartu metrik CAVA berdasarkan variabel ringkasan statistik dari AdminDashboardController.
-    -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <x-cava.stat-card 
-            title="Verifikasi Akun Pending"
-            :value="$pendingUsersCount"
-            subtitle="Pendaftar Baru"
-            :tagText="'+' . $pendingUsersToday . ' Hari Ini'"
-            footerText="Verifikasi Petugas < 24 Jam"
-            icon="how_to_reg"
-            variant="tertiary"
-        />
-
-        <x-cava.stat-card 
-            title="Master Fasilitas"
-            :value="$totalFacilities"
-            subtitle="Ruang Terdaftar"
-            :tagText="$activeFacilities . ' Aktif • ' . $maintenanceFacilities . ' Perbaikan'"
-            :footerText="'Kapasitas ' . number_format($totalCapacitySeats) . ' Kursi'"
-            icon="domain"
-            variant="primary"
-        />
-
-        <x-cava.stat-card 
-            title="Tingkat Okupansi"
-            :value="$occupancyRate . '%'"
-            subtitle="Rata-rata Bulan Ini"
-            :tagText="$occupancyRate >= 70 ? 'Sangat Optimal' : ($occupancyRate >= 40 ? 'Cukup Optimal' : 'Perlu Peningkatan')"
-            :footerText="'Status: ' . ($occupancyRate >= 70 ? 'Sangat Optimal' : 'Optimal')"
-            icon="trending_up"
-            variant="secondary"
-        />
-
-        <x-cava.stat-card 
-            title="Tiket Kerusakan"
-            :value="$activeDamageReports"
-            subtitle="Perlu Pemantauan"
-            :tagText="$urgentDamageCount . ' Prioritas Baru'"
-            :footerText="'Terselesaikan Petugas ' . $slaResolutionPercent . '%'"
-            icon="build"
-            variant="error"
-        />
-    </section>
-
-    <!-- 
-      ELEMEN       : Section Antrean Verifikasi Akun Sivitas (Batas 3 Data Preview + Tombol Lihat Semua)
-      KEGUNAAN     : Memungkinkan Super Admin mengevaluasi pendaftar mandiri (UR15) tanpa membuka tabel panjang di dasbor.
-      CARA KERJA   : Melakukan perulangan data pada $pendingUsersPreview dengan tombol otorisasi verifikasi cepat atau navigasi ke manajemen akun.
-    -->
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
-            <div>
-                <h3 class="text-base font-bold text-slate-900">Antrean Verifikasi Akun Sivitas Baru</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Menampilkan {{ $pendingUsersPreview->count() }} dari total {{ $pendingUsersCount }} calon pengguna yang menunggu otorisasi akun (UR15).</p>
-            </div>
-            <!-- 
-              ROUTE: GET /admin/user-management
-              FUNGSI: Mengarahkan ke halaman direktori lengkap manajemen verifikasi seluruh akun sivitas
-            -->
-            <a href="{{ route('admin.user-management') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                <span>Kelola Seluruh Akun Sivitas ({{ $totalUsersCount }} Pengguna)</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </a>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                        <th class="py-3 px-4">Nama Lengkap & Identitas</th>
-                        <th class="py-3 px-4">Peran Dimohon</th>
-                        <th class="py-3 px-4">Program Studi / Lembaga</th>
-                        <th class="py-3 px-4">Status Akun</th>
-                        <th class="py-3 px-4 text-right">Otorisasi Cepat</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($pendingUsersPreview as $user)
-                    <tr class="hover:bg-slate-50/70 transition">
-                        <td class="py-3.5 px-4">
-                            <div class="font-bold text-slate-900">{{ $user->name }}</div>
-                            <div class="text-[11px] text-slate-500 font-mono">ID: {{ $user->identity_number ?? '-' }} • {{ $user->email }}</div>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">{{ ucfirst($user->role ?? 'Sivitas') }}</span>
-                        </td>
-                        <td class="py-3.5 px-4 text-slate-700 font-medium">{{ $user->department ?? '-' }}</td>
-                        <td class="py-3.5 px-4">
-                            <x-cava.status-badge status="pending" label="Pending Verifikasi" />
-                        </td>
-                        <td class="py-3.5 px-4 text-right">
-                            <div class="flex items-center justify-end gap-1.5">
-                                <!-- 
-                                  ROUTE: POST /admin/users/{{ $user->id }}/verify
-                                  FUNGSI: Memverifikasi dan mengaktifkan akun calon pengguna secara langsung
-                                -->
-                                <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Verifikasi dan aktifkan akun {{ addslashes($user->name) }}?')">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition shadow-xs">
-                                        Verifikasi
-                                    </button>
-                                </form>
-
-                                <!-- 
-                                  ROUTE: GET /admin/user-management?search={{ urlencode($user->email) }}
-                                  FUNGSI: Membuka konsol manajemen pengguna untuk proses penolakan berstempel alasan resmi
-                                -->
-                                <a href="{{ route('admin.user-management', ['search' => $user->email]) }}" class="px-2.5 py-1 rounded-xl border border-slate-200 text-rose-700 font-semibold hover:bg-rose-50 transition inline-block">
-                                    Tolak
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="py-8 text-center text-slate-500">
-                            <div class="flex flex-col items-center justify-center gap-1.5">
-                                <span class="material-symbols-outlined text-slate-400 text-[28px]">check_circle</span>
-                                <p class="font-medium text-slate-600 text-xs">Tidak ada antrean verifikasi akun baru saat ini.</p>
-                                <p class="text-[11px] text-slate-400">Seluruh permohonan pendaftaran sivitas telah selesai dievaluasi.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- 
-      ELEMEN       : Section Master Fasilitas & Utilisasi (Batas 3 Data Preview + Tombol Lihat Semua)
-      KEGUNAAN     : Memantau master data ruang dan membuka analitik okupansi per gedung.
-      CARA KERJA   : Merender cuplikan inventaris fasilitas dan grafik persentase okupansi per gedung dari $buildingUtilization.
-    -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {{-- 3 Fasilitas Preview (7 Kolom) --}}
-        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900">Ringkasan Master Fasilitas</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">{{ $facilitiesPreview->count() }} dari {{ $totalFacilities }} ruang terdaftar dalam inventaris universitas.</p>
-                    </div>
-                    <!-- 
-                      ROUTE: GET /admin/facility-master
-                      FUNGSI: Mengarahkan ke halaman pengelolaan seluruh master data fasilitas kampus
-                    -->
-                    <a href="{{ route('admin.facility-master') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-950 hover:text-blue-700 transition">
-                        <span>Kelola Master ({{ $totalFacilities }} Ruang)</span>
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                    </a>
-                </div>
-
-                <div class="space-y-3">
-                    @forelse($facilitiesPreview as $facility)
-                    <div class="p-3 rounded-xl border border-slate-200/70 bg-slate-50/50 flex items-center justify-between">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-slate-900 text-sm">{{ $facility->name }}</span>
-                                <span class="text-[10px] font-mono font-bold bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">{{ $facility->code }}</span>
-                            </div>
-                            <span class="text-xs text-slate-500">{{ $facility->building }} • Kapasitas: {{ $facility->capacity }} {{ strtolower($facility->category ?? '') == 'laboratorium' ? 'PC/Meja' : 'Kursi' }}</span>
-                        </div>
-                        <x-cava.status-badge :status="$facility->status == 'aktif' ? 'active' : 'locked'" :label="ucfirst($facility->status)" />
-                    </div>
-                    @empty
-                    <div class="py-6 text-center text-slate-500">
-                        <p class="text-xs font-medium">Belum ada data fasilitas terdaftar dalam sistem.</p>
-                    </div>
-                    @endforelse
+        {{-- Flash Session Sukses (Soft Apple Tone) --}}
+        @if(session('success'))
+            <div class="p-6 rounded-[2rem] bg-emerald-50/70 border border-emerald-100 text-emerald-900 flex items-center gap-4">
+                <span class="material-symbols-outlined text-emerald-600 text-[24px] shrink-0">check_circle</span>
+                <div>
+                    <h4 class="text-sm font-bold">Aksi Berhasil Dieksekusi</h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">{{ session('success') }}</p>
                 </div>
             </div>
+        @endif
 
-            <div class="mt-4 pt-3 border-t border-slate-100 text-center">
-                <!-- 
-                  ROUTE: GET /admin/facility-master
-                  FUNGSI: Pintasan ke formulir penambahan ruang baru pada katalog master fasilitas
-                -->
-                <a href="{{ route('admin.facility-master') }}" class="text-xs font-semibold text-blue-950 hover:underline">
-                    Buka Master Data & Tambah Ruang Baru (UR16) →
+        {{-- Flash Session Error / Peringatan Validasi --}}
+        @if(session('error') || (isset($errors) && $errors->any()))
+            <div class="p-6 rounded-[2rem] bg-rose-50/70 border border-rose-100 text-rose-900 flex items-start gap-4">
+                <span class="material-symbols-outlined text-rose-600 text-[24px] shrink-0 mt-0.5">error</span>
+                <div class="space-y-1">
+                    <h4 class="text-sm font-bold">Terjadi Kendala pada Tindakan Sistem</h4>
+                    <p class="text-xs text-rose-700">{{ session('error') ?? (isset($errors) ? $errors->first() : '') }}</p>
+                </div>
+            </div>
+        @endif
+
+        {{-- Header Dasbor Eksekutif --}}
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <span class="text-xs font-medium uppercase tracking-wider text-[#86868B] block">Biro Sarana Prasarana & TIK Universitas</span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-1 font-display">Dasbor Eksekutif</h1>
+                <p class="text-sm text-[#86868B] mt-1.5 max-w-2xl leading-relaxed">Pemantauan sentral aktivitas peminjaman ruang, validasi pendaftar sivitas akademik, dan ketersediaan sarana kampus.</p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="{{ route('admin.user-management') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black transition shadow-sm active:scale-[0.98]">
+                    Tinjau Antrean Akun
                 </a>
             </div>
         </div>
 
-        {{-- Mini Analitik Okupansi (5 Kolom) --}}
-        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                    <h3 class="text-base font-bold text-slate-900">Analitik Utilisasi Kampus</h3>
-                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Optimal {{ $occupancyRate }}%</span>
+        {{-- Bento Grid Baris Atas: 4 Kartu Metrik Apple Bersih & Lapang --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {{-- Metrik 1: Antrean Verifikasi --}}
+            <a href="{{ route('admin.user-management', ['search' => '']) }}" 
+               class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition block">
+                <span class="text-xs text-[#86868B] font-medium block">Antrean Akun Pending</span>
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">{{ $pendingUsersCount }}</span>
+                <span class="text-[11px] text-amber-800 font-medium mt-3 block">+{{ $pendingUsersToday }} pendaftar baru hari ini</span>
+            </a>
+
+            {{-- Metrik 2: Master Fasilitas --}}
+            <a href="{{ route('admin.facility-master') }}" 
+               class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition block">
+                <span class="text-xs text-[#86868B] font-medium block">Master Fasilitas Kampus</span>
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">{{ $totalFacilities }}</span>
+                <span class="text-[11px] text-[#86868B] mt-3 block">{{ $activeFacilities }} aktif • {{ $maintenanceFacilities }} pemeliharaan</span>
+            </a>
+
+            {{-- Metrik 3: Okupansi --}}
+            <a href="{{ route('admin.export-report') }}" 
+               class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition block">
+                <span class="text-xs text-[#86868B] font-medium block">Tingkat Okupansi Ruang</span>
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">{{ $occupancyRate }}%</span>
+                <span class="text-[11px] text-emerald-800 font-medium mt-3 block">{{ $occupancyRate >= 70 ? 'Penggunaan sangat optimal' : 'Peminjaman ruang terjadwal' }}</span>
+            </a>
+
+            {{-- Metrik 4: Tiket Kerusakan --}}
+            <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:border-gray-300 transition">
+                <span class="text-xs text-[#86868B] font-medium block">Tiket Kerusakan Terbuka</span>
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1D1D1F] mt-3 block">{{ $activeDamageReports }}</span>
+                <span class="text-[11px] text-[#86868B] mt-3 block">{{ $urgentDamageCount }} prioritas baru • SLA {{ $slaResolutionPercent }}%</span>
+            </div>
+        </div>
+
+        {{-- Bento Grid Baris Kedua: Antrean Verifikasi Sivitas & Ringkasan Kesiapan Fasilitas --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            
+            {{-- Kolom Kiri: Antrean Verifikasi Pendaftar Sivitas --}}
+            <div class="lg:col-span-7 bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                <div class="flex items-center justify-between pb-5 mb-5 border-b border-gray-100">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1D1D1F]">Pendaftar Mandiri Menunggu Otorisasi</h3>
+                        <p class="text-xs text-[#86868B] mt-0.5">Menampilkan {{ $pendingUsersPreview->count() }} dari total {{ $pendingUsersCount }} calon pengguna yang menunggu evaluasi.</p>
+                    </div>
+                    <a href="{{ route('admin.user-management') }}" class="text-xs font-semibold text-[#1D1D1F] hover:underline transition">
+                        Kelola Seluruh Akun ({{ $totalUsersCount }}) &rarr;
+                    </a>
                 </div>
 
-                <div class="space-y-3.5 text-xs text-slate-600 mb-6">
-                    @forelse($buildingUtilization as $b)
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span>{{ $b['building'] }}</span>
-                            <span class="font-bold text-slate-900">{{ $b['rate'] }}% Okupansi</span>
+                <div class="space-y-3">
+                    @forelse($pendingUsersPreview as $user)
+                        <div class="py-4 px-5 rounded-2xl bg-[#FBFBFD] border border-gray-100/80 flex items-center justify-between gap-4 hover:border-gray-200 transition">
+                            <div class="min-w-0">
+                                <div class="text-sm font-bold text-[#1D1D1F] truncate">{{ $user->name }}</div>
+                                <div class="text-xs text-[#86868B] mt-0.5">
+                                    {{ ucfirst($user->role ?? 'Sivitas') }} • {{ $user->department ?? 'Civitas' }} • <span class="font-mono text-[11px]">{{ $user->identity_number ?? '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Verifikasi dan aktifkan akun {{ addslashes($user->name) }}?')">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition shadow-sm cursor-pointer">
+                                        Setujui
+                                    </button>
+                                </form>
+                                <a href="{{ route('admin.user-management', ['search' => $user->email]) }}" class="px-3 py-2 text-xs font-medium text-[#86868B] hover:text-rose-600 transition cursor-pointer">
+                                    Tolak
+                                </a>
+                            </div>
                         </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: {{ min(100, max(0, $b['rate'])) }}%"></div>
-                        </div>
-                    </div>
                     @empty
-                    <div class="py-4 text-center text-slate-500">
-                        <p class="text-xs">Belum ada rekaman peminjaman ruang pada periode berjalan.</p>
-                    </div>
+                        <div class="py-12 text-center text-[#86868B]">
+                            <span class="material-symbols-outlined text-gray-400 text-[32px] block mb-2">check_circle</span>
+                            <p class="text-xs font-semibold text-[#1D1D1F]">Tidak ada antrean verifikasi akun baru saat ini.</p>
+                            <p class="text-[11px] text-[#86868B] mt-0.5">Seluruh permohonan pendaftaran sivitas telah selesai dievaluasi.</p>
+                        </div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- 
-              ROUTE: GET /admin/export-report
-              FUNGSI: Mengarahkan ke halaman rekapitulasi analitik dan unduh laporan resmi (ADM-04 / UR17)
-            -->
-            <a href="{{ route('admin.export-report') }}" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-xs flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-[16px]">file_download</span>
-                <span>Buka Laporan Statuter & Ekspor (UR17)</span>
-            </a>
+            {{-- Kolom Kanan: Ringkasan Master Fasilitas & Kesiapan Operasional --}}
+            <div class="lg:col-span-5 bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-5 mb-5 border-b border-gray-100">
+                        <div>
+                            <h3 class="text-base font-bold text-[#1D1D1F]">Ringkasan Master Fasilitas</h3>
+                            <p class="text-xs text-[#86868B] mt-0.5">{{ $facilitiesPreview->count() }} dari {{ $totalFacilities }} ruang terdaftar.</p>
+                        </div>
+                        <a href="{{ route('admin.facility-master') }}" class="text-xs font-semibold text-[#1D1D1F] hover:underline transition">
+                            Katalog Master &rarr;
+                        </a>
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse($facilitiesPreview as $facility)
+                            <div class="py-3 px-4 rounded-2xl bg-[#FBFBFD] border border-gray-100/80 flex items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm text-[#1D1D1F] truncate">{{ $facility->name }}</span>
+                                        <span class="text-[10px] font-mono text-[#86868B]">{{ $facility->code }}</span>
+                                    </div>
+                                    <p class="text-xs text-[#86868B] mt-0.5">{{ $facility->building }} • {{ $facility->capacity }} Kursi</p>
+                                </div>
+                                <span class="text-xs font-semibold shrink-0 {{ $facility->status === 'aktif' ? 'text-emerald-800' : 'text-amber-800' }}">
+                                    {{ $facility->status === 'aktif' ? 'Tersedia' : 'Pemeliharaan' }}
+                                </span>
+                            </div>
+                        @empty
+                            <div class="py-8 text-center text-[#86868B]">
+                                <p class="text-xs">Belum ada data fasilitas terdaftar dalam sistem.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- Action Footer Link --}}
+                <div class="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between text-xs">
+                    <span class="text-[#86868B]">Total Kapasitas: <strong class="text-[#1D1D1F]">{{ number_format($totalCapacitySeats) }} Kursi</strong></span>
+                    <a href="{{ route('admin.export-report') }}" class="text-[#1D1D1F] font-semibold hover:underline">
+                        Lihat Laporan & Ekspor &rarr;
+                    </a>
+                </div>
+            </div>
+
         </div>
+
     </div>
 </x-admin-layout>
