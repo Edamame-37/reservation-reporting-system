@@ -9,14 +9,7 @@
 
 <x-app-layout title="Dasbor Pengguna" active="dashboard">
     <div class="space-y-10 font-sans text-[#1D1D1F]">
-        
-        {{-- 1. Judul Halaman Murni Minimalis --}}
-        <div class="space-y-1">
-            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1D1D1F]">Dasbor Pengguna</h1>
-            <p class="text-base sm:text-lg text-[#86868B] font-light">Kelola permohonan ruang kuliah dan pantau perbaikan fasilitas kampus secara terpadu.</p>
-        </div>
-
-        {{-- 2. SPOTLIGHT HERO: KARTU SOROTAN BERSIH TANPA KOTAK BADGE & TANPA DOT --}}
+        {{-- SPOTLIGHT HERO: KARTU SOROTAN BERSIH TANPA KOTAK BADGE & TANPA DOT --}}
         <section class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
             @if($upcomingReservation)
                 <div class="space-y-3 flex-1">
