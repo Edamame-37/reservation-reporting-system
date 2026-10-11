@@ -66,23 +66,15 @@
         }
     }" class="max-w-4xl mx-auto space-y-8">
 
-        {{-- Top Navigation: Link Kembali & Header Halaman Apple-Style --}}
-        <div>
-            <a href="{{ route('user.reports.index') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition mb-4">
+        {{-- Top Navigation & Indikator Status (Judul halaman telah terwakili pada Universal Top Header) --}}
+        <div class="flex items-center justify-between">
+            <a href="{{ route('user.report-history') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span>Kembali ke Riwayat Laporan</span>
             </a>
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div class="space-y-1">
-                    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1D1D1F]">Formulir Pelaporan Kerusakan</h1>
-                    <p class="text-base sm:text-lg text-[#86868B] font-light">Sampaikan kendala kerusakan sarana prasarana agar segera ditangani tim teknisi kampus.</p>
-                </div>
-                <div class="shrink-0">
-                    <span class="text-xs font-semibold tracking-wide text-emerald-800">
-                        Respon Petugas &lt; 24 Jam Kerja
-                    </span>
-                </div>
-            </div>
+            <span class="text-xs font-semibold tracking-wide text-emerald-800">
+                Respon Petugas &lt; 24 Jam Kerja
+            </span>
         </div>
 
         {{-- Flash Session Sukses --}}
@@ -241,7 +233,7 @@
 
             {{-- Tombol Aksi Formulir --}}
             <div class="pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
-                <a href="{{ route('user.reports.index') }}" class="px-5 py-3 text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
+                <a href="{{ route('user.report-history') }}" class="px-5 py-3 text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
                     Batal
                 </a>
                 <button type="submit" 
