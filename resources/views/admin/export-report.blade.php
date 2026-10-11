@@ -1,130 +1,64 @@
 {{-- 
   NAMA FILE      : export-report.blade.php
-  FUNGSIONALITAS : Halaman Antarmuka Rekapitulasi, Analitik, dan Ekspor Laporan Statuter (Super Admin)
-  DESKRIPSI      : Menampilkan visualisasi data rekap okupansi fasilitas kampus, frekuensi kerusakan aset, dan pencetakan dokumen resmi ke format CSV/Excel dan PDF.
-  DESAIN SISTEM  : Opsi 1 (Executive Apple Bento & Minimalist Precision)
-                   - Layout Bento Box lega (rounded-[2rem], border gray-100, soft shadows)
-                   - Filter rentang waktu terintegrasi tombol aksi unduh dokumen resmi
-                   - 4 Bento KPI Metric Cards informatif dan berbobot
-                   - Tabel analitik luas dengan navigasi paginasi interaktif Alpine.js
-                   - Pure typographic status indicator bebas badge mini berisik
+  FUNGSIONALITAS : Halaman Antarmuka Rekapitulasi & Ekspor Laporan (100% Sesuai Opsi 1 Prototype 4_try-admin.html)
+  DESKRIPSI      : Menampilkan rentang tanggal periode laporan statuter, tombol unduh Excel/CSV dan PDF resmi, serta data rekapitulasi okupansi fasilitas dan insiden pemeliharaan.
+  DESAIN SISTEM  : Apple Bento & Minimalist Precision (Opsi 1)
   CARA KERJA     : Menggunakan layout <x-admin-layout active="export-report">, memicu download file CSV/Excel atau PDF dari ExportController berdasarkan rentang tanggal aktif.
 --}}
 
 <x-admin-layout title="Rekapitulasi & Ekspor Laporan" active="export-report">
     <div class="space-y-8">
         
-        {{-- 1. Header Eksekutif & Pengantar Laporan --}}
+        {{-- 1. Header Halaman (100% Sesuai 4_try-admin.html Opsi 1) --}}
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-                <nav class="flex items-center gap-2 text-xs text-[#86868B] mb-1.5">
-                    <a href="{{ route('admin.dashboard') }}" class="hover:text-[#1D1D1F] transition-colors">Admin Console</a>
-                    <span>/</span>
-                    <span class="text-[#1D1D1F] font-medium">Laporan Statuter</span>
-                </nav>
                 <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Rekapitulasi & Ekspor Laporan</h1>
-                <p class="text-sm text-[#86868B] mt-1 leading-relaxed">
-                    Unduh data rekapitulasi pemanfaatan fasilitas dan insiden pemeliharaan dalam format spreadsheet dan PDF resmi.
-                </p>
+                <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Unduh data rekapitulasi okupansi fasilitas dan insiden pemeliharaan dalam format spreadsheet resmi.</p>
             </div>
         </div>
 
-        {{-- 2. Bento Box Filter Rentang Waktu & Aksi Cepat Ekspor --}}
+        {{-- 2. Rentang Tanggal Filter Box Bergaya Bento Apple (100% Sesuai Prototype) --}}
         <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-            <div class="pb-5 mb-5 border-b border-gray-100">
-                <h3 class="text-base font-bold text-[#1D1D1F]">Periode Waktu Laporan Statuter</h3>
-                <p class="text-xs text-[#86868B] mt-0.5">Tentukan rentang tanggal untuk kompilasi data peminjaman ruangan dan catatan keluhan sarpras.</p>
-            </div>
+            <h3 class="text-base font-bold text-[#1D1D1F] mb-1">Periode Waktu Laporan</h3>
+            <p class="text-xs text-[#86868B] mb-6">Tentukan rentang tanggal untuk kompilasi data peminjaman ruangan dan catatan kerusakan.</p>
 
             <form action="{{ route('admin.export-report') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div>
-                    <label class="block text-xs font-semibold text-[#1D1D1F] mb-1.5" for="rep-start">Tanggal Mulai</label>
+                    <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-start">Tanggal Mulai</label>
                     <input type="date" 
-                           id="rep-start" 
+                           id="exp-start" 
                            name="start_date" 
                            value="{{ $startDate }}" 
-                           class="w-full h-11 px-3.5 bg-[#FBFBFD] rounded-xl text-xs border border-gray-200 text-[#1D1D1F] focus:bg-white focus:border-[#1D1D1F] focus:outline-none transition">
+                           onchange="this.form.submit()" 
+                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-[#1D1D1F] mb-1.5" for="rep-end">Tanggal Selesai</label>
+                    <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-end">Tanggal Selesai</label>
                     <input type="date" 
-                           id="rep-end" 
+                           id="exp-end" 
                            name="end_date" 
                            value="{{ $endDate }}" 
-                           class="w-full h-11 px-3.5 bg-[#FBFBFD] rounded-xl text-xs border border-gray-200 text-[#1D1D1F] focus:bg-white focus:border-[#1D1D1F] focus:outline-none transition">
+                           onchange="this.form.submit()" 
+                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
-
                 <div>
-                    <button type="submit" 
-                            class="w-full h-11 px-4 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-[0_2px_8px_rgb(0,0,0,0.02)] cursor-pointer flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[18px] text-[#86868B]">sync</span>
-                        <span>Segarkan Analitik</span>
-                    </button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    {{-- Tombol Ekspor Excel Reservasi --}}
                     <a href="{{ route('admin.export.reservations.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                       class="flex-1 h-11 px-3 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-[0_2px_8px_rgb(0,0,0,0.02)] flex items-center justify-center gap-1.5 text-center">
-                        <span class="material-symbols-outlined text-[16px] text-emerald-700">table_view</span>
-                        <span>Excel</span>
+                       class="w-full bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50 py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">table_view</span>
+                        <span>Unduh Excel / CSV</span>
                     </a>
-
-                    {{-- Tombol Ekspor PDF Reservasi --}}
+                </div>
+                <div>
                     <a href="{{ route('admin.export.reservations.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                       class="flex-1 h-11 px-3 rounded-xl bg-[#1D1D1F] text-white text-xs font-semibold hover:bg-black transition shadow-sm flex items-center justify-center gap-1.5 text-center">
-                        <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                        <span>PDF</span>
+                       class="w-full bg-[#1D1D1F] text-white hover:bg-black py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                        <span>Cetak PDF Resmi</span>
                     </a>
                 </div>
             </form>
         </div>
 
-        {{-- 3. Bento KPI Cards (4 Metrik Performa Statuter) --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {{-- Metrik 1: Okupansi Global --}}
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                <div class="text-xs font-medium text-[#86868B] mb-2">Okupansi Fasilitas</div>
-                <div class="text-3xl font-extrabold text-[#1D1D1F] tracking-tight font-display">{{ $occupancyRate }}%</div>
-                <div class="text-xs text-emerald-800 font-semibold mt-2 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>{{ number_format($totalHoursReserved, 1) }} Jam Terpakai</span>
-                </div>
-            </div>
-
-            {{-- Metrik 2: Total Sesi Terpakai --}}
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                <div class="text-xs font-medium text-[#86868B] mb-2">Sesi Disetujui</div>
-                <div class="text-3xl font-extrabold text-[#1D1D1F] tracking-tight font-display">{{ number_format($approvedCount) }}</div>
-                <div class="text-xs text-[#86868B] mt-2 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#1D1D1F]"></span>
-                    <span>Kegiatan sivitas terakomodasi</span>
-                </div>
-            </div>
-
-            {{-- Metrik 3: Pengaduan Kerusakan --}}
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                <div class="text-xs font-medium text-[#86868B] mb-2">Tiket Kerusakan</div>
-                <div class="text-3xl font-extrabold text-[#1D1D1F] tracking-tight font-display">{{ number_format($totalDamageReports) }}</div>
-                <div class="text-xs text-amber-800 font-semibold mt-2 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <span>{{ $resolvedDamageCount }} Selesai • {{ $inProgressDamageCount }} Dikerjakan</span>
-                </div>
-            </div>
-
-            {{-- Metrik 4: Indeks Resolusi SLA --}}
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                <div class="text-xs font-medium text-[#86868B] mb-2">Indeks Resolusi SLA</div>
-                <div class="text-3xl font-extrabold text-[#1D1D1F] tracking-tight font-display">{{ $slaResolutionIndex }}%</div>
-                <div class="text-xs {{ $slaResolutionIndex >= 85 ? 'text-emerald-800' : 'text-amber-800' }} font-semibold mt-2 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full {{ $slaResolutionIndex >= 85 ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                    <span>Standar kepatuhan penanganan</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- 4. Tabel 1: Rekapitulasi Utilisasi Fasilitas Kampus --}}
+        {{-- 3. Tabel Rekapitulasi Okupansi Fasilitas --}}
         <section x-data="facilityReportTable(@js($facilityUtilization))" class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -177,7 +111,6 @@
                 </table>
             </div>
 
-            {{-- Paginasi Interaktif --}}
             <template x-if="allRows.length > 0">
                 <div class="p-6 bg-[#FBFBFD] border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#86868B]">
                     <div>
@@ -213,7 +146,7 @@
             </template>
         </section>
 
-        {{-- 5. Tabel 2: Rekapitulasi Insiden Kerusakan Aset --}}
+        {{-- 4. Tabel Frekuensi Kerusakan Aset --}}
         <section class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -221,15 +154,14 @@
                     <p class="text-xs text-[#86868B] mt-0.5">Ringkasan penanganan gangguan dan kepatuhan SLA sarana prasarana.</p>
                 </div>
                 
-                {{-- Aksi Unduh Laporan Kerusakan --}}
                 <div class="flex items-center gap-2">
                     <a href="{{ route('admin.export.damage-reports.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                       class="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-[0_2px_8px_rgb(0,0,0,0.02)] flex items-center gap-1.5">
+                       class="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-xs flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px] text-emerald-700">table_view</span>
                         <span>Excel Kerusakan</span>
                     </a>
                     <a href="{{ route('admin.export.damage-reports.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                       class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-800 text-xs font-semibold hover:bg-rose-50 transition shadow-[0_2px_8px_rgb(0,0,0,0.02)] flex items-center gap-1.5">
+                       class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-800 text-xs font-semibold hover:bg-rose-50 transition shadow-xs flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                         <span>PDF Kerusakan</span>
                     </a>
