@@ -325,9 +325,12 @@
                                    id="participants_count" 
                                    name="participants_count" 
                                    min="1" 
-                                   max="1000" 
+                                   max="2000" 
                                    value="{{ old('participants_count', 1) }}" 
-                                   class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
+                                   class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition @error('participants_count') ring-2 ring-rose-400 bg-rose-50/50 @enderror">
+                            @error('participants_count')
+                                <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
@@ -338,6 +341,8 @@
                                       name="purpose" 
                                       rows="4" 
                                       required 
+                                      minlength="10" 
+                                      maxlength="500" 
                                       placeholder="Contoh: Seminar Nasional Web Development HMIF - Estimasi 75 Peserta Mahasiswa. PIC: Dimas Pratama (08123456789)" 
                                       class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm @error('purpose') ring-2 ring-rose-400 bg-rose-50/50 @enderror focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition leading-relaxed">{{ old('purpose') }}</textarea>
                             @error('purpose')

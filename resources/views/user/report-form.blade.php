@@ -174,7 +174,8 @@
                               rows="5" 
                               required 
                               minlength="10" 
-                              placeholder="Jelaskan secara spesifik kerusakan yang terjadi, misalnya: 'Unit AC di dekat pintu keluar mengeluarkan suara bising dan proyektor tidak merespon saat disambungkan ke kabel HDMI di meja dosen...'" 
+                              maxlength="1000" 
+                              placeholder="Jelaskan secara spesifik kerusakan yang terjadi, misalnya: 'Unit AC di dekat pintu keluar mengeluarkan suara bising dan proyektor tidak merespon saat disambungkan ke kabel HDMI di meja dosen...' (Maks. 1.000 karakter)" 
                               class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-4 rounded-xl text-sm {{ $errors->has('description') ? 'ring-2 ring-rose-400 bg-rose-50/50' : '' }} focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition leading-relaxed">{{ old('description') }}</textarea>
                     @error('description')
                         <p class="mt-1.5 text-xs text-rose-600 font-medium">{{ $message }}</p>

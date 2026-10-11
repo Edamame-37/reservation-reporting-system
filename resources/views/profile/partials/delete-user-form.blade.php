@@ -38,6 +38,7 @@
                     id="password"
                     name="password"
                     type="password"
+                    required
                     class="w-full h-11 px-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 border border-slate-200 focus:border-slate-900 focus:bg-white focus:outline-none transition"
                     placeholder="{{ __('Kata Sandi Anda') }}"
                 />

@@ -177,6 +177,13 @@ class ReservationController extends Controller
      */
     public function cancel(Request $request, int|string $id): RedirectResponse
     {
+        // 0. Validasi Input Payload Pembatalan
+        $request->validate([
+            'cancellation_reason' => ['nullable', 'string', 'max:500'],
+        ], [
+            'cancellation_reason.max' => 'Alasan pembatalan maksimal 500 karakter.',
+        ]);
+
         $userId = Auth::id();
 
         $reservation = Reservation::findOrFail($id);

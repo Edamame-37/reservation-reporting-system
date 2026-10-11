@@ -326,11 +326,11 @@
                         @csrf
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-name">Nama Lengkap</label>
-                            <input type="text" id="m-name" name="name" required placeholder="Nama lengkap sivitas..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="text" id="m-name" name="name" required maxlength="150" placeholder="Nama lengkap sivitas..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-id">NIM / NIP</label>
-                            <input type="text" id="m-id" name="identifier" required placeholder="Nomor induk mahasiswa atau pegawai..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono">
+                            <input type="text" id="m-id" name="identifier" required maxlength="50" placeholder="Nomor induk mahasiswa atau pegawai..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono">
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-role">Peran Sivitas</label>
@@ -342,15 +342,15 @@
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-dept">Departemen / Program Studi</label>
-                            <input type="text" id="m-dept" name="department" placeholder="Contoh: Teknik Informatika" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="text" id="m-dept" name="department" maxlength="100" placeholder="Contoh: Teknik Informatika" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-email">Email Kampus</label>
-                            <input type="email" id="m-email" name="email" required placeholder="nama@students.undip.ac.id" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="email" id="m-email" name="email" required maxlength="150" placeholder="nama@students.undip.ac.id" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="m-pass">Kata Sandi Awal (Opsional)</label>
-                            <input type="password" id="m-pass" name="password" placeholder="Kosongkan untuk default: 'password'" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="password" id="m-pass" name="password" minlength="8" placeholder="Kosongkan untuk default: 'password' (min. 8 karakter)" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                         <div class="pt-5 mt-6 border-t border-gray-100 flex items-center justify-end gap-3">
                             <button type="button" @click="showUserModal = false" class="px-4 py-2 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F]">Batal</button>

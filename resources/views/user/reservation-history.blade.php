@@ -508,7 +508,8 @@
                                 <textarea name="cancellation_reason" 
                                           id="cancellation_reason" 
                                           rows="2" 
-                                          placeholder="Tuliskan alasan pembatalan kegiatan Anda..." 
+                                          maxlength="500" 
+                                          placeholder="Tuliskan alasan pembatalan kegiatan Anda (maks. 500 karakter)..." 
                                           class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] p-3 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
                             </div>
 
@@ -666,7 +667,9 @@
                                       name="purpose" 
                                       rows="3" 
                                       required 
-                                      placeholder="Jelaskan nama agenda, organisasi penyelenggara, atau keperluan perkuliahan..." 
+                                      minlength="10" 
+                                      maxlength="500" 
+                                      placeholder="Jelaskan nama agenda, organisasi penyelenggara, atau keperluan perkuliahan (10 - 500 karakter)..." 
                                       class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] p-3.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition"></textarea>
                         </div>
 
@@ -679,7 +682,7 @@
                                    name="participants_count" 
                                    value="{{ old('participants_count', 10) }}" 
                                    min="1" 
-                                   max="500" 
+                                   max="2000" 
                                    required 
                                    class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-black/10 focus:bg-white transition">
                         </div>

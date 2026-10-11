@@ -19,14 +19,14 @@
         <!-- Name -->
         <div>
             <label for="name" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Nama Lengkap</label>
-            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Mis. Bima Dewantara">
+            <input id="name" type="text" name="name" value="{{ old('name') }}" required maxlength="255" autofocus autocomplete="name" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Mis. Bima Dewantara">
             <x-input-error :messages="$errors->get('name')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Identifier (NIM/NIP) -->
         <div>
             <label for="identifier" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">NIM / NIP / NIDN</label>
-            <input id="identifier" type="text" name="identifier" value="{{ old('identifier') }}" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Contoh: 2108561044">
+            <input id="identifier" type="text" name="identifier" value="{{ old('identifier') }}" required maxlength="50" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="Contoh: 2108561044">
             <x-input-error :messages="$errors->get('identifier')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
@@ -47,14 +47,34 @@
         <!-- Email Address -->
         <div>
             <label for="email" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Email Kampus</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" autocomplete="username" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] placeholder:text-[#86868B] px-5 py-4 rounded-2xl focus:outline-none focus:ring-[3px] focus:ring-blue-500/20 focus:bg-white transition-all text-[15px]" placeholder="nama@kampus.ac.id">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm font-medium" />
         </div>
 
         <!-- Bukti KTM/SK (Upload) -->
         <div>
             <label for="identity_proof" class="block text-[14px] font-semibold text-[#1D1D1F] mb-2">Unggah Bukti Identitas (KTM/SK)</label>
-            <div class="mt-1 flex items-center justify-center w-full" x-data="{ fileName: '' }">
+            <div class="mt-1 flex flex-col items-center justify-center w-full" x-data="{ 
+                fileName: '', 
+                fileError: '',
+                checkFile(e) {
+                    const f = e.target.files[0];
+                    this.fileError = '';
+                    if (f) {
+                        if (f.size > 2 * 1024 * 1024) {
+                            this.fileError = 'Ukuran berkas melebihi batas 2 MB (' + (f.size / (1024*1024)).toFixed(2) + ' MB). Pilih berkas yang lebih kecil.';
+                            e.target.value = '';
+                            this.fileName = '';
+                            return;
+                        }
+                        this.fileName = f.name;
+                    }
+                }
+            }">
+                <div x-show="fileError" x-cloak class="w-full mb-2 p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-rose-600 shrink-0">warning</span>
+                    <span x-text="fileError"></span>
+                </div>
                 <label for="identity_proof" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-[#F5F5F7] hover:bg-gray-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
                         <span class="material-symbols-outlined text-[28px] text-[#86868B] mb-2">cloud_upload</span>
@@ -62,7 +82,7 @@
                         <p class="mb-1 text-[13px] text-blue-600 font-semibold text-center px-4 break-all" x-show="fileName" x-text="fileName" style="display: none;"></p>
                         <p class="text-[12px] text-[#86868B]">PDF, JPG, atau PNG (Maks. 2MB)</p>
                     </div>
-                    <input id="identity_proof" name="identity_proof" type="file" accept=".pdf,image/jpeg,image/png" class="hidden" required @change="fileName = $event.target.files[0].name" />
+                    <input id="identity_proof" name="identity_proof" type="file" accept=".pdf,image/jpeg,image/png" class="hidden" required @change="checkFile($event)" />
                 </label>
             </div>
             <x-input-error :messages="$errors->get('identity_proof')" class="mt-2 text-red-500 text-sm font-medium" />

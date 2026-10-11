@@ -32,7 +32,7 @@ class RejectUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reason' => ['required', 'string', 'in:invalid_ktm,mismatched_data,invalid_email,other'],
+            'reason' => ['required', 'string', 'in:invalid_ktm,mismatched_data,invalid_email,invalid_data,other'],
             'notes'  => ['nullable', 'string', 'max:500'],
         ];
     }

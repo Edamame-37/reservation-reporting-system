@@ -210,17 +210,17 @@
 
                     <div>
                         <label class="block font-medium text-[#86868B] mb-1.5" for="fac-name">Nama Fasilitas</label>
-                        <input type="text" id="fac-name" name="name" :value="selectedFacility ? selectedFacility.name : ''" required placeholder="Nama ruangan / gedung..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                        <input type="text" id="fac-name" name="name" :value="selectedFacility ? selectedFacility.name : ''" required maxlength="150" placeholder="Nama ruangan / gedung..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="fac-code">Kode Ruang</label>
-                            <input type="text" id="fac-code" name="code" :value="selectedFacility ? selectedFacility.code : ''" required placeholder="AUD-01..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono uppercase">
+                            <input type="text" id="fac-code" name="code" :value="selectedFacility ? selectedFacility.code : ''" required maxlength="30" placeholder="AUD-01..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black font-mono uppercase">
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="fac-cap">Kapasitas (Kursi)</label>
-                            <input type="number" id="fac-cap" name="capacity" :value="selectedFacility ? selectedFacility.capacity : 50" min="1" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="number" id="fac-cap" name="capacity" :value="selectedFacility ? selectedFacility.capacity : 50" min="1" max="10000" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                     </div>
 
@@ -237,13 +237,13 @@
                         </div>
                         <div>
                             <label class="block font-medium text-[#86868B] mb-1.5" for="fac-bld">Gedung & Lokasi Lantai</label>
-                            <input type="text" id="fac-bld" name="building" :value="selectedFacility ? selectedFacility.building : ''" required placeholder="Gedung FSM Lantai 2..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                            <input type="text" id="fac-bld" name="building" :value="selectedFacility ? selectedFacility.building : ''" required maxlength="100" placeholder="Gedung FSM Lantai 2..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                         </div>
                     </div>
 
                     <div>
                         <label class="block font-medium text-[#86868B] mb-1.5" for="fac-eq">Deskripsi Kelengkapan Fasilitas</label>
-                        <input type="text" id="fac-eq" name="equipment" :value="selectedFacility ? selectedFacility.equipmentText : ''" placeholder="Contoh: Videotron 4K, Tata Suara Sentral, AC..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
+                        <input type="text" id="fac-eq" name="equipment" :value="selectedFacility ? selectedFacility.equipmentText : ''" maxlength="1000" placeholder="Contoh: Videotron 4K, Tata Suara Sentral, AC (maks. 1000 karakter)..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                     </div>
 
                     <div class="pt-5 mt-6 border-t border-gray-100 flex items-center justify-end gap-3">
