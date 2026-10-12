@@ -447,9 +447,44 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
     Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
 
-    // ROUTE: Menerima GET request ke '/petugas/schedule-matrix'
-    // FUNGSI: Menampilkan matriks jadwal slot 30m operasional untuk peninjauan detail pemohon & reservasi petugas
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 14: MATRIKS JADWAL 30 MENIT OPERASIONAL & DETAIL PEMOHON (SCHEDULE MATRIX)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini memfasilitasi visualisasi tabular matriks ketersediaan seluruh ruangan
+     * kampus per interval 30 menit (pukul 07:00 hingga 20:00 WIB) untuk staf UPT Sarpras:
+     * - Menampilkan antarmuka Bento UI matriks jadwal harian terintegrasi.
+     * - Menyediakan endpoint asinkron JSON untuk data slot terisi, identitas lengkap sivitas pemohon,
+     *   surat izin, status persetujuan, dan log verifikator.
+     */
+
+    /**
+     * RUTE: GET /petugas/schedule-matrix (Antarmuka Matriks Jadwal 30 Menit Petugas)
+     * -----------------------------------------------------------------------------
+     * Syntax: Route::get('/petugas/schedule-matrix', [PetugasScheduleMatrixController::class, 'index'])->name('petugas.schedule-matrix');
+     * - Method HTTP : GET (pengambilan halaman web matriks operasional).
+     * - URI Path   : '/petugas/schedule-matrix'.
+     * - Handler    : PetugasScheduleMatrixController@index.
+     * - Route Name : 'petugas.schedule-matrix'.
+     * - Cara Kerja : Menarik daftar gedung kampus aktif, fasilitas terkait, preferensi filter cookie,
+     *                serta ringkasan statistik harian (disetujui, pending, maintenance) lalu merender
+     *                view Bento 'petugas.schedule-matrix'.
+     */
     Route::get('/petugas/schedule-matrix', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'index'])->name('petugas.schedule-matrix');
+
+    /**
+     * RUTE: GET /api/petugas/matrix/{date} (Endpoint JSON Detail Slot Matriks Asinkron)
+     * ---------------------------------------------------------------------------------
+     * Syntax: Route::get('/api/petugas/matrix/{date}', [PetugasScheduleMatrixController::class, 'getMatrixData'])->name('api.petugas.matrix');
+     * - Method HTTP : GET (pengambilan payload data berekstensi JSON melalui AJAX/Fetch API).
+     * - URI Path   : '/api/petugas/matrix/{date}' ({date} berformat ISO 'YYYY-MM-DD').
+     * - Handler    : PetugasScheduleMatrixController@getMatrixData.
+     * - Route Name : 'api.petugas.matrix'.
+     * - Cara Kerja : Menarik seluruh reservasi ('approved' & 'pending') pada tanggal yang dipilih,
+     *                memetakan setiap permohonan ke dalam slot waktu 30 menit (`matrix[facility_id][H:i]`),
+     *                menyematkan detail pemohon (nama, NIM, prodi, kontak, surat izin, reviewer),
+     *                dan mengembalikan respons JsonResponse untuk dirender reaktif oleh Alpine.js.
+     */
     Route::get('/api/petugas/matrix/{date}', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'getMatrixData'])->name('api.petugas.matrix');
 
     // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/approve'
