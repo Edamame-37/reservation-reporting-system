@@ -1,8 +1,8 @@
 {{-- 
   NAMA FILE      : catalog.blade.php
   FUNGSIONALITAS : Katalog Publik Daftar Fasilitas & Ruangan Kampus
-  DESKRIPSI      : Menampilkan daftar seluruh fasilitas kampus dengan filter kategori, pencarian nama/gedung, kartu bento detail, dan modal pratinjau spesifikasi.
-  CARA KERJA     : Menerima koleksi $facilities dan $categories dari PublicFacilityController@index, merender layout <x-public-layout active="catalog">.
+  DESKRIPSI      : Menampilkan daftar fasilitas kampus dengan paginasi maksimal 8 item per request, filter kategori, pencarian cerdas nama/gedung, kartu bento detail, dan modal pratinjau spesifikasi.
+  CARA KERJA     : Menerima paginator $facilities (8 item per request) dan array $categories dari PublicFacilityController@index, merender layout <x-public-layout active="catalog">.
 --}}
 
 @php
@@ -334,6 +334,24 @@
             </div>
             @endif
         </div>
+
+        <!-- 
+          ELEMEN       : Kontrol Paginasi Katalog Fasilitas (Maksimal 8 Item Sekali Request)
+          KEGUNAAN     : Menampilkan informasi rentang item yang tampil dan tombol navigasi halaman.
+          CARA KERJA   : Merender method $facilities->links() bawaan Laravel dengan query string filter otomatis dipertahankan.
+        -->
+        @if($facilities instanceof \Illuminate\Pagination\LengthAwarePaginator && $facilities->total() > 0)
+            <div class="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-6">
+                <p class="text-xs text-[#86868B]">
+                    Menampilkan <span class="font-medium text-[#1D1D1F]">{{ $facilities->firstItem() ?? 0 }}</span> sampai <span class="font-medium text-[#1D1D1F]">{{ $facilities->lastItem() ?? 0 }}</span> dari <span class="font-medium text-[#1D1D1F]">{{ $facilities->total() }}</span> fasilitas
+                </p>
+                @if($facilities->hasPages())
+                    <div class="overflow-x-auto max-w-full">
+                        {{ $facilities->links() }}
+                    </div>
+                @endif
+            </div>
+        @endif
 
         <!-- Pop-up Modal Detail Fasilitas -->
         <template x-teleport="body">
