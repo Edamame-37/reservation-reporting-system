@@ -1,11 +1,42 @@
 {{-- 
-  NAMA FILE      : information.blade.php
-  FUNGSIONALITAS : Pusat Informasi, Regulasi, dan Panduan Bantuan Publik CAVA
-  DESKRIPSI      : Menampilkan panduan kebijakan kampus, transparansi penggunaan cookies & session, syarat dan ketentuan peminjaman, serta petunjuk operasional helpdesk.
-  CARA KERJA     : Menggunakan layout <x-public-layout active="information">, mengelola scroll spy dan tab seleksi via Alpine.js dengan IntersectionObserver.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 18: PUSAT INFORMASI PUBLIK, KEBIJAKAN, SYARAT & BANTUAN SIVITAS
+BERKAS: resources/views/public/information.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Halaman statuter publik terpadu yang mempublikasikan dokumen kebijakan privasi, transparansi penggunaan
+cookies & sesi peramban, syarat & ketentuan peminjaman fasilitas kampus, panduan alur reservasi, serta
+prosedur helpdesk pengaduan kerusakan fisik aset kampus. Menggunakan desain Apple-esque Minimalist.
+
+PERAN ARSITEKTURAL DALAM SISTEM CAVA:
+1. Akuntabilitas & Kepatuhan Privasi (Privacy Transparency):
+   Menyediakan tabel inventarisasi resmi seluruh cookie yang digunakan sistem CAVA, mencakup nama cookie,
+   kategori (preferensi, fungsional, esensial, keamanan, otentikasi), masa retensi, dan tujuan operasional.
+2. Regulasi Operasional Peminjaman (Statutory Rules):
+   Menegaskan batas waktu mutlak Pembatalan Mandiri H-1 (Regulasi BR-USR03-02), jam operasional kampus
+   (Senin-Sabtu 07:00-20:00 WIB), sanksi keterlambatan pengosongan ruangan, serta ganti rugi fisik.
+3. Fitur Interaktif Scroll Spy (IntersectionObserver API):
+   Menggunakan pustaka bawaan peramban via Alpine.js untuk mendeteksi posisi gulir layar pengguna dan
+   secara dinamis menyorot item navigasi sidebar yang sedang dibaca tanpa lagging.
+====================================================================================================
 --}}
 
+{{--
+  PEMBUNGKUS MASTER LAYOUT PUBLIK:
+  - 'title'  : Judul dokumen regulasi yang tampil pada tab browser.
+  - 'active' : Menandai item menu 'information' pada navbar publik.
+--}}
 <x-public-layout title="Pusat Informasi & Regulasi" active="information">
+
+    {{--
+      KOMPONEN REAKTIF ALPINE.JS DENGAN SCROLL SPY:
+      - 'activeTab'      : Menyimpan ID seksi konten yang sedang aktif dibaca pengguna (default: 'kebijakan').
+      - 'initObserver()' : Menginisialisasi objek JavaScript 'IntersectionObserver' untuk memantau elemen '.info-section'.
+      - 'rootMargin'     : Offset vertikal untuk memicu pergantian tab aktif saat seksi berada di viewport tengah.
+      - 'x-init="initObserver()"': Menjalankan observer secara otomatis begitu DOM halaman selesai dimuat.
+    --}}
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" 
          x-data="{ 
             activeTab: 'kebijakan',
@@ -30,48 +61,58 @@
          
         <div class="flex flex-col md:flex-row gap-12">
             
-            <!-- Sidebar Navigasi -->
+            {{-- 
+              1. SIDEBAR NAVIGASI STATIS / STICKY:
+              Menyediakan daftar tautan seksi dengan efek gulir halus (Smooth Scrolling).
+            --}}
             <div class="w-full md:w-64 shrink-0">
                 <div class="sticky top-28">
                     <h3 class="text-xs font-semibold text-[#86868B] tracking-wider uppercase mb-4">Pusat Informasi</h3>
                     <ul class="space-y-3 text-sm font-medium relative">
-                        <!-- Indikator Garis Samping (Opsional untuk estetika tambahan, tapi kita biarkan simple seperti text highlight saja) -->
+                        {{-- Tautan Seksi 1: Kebijakan Privasi --}}
                         <li>
                             <a href="#kebijakan" @click.prevent="document.getElementById('kebijakan').scrollIntoView({behavior: 'smooth'})" 
-                               class="transition block" 
+                               class="transition block cursor-pointer" 
                                :class="activeTab === 'kebijakan' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
-                               Kebijakan Privasi
+                                Kebijakan Privasi
                             </a>
                         </li>
+                        {{-- Tautan Seksi 2: Syarat & Ketentuan --}}
                         <li>
                             <a href="#syarat" @click.prevent="document.getElementById('syarat').scrollIntoView({behavior: 'smooth'})" 
-                               class="transition block"
+                               class="transition block cursor-pointer"
                                :class="activeTab === 'syarat' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
-                               Syarat & Ketentuan
+                                Syarat & Ketentuan
                             </a>
                         </li>
+                        {{-- Tautan Seksi 3: Panduan Peminjaman --}}
                         <li>
                             <a href="#panduan" @click.prevent="document.getElementById('panduan').scrollIntoView({behavior: 'smooth'})" 
-                               class="transition block"
+                               class="transition block cursor-pointer"
                                :class="activeTab === 'panduan' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
-                               Panduan Peminjaman
+                                Panduan Peminjaman
                             </a>
                         </li>
+                        {{-- Tautan Seksi 4: Helpdesk & Lapor Kerusakan --}}
                         <li>
                             <a href="#lapor" @click.prevent="document.getElementById('lapor').scrollIntoView({behavior: 'smooth'})" 
-                               class="transition block"
+                               class="transition block cursor-pointer"
                                :class="activeTab === 'lapor' ? 'text-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'">
-                               Lapor Kerusakan (Helpdesk)
+                                Lapor Kerusakan (Helpdesk)
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
             
-            <!-- Area Konten -->
+            {{-- 
+              2. AREA KONTEN REGULASI UTAMA (ARTIKEL DENGAN SCROLL MARGIN TOP):
+            --}}
             <div class="flex-1 max-w-3xl relative">
                 
-                <!-- Konten: Kebijakan Privasi -->
+                {{-- 
+                  SEKSI 1: KEBIJAKAN PRIVASI & TRANSPARANSI COOKIES
+                --}}
                 <div id="kebijakan" class="info-section scroll-mt-32 mb-20">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Kebijakan Privasi</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
@@ -83,7 +124,7 @@
                         <h2 class="text-xl font-semibold mt-8 mb-4">2. Penggunaan Informasi & Cookies</h2>
                         <p>Portal CAVA memanfaatkan teknologi cookie dan sesi peramban untuk mengingat preferensi tampilan Anda, memelihara sesi masuk yang aman, serta melindungi transmisi formulir dari ancaman siber. Berikut adalah rincian transparansi cookie yang diterapkan di dalam sistem:</p>
 
-                        <!-- Tabel Transparansi Cookies CAVA -->
+                        {{-- Tabel Transparansi Cookies CAVA --}}
                         <div class="overflow-x-auto not-prose my-6">
                             <table class="w-full text-left text-xs border border-gray-100 rounded-xl overflow-hidden">
                                 <thead class="bg-gray-50 text-[#86868B] uppercase font-semibold border-b border-gray-100">
@@ -135,13 +176,16 @@
                             </table>
                         </div>
                         
+                        {{-- Panel Manajemen Sesi Draf Otomatis --}}
                         <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 mt-8">
                             <p class="text-sm m-0"><strong>Manajemen Sesi & Fitur Draf Otomatis:</strong> Sistem CAVA dilengkapi fitur penyimpanan draf sementara (<code class="font-mono text-xs">reservation_draft</code> dan <code class="font-mono text-xs">report_draft</code>) yang menjaga isian formulir pemesanan atau pengaduan di sisi server saat koneksi terputus atau halaman ter-refresh secara tidak sengaja. Draf otomatis dibersihkan begitu tiket resmi berhasil diterbitkan.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Konten: Syarat & Ketentuan -->
+                {{-- 
+                  SEKSI 2: SYARAT & KETENTUAN OPERASIONAL PEMINJAMAN
+                --}}
                 <div id="syarat" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Syarat & Ketentuan</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
@@ -155,6 +199,7 @@
                             <li>Dilarang membawa makanan beraroma menyengat, merokok, atau menggunakan fasilitas di luar peruntukan izin kegiatan yang diajukan.</li>
                         </ul>
 
+                        {{-- Regulasi Pembatalan Mandiri H-1 --}}
                         <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 mt-8">
                             <p class="text-sm m-0"><strong>Ketentuan Pembatalan Mandiri H-1 (Regulasi BR-USR03-02):</strong> Pembatalan reservasi yang telah disetujui hanya dapat dilakukan secara mandiri oleh peminjam selambat-lambatnya 24 jam sebelum jadwal mulai kegiatan. Batas waktu ini diperlukan agar slot waktu dapat segera dialokasikan kembali untuk sivitas lain yang membutuhkan. Pembatalan darurat di bawah 24 jam wajib melapor langsung ke loket Petugas Sarpras.</p>
                         </div>
@@ -164,7 +209,9 @@
                     </div>
                 </div>
 
-                <!-- Konten: Panduan Peminjaman -->
+                {{-- 
+                  SEKSI 3: PANDUAN LANGKAH-LANGKAH PEMINJAMAN
+                --}}
                 <div id="panduan" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Panduan Peminjaman</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
@@ -182,12 +229,15 @@
                     </div>
                 </div>
 
-                <!-- Konten: Lapor Kerusakan -->
+                {{-- 
+                  SEKSI 4: HELPDESK & LAPOR KERUSAKAN FASILITAS
+                --}}
                 <div id="lapor" class="info-section scroll-mt-32 mb-20 border-t border-gray-100 pt-16">
                     <h1 class="text-4xl font-bold tracking-tight mb-8">Helpdesk & Lapor Kerusakan</h1>
                     <div class="prose prose-slate max-w-none space-y-6 text-[#1D1D1F] font-light leading-relaxed">
                         <p>Sivitas akademika dapat melaporkan sarana prasarana yang mengalami kerusakan atau malfungsi (seperti AC bocor, proyektor bermasalah, kursi patah, atau stopkontak padam) melalui formulir Helpdesk CAVA dengan melampirkan foto bukti kondisi fisik (< 2MB).</p>
                         
+                        {{-- Prosedur Darurat Sarpras --}}
                         <div class="p-6 bg-red-50 rounded-2xl border border-red-100 mt-8">
                             <h3 class="text-red-800 font-semibold mb-2">Prosedur Darurat</h3>
                             <p class="text-sm m-0 text-red-700">Untuk insiden darurat yang memerlukan penanganan seketika di lokasi acara (seperti korsleting listrik, pipa bocor besar, atau genset padam), hubungi Posko Sarpras: (021) 555-0199 ext. 104 atau WhatsApp Siaga: +62 812-3456-7890.</p>
