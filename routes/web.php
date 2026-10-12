@@ -442,8 +442,28 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
      */
     Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
 
-    // ROUTE: Menerima GET request ke '/petugas/reservation-management'
-    // FUNGSI: Menampilkan lembar kerja manajemen dan seluruh antrean persetujuan reservasi (PTG-02 / US-9)
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 15: OPERASIONAL PETUGAS SARPRAS: PERSETUJUAN, PENOLAKAN, & PEMBATALAN DARURAT (PTG-02 & PTG-03)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini mengelola seluruh siklus verifikasi permohonan reservasi kampus:
+     * - Penarikan lembar kerja antrean verifikasi dengan filter status tab Bento & paginasi.
+     * - Eksekusi persetujuan permohonan (Approval) bergaransi anti-bentrok dan lockForUpdate().
+     * - Penolakan permohonan (Rejection) dengan pencatatan alasan resmi transparan.
+     * - Pembatalan darurat sepihak (Force Cancel / Override Privilege) untuk jadwal approved jika terjadi insiden teknis.
+     */
+
+    /**
+     * RUTE: GET /petugas/reservation-management (Lembar Kerja Antrean Reservasi Petugas - PTG-02 / US-9)
+     * -------------------------------------------------------------------------------------------------
+     * Syntax: Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
+     * - Method HTTP : GET (pengambilan tampilan antrean reservasi).
+     * - URI Path   : '/petugas/reservation-management' (dan alias '/petugas/reservations').
+     * - Handler    : ReservationManagementController@index.
+     * - Route Name : 'petugas.reservation-management' & 'petugas.reservations.index'.
+     * - Cara Kerja : Menampilkan tabel antrean permohonan dengan filter status ('pending', 'approved',
+     *                'rejected', 'cancelled'), pencarian teks, dan paginasi server-side.
+     */
     Route::get('/petugas/reservation-management', [ReservationManagementController::class, 'index'])->name('petugas.reservation-management');
     Route::get('/petugas/reservations', [ReservationManagementController::class, 'index'])->name('petugas.reservations.index');
 
@@ -487,16 +507,49 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
      */
     Route::get('/api/petugas/matrix/{date}', [App\Http\Controllers\PetugasScheduleMatrixController::class, 'getMatrixData'])->name('api.petugas.matrix');
 
-    // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/approve'
-    // FUNGSI: Menyetujui permohonan reservasi dengan validasi anti-bentrok jadwal (PTG-02 / US-9)
+    /**
+     * RUTE: PATCH /petugas/reservations/{id}/approve (Persetujuan Reservasi Anti-Bentrok - PTG-02 / US-9)
+     * ----------------------------------------------------------------------------------------------------
+     * Syntax: Route::patch('/petugas/reservations/{id}/approve', [ReservationManagementController::class, 'approve'])->name('petugas.reservations.approve');
+     * - Method HTTP : PATCH (pembaruan parsial status tiket reservasi).
+     * - URI Path   : '/petugas/reservations/{id}/approve'.
+     * - Parameter  : {id} Primary Key tiket reservasi yang berstatus 'pending'.
+     * - Handler    : ReservationManagementController@approve.
+     * - Route Name : 'petugas.reservations.approve'.
+     * - Cara Kerja : Mengeksekusi transaksi database dengan `lockForUpdate()`, memverifikasi bahwa fasilitas
+     *                tidak sedang dalam perbaikan, mengecek formula SQL overlap bentrok jadwal,
+     *                dan mengubah status tiket menjadi 'approved' serta mencatat waktu dan reviewer.
+     */
     Route::patch('/petugas/reservations/{id}/approve', [ReservationManagementController::class, 'approve'])->name('petugas.reservations.approve');
 
-    // ROUTE: Menerima PATCH request ke '/petugas/reservations/{id}/reject'
-    // FUNGSI: Menolak permohonan reservasi dengan alasan penolakan resmi (PTG-02 / US-9)
+    /**
+     * RUTE: PATCH /petugas/reservations/{id}/reject (Penolakan Reservasi dengan Alasan Resmi - PTG-02 / US-9)
+     * --------------------------------------------------------------------------------------------------------
+     * Syntax: Route::patch('/petugas/reservations/{id}/reject', [ReservationManagementController::class, 'reject'])->name('petugas.reservations.reject');
+     * - Method HTTP : PATCH.
+     * - URI Path   : '/petugas/reservations/{id}/reject'.
+     * - Parameter  : {id} ID reservasi yang ditolak.
+     * - FormRequest: RejectReservationRequest (validasi wajib kolom rejection_reason min 5 karakter).
+     * - Handler    : ReservationManagementController@reject.
+     * - Route Name : 'petugas.reservations.reject'.
+     * - Cara Kerja : Mengunci data tiket, mengubah status menjadi 'rejected', menyimpan alasan penolakan
+     *                ke kolom `rejection_reason`, serta mencatat reviewer yang menolak.
+     */
     Route::patch('/petugas/reservations/{id}/reject', [ReservationManagementController::class, 'reject'])->name('petugas.reservations.reject');
 
-    // ROUTE: Menerima DELETE request ke '/petugas/reservations/{id}/force-cancel'
-    // FUNGSI: Pembatalan darurat sepihak (override privilege) oleh petugas untuk reservasi yang telah disetujui (PTG-03 / US-10)
+    /**
+     * RUTE: DELETE /petugas/reservations/{id}/force-cancel (Pembatalan Darurat / Override Privilege - PTG-03 / US-10)
+     * ---------------------------------------------------------------------------------------------------------------
+     * Syntax: Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
+     * - Method HTTP : DELETE (penghapusan alokasi slot jadwal secara darurat).
+     * - URI Path   : '/petugas/reservations/{id}/force-cancel'.
+     * - Parameter  : {id} ID reservasi yang sebelumnya telah berstatus 'approved'.
+     * - FormRequest: ForceCancelReservationRequest (validasi kolom alasan_batal min 10 karakter).
+     * - Handler    : ReservationManagementController@forceCancel.
+     * - Route Name : 'petugas.reservations.force-cancel'.
+     * - Cara Kerja : Memeriksa bahwa reservasi berstatus 'approved' dan acaranya belum berlalu, mengubah status
+     *                menjadi 'cancelled', menyimpan alasan darurat ke `cancellation_reason`, dan melepaskan slot ruang.
+     */
     Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
 
     // ROUTE: Menerima GET request ke '/petugas/report-management'
