@@ -529,12 +529,43 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
      */
     Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
 
-    // ROUTE: Menerima GET request ke '/user/reservation-history'
-    // FUNGSI: Menampilkan daftar riwayat pengajuan reservasi dan status verifikasi
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 11: RIWAYAT RESERVASI & PEMBATALAN MANDIRI H-1 (USR-02 & USR-03)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini melayani pemantauan tiket permohonan reservasi milik sivitas
+     * serta fasilitas pembatalan mandiri sebelum batas mutlak H-1 (24 jam sebelum kegiatan):
+     */
+
+    /**
+     * RUTE: GET /user/reservation-history (Riwayat Permohonan Reservasi Pengguna - USR-02)
+     * ------------------------------------------------------------------------------------
+     * Syntax: Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
+     * - Method HTTP : GET (pengambilan halaman riwayat reservasi personal).
+     * - URI Path   : '/user/reservation-history'.
+     * - Handler    : ReservationController@history.
+     * - Route Name : 'user.reservation-history'.
+     * - Cara Kerja : Menarik seluruh riwayat reservasi yang diajukan oleh pengguna login (`Auth::id()`)
+     *                menggunakan teknik Eager Loading (`with(['facility', 'reviewer'])`) untuk mencegah
+     *                masalah performa N+1, mendukung tab filter status, pencarian multi-atribut,
+     *                serta paginasi data 10 baris per halaman.
+     */
     Route::get('/user/reservation-history', [ReservationController::class, 'history'])->name('user.reservation-history');
 
-    // ROUTE: Menerima DELETE request ke '/user/reservations/{id}/cancel'
-    // FUNGSI: Membatalkan pengajuan reservasi secara mandiri
+    /**
+     * RUTE: DELETE /user/reservations/{id}/cancel (Pembatalan Reservasi Mandiri H-1 - USR-03)
+     * --------------------------------------------------------------------------------------
+     * Syntax: Route::delete('/user/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('user.reservations.cancel');
+     * - Method HTTP : DELETE (penghapusan logis / transisi status pembatalan entitas tiket).
+     * - URI Path   : '/user/reservations/{id}/cancel'.
+     * - Parameter  : {id} mewakili Primary Key tiket reservasi yang ingin dibatalkan.
+     * - Handler    : ReservationController@cancel.
+     * - Route Name : 'user.reservations.cancel'.
+     * - Cara Kerja : Memverifikasi kepemilikan mutlak tiket (`user_id === Auth::id()`), memastikan
+     *                status layak batal ('pending' / 'approved'), dan memvalidasi selisih waktu
+     *                pelaksanaan kegiatan minimal 24 jam (H-1). Jika valid, status diubah menjadi
+     *                'cancelled', mencatat keterangan pembatalan, dan melepas slot ruangan kembali.
+     */
     Route::delete('/user/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('user.reservations.cancel');
 
     // ROUTE: Menerima GET request ke '/user/report-form'
