@@ -1,21 +1,51 @@
 <?php
 /**
- * NAMA FILE    : RejectReservationRequest.php
- * FUNGSI       : FormRequest validasi penolakan permohonan reservasi oleh Petugas Sarpras
- * DESKRIPSI    : Memvalidasi ketersediaan dan format kolom alasan penolakan (rejection_reason) sebelum diolah oleh controller (PTG-02).
- * CARA KERJA   : Mencegat HTTP Request, memeriksa otorisasi petugas, memvalidasi input teks alasan penolakan minimal 5 karakter, dan mengembalikan pesan kesalahan jika kosong.
+ * ====================================================================================================
+ * SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+ * MODUL 15: OPERASIONAL PETUGAS SARPRAS: PERSETUJUAN, PENOLAKAN, & PEMBATALAN DARURAT (PTG-02 & PTG-03)
+ * BERKAS: app/Http/Requests/RejectReservationRequest.php
+ * ====================================================================================================
+ *
+ * DESKRIPSI BERKAS:
+ * Kelas Form Request Validation resmi yang bertindak sebagai penjaga gerbang (Gatekeeper) untuk
+ * memvalidasi integritas data alasan penolakan saat Petugas Sarpras menolak permohonan reservasi sivitas (PTG-02).
+ *
+ * PERAN ARSITEKTURAL DALAM SISTEM CAVA:
+ * 1. Otorisasi Hak Akses Berbasis Peran (RBAC):
+ *    Memverifikasi bahwa pengguna yang mengirimkan aksi penolakan terautentikasi dan memiliki peran 'petugas'.
+ * 2. Transparansi Penolakan Layanan (Accountability):
+ *    Mewajibkan petugas mencantumkan alasan penolakan formal (`rejection_reason`) dengan batasan panjang yang
+ *    memadai (minimal 5 karakter, maksimal 1000 karakter) agar pemohon menerima penjelasan yang jelas.
+ * 3. Lokalisasi Pesan Validasi:
+ *    Menyediakan pesan kegagalan dalam Bahasa Indonesia yang ramah pengguna jika kolom tidak diisi atau tidak valid.
+ * ====================================================================================================
  */
 
 namespace App\Http\Requests;
 
+// Import Base FormRequest dari framework Laravel
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class RejectReservationRequest
+ *
+ * Menangani otorisasi dan validasi input alasan penolakan tiket reservasi fasilitas.
+ */
 class RejectReservationRequest extends FormRequest
 {
     /**
-     * FUNCTION/PROCEDURE : authorize()
-     * KEGUNAAN           : Menentukan apakah pengguna saat ini berwenang mengeksekusi request penolakan ini.
-     * CARA KERJA         : Memeriksa apakah pengguna telah terautentikasi dan memiliki peran petugas.
+     * METHOD: authorize()
+     * ------------------------------------------------------------------------------------------------
+     * FUNGSI / KEGUNAAN:
+     * Menentukan apakah pengguna yang sedang login memiliki wewenang untuk menolak permohonan reservasi.
+     *
+     * RETURN VALUE:
+     * bool : Mengembalikan `true` jika pengguna sah, atau `false` yang memicu respon HTTP 403 Forbidden.
+     *
+     * CARA KERJA:
+     * 1. `auth()->check()`: Memastikan sesi otentikasi pengguna aktif (bukan guest).
+     * 2. `auth()->user()->hasRole('petugas') || auth()->user()->role === 'petugas'`: Memeriksa kepemilikan
+     *    peran Petugas Sarpras baik melalui sistem Spatie Laravel-Permission maupun kolom role bawaan.
      */
     public function authorize(): bool
     {
@@ -23,9 +53,19 @@ class RejectReservationRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : rules()
-     * KEGUNAAN           : Menetapkan aturan validasi untuk payload request penolakan.
-     * CARA KERJA         : Memastikan rejection_reason wajib diisi berupa teks string yang informatif (5 - 1000 karakter).
+     * METHOD: rules()
+     * ------------------------------------------------------------------------------------------------
+     * FUNGSI / KEGUNAAN:
+     * Menetapkan aturan validasi deklaratif untuk payload penolakan tiket permohonan.
+     *
+     * RETURN VALUE:
+     * array : Array pemetaan nama kolom ke daftar rule validasi Laravel.
+     *
+     * CARA KERJA:
+     * - 'required' : Nilai kolom `rejection_reason` wajib disertakan dan tidak boleh string kosong atau null.
+     * - 'string'   : Nilai harus berupa tipe data teks / untaian karakter.
+     * - 'min:5'    : Panjang teks minimal 5 karakter guna mencegah pengisian alasan asal-asalan.
+     * - 'max:1000' : Panjang teks maksimal 1000 karakter untuk mencegah eksploitasi beban memori basis data.
      */
     public function rules(): array
     {
@@ -35,9 +75,13 @@ class RejectReservationRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : messages()
-     * KEGUNAAN           : Menyediakan pesan umpan balik validasi kustom dalam Bahasa Indonesia.
-     * CARA KERJA         : Mengembalikan pemetaan string pesan kesalahan untuk setiap kegagalan rule validasi.
+     * METHOD: messages()
+     * ------------------------------------------------------------------------------------------------
+     * FUNGSI / KEGUNAAN:
+     * Mengkustomisasi pesan kesalahan validasi agar informatif dan berbahasa Indonesia standar.
+     *
+     * RETURN VALUE:
+     * array : Array pemetaan aturan kesalahan ke kalimat pesan kesalahan.
      */
     public function messages(): array
     {
