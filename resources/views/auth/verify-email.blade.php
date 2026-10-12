@@ -6,7 +6,7 @@
 
     <div class="mb-10">
         <h1 class="text-[32px] md:text-[36px] font-extrabold tracking-tight text-[#1D1D1F] mb-2 leading-tight">Verifikasi Email</h1>
-        <p class="text-[15px] text-[#86868B] leading-relaxed max-w-sm">{{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.') }}</p>
+        <p class="text-[15px] text-[#86868B] leading-relaxed max-w-sm">{{ __("Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.") }}</p>
     </div>
 
     @if (session('status') == 'verification-link-sent')

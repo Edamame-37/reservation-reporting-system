@@ -220,6 +220,10 @@
                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $currentCat === 'rapat' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                         Ruang Rapat
                     </a>
+                    <a href="{{ route('admin.facility-master', array_merge(request()->query(), ['category' => 'ruang_kerja'])) }}"
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $currentCat === 'ruang_kerja' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        Ruang Kerja
+                    </a>
                 </div>
 
                 {{-- Search & Status Filter --}}
@@ -266,11 +270,12 @@
                     <tbody class="divide-y divide-slate-100">
                         @php
                             $categoryLabels = [
-                                'auditorium' => 'Auditorium & Hall',
-                                'kelas'      => 'Ruang Kelas',
-                                'lab'        => 'Laboratorium',
-                                'olahraga'   => 'Lapangan Olahraga',
-                                'rapat'      => 'Ruang Rapat',
+                                'auditorium'  => 'Auditorium & Hall',
+                                'kelas'       => 'Ruang Kelas',
+                                'lab'         => 'Laboratorium',
+                                'olahraga'    => 'Lapangan Olahraga',
+                                'rapat'       => 'Ruang Rapat',
+                                'ruang_kerja' => 'Ruang Kerja / Co-Working',
                             ];
                         @endphp
 
@@ -439,6 +444,7 @@
                                 <option value="lab">Laboratorium</option>
                                 <option value="olahraga">Lapangan Olahraga</option>
                                 <option value="rapat">Ruang Rapat</option>
+                                <option value="ruang_kerja">Ruang Kerja / Co-Working</option>
                             </select>
                             @error('category') <p class="text-rose-600 text-[11px] mt-0.5">{{ $message }}</p> @enderror
                         </div>

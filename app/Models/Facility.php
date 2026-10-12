@@ -33,6 +33,7 @@ class Facility extends Model
     protected $fillable = [
         'code',
         'name',
+        'source_origin',
         'category',
         'building',
         'floor_location',

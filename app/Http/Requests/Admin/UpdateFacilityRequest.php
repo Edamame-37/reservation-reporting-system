@@ -67,11 +67,12 @@ class UpdateFacilityRequest extends FormRequest
         $facilityId = $this->route('facility') ?? $this->input('id');
 
         return [
-            'name'           => ['required', 'string', 'max:150', Rule::unique('facilities', 'name')->ignore($facilityId)],
+            'name'           => ['required', 'string', 'max:255', Rule::unique('facilities', 'name')->ignore($facilityId)],
             'code'           => ['required', 'string', 'max:30', Rule::unique('facilities', 'code')->ignore($facilityId)],
-            'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat'],
+            'source_origin'  => ['nullable', 'string', 'max:100'],
+            'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat,ruang_kerja'],
             'building'       => ['required', 'string', 'max:100'],
-            'floor_location' => ['nullable', 'string', 'max:50'],
+            'floor_location' => ['nullable', 'string', 'max:100'],
             'capacity'       => ['required', 'integer', 'min:1'],
             'equipment'      => ['nullable'],
             'description'    => ['nullable', 'string', 'max:1000'],

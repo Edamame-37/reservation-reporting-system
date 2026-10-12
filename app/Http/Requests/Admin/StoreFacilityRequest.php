@@ -64,11 +64,12 @@ class StoreFacilityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'           => ['required', 'string', 'max:150', 'unique:facilities,name'],
+            'name'           => ['required', 'string', 'max:255', 'unique:facilities,name'],
             'code'           => ['required', 'string', 'max:30', 'unique:facilities,code'],
-            'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat'],
+            'source_origin'  => ['nullable', 'string', 'max:100'],
+            'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat,ruang_kerja'],
             'building'       => ['required', 'string', 'max:100'],
-            'floor_location' => ['nullable', 'string', 'max:50'],
+            'floor_location' => ['nullable', 'string', 'max:100'],
             'capacity'       => ['required', 'integer', 'min:1'],
             'equipment'      => ['nullable'],
             'description'    => ['nullable', 'string', 'max:1000'],

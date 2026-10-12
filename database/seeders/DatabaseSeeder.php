@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             UserSeeder::class,
             FacilitySeeder::class,
+            ImportFacilitiesFromCsvSeeder::class,
         ]);
     }
 }
