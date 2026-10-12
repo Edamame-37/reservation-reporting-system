@@ -102,9 +102,11 @@ class PublicFacilityController extends Controller
             ->get()
             ->groupBy('facility_id');
 
+        // Batasi penampilan maksimal 8 fasilitas per request dengan paginasi server-side
         $facilities = $query->orderBy('name', 'asc')
-            ->get()
-            ->map(function ($f) use ($todayReservations) {
+            ->paginate(8)
+            ->withQueryString()
+            ->through(function ($f) use ($todayReservations) {
                 $occupiedSlots = isset($todayReservations[$f->id])
                     ? $todayReservations[$f->id]->sum('total_slots')
                     : 0;
@@ -148,9 +150,11 @@ class PublicFacilityController extends Controller
         $query = Facility::where('status', '!=', 'nonaktif');
         $query = $this->applyFilters($query, $request);
 
+        // Batasi penampilan maksimal 8 fasilitas per request dengan paginasi server-side
         $facilities = $query->orderBy('name', 'asc')
-            ->get()
-            ->map(function ($f) {
+            ->paginate(8)
+            ->withQueryString()
+            ->through(function ($f) {
                 return [
                     'id' => $f->id,
                     'name' => $f->name,

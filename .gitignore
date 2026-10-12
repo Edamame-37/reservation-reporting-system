@@ -35,3 +35,6 @@ Project PPK 2026.pdf
 phpunit.xml
 .npmrc
 .gitattributes
+
+# Direktori data dump / aset ekspor database lokal
+new data for database/
