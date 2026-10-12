@@ -1,15 +1,42 @@
 {{-- 
-  NAMA FILE      : export-report.blade.php
-  FUNGSIONALITAS : Halaman Antarmuka Rekapitulasi & Ekspor Laporan (100% Sesuai Opsi 1 Prototype 4_try-admin.html)
-  DESKRIPSI      : Menampilkan rentang tanggal periode laporan statuter, tombol unduh Excel/CSV dan PDF resmi, serta data rekapitulasi okupansi fasilitas dan insiden pemeliharaan.
-  DESAIN SISTEM  : Apple Bento & Minimalist Precision (Opsi 1)
-  CARA KERJA     : Menggunakan layout <x-admin-layout active="export-report">, memicu download file CSV/Excel atau PDF dari ExportController berdasarkan rentang tanggal aktif.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 8: KONSOL ADMIN - REKAPITULASI ANALITIK, AUDIT OKUPANSI, & EKSPOR RESMI (PDF & EXCEL - ADM-04)
+BERKAS: resources/views/admin/export-report.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Halaman Konsol Pusat Rekapitulasi Analitik & Ekspor Laporan Resmi (Executive Reporting Hub) bagi Super Admin.
+Menyediakan antarmuka interaktif Bento UI untuk memfilter data berdasarkan rentang waktu, memeriksa
+pratinjau metrik secara komprehensif, serta memicu pengunduhan dokumen resmi berformat:
+1. Spreadsheet Excel/CSV (.csv) untuk audit numerik mendalam.
+2. Dokumen Cetak PDF Resmi (.pdf) berspesifikasi Landscape A4 berkop universitas.
+
+PERAN & ARSITEKTUR DALAM SISTEM CAVA:
+- Membungkus antarmuka dengan `<x-admin-layout active="export-report">` untuk mempertahankan navigasi sidebar terpadu.
+- Formulir Filter Tanggal Otomatis: Menggunakan event `onchange="this.form.submit()"` sehingga pergantian
+  rentang waktu langsung memperbarui seluruh tabel rekapitulasi secara sinkron.
+- Komponen Paginasi Sisi Klien Alpine.js: Fungsi `facilityReportTable()` menangani pembagian data tabel
+  utilisasi fasilitas (10 baris per halaman) tanpa perlu reload HTTP yang berat.
+- Integrasi Rute Ekspor Terpusat:
+  * Reservasi Excel: `admin.export.reservations.excel`
+  * Reservasi PDF  : `admin.export.reservations.pdf`
+  * Kerusakan Excel: `admin.export.damage-reports.excel`
+  * Kerusakan PDF  : `admin.export.damage-reports.pdf`
+====================================================================================================
 --}}
 
+{{--
+  PENJELASAN ELEMEN LAYOUT INDUK:
+  - 'title'  : Menyetel judul tab browser menjadi "Rekapitulasi & Ekspor Laporan".
+  - 'active' : Mengaktifkan penanda visual menu sidebar "export-report".
+--}}
 <x-admin-layout title="Rekapitulasi & Ekspor Laporan" active="export-report">
     <div class="space-y-8">
         
-        {{-- 1. Header Halaman (100% Sesuai 4_try-admin.html Opsi 1) --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 1. HEADER HALAMAN & DESKRIPSI TUJUAN AUDIT                                         --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Rekapitulasi & Ekspor Laporan</h1>
@@ -17,12 +44,16 @@
             </div>
         </div>
 
-        {{-- 2. Rentang Tanggal Filter Box Bergaya Bento Apple (100% Sesuai Prototype) --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 2. KARTU FILTER PERIODE WAKTU LAPORAN & TOMBOL PINTASAN UNDUH                      --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <div class="bg-white rounded-[2rem] p-7 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
             <h3 class="text-base font-bold text-[#1D1D1F] mb-1">Periode Waktu Laporan</h3>
             <p class="text-xs text-[#86868B] mb-6">Tentukan rentang tanggal untuk kompilasi data peminjaman ruangan dan catatan kerusakan.</p>
 
+            {{-- Formulir Filter Rentang Tanggal (GET Request ke admin.export-report) --}}
             <form action="{{ route('admin.export-report') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                {{-- Input Tanggal Mulai --}}
                 <div>
                     <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-start">Tanggal Mulai</label>
                     <input type="date" 
@@ -32,6 +63,8 @@
                            onchange="this.form.submit()" 
                            class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
+
+                {{-- Input Tanggal Selesai --}}
                 <div>
                     <label class="block text-xs font-medium text-[#86868B] mb-1.5" for="exp-end">Tanggal Selesai</label>
                     <input type="date" 
@@ -41,6 +74,8 @@
                            onchange="this.form.submit()" 
                            class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                 </div>
+
+                {{-- Tombol Unduh Spreadsheet Excel / CSV Transaksi Reservasi --}}
                 <div>
                     <a href="{{ route('admin.export.reservations.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
                        class="w-full bg-white border border-gray-200 text-[#1D1D1F] hover:bg-gray-50 py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2">
@@ -48,6 +83,8 @@
                         <span>Unduh Excel / CSV</span>
                     </a>
                 </div>
+
+                {{-- Tombol Cetak Dokumen PDF Resmi Transaksi Reservasi --}}
                 <div>
                     <a href="{{ route('admin.export.reservations.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
                        class="w-full bg-[#1D1D1F] text-white hover:bg-black py-2.5 px-4 rounded-xl text-sm font-medium transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
@@ -58,13 +95,16 @@
             </form>
         </div>
 
-        {{-- 3. Tabel Rekapitulasi Okupansi Fasilitas --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 3. TABEL REKAPITULASI AUDIT OKUPANSI FASILITAS (DENGAN PAGINASI ALPINE.JS)         --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <section x-data="facilityReportTable(@js($facilityUtilization))" class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h3 class="text-base font-bold text-[#1D1D1F] font-display">Rekapitulasi Okupansi Fasilitas</h3>
                     <p class="text-xs text-[#86868B] mt-0.5">Rincian utilisasi dan jam pemakaian setiap ruangan pada periode berjalan.</p>
                 </div>
+                {{-- Rentang Tanggal Aktif --}}
                 <span class="text-xs font-mono text-[#86868B]">{{ $startDate }} s.d. {{ $endDate }}</span>
             </div>
 
@@ -82,6 +122,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
+                        {{-- Iterasi Baris Dinamis Menggunakan Array Paginasi Alpine.js `displayedRows` --}}
                         <template x-for="row in displayedRows" :key="row.id">
                             <tr class="hover:bg-[#FBFBFD] transition group">
                                 <td class="py-5 px-6">
@@ -100,6 +141,8 @@
                                 </td>
                             </tr>
                         </template>
+
+                        {{-- Tampilan Kosong Jika Tidak Ada Data --}}
                         <template x-if="allRows.length === 0">
                             <tr>
                                 <td colspan="7" class="py-16 text-center text-[#86868B] text-xs">
@@ -111,6 +154,7 @@
                 </table>
             </div>
 
+            {{-- Kontrol Navigasi Paginasi Sisi Klien --}}
             <template x-if="allRows.length > 0">
                 <div class="p-6 bg-[#FBFBFD] border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#86868B]">
                     <div>
@@ -146,7 +190,9 @@
             </template>
         </section>
 
-        {{-- 4. Tabel Frekuensi Kerusakan Aset --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 4. TABEL REKAPITULASI FREKUENSI KERUSAKAN ASET & KEPATUHAN SLA                     --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <section class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="p-6 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -154,6 +200,7 @@
                     <p class="text-xs text-[#86868B] mt-0.5">Ringkasan penanganan gangguan dan kepatuhan SLA sarana prasarana.</p>
                 </div>
                 
+                {{-- Tombol Ekspor Khusus Rekapitulasi Tiket Kerusakan --}}
                 <div class="flex items-center gap-2">
                     <a href="{{ route('admin.export.damage-reports.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
                        class="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-[#1D1D1F] text-xs font-semibold hover:bg-gray-50 transition shadow-xs flex items-center gap-1.5">
@@ -209,16 +256,20 @@
 
     </div>
 
-    {{-- Script Pembungkus Komponen Alpine.js Terisolasi Bebas Syntax Leak --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- SKRIP ALPINE.JS: FUNGSI PAGINASI SISI KLIEN UNTUK TABEL UTILISASI FASILITAS            --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <script>
         function facilityReportTable(initialData) {
             return {
                 allRows: initialData || [],
                 currentPage: 1,
                 perPage: 10,
+                // Menghitung jumlah total halaman paginasi
                 get totalPages() {
                     return Math.max(1, Math.ceil(this.allRows.length / this.perPage));
                 },
+                // Memotong array data untuk halaman saat ini
                 get displayedRows() {
                     const start = (this.currentPage - 1) * this.perPage;
                     return this.allRows.slice(start, start + this.perPage);
