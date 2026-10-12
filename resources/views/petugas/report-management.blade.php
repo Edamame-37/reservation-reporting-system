@@ -1,12 +1,33 @@
 {{-- 
-  NAMA FILE      : report-management.blade.php
-  FUNGSIONALITAS : Lembar Kerja Manajemen Tiket Kerusakan Fasilitas & Pemblokiran Ruang Petugas Sarpras
-  DESKRIPSI      : Menampilkan seluruh antrean tiket kerusakan fasilitas kampus, mengubah status progres (Baru/Diproses/Selesai/Ditolak),
-                   menginput catatan resolusi teknisi, serta mengunci fasilitas ke status 'Dalam Perbaikan' / Maintenance Mode secara profesional.
-  CARA KERJA     : Memanfaatkan layout <x-petugas-layout active="report-management">, mengelola modal pembaruan status dan saklar toggle
-                   pemblokiran jadwal maintenance via Alpine.js/Blade form, serta memicu pengiriman PATCH request ke endpoint operasional petugas.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 16: OPERASIONAL PETUGAS SARPRAS: MANAJEMEN TIKET KERUSAKAN, RESOLUSI & MODE PERBAIKAN (PTG-04 & PTG-05)
+BERKAS: resources/views/petugas/report-management.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Lembar kerja operasional bagi Petugas UPT Sarana dan Prasarana Kampus untuk mengelola pengaduan kerusakan fisik aset kampus.
+Menyediakan fitur pelacakan status penanganan teknisi (Baru, Diproses, Selesai, Ditolak), pencatatan resolusi perbaikan resmi,
+pratinjau bukti foto via modal lightbox, serta saklar interaktif untuk mengunci/membuka kunci fasilitas ke Mode Perbaikan (Maintenance Mode).
+
+PERAN ARSITEKTURAL DALAM SISTEM CAVA:
+1. Lembar Kerja Penanganan Insiden Sarpras (PTG-04 / US-11):
+   Menyediakan visibilitas penuh atas laporan sivitas, kategori kerusakan, bukti foto fisik, dan catatan teknis pengerjaan.
+2. Saklar Operasional Mode Perbaikan Fasilitas (PTG-05 / US-12 / UR12):
+   Memungkinkan petugas mengunci ruangan yang rusak parah langsung dari baris tabel laporan via tombol saklar toggle switch,
+   sehingga ruangan secara otomatis dinonaktifkan dari katalog dan kalender reservasi kampus.
+3. Modal Reaktif Pembaruan Status & Resolusi:
+   Memanfaatkan Alpine.js untuk memuat form dialog pembaruan status yang secara dinamis mewajibkan pengisian catatan resolusi
+   saat status dipilih sebagai 'selesai' atau 'ditolak'.
+4. Lightbox Bukti Foto Asli:
+   Menampilkan berkas foto yang diunggah sivitas dalam pop-up modal layar penuh agar teknisi dapat menganalisis tingkat kerusakan.
+====================================================================================================
 --}}
 
+{{--
+  INISIALISASI AMAN DATA & AGREGASI STATISTIK:
+  Menghitung jumlah metrik laporan jika variabel agregasi tidak dioper secara langsung dari controller.
+--}}
 @php
     $reports = $reports ?? collect([]);
     $totalCount = $totalCount ?? $reports->count();
@@ -19,7 +40,23 @@
     })->pluck('facility_id')->unique()->count();
 @endphp
 
+{{--
+  PEMBUNGKUS MASTER LAYOUT PETUGAS:
+  - 'title'  : Judul halaman operasional pada tab browser dan top bar.
+  - 'active' : Mengaktifkan penanda 'report-management' pada sidebar petugas.
+--}}
 <x-petugas-layout title="Manajemen Tiket Kerusakan Fasilitas" active="report-management">
+
+    {{--
+      KOMPONEN STATE ALPINE.JS (x-data):
+      Mengelola interaktivitas klien:
+      - 'showStatusModal' : Boolean visibilitas dialog pembaruan status dan catatan resolusi.
+      - 'showPhotoModal'  : Boolean visibilitas modal lightbox foto lampiran.
+      - 'photoUrl'        : String URL publik berkas foto yang sedang ditampilkan.
+      - 'selectedReport'  : Objek metadata tiket yang sedang diedit (id, code, venue, desc, status, facilityLocked, resolutionNote).
+      - 'openUpdate(...)': Method pengisi data ke state sebelum membuka modal status.
+      - 'openPhoto(url)'  : Method pemicu pembukaan lightbox foto.
+    --}}
     <div x-data="{
         showStatusModal: false,
         showPhotoModal: false,
@@ -53,14 +90,17 @@
         }
     }" class="flex flex-col gap-6">
 
-        {{-- 1. Notifikasi Flash Message --}}
+        {{-- 
+          1. NOTIFIKASI FLASH MESSAGE OPERASIONAL:
+          Menampilkan umpan balik berhasil atau galat validasi dengan tombol tutup mandiri.
+        --}}
         @if(session('success'))
             <div class="p-3.5 rounded-xl bg-slate-900 text-white text-xs flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
                     <span class="font-medium">{{ session('success') }}</span>
                 </div>
-                <button type="button" @click="$el.parentElement.remove()" class="text-slate-400 hover:text-white">
+                <button type="button" @click="$el.parentElement.remove()" class="text-slate-400 hover:text-white cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">close</span>
                 </button>
             </div>
@@ -74,13 +114,17 @@
                         {{ session('error') ?? ($errors->first() ?? 'Terjadi kesalahan') }}
                     </span>
                 </div>
-                <button type="button" @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-800">
+                <button type="button" @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-800 cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">close</span>
                 </button>
             </div>
         @endif
 
-        {{-- 2. Header Halaman Profesional --}}
+        {{-- 
+          2. HEADER HALAMAN PROFESIONAL:
+          Menampilkan judul modul, deskripsi operasional, serta 2 badge indikator ringkasan:
+          total tiket dan total ruangan yang sedang terkunci dalam Mode Perbaikan.
+        --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Laporan Kerusakan & Fasilitas</h1>
@@ -99,8 +143,13 @@
             </div>
         </div>
 
-        {{-- 3. Filter & Search Bar Server-Side --}}
+        {{-- 
+          3. FILTER STATUS TAB & SEARCH BAR SERVER-SIDE:
+          Menyediakan tab tombol filter status (Semua, Baru, Diproses, Selesai, Ditolak)
+          dan kolom formulir pencarian teks multi-atribut yang mempertahankan parameter status aktif.
+        --}}
         <div class="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
+            {{-- Tab Filter Status Tiket --}}
             <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-lg text-xs font-medium w-full md:w-auto overflow-x-auto">
                 <a href="{{ route('petugas.report-management', ['status' => 'semua', 'search' => $search ?? '']) }}" class="px-3 py-1.5 rounded-md transition whitespace-nowrap {{ ($currentStatus ?? 'semua') === 'semua' ? 'bg-white text-slate-900 font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}">
                     Semua ({{ $totalCount }})
@@ -119,6 +168,7 @@
                 </a>
             </div>
 
+            {{-- Formulir Pencarian Teks --}}
             <form method="GET" action="{{ route('petugas.report-management') }}" class="relative w-full md:w-72">
                 <input type="hidden" name="status" value="{{ $currentStatus ?? 'semua' }}">
                 <span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-[18px]">search</span>
@@ -131,7 +181,17 @@
             </form>
         </div>
 
-        {{-- 4. Tabel Tiket Kerusakan Lengkap (Monochrome Bento Table) --}}
+        {{-- 
+          4. TABEL TIKET KERUSAKAN LENGKAP (MONOCHROME BENTO TABLE):
+          Menyajikan 7 kolom data:
+          1. Tiket & Pelapor (Kode tiket, nama sivitas, tanggal laporan)
+          2. Fasilitas (Nama ruang, gedung, lantai, kategori kerusakan)
+          3. Deskripsi Masalah (Uraian keluhan sivitas + tombol pemicu lightbox foto)
+          4. Status (Pill badge penanganan: baru, diproses, selesai, ditolak)
+          5. Mode Perbaikan (Tombol saklar toggle status maintenance fasilitas)
+          6. Catatan Resolusi (Catatan tindakan teknisi)
+          7. Tindakan (Tombol buka modal perbarui status)
+        --}}
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs border-collapse">
@@ -153,6 +213,7 @@
                                 $facilityName = $report->facility->name ?? 'Fasilitas Terkait';
                             @endphp
                             <tr class="hover:bg-slate-50/70 transition-colors">
+                                {{-- Kolom 1: Kode Tiket & Identitas Pelapor --}}
                                 <td class="py-3 px-4 align-top whitespace-nowrap">
                                     <div class="font-mono font-bold text-slate-900">
                                         {{ $report->report_code ?? 'RPT-' . $report->id }}
@@ -165,6 +226,7 @@
                                     </span>
                                 </td>
 
+                                {{-- Kolom 2: Fasilitas & Kategori Kerusakan --}}
                                 <td class="py-3 px-4 align-top">
                                     <div class="font-semibold text-slate-900">
                                         {{ $report->facility->name ?? 'Fasilitas Kampus' }}
@@ -180,6 +242,7 @@
                                     </span>
                                 </td>
 
+                                {{-- Kolom 3: Deskripsi Keluhan & Bukti Foto --}}
                                 <td class="py-3 px-4 align-top max-w-xs">
                                     <p class="text-slate-700 line-clamp-2 leading-relaxed">
                                         {{ $report->description ?? '-' }}
@@ -194,19 +257,20 @@
                                     @endif
                                 </td>
 
+                                {{-- Kolom 4: Pill Badge Status Penanganan --}}
                                 <td class="py-3 px-4 align-top">
                                     <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 capitalize">
                                         {{ $report->status ?? 'baru' }}
                                     </span>
                                 </td>
 
-                                {{-- Kolom Saklar Mode Perbaikan --}}
+                                {{-- Kolom 5: Saklar Toggle Mode Perbaikan Ruangan --}}
                                 <td class="py-3 px-4 align-top whitespace-nowrap">
                                     @if(!empty($report->facility_id))
                                         <form action="{{ url('/petugas/facilities/' . $report->facility_id . '/toggle-maintenance') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin {{ $isFacilityLocked ? 'MEMBUKA KUNCI dan mengembalikan fasilitas ' . addslashes($facilityName) . ' ke status Aktif' : 'MENGUNCI fasilitas ' . addslashes($facilityName) . ' ke Mode Perbaikan' }}?');" class="inline-block">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" title="{{ $isFacilityLocked ? 'Buka kunci fasilitas' : 'Kunci fasilitas' }}" class="group flex items-center gap-2 p-1.5 pr-2.5 rounded-lg border text-left transition-colors shadow-2xs {{ $isFacilityLocked ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+                                            <button type="submit" title="{{ $isFacilityLocked ? 'Buka kunci fasilitas' : 'Kunci fasilitas' }}" class="group flex items-center gap-2 p-1.5 pr-2.5 rounded-lg border text-left transition-colors shadow-2xs cursor-pointer {{ $isFacilityLocked ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' }}">
                                                 <div class="relative w-6 h-3.5 rounded-full transition-colors {{ $isFacilityLocked ? 'bg-white/30' : 'bg-slate-200' }}">
                                                     <div class="absolute top-0.5 {{ $isFacilityLocked ? 'right-0.5 bg-white' : 'left-0.5 bg-slate-400' }} w-2.5 h-2.5 rounded-full transition-all"></div>
                                                 </div>
@@ -220,6 +284,7 @@
                                     @endif
                                 </td>
 
+                                {{-- Kolom 6: Catatan Resolusi Teknisi --}}
                                 <td class="py-3 px-4 align-top max-w-xs">
                                     @if(!empty($report->resolution_note))
                                         <div class="text-[11px] text-slate-700 bg-slate-50 border border-slate-200/60 p-2 rounded-lg leading-relaxed">
@@ -230,13 +295,15 @@
                                     @endif
                                 </td>
 
+                                {{-- Kolom 7: Tombol Tindakan Modal Perbarui Status --}}
                                 <td class="py-3 px-4 align-top text-right whitespace-nowrap">
-                                    <button type="button" @click="openUpdate('{{ $report->id }}', '{{ $report->report_code }}', '{{ addslashes($report->facility->name ?? 'Fasilitas') }}', '{{ addslashes($report->description ?? '') }}', '{{ $report->status }}', {{ $isFacilityLocked ? 'true' : 'false' }}, '{{ addslashes($report->resolution_note ?? '') }}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors shadow-2xs text-xs font-medium">
+                                    <button type="button" @click="openUpdate('{{ $report->id }}', '{{ $report->report_code }}', '{{ addslashes($report->facility->name ?? 'Fasilitas') }}', '{{ addslashes($report->description ?? '') }}', '{{ $report->status }}', {{ $isFacilityLocked ? 'true' : 'false' }}, '{{ addslashes($report->resolution_note ?? '') }}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors shadow-2xs text-xs font-medium cursor-pointer">
                                         Perbarui Status
                                     </button>
                                 </td>
                             </tr>
                         @empty
+                            {{-- Tampilan Kosong --}}
                             <tr>
                                 <td colspan="7" class="py-12 px-4 text-center text-xs text-slate-400">
                                     Tidak ada tiket laporan kerusakan yang tertunda saat ini.
@@ -260,14 +327,18 @@
             @endif
         </div>
 
-        {{-- 5. Modal Perbarui Status Tiket & Kunci Fasilitas --}}
+        {{-- 
+          5. MODAL PERBARUI STATUS TIKET & KUNCI FASILITAS:
+          Form dialog berbasis Alpine.js untuk mengubah status penanganan, mengunci fasilitas,
+          dan menginput catatan resolusi teknisi yang wajib diisi jika status diubah ke 'selesai' atau 'ditolak'.
+        --}}
         <div x-show="showStatusModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showStatusModal = false" class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-bold text-slate-900">
                         Perbarui Status Penanganan & Fasilitas
                     </h3>
-                    <button type="button" @click="showStatusModal = false" class="text-slate-400 hover:text-slate-700">
+                    <button type="button" @click="showStatusModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
@@ -280,6 +351,7 @@
                         <p class="text-slate-600 mt-1 leading-relaxed" x-text="selectedReport.desc"></p>
                     </div>
 
+                    {{-- Formulir Pembaruan Status HTTP PATCH --}}
                     <form :action="'{{ url('/petugas/reports') }}/' + selectedReport.id" method="POST" class="space-y-4">
                         @csrf
                         @method('PATCH')
@@ -297,7 +369,7 @@
                             </select>
                         </div>
 
-                        {{-- Toggle Fasilitas Dalam Perbaikan --}}
+                        {{-- Checkbox Kunci Fasilitas ke Mode Perbaikan --}}
                         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
                             <label class="flex items-start gap-2.5 cursor-pointer">
                                 <input type="checkbox" name="is_facility_locked" value="1" x-model="selectedReport.facilityLocked" class="mt-0.5 rounded text-slate-900 focus:ring-slate-900 w-4 h-4">
@@ -310,7 +382,7 @@
                             </label>
                         </div>
 
-                        {{-- Catatan Resolusi --}}
+                        {{-- Input Catatan Resolusi (Wajib jika status selesai / ditolak) --}}
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label for="resolution-note" class="text-xs font-medium text-slate-700">
@@ -323,11 +395,12 @@
                             <textarea id="resolution-note" name="catatan_resolusi" x-model="selectedReport.resolutionNote" :required="selectedReport.status === 'selesai' || selectedReport.status === 'ditolak'" maxlength="2000" rows="3" placeholder="Contoh: Komponen telah diganti dan fasilitas telah diuji normal (maks. 2000 karakter)..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition"></textarea>
                         </div>
 
+                        {{-- Tombol Batal & Simpan --}}
                         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                            <button type="button" @click="showStatusModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition">
+                            <button type="button" @click="showStatusModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition cursor-pointer">
                                 Batal
                             </button>
-                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 shadow-2xs transition">
+                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 shadow-2xs transition cursor-pointer">
                                 Simpan Perubahan
                             </button>
                         </div>
@@ -336,12 +409,15 @@
             </div>
         </div>
 
-        {{-- 6. Modal Lightbox Pratinjau Foto --}}
+        {{-- 
+          6. MODAL LIGHTBOX PRATINJAU FOTO:
+          Menampilkan gambar bukti kerusakan dalam resolusi utuh dengan latar belakang redup (backdrop blur).
+        --}}
         <div x-show="showPhotoModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showPhotoModal = false" class="bg-white rounded-2xl max-w-2xl w-full p-4 shadow-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3 px-2">
                     <span class="text-xs font-semibold text-slate-900">Lampiran Foto Bukti Kerusakan</span>
-                    <button type="button" @click="showPhotoModal = false" class="text-slate-400 hover:text-slate-700">
+                    <button type="button" @click="showPhotoModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
