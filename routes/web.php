@@ -464,15 +464,29 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
     Route::patch('/petugas/facilities/{id}/toggle-maintenance', [ReportManagementController::class, 'toggleMaintenance'])->name('petugas.facilities.toggle-maintenance');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Portal Pengguna (Mahasiswa & Dosen)
-|--------------------------------------------------------------------------
-*/
-
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL PORTAL PENGGUNA (SIVITAS AKADEMIKA / MAHASISWA & DOSEN - MODUL 9)
+ * ------------------------------------------------------------------------------------------
+ * Kelompok rute di bawah ini melayani portal swalayan (Self-Service Portal) untuk sivitas kampus:
+ * - Pengajuan dan pelacakan reservasi peminjaman ruangan mandiri (USR-01).
+ * - Pembatalan mandiri sebelum batas waktu H-1 (USR-02).
+ * - Pelaporan tiket kerusakan sarana prasarana beserta bukti foto (USR-03).
+ * Dilindungi oleh middleware: 'auth' (wajib login) dan 'role:pengguna' (hak akses sivitas aktif).
+ */
 Route::middleware(['auth', 'role:pengguna'])->group(function () {
-    // ROUTE: Menerima GET request ke '/user/dashboard'
-    // FUNGSI: Menampilkan dasbor riwayat aktif dan pintasan reservasi untuk mahasiswa/dosen
+    /**
+     * RUTE: GET /user/dashboard (Dasbor Personal Sivitas & Ringkasan Tiket Aktif - Modul 9)
+     * --------------------------------------------------------------------------------------
+     * Syntax: Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard');
+     * - Method HTTP : GET (pengambilan halaman representasi dasbor pengguna).
+     * - URI Path   : '/user/dashboard'.
+     * - Handler    : DashboardUserController@index.
+     * - Route Name : 'user.dashboard'.
+     * - Cara Kerja : Mengidentifikasi akun pengguna yang sedang login (`Auth::id()`), mengambil
+     *                jadwal terdekat yang disetujui (`upcomingReservation`), 3 riwayat pengajuan terkini,
+     *                dan tiket pengaduan aktif, lalu merender view Bento UI `user.dashboard`.
+     */
     Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard');
 
     // ROUTE: Menerima GET request ke '/user/reservation-form'
