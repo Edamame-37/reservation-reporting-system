@@ -1,19 +1,58 @@
 {{-- 
-  NAMA FILE      : reservation-management.blade.php
-  FUNGSIONALITAS : Lembar Kerja Manajemen & Approval Antrean Reservasi Petugas Sarpras
-  DESKRIPSI      : Menampilkan antrean permohonan reservasi dengan prinsip Progressive Disclosure:
-                   tampilan awal hanya memuat informasi esensial yang lapang & bersih, sementara rincian
-                   lengkap (surat izin, tujuan kegiatan, identitas lengkap) dibuka via modal peninjauan.
-  CARA KERJA     : Terintegrasi dengan <x-petugas-layout active="reservation-management">, pagination server-side,
-                   dan modal Alpine.js untuk peninjauan, persetujuan, penolakan, serta pembatalan darurat.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 15: OPERASIONAL PETUGAS SARPRAS: PERSETUJUAN, PENOLAKAN, & PEMBATALAN DARURAT (PTG-02 & PTG-03)
+BERKAS: resources/views/petugas/reservation-management.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Lembar kerja manajemen dan verifikasi permohonan reservasi fasilitas kampus bagi Petugas UPT Sarpras.
+Menerapkan prinsip Progressive Disclosure (Penyingkapan Bertahap): baris tabel hanya menyajikan
+informasi esensial yang bersih dan lapang, sementara detail komprehensif (identitas pemohon, berkas surat izin,
+dan justifikasi acara) disajikan dalam modal pop-up interaktif berbasis Alpine.js.
+Mendukung persetujuan langsung (Approval), penolakan resmi (Rejection), dan pembatalan darurat (Force Cancel).
+
+PERAN ARSITEKTURAL DALAM SISTEM CAVA:
+1. Konsol Verifikasi Sentral (PTG-02 / US-9):
+   Menyediakan alur kerja harian bagi petugas untuk menyortir permohonan sivitas berdasarkan tab KPI status:
+   - Menunggu Verifikasi (Pending - prioritas FIFO)
+   - Disetujui (Approved)
+   - Ditolak (Rejected)
+   - Dibatalkan (Cancelled - baik mandiri oleh sivitas maupun darurat oleh petugas)
+2. Mekanisme Progressive Disclosure:
+   Mengurangi kelelahan kognitif petugas dengan menyembunyikan rincian dokumen dan deskripsi panjang di awal,
+   namun dapat diakses seketika via modal pratinjau yang memuat tombol tindakan terintegrasi.
+3. Hak Override Darurat Sepihak (PTG-03 / US-10):
+   Menyediakan tombol dan modal khusus "Batalkan Paksa (Darurat)" untuk membatalkan reservasi yang telah disetujui
+   jika terjadi insiden gedung (kerusakan sarpras darurat, kebakaran, gangguan teknis fatal).
+====================================================================================================
 --}}
 
+{{--
+  INISIALISASI AMAN FILTER STATUS & PENCARIAN:
+  Memastikan nilai string default terdefinisi jika tidak dioper secara eksplisit dari controller.
+--}}
 @php
     $currentStatus = $currentStatus ?? 'pending';
     $search = $search ?? '';
 @endphp
 
+{{--
+  PEMBUNGKUS MASTER LAYOUT PETUGAS:
+  - 'title'  : Judul halaman operasional.
+  - 'active' : Menandai item menu 'reservation-management' sebagai aktif pada sidebar navigasi.
+--}}
 <x-petugas-layout title="Manajemen & Approval Reservasi" active="reservation-management">
+
+    {{--
+      KOMPONEN STATE ALPINE.JS (x-data):
+      Mengelola interaktivitas 3 modal pop-up independen:
+      - 'showRejectModal' : Visibilitas modal alasan penolakan permohonan.
+      - 'showCancelModal' : Visibilitas modal alasan pembatalan darurat sepihak (override).
+      - 'showDetailModal' : Visibilitas modal peninjauan rincian berkas permohonan.
+      - 'selectedId', 'applicantName', 'ticketCode', 'venueName' : Parameter binding formulir aksi.
+      - 'selectedDetail'  : Objek JSON permohonan yang aktif ditampilkan di modal detail.
+    --}}
     <div x-data="{
         showRejectModal: false,
         showCancelModal: false,
@@ -24,6 +63,9 @@
         venueName: '',
         selectedDetail: null,
 
+        /**
+         * Membuka modal penolakan resmi dengan mengisi metadata tiket target.
+         */
         openReject(id, name, code) {
             this.selectedId = id;
             this.applicantName = name;
@@ -32,6 +74,9 @@
             this.showRejectModal = true;
         },
 
+        /**
+         * Membuka modal pembatalan darurat sepihak oleh petugas sarpras.
+         */
         openCancel(id, code, venue, applicant) {
             this.selectedId = id;
             this.ticketCode = code;
@@ -41,20 +86,26 @@
             this.showCancelModal = true;
         },
 
+        /**
+         * Membuka modal rincian berkas dan identitas lengkap pemohon.
+         */
         openDetail(data) {
             this.selectedDetail = data;
             this.showDetailModal = true;
         }
     }" class="flex flex-col gap-6">
 
-        {{-- 1. Notifikasi Flash Message --}}
+        {{-- 
+          1. NOTIFIKASI FLASH MESSAGE (UMPAN BALIK OPERASIONAL):
+          Menampilkan pesan sukses atau kesalahan validasi secara elegan dengan tombol dismiss mandiri.
+        --}}
         @if(session('success'))
             <div class="p-3.5 rounded-xl bg-slate-900 text-white text-xs flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
                     <span class="font-medium">{{ session('success') }}</span>
                 </div>
-                <button type="button" @click="$el.parentElement.remove()" class="text-slate-400 hover:text-white">
+                <button type="button" @click="$el.parentElement.remove()" class="text-slate-400 hover:text-white cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">close</span>
                 </button>
             </div>
@@ -68,13 +119,16 @@
                         {{ session('error') ?? ($errors->first() ?? 'Terjadi kesalahan') }}
                     </span>
                 </div>
-                <button type="button" @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-800">
+                <button type="button" @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-800 cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">close</span>
                 </button>
             </div>
         @endif
 
-        {{-- 2. Header Halaman Profesional --}}
+        {{-- 
+          2. HEADER HALAMAN PROFESIONAL:
+          Menampilkan judul konsol verifikasi dan tombol sinkronisasi refresh data cepat.
+        --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Antrean Reservasi</h1>
@@ -90,9 +144,12 @@
             </div>
         </div>
 
-        {{-- 3. Bento Status KPI Cards (Langsung Berfungsi Sebagai Filter Cepat) --}}
+        {{-- 
+          3. BENTO STATUS KPI CARDS (KARTU STATISTIK SEKALIGUS FILTER CEPAT):
+          Setiap kartu dapat diklik untuk menyaring tabel berdasarkan status permohonan terkait.
+        --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {{-- Card 1: Menunggu Verifikasi --}}
+            {{-- Card 1: Menunggu Verifikasi (Pending) --}}
             <a href="{{ route('petugas.reservation-management', ['status' => 'pending', 'search' => $search]) }}" class="p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between {{ $currentStatus === 'pending' ? 'bg-slate-50/90 border-slate-900 ring-1 ring-slate-900 shadow-2xs' : 'bg-white border-slate-200/80 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium {{ $currentStatus === 'pending' ? 'text-slate-900 font-semibold' : 'text-slate-500' }}">Menunggu Verifikasi</span>
@@ -105,7 +162,7 @@
                 </div>
             </a>
 
-            {{-- Card 2: Disetujui --}}
+            {{-- Card 2: Disetujui (Approved) --}}
             <a href="{{ route('petugas.reservation-management', ['status' => 'approved', 'search' => $search]) }}" class="p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between {{ $currentStatus === 'approved' ? 'bg-slate-50/90 border-slate-900 ring-1 ring-slate-900 shadow-2xs' : 'bg-white border-slate-200/80 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium {{ $currentStatus === 'approved' ? 'text-slate-900 font-semibold' : 'text-slate-500' }}">Disetujui</span>
@@ -118,7 +175,7 @@
                 </div>
             </a>
 
-            {{-- Card 3: Ditolak --}}
+            {{-- Card 3: Ditolak (Rejected) --}}
             <a href="{{ route('petugas.reservation-management', ['status' => 'rejected', 'search' => $search]) }}" class="p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between {{ $currentStatus === 'rejected' ? 'bg-slate-50/90 border-slate-900 ring-1 ring-slate-900 shadow-2xs' : 'bg-white border-slate-200/80 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium {{ $currentStatus === 'rejected' ? 'text-slate-900 font-semibold' : 'text-slate-500' }}">Ditolak</span>
@@ -131,7 +188,7 @@
                 </div>
             </a>
 
-            {{-- Card 4: Dibatalkan --}}
+            {{-- Card 4: Dibatalkan (Cancelled) --}}
             <a href="{{ route('petugas.reservation-management', ['status' => 'cancelled', 'search' => $search]) }}" class="p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between {{ $currentStatus === 'cancelled' ? 'bg-slate-50/90 border-slate-900 ring-1 ring-slate-900 shadow-2xs' : 'bg-white border-slate-200/80 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium {{ $currentStatus === 'cancelled' ? 'text-slate-900 font-semibold' : 'text-slate-500' }}">Dibatalkan</span>
@@ -145,7 +202,10 @@
             </a>
         </div>
 
-        {{-- 4. Toolbar Pencarian & Status Aktif --}}
+        {{-- 
+          4. TOOLBAR PENCARIAN & STATUS AKTIF:
+          Menampilkan label filter yang sedang aktif, opsi "Lihat Semua", dan input pencarian teks.
+        --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
             <div class="flex items-center gap-2 text-xs">
                 <span class="text-slate-500">Filter Aktif:</span>
@@ -163,6 +223,7 @@
                 </a>
             </div>
 
+            {{-- Formulir Pencarian Teks --}}
             <form method="GET" action="{{ route('petugas.reservation-management') }}" class="relative w-full sm:w-72">
                 <input type="hidden" name="status" value="{{ $currentStatus }}">
                 <span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-[18px]">search</span>
@@ -175,14 +236,22 @@
             </form>
         </div>
 
-        {{-- 5. Daftar Antrean Reservasi Lapang (Spacious Bento List - Progressive Disclosure) --}}
+        {{-- 
+          5. DAFTAR ANTREAN RESERVASI LAPANG (PROGRESSIVE DISCLOSURE BENTO LIST):
+          Setiap baris menyajikan informasi ringkas dan tombol aksi untuk membuka rincian lengkap via modal.
+        --}}
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div class="divide-y divide-slate-100">
                 @forelse($reservations as $reservation)
+                    {{-- 
+                      PERHITUNGAN FLAG KADALUARSA / SELESAI:
+                      Mengecek apakah waktu selesai kegiatan telah terlewati untuk menonaktifkan aksi pembatalan darurat.
+                    --}}
                     @php
                         $endDateTime = \Carbon\Carbon::parse($reservation->reservation_date->format('Y-m-d') . ' ' . $reservation->end_time);
                         $isFinished = $reservation->status === 'completed' || $endDateTime->isPast();
 
+                        // Konstruksi payload data lengkap permohonan untuk dioper ke modal Alpine.js
                         $detailPayload = [
                             'id' => $reservation->id,
                             'ticket_code' => $reservation->ticket_code ?? 'TKT-' . $reservation->id,
@@ -211,7 +280,7 @@
                         ];
                     @endphp
 
-                    {{-- Baris Antrean Lapang & Bersih --}}
+                    {{-- Baris Item Antrean Lapang & Bersih --}}
                     <div class="px-5 sm:px-6 py-4 sm:py-5 hover:bg-slate-50/70 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
                         {{-- Data Esensial Kiri: Waktu, Ruang, dan Pemohon --}}
                         <div class="min-w-0 flex-1">
@@ -226,17 +295,19 @@
                                 @endif
                             </div>
 
+                            {{-- Nama Fasilitas dan Lokasi Gedung --}}
                             <div class="text-sm font-semibold text-slate-900 mt-1 truncate">
                                 {{ $reservation->facility->name ?? 'Fasilitas Kampus' }}
                                 <span class="text-xs font-normal text-slate-500">({{ $reservation->facility->building ?? 'Gedung' }})</span>
                             </div>
 
+                            {{-- Identitas Pemohon Sivitas --}}
                             <div class="text-xs text-slate-500 mt-0.5">
                                 Pemohon: <span class="font-medium text-slate-700">{{ $reservation->user->name ?? 'Pemohon' }}</span>
                             </div>
                         </div>
 
-                        {{-- Data Kanan: Status & Aksi Selaras dengan Dasbor Operasional --}}
+                        {{-- Data Kanan: Badge Status & Tombol Peninjauan Modal --}}
                         <div class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
                             <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
                                 {{ $reservation->status === 'pending' ? 'Menunggu Verifikasi' : ($reservation->status === 'approved' ? 'Disetujui' : ($reservation->status === 'rejected' ? 'Ditolak' : 'Dibatalkan')) }}
@@ -254,6 +325,7 @@
                         </div>
                     </div>
                 @empty
+                    {{-- Kondisi Daftar Kosong --}}
                     <div class="py-16 px-4 text-center text-xs text-slate-400">
                         @if($currentStatus === 'pending')
                             Tidak ada permohonan reservasi baru yang menunggu persetujuan.
@@ -264,7 +336,7 @@
                 @endforelse
             </div>
 
-            {{-- Paginasi Server-Side Laravel --}}
+            {{-- Paginasi Server-Side Laravel dengan Tautan Halaman --}}
             @if ($reservations->total() > 0)
                 <div class="p-3.5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                     <div class="text-slate-500">
@@ -277,16 +349,21 @@
             @endif
         </div>
 
-        {{-- 6. Modal Detail Reservasi Lengkap (Progressive Disclosure) --}}
+        {{-- 
+          6. MODAL DETAIL RESERVASI LENGKAP (PROGRESSIVE DISCLOSURE):
+          Menyajikan seluruh rincian pemohon, jadwal, ruangan, tujuan kegiatan, surat izin,
+          serta kontrol aksi langsung (Setujui, Tolak, atau Batalkan Paksa).
+        --}}
         <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showDetailModal = false" class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-xl border border-slate-200 relative">
-                <button type="button" @click="showDetailModal = false" class="absolute top-5 right-5 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                {{-- Tombol Tutup Silang --}}
+                <button type="button" @click="showDetailModal = false" class="absolute top-5 right-5 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
 
                 <template x-if="selectedDetail">
                     <div class="flex flex-col gap-5">
-                        {{-- Header Modal --}}
+                        {{-- Header Modal: Kode Tiket & Badge Status --}}
                         <div class="pr-8">
                             <div class="flex items-center gap-2">
                                 <span class="font-mono text-base font-bold text-slate-900" x-text="selectedDetail.ticket_code"></span>
@@ -297,7 +374,7 @@
 
                         {{-- Rincian Bento Grid 2 Kolom --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {{-- Kolom 1: Data Pemohon --}}
+                            {{-- Kolom 1: Profil Pemohon --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Identitas Pemohon</div>
                                 <div class="font-semibold text-slate-900 text-sm" x-text="selectedDetail.applicant_name"></div>
@@ -308,7 +385,7 @@
                                 </div>
                             </div>
 
-                            {{-- Kolom 2: Fasilitas & Waktu --}}
+                            {{-- Kolom 2: Fasilitas & Waktu Pemakaian --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Fasilitas & Waktu</div>
                                 <div class="font-semibold text-slate-900 text-sm" x-text="selectedDetail.facility_name"></div>
@@ -319,7 +396,7 @@
                                 </div>
                             </div>
 
-                            {{-- Kolom 3: Tujuan Kegiatan & Berkas Surat Izin (Penuh) --}}
+                            {{-- Kolom 3: Tujuan Kegiatan & Berkas Surat Izin (Lebar Penuh) --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 md:col-span-2">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tujuan Kegiatan</div>
                                 <p class="text-xs text-slate-800 leading-relaxed bg-white p-3 rounded-lg border border-slate-200/80" x-text="selectedDetail.purpose || '-'"></p>
@@ -342,7 +419,7 @@
                                 </div>
                             </div>
 
-                            {{-- Kolom 4: Alasan Penolakan / Pembatalan --}}
+                            {{-- Kolom 4: Keterangan Alasan Penolakan atau Pembatalan (Jika Ada) --}}
                             <template x-if="selectedDetail.rejection_reason">
                                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 md:col-span-2">
                                     <div class="text-[11px] font-semibold text-rose-700 uppercase tracking-wider mb-1">Alasan Penolakan</div>
@@ -357,7 +434,7 @@
                                 </div>
                             </template>
 
-                            {{-- Log Peninjauan --}}
+                            {{-- Log Peninjauan Staf Verifikator --}}
                             <template x-if="selectedDetail.reviewed_by || selectedDetail.reviewed_at">
                                 <div class="p-3 rounded-xl bg-slate-100 border border-slate-200/80 md:col-span-2 text-xs flex items-center justify-between text-slate-600">
                                     <span>Ditinjau oleh: <strong class="text-slate-900" x-text="selectedDetail.reviewed_by"></strong></span>
@@ -366,16 +443,16 @@
                             </template>
                         </div>
 
-                        {{-- Footer Aksi Modal: Langsung Setujui / Tolak / Batal Darurat --}}
+                        {{-- Footer Aksi Modal: Setujui, Tolak, atau Batalkan Paksa --}}
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
                             <div>
-                                <button type="button" @click="showDetailModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition">
+                                <button type="button" @click="showDetailModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition cursor-pointer">
                                     Tutup
                                 </button>
                             </div>
 
                             <div class="flex items-center gap-2">
-                                {{-- Jika status PENDING: Tombol Tolak dan Setujui --}}
+                                {{-- Jika status PENDING: Tombol Tolak dan Tombol Setujui --}}
                                 <template x-if="selectedDetail.status === 'pending'">
                                     <div class="flex items-center gap-2">
                                         <button type="button" @click="openReject(selectedDetail.id, selectedDetail.applicant_name, selectedDetail.ticket_code)" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-rose-700 hover:bg-rose-50 hover:border-rose-200 transition text-xs font-medium cursor-pointer">
@@ -391,7 +468,7 @@
                                     </div>
                                 </template>
 
-                                {{-- Jika status APPROVED & belum lewat: Tombol Batalkan Paksa --}}
+                                {{-- Jika status APPROVED & acaranya belum usai: Tombol Batalkan Paksa (Darurat) --}}
                                 <template x-if="selectedDetail.status === 'approved' && !selectedDetail.is_finished">
                                     <button type="button" @click="openCancel(selectedDetail.id, selectedDetail.ticket_code, selectedDetail.facility_name, selectedDetail.applicant_name)" class="px-3.5 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 transition text-xs font-medium cursor-pointer">
                                         Batalkan Paksa (Darurat)
@@ -404,14 +481,18 @@
             </div>
         </div>
 
-        {{-- 7. Modal Tolak Permohonan --}}
+        {{-- 
+          7. MODAL TOLAK PERMOHONAN RESERVASI (REJECTION REASON MODAL):
+          Memfasilitasi input alasan penolakan secara resmi (5 - 1000 karakter).
+          Data dikirim via HTTP PATCH ke `/petugas/reservations/{id}/reject`.
+        --}}
         <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showRejectModal = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-bold text-slate-900">
                         Tolak Permohonan Reservasi
                     </h3>
-                    <button type="button" @click="showRejectModal = false" class="text-slate-400 hover:text-slate-700">
+                    <button type="button" @click="showRejectModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
@@ -431,10 +512,10 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2">
-                        <button type="button" @click="showRejectModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition">
+                        <button type="button" @click="showRejectModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition cursor-pointer">
                             Batal
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-medium hover:bg-rose-700 shadow-2xs transition">
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-medium hover:bg-rose-700 shadow-2xs transition cursor-pointer">
                             Kirim Penolakan
                         </button>
                     </div>
@@ -442,14 +523,18 @@
             </div>
         </div>
 
-        {{-- 8. Modal Pembatalan Darurat Sepihak oleh Petugas --}}
+        {{-- 
+          8. MODAL PEMBATALAN DARURAT SEPIHAK OLEH PETUGAS (OVERRIDE PRIVILEGE):
+          Digunakan saat fasilitas mendadak mengalami malfungsi atau instruksi khusus kampus.
+          Membebaskan kembali slot jadwal via HTTP DELETE ke `/petugas/reservations/{id}/force-cancel`.
+        --}}
         <div x-show="showCancelModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showCancelModal = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-bold text-slate-900">
                         Pembatalan Darurat (Override Petugas)
                     </h3>
-                    <button type="button" @click="showCancelModal = false" class="text-slate-400 hover:text-slate-700">
+                    <button type="button" @click="showCancelModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
@@ -470,10 +555,10 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-2">
-                        <button type="button" @click="showCancelModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition">
+                        <button type="button" @click="showCancelModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition cursor-pointer">
                             Kembali
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-medium hover:bg-rose-700 shadow-2xs transition">
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-medium hover:bg-rose-700 shadow-2xs transition cursor-pointer">
                             Eksekusi Pembatalan
                         </button>
                     </div>
