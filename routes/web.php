@@ -568,16 +568,56 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
      */
     Route::delete('/user/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('user.reservations.cancel');
 
-    // ROUTE: Menerima GET request ke '/user/report-form'
-    // FUNGSI: Menampilkan formulir pelaporan keluhan kerusakan fasilitas
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 12: PELAPORAN KERUSAKAN FASILITAS & PELACAKAN TIKET (USR-04 & USR-05)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini melayani siklus hidup pengaduan kerusakan sarana prasarana kampus:
+     * - Menampilkan formulir pelaporan mandiri sivitas dengan upload bukti foto.
+     * - Menyimpan pengaduan baru dan menerbitkan kode tiket resmi `REP-YYYYMMDD-XXXX`.
+     * - Menampilkan log riwayat penanganan tiket perbaikan oleh tim teknisi sarpras.
+     */
+
+    /**
+     * RUTE: GET /user/report-form (Formulir Pelaporan Kerusakan Fasilitas - USR-04)
+     * -----------------------------------------------------------------------------
+     * Syntax: Route::get('/user/report-form', [ReportController::class, 'create'])->name('user.report-form');
+     * - Method HTTP : GET (pengambilan representasi formulir pelaporan).
+     * - URI Path   : '/user/report-form'.
+     * - Handler    : ReportController@create.
+     * - Route Name : 'user.report-form'.
+     * - Cara Kerja : Menarik seluruh fasilitas aktif dari database untuk mengisi dropdown pilihan
+     *                ruangan dan merender view responsif `user.report-form`.
+     */
     Route::get('/user/report-form', [ReportController::class, 'create'])->name('user.report-form');
 
-    // ROUTE: Menerima POST request ke '/user/reports'
-    // FUNGSI: Menyimpan laporan kerusakan fasilitas
+    /**
+     * RUTE: POST /user/reports (Simpan Pengaduan Kerusakan Fasilitas Baru - USR-04)
+     * ----------------------------------------------------------------------------
+     * Syntax: Route::post('/user/reports', [ReportController::class, 'store'])->name('user.reports.store');
+     * - Method HTTP : POST (pengiriman multipart form-data berisi deskripsi dan berkas foto).
+     * - URI Path   : '/user/reports'.
+     * - Handler    : ReportController@store.
+     * - FormRequest: StoreDamageReportRequest (validasi tipe berkas gambar maks 2MB, panjang teks deskripsi).
+     * - Route Name : 'user.reports.store'.
+     * - Cara Kerja : Mengunggah berkas foto ke disk publik (`storage/app/public/damage-reports/`),
+     *                membangkitkan kode tiket unik `REP-YYYYMMDD-XXXX`, menyimpan data berstatus 'baru',
+     *                dan mengalihkan pengguna ke riwayat pelaporan dengan notifikasi sukses.
+     */
     Route::post('/user/reports', [ReportController::class, 'store'])->name('user.reports.store');
 
-    // ROUTE: Menerima GET request ke '/user/report-history'
-    // FUNGSI: Menampilkan riwayat tiket pelaporan kerusakan yang diajukan oleh pengguna
+    /**
+     * RUTE: GET /user/report-history (Riwayat Pelacakan Tiket Kerusakan Sivitas - USR-05)
+     * ----------------------------------------------------------------------------------
+     * Syntax: Route::get('/user/report-history', [ReportController::class, 'history'])->name('user.report-history');
+     * - Method HTTP : GET (pengambilan halaman rekapitulasi status tiket pengaduan).
+     * - URI Path   : '/user/report-history'.
+     * - Handler    : ReportController@history.
+     * - Route Name : 'user.report-history'.
+     * - Cara Kerja : Menarik seluruh tiket kerusakan milik pengguna login (`user_id === Auth::id()`)
+     *                dengan Eager Loading relasi fasilitas (`with('facility')`), filter tab status,
+     *                dan paginasi data untuk menampilkan progres perbaikan (Baru -> Diproses -> Selesai).
+     */
     Route::get('/user/report-history', [ReportController::class, 'history'])->name('user.report-history');
 });
 
