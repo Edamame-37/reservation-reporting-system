@@ -782,10 +782,54 @@ Route::get('/dashboard', function () {
     return redirect()->route('user.dashboard');
 })->middleware('auth')->name('dashboard');
 
-// Rute Profil Pengguna
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL 17: MANAJEMEN AKUN PROFIL PENGGUNA (PROFILE SETTINGS & PASSWORD)
+ * ------------------------------------------------------------------------------------------
+ * Rute-rute di bawah ini memfasilitasi setiap pengguna terotentikasi (Sivitas, Petugas, maupun Admin)
+ * untuk mengelola informasi akun personal, memperbarui kata sandi, dan menghapus akun mandiri.
+ * Dilindungi oleh middleware: 'auth' (wajib terotentikasi).
+ */
 Route::middleware('auth')->group(function () {
+    /**
+     * RUTE: GET /profile (Halaman Induk Pengaturan Profil Akun)
+     * ---------------------------------------------------------
+     * Syntax: Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+     * - Method HTTP : GET (pengambilan halaman pengaturan profil).
+     * - URI Path   : '/profile'.
+     * - Handler    : ProfileController@edit.
+     * - Route Name : 'profile.edit'.
+     * - Cara Kerja : Menarik data akun pengguna aktif via `Auth::user()` dan merender view `profile.edit`
+     *                yang secara dinamis memilih master layout sesuai peran pengguna (Admin/Petugas/User).
+     */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    /**
+     * RUTE: PATCH /profile (Pembaruan Informasi Identitas Profil Akun)
+     * ---------------------------------------------------------------
+     * Syntax: Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+     * - Method HTTP : PATCH (pembaruan data atribut nama dan email).
+     * - URI Path   : '/profile'.
+     * - FormRequest: ProfileUpdateRequest (validasi keunikan email dengan pengecualian ID pengguna).
+     * - Handler    : ProfileController@update.
+     * - Route Name : 'profile.update'.
+     * - Cara Kerja : Memperbarui kolom `name` dan `email`, me-reset status verifikasi email jika email berubah,
+     *                dan mengalihkan kembali dengan status 'profile-updated'.
+     */
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    /**
+     * RUTE: DELETE /profile (Penghapusan Akun Pengguna Mandiri)
+     * --------------------------------------------------------
+     * Syntax: Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+     * - Method HTTP : DELETE (penghapusan akun permanen dari sistem).
+     * - URI Path   : '/profile'.
+     * - Handler    : ProfileController@destroy.
+     * - Route Name : 'profile.destroy'.
+     * - Cara Kerja : Memvalidasi kata sandi saat ini (`current_password`), melogout pengguna dari sesi,
+     *                menghapus baris entitas pengguna (`$user->delete()`), menginvaliasi session,
+     *                me-regenerasi CSRF token, dan mengarahkan kembali ke beranda publik `/`.
+     */
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
