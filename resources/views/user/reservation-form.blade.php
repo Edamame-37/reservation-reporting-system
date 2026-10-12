@@ -1,13 +1,45 @@
 {{-- 
+  ====================================================================================================
   NAMA FILE      : reservation-form.blade.php
-  FUNGSIONALITAS : Formulir Pengajuan Reservasi Ruang & Fasilitas Kampus
-  DESKRIPSI      : Form interaktif pemilihan fasilitas aktif dari basis data, tanggal pelaksanaan, pemilihan slot 30 menit (07:00 - 20:00 WIB), tujuan kegiatan, dan proteksi anti-bentrok.
-  DESAIN         : Opsi 1 (Apple-esque Bento) dengan styling borderless soft gray (bg-[#F5F5F7] border-0), tipografi bersih Outfit/Inter, tanpa AI slop / tanpa border hitam pekat.
-  CARA KERJA     : Mengirimkan HTTP POST ke route('user.reservations.store') dengan validasi StoreReservationRequest, menangani error session dan old values secara dinamis.
+  LOKASI         : resources/views/user/reservation-form.blade.php
+  FUNGSIONALITAS : Antarmuka Formulir Pengajuan Reservasi Ruang & Fasilitas Kampus Mandiri (USR-01)
+  MODUL CAVA     : 10. Portal Pengguna: Formulir Pengajuan Reservasi Ruangan Mandiri (USR-01)
+  ====================================================================================================
+
+  DESKRIPSI ARSITEKTUR & DESAIN SISTEM:
+  1. Integrasi Master Layout:
+     - Menggunakan komponen Blade `<x-app-layout title="Form Pengajuan Reservasi" active="reservation-form">`
+       sehingga navigasi header dan sidebar pengguna tetap sinkron dan konsisten.
+  
+  2. Pendekatan Desain Apple-esque Bento UI:
+     - Menggunakan kontainer kartu modular bersudut membulat (`rounded-[2rem]`), border halus (`border-gray-100`),
+       dan bayangan elevasi lembut (`shadow-[0_8px_30px_rgb(0,0,0,0.03)]`).
+     - Input field menggunakan gaya borderless soft gray (`bg-[#F5F5F7] border-0 text-[#1D1D1F]`) dengan
+       fokus ring minimalis hitam halus (`focus:ring-black/10 focus:bg-white`).
+  
+  3. Reaktivitas Klien Bertingkat 3-Level (Gedung -> Lantai -> Ruangan):
+     - Membangun hierarki fasilitas langsung di server PHP (`@php`) dan mengekspornya ke JSON untuk
+       dikonsumsi oleh Alpine.js (`x-data`).
+     - Ketika pengguna memilih Gedung, daftar Lantai diperbarui otomatis; ketika Lantai dipilih,
+       daftar Ruangan diperbarui seketika tanpa memerlukan AJAX request tambahan (Zero Network Latency).
+  
+  4. Panel Ringkasan Sticky Bento (Live Preview):
+     - Kolom kanan (5 kolom grid) diposisikan secara melayang tetap (`lg:sticky lg:top-24`)
+       untuk menyajikan ringkasan instan secara real-time mengenai ruangan yang dipilih, estimasi tanggal,
+       durasi sesi waktu, serta kebijakan operasional pembatalan H-1 kampus.
+  ====================================================================================================
 --}}
 
+{{-- Memanggil komponen master layout khusus portal pengguna dengan prop active="reservation-form" --}}
 <x-app-layout title="Form Pengajuan Reservasi" active="reservation-form">
+    
+    {{-- 
+      Blok @php: Transformasi Data Fasilitas Menjadi Struktur Hierarki & Peta Objek JSON
+      - Menyiapkan array slot waktu operasional kampus 30 menitan (07:00 - 20:00 WIB).
+      - Mengonversi koleksi Eloquent $facilities menjadi array hierarki bersarang [Gedung][Lantai][Ruangan].
+    --}}
     @php
+        // Array titik slot waktu baku per 30 menit dalam rentang operasional 07:00 hingga 20:00 WIB
         $timeSlots = [
             '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
             '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
@@ -16,11 +48,14 @@
             '19:00', '19:30', '20:00'
         ];
 
-        // Format data fasilitas ke JSON untuk interaktivitas ringkasan instan dan 3 dropdown bertingkat
+        // Inisialisasi peta asosiatif fasilitas untuk pencarian instan (O(1) lookup) pada live summary preview
         $facilitiesMap = [];
+        // Inisialisasi struktur hierarki 3 level: [Nama Gedung] => [Nama Lantai] => [Daftar Ruangan]
         $hierarchy = [];
 
+        // Melakukan iterasi seluruh koleksi master fasilitas aktif
         foreach ($facilities as $f) {
+            // Memetakan atribut fasilitas berdasarkan ID untuk akses cepat di klien
             $facilitiesMap[$f->id] = [
                 'id'       => $f->id,
                 'code'     => $f->code,
@@ -31,21 +66,26 @@
                 'category' => ucfirst($f->category),
             ];
 
-            $bName = $f->building;
+            $bName     = $f->building;
             $floorName = 'Lantai 1';
+            
+            // Ekstraksi nomor lantai menggunakan regex jika string mengandung pola "Lantai X"
             if (preg_match('/Lantai\s*(\d+)/i', $f->floor_location ?? '', $matches)) {
                 $floorName = 'Lantai ' . $matches[1];
             } elseif (!empty($f->floor_location)) {
                 $floorName = $f->floor_location;
             }
 
+            // Memastikan kunci gedung terdaftar dalam array hierarki
             if (!isset($hierarchy[$bName])) {
                 $hierarchy[$bName] = [];
             }
+            // Memastikan kunci lantai terdaftar di dalam gedung terkait
             if (!isset($hierarchy[$bName][$floorName])) {
                 $hierarchy[$bName][$floorName] = [];
             }
 
+            // Memasukkan entitas ruangan ke dalam sub-kunci lantai
             $hierarchy[$bName][$floorName][] = [
                 'id'       => $f->id,
                 'code'     => $f->code,
@@ -54,10 +94,11 @@
             ];
         }
 
-        $draft = $draft ?? [];
+        // Menentukan nilai awal (fallback) untuk inisialisasi state Alpine.js
+        $draft          = $draft ?? [];
         $initFacilityId = old('facility_id', $draft['facility_id'] ?? ($selectedFacilityId ?? ($facilities->first()->id ?? '1')));
-        $initFacility = $facilities->firstWhere('id', $initFacilityId) ?? $facilities->first();
-        $initBuilding = $initFacility ? $initFacility->building : (array_key_first($hierarchy) ?? '');
+        $initFacility   = $facilities->firstWhere('id', $initFacilityId) ?? $facilities->first();
+        $initBuilding   = $initFacility ? $initFacility->building : (array_key_first($hierarchy) ?? '');
 
         $initFloor = 'Lantai 1';
         if ($initFacility && preg_match('/Lantai\s*(\d+)/i', $initFacility->floor_location ?? '', $matches)) {
@@ -67,6 +108,18 @@
         }
     @endphp
 
+    {{-- 
+      Pembungkus Utama Form dengan Reactive State Management Alpine.js:
+      - submitting         : Mencegah double-submission saat tombol kirim diklik.
+      - hierarchy          : Menyimpan pohon hierarki Gedung -> Lantai -> Ruangan dalam format JSON.
+      - facilitiesData     : Peta data detail seluruh fasilitas untuk preview instan.
+      - selectedBuilding   : Gedung aktif yang dipilih pada dropdown 1.
+      - selectedFloor      : Lantai aktif yang dipilih pada dropdown 2.
+      - selectedFacilityId : Ruangan terpilih yang nilainya dikirim ke server via input 'facility_id'.
+      - selectedDate       : Tanggal pelaksanaan kegiatan (default: H+1 besok).
+      - selectedStart      : Jam mulai pelaksanaan (default: 09:00).
+      - selectedEnd        : Jam selesai pelaksanaan (default: 11:00).
+    --}}
     <div x-data="{
         submitting: false,
         hierarchy: {{ json_encode($hierarchy) }},
@@ -78,10 +131,12 @@
         selectedStart: '{{ old('start_time', $draft['start_time'] ?? '09:00') }}',
         selectedEnd: '{{ old('end_time', $draft['end_time'] ?? '11:00') }}',
 
+        // Getter untuk mengambil seluruh daftar gedung yang tersedia
         get availableBuildings() {
             return Object.keys(this.hierarchy);
         },
 
+        // Getter untuk mengambil daftar lantai berdasarkan gedung yang sedang dipilih
         get availableFloors() {
             if (!this.selectedBuilding || !this.hierarchy[this.selectedBuilding]) {
                 return [];
@@ -89,6 +144,7 @@
             return Object.keys(this.hierarchy[this.selectedBuilding]);
         },
 
+        // Getter untuk mengambil daftar ruangan berdasarkan kombinasi gedung & lantai yang dipilih
         get availableRooms() {
             if (!this.selectedBuilding || !this.selectedFloor || 
                 !this.hierarchy[this.selectedBuilding] || 
@@ -98,6 +154,7 @@
             return this.hierarchy[this.selectedBuilding][this.selectedFloor];
         },
 
+        // Event handler saat pengguna mengganti gedung
         onBuildingChange() {
             const floors = this.availableFloors;
             if (floors.length > 0) {
@@ -109,6 +166,7 @@
             }
         },
 
+        // Event handler saat pengguna mengganti lantai
         onFloorChange() {
             const rooms = this.availableRooms;
             if (rooms.length > 0) {
@@ -118,6 +176,7 @@
             }
         },
 
+        // Getter untuk mengambil objek detail ruangan terpilih guna ditampilkan pada ringkasan Bento
         get currentVenue() {
             return this.facilitiesData[this.selectedFacilityId] || {
                 name: 'Pilih Fasilitas Kampus',
@@ -128,7 +187,7 @@
         }
     }" class="space-y-8">
 
-        {{-- Top Navigation & Indikator Status (Judul halaman telah terwakili pada Universal Top Header) --}}
+        {{-- Top Navigation & Indikator Status Opsi B: Pure Typographic --}}
         <div class="flex items-center justify-between">
             <a href="{{ route('user.reservation-history') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -139,7 +198,7 @@
             </span>
         </div>
 
-        {{-- Banner Error Validasi Server (Soft Apple Tone tanpa border hitam) --}}
+        {{-- Banner Error Validasi Server (Soft Apple Tone dengan latar rose-50 lembut) --}}
         @if ($errors->any())
             <div class="p-6 rounded-[2rem] bg-rose-50/70 border border-rose-100 text-rose-900 flex items-start gap-4">
                 <span class="material-symbols-outlined text-rose-600 text-[24px] shrink-0 mt-0.5">error</span>
@@ -154,7 +213,7 @@
             </div>
         @endif
 
-        {{-- Toast / Session Flash Sukses --}}
+        {{-- Toast / Session Flash Sukses (Latar emerald-50 lembut) --}}
         @if (session('success'))
             <div class="p-6 rounded-[2rem] bg-emerald-50/70 border border-emerald-100 text-emerald-900 flex items-center gap-4">
                 <span class="material-symbols-outlined text-emerald-600 text-[24px] shrink-0">check_circle</span>
@@ -165,25 +224,34 @@
             </div>
         @endif
 
-        <!-- 
-          ROUTE: POST /user/reservations
-          FUNGSI: Mengirimkan permohonan reservasi baru dengan validasi slot & proteksi anti bentrok
-        -->
+        {{-- 
+          Formulir Utama Pengajuan Reservasi:
+          - action: route('user.reservations.store') -> POST /user/reservations
+          - @submit: Mengubah state submitting = true untuk mengaktifkan animasi loading dan mencegah double post
+          - Grid 12 Kolom: 7 kolom sisi kiri untuk isian form, 5 kolom sisi kanan untuk preview sticky
+        --}}
         <form action="{{ route('user.reservations.store') }}" method="POST" @submit="submitting = true" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {{-- Token Proteksi CSRF Laravel Wajib untuk Seluruh Request HTTP POST --}}
             @csrf
 
-            {{-- Kolom Kiri: Form Input Data Utama (7 Kolom Bento) --}}
+            {{-- ====================================================================================== --}}
+            {{-- KOLOM KIRI: FORM INPUT DATA UTAMA (7 KOLOM BENTO)                                      --}}
+            {{-- ====================================================================================== --}}
             <div class="lg:col-span-7 space-y-8">
                 <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
                     
-                    {{-- Bagian 1: Pemilihan Ruang Bertingkat --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
+                    {{-- BAGIAN 1: PEMILIHAN RUANG BERTINGKAT (GEDUNG -> LANTAI -> RUANGAN)                 --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">1. Pilih Ruangan Kampus</h2>
                             <span class="text-xs text-[#86868B]">Gedung ➔ Lantai ➔ Ruangan</span>
                         </div>
 
+                        {{-- Grid 3 Dropdown Pemilihan Bertingkat --}}
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            
                             {{-- Dropdown 1: Pilih Gedung --}}
                             <div>
                                 <label for="building-select" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
@@ -233,23 +301,28 @@
                                 </select>
                             </div>
                         </div>
+
+                        {{-- Pesan Kesalahan Validasi Field facility_id --}}
                         @error('facility_id')
                             <p class="text-xs text-rose-600 font-medium">{{ $message }}</p>
                         @enderror
 
-                        {{-- Ringkasan Ruangan Teks Bersih Bento --}}
+                        {{-- Ringkasan Ruangan Teks Bersih Bento (Kapasitas, Kategori, Gedung) --}}
                         <div class="p-4 rounded-xl bg-[#F9F9FB] text-sm text-[#86868B]">
                             <strong class="text-[#1D1D1F]" x-text="currentVenue.name"></strong> • <span x-text="currentVenue.building"></span> • Kapasitas <span x-text="currentVenue.capacity"></span> Orang • <span x-text="currentVenue.category"></span>
                         </div>
                     </div>
 
-                    {{-- Bagian 2: Waktu & Rentang Penggunaan --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
+                    {{-- BAGIAN 2: WAKTU & RENTANG PENGGUNAAN (TANGGAL & SLOT 30 MENIT)                     --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
                     <div class="space-y-4 pt-6 border-t border-gray-100">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">2. Waktu & Sesi Pelaksanaan</h2>
                             <span class="text-xs text-[#86868B]">Operasional 07:00 - 20:00 WIB</span>
                         </div>
 
+                        {{-- Input Tanggal Pelaksanaan (Minimal Hari Ini) --}}
                         <div>
                             <label for="res-date" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                                 Tanggal Pelaksanaan <span class="text-rose-500">*</span>
@@ -266,7 +339,9 @@
                             @enderror
                         </div>
 
+                        {{-- Pemilihan Jam Mulai dan Jam Selesai --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {{-- Dropdown Jam Mulai --}}
                             <div>
                                 <label for="start_time" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                                     Jam Mulai <span class="text-rose-500">*</span>
@@ -287,6 +362,7 @@
                                 @enderror
                             </div>
 
+                            {{-- Dropdown Jam Selesai --}}
                             <div>
                                 <label for="end_time" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                                     Jam Selesai <span class="text-rose-500">*</span>
@@ -308,16 +384,20 @@
                             </div>
                         </div>
 
+                        {{-- Informasi Durasi Kegiatan Terhitung --}}
                         <div class="text-xs text-[#86868B] flex items-center justify-between pt-1">
                             <span>Durasi kegiatan: <strong class="text-[#1D1D1F]" x-text="selectedStart + ' - ' + selectedEnd + ' WIB'"></strong></span>
                             <span>Slot kelipatan 30 menit</span>
                         </div>
                     </div>
 
-                    {{-- Bagian 3: Rincian Kegiatan & Peserta --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
+                    {{-- BAGIAN 3: RINCIAN KEGIATAN & JUMLAH PESERTA                                        --}}
+                    {{-- ---------------------------------------------------------------------------------- --}}
                     <div class="space-y-4 pt-6 border-t border-gray-100">
                         <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F]">3. Rincian Kegiatan</h2>
 
+                        {{-- Input Estimasi Jumlah Peserta --}}
                         <div>
                             <label for="participants_count" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                                 Estimasi Jumlah Peserta (Orang)
@@ -334,6 +414,7 @@
                             @enderror
                         </div>
 
+                        {{-- Textarea Tujuan Penggunaan, Nama Acara, dan Kontak PIC --}}
                         <div>
                             <label for="purpose" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                                 Tujuan Penggunaan, Nama Acara & PIC <span class="text-rose-500">*</span>
@@ -355,24 +436,28 @@
                 </div>
             </div>
 
-            {{-- Kolom Kanan: Preview Validasi Sistem & Aksi Submit (5 Kolom Sticky Bento) --}}
+            {{-- ====================================================================================== --}}
+            {{-- KOLOM KANAN: PREVIEW RINGKASAN BENTO & AKSI SUBMIT (5 KOLOM STICKY)                    --}}
+            {{-- ====================================================================================== --}}
             <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
                 <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
                     
-                    {{-- Header Ringkasan --}}
+                    {{-- Header Ringkasan Permohonan --}}
                     <div class="flex items-center justify-between pb-4 border-b border-gray-100">
                         <h3 class="text-base font-bold text-[#1D1D1F]">Ringkasan Permohonan</h3>
                         <span class="text-xs font-semibold tracking-wide text-emerald-800">Bebas Bentrok</span>
                     </div>
 
-                    {{-- Item Ringkasan --}}
+                    {{-- Kotak Preview Reaktif Ruangan, Tanggal, dan Jam --}}
                     <div class="space-y-3 text-xs">
+                        {{-- Preview Ruangan --}}
                         <div class="bg-[#F9F9FB] p-4 rounded-2xl space-y-1">
                             <span class="text-[#86868B] block">Ruangan Terpilih</span>
                             <div class="font-bold text-[#1D1D1F] text-sm" x-text="currentVenue.name"></div>
                             <div class="text-[#86868B]" x-text="currentVenue.building + ' • Kapasitas: ' + currentVenue.capacity + ' Orang'"></div>
                         </div>
 
+                        {{-- Preview Tanggal dan Jam Sesi --}}
                         <div class="grid grid-cols-2 gap-3 text-[#86868B]">
                             <div class="bg-[#F9F9FB] p-4 rounded-2xl space-y-1">
                                 <span class="block">Tanggal</span>
@@ -395,16 +480,19 @@
                         </ul>
                     </div>
 
-                    {{-- Tombol Aksi --}}
+                    {{-- Tombol Aksi Submit Form dan Batal --}}
                     <div class="space-y-3 pt-2">
                         <button type="submit" 
                                 :disabled="submitting" 
                                 class="w-full py-3.5 px-6 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50">
+                            {{-- Ikon Kirim Normal --}}
                             <span x-show="!submitting" class="material-symbols-outlined text-[18px]">send</span>
+                            {{-- Spinner Loading Saat Sedang Memproses Request --}}
                             <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                             <span x-text="submitting ? 'Memproses Validasi...' : 'Kirim Permohonan Reservasi'"></span>
                         </button>
 
+                        {{-- Tombol Pembatalan Kembali ke Halaman Riwayat --}}
                         <a href="{{ route('user.reservation-history') }}" 
                            class="block text-center w-full py-2.5 text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition">
                             Batal dan Kembali
