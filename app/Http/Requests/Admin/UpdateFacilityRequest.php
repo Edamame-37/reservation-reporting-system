@@ -1,9 +1,20 @@
 <?php
+
 /**
- * NAMA FILE    : UpdateFacilityRequest.php
- * FUNGSI       : Form Request validasi data pembaruan master fasilitas (Konsol Admin)
- * DESKRIPSI    : Memvalidasi integritas payload perombakan spesifikasi ruang kampus (ADM-03 / US-16) dengan pengecualian ID aktif.
- * CARA KERJA   : Memastikan otorisasi request, memeriksa keunikan nama dan kode ruang dengan mengabaikan ID saat ini, dan mengecek foto cover pengganti jika ada.
+ * ==============================================================================================
+ * FORM REQUEST: VALIDASI PEMBARUAN DATA FASILITAS (KONSOL ADMIN - ADM-03)
+ * ==============================================================================================
+ * Berkas: app/Http/Requests/Admin/UpdateFacilityRequest.php
+ * 
+ * PERAN & FUNGSI UTAMA:
+ * 1. Mengenkapsulasi validasi pembaruan data spesifikasi dan inventaris ruangan yang sudah ada.
+ * 2. Mengatasi Dilema Validasi Unik (Unique Constraint Dilemma):
+ *    Menggunakan `Rule::unique(...)->ignore($facilityId)` agar sistem tidak menganggap data unik
+ *    (seperti `code` atau `name`) bertabrakan dengan record dirinya sendiri saat disimpan ulang.
+ * 3. Menangani pembaruan gambar opsional: jika admin tidak mengunggah foto cover baru, berkas lama
+ *    tetap dipertahankan tanpa memicu error validasi gambar.
+ * 4. Menyelaraskan alias form input lama (`type` -> `category`, `location` -> `building`) pada `prepareForValidation`.
+ * ==============================================================================================
  */
 
 namespace App\Http\Requests\Admin;
@@ -14,9 +25,13 @@ use Illuminate\Validation\Rule;
 class UpdateFacilityRequest extends FormRequest
 {
     /**
-     * FUNCTION/PROCEDURE : authorize()
-     * KEGUNAAN           : Menentukan apakah pengguna yang sedang login berhak mengeksekusi request ini.
-     * CARA KERJA         : Mengembalikan nilai true (dapat diintegrasikan dengan otorisasi Gate/Role Admin).
+     * Menentukan apakah pengguna saat ini diizinkan memperbarui data fasilitas ini.
+     * 
+     * CARA KERJA & ALUR:
+     * - Mengembalikan boolean `true`.
+     * - Otorisasi peran Administrator ditangani secara ketat di level middleware route (`role:admin`).
+     * 
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -24,30 +39,37 @@ class UpdateFacilityRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : prepareForValidation()
-     * KEGUNAAN           : Menormalkan input data sebelum aturan validasi dievaluasi.
-     * CARA KERJA         : Membersihkan spasi pada kode ruang dan memastikan kategori dalam format huruf kecil.
+     * Normalisasi data input sebelum aturan validasi dijalankan.
+     * 
+     * CARA KERJA & ALUR:
+     * - Memastikan kode ruangan selalu dalam format uppercase tanpa spasi samping.
+     * - Memastikan kategori ruangan selalu dalam format lowercase seragam.
+     * - Menangani kompatibilitas mundur jika input form menggunakan nama 'type' atau 'location'.
      */
     protected function prepareForValidation(): void
     {
+        // 1. Kapitalisasi kode ruang:
         if ($this->has('code')) {
             $this->merge([
                 'code' => strtoupper(trim((string) $this->code)),
             ]);
         }
 
+        // 2. Huruf kecil seragam pada kategori:
         if ($this->has('category')) {
             $this->merge([
                 'category' => strtolower(trim((string) $this->category)),
             ]);
         }
 
+        // 3. Fallback alias 'type' ke 'category':
         if ($this->has('type') && !$this->has('category')) {
             $this->merge([
                 'category' => strtolower(trim((string) $this->type)),
             ]);
         }
 
+        // 4. Fallback alias 'location' ke 'building':
         if ($this->has('location') && !$this->has('building')) {
             $this->merge([
                 'building' => trim((string) $this->location),
@@ -56,34 +78,61 @@ class UpdateFacilityRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : rules()
-     * KEGUNAAN           : Mendefinisikan aturan validasi integritas data pembaruan fasilitas.
-     * CARA KERJA         : Memeriksa field yang diperbarui dengan Rule::unique()->ignore($facilityId) agar tidak konflik dengan dirinya sendiri.
+     * Mendefinisikan aturan validasi integritas data pembaruan fasilitas.
+     * 
+     * CARA KERJA & ALUR:
+     * - Mengambil parameter rute `{facility}` (bisa berupa ID integer atau instance model)
+     *   atau fallback `input('id')`.
+     * - Menambahkan klausa `->ignore($facilityId)` pada aturan unik SQL, menghasilkan kueri:
+     *   `WHERE code = '...' AND id != '$facilityId'`
+     *   sehingga ruangan dapat mempertahankan kodenya sendiri tanpa ditolak.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        // Mengambil ID fasilitas yang sedang diedit dari route binding atau form body:
         $facilityId = $this->route('facility') ?? $this->input('id');
 
         return [
+            // 'name': Wajib diisi, unik di tabel facilities kecuali ID fasilitas saat ini:
             'name'           => ['required', 'string', 'max:150', Rule::unique('facilities', 'name')->ignore($facilityId)],
+
+            // 'code': Wajib diisi, unik di tabel facilities kecuali ID fasilitas saat ini:
             'code'           => ['required', 'string', 'max:30', Rule::unique('facilities', 'code')->ignore($facilityId)],
+
+            // 'category': Harus salah satu dari 5 enum baku sistem:
             'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat'],
+
+            // 'building': Lokasi gedung wajib, maksimal 100 karakter:
             'building'       => ['required', 'string', 'max:100'],
+
+            // 'floor_location': Lokasi lantai opsional, maksimal 50 karakter:
             'floor_location' => ['nullable', 'string', 'max:50'],
+
+            // 'capacity': Kapasitas wajib integer minimal 1 orang:
             'capacity'       => ['required', 'integer', 'min:1'],
+
+            // 'equipment': Daftar perlengkapan ruangan opsional:
             'equipment'      => ['nullable'],
+
+            // 'description': Keterangan naratif opsional hingga 1000 karakter:
             'description'    => ['nullable', 'string', 'max:1000'],
+
+            // 'cover_image': Opsional saat update (jika tidak upload, gambar lama tetap digunakan).
+            // Jika diupload, wajib file gambar (jpg, jpeg, png) maksimal 2MB (2048 KB).
             'cover_image'    => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+
+            // 'status': Status operasional yang valid:
             'status'         => ['nullable', 'string', 'in:aktif,dalam perbaikan,nonaktif'],
         ];
     }
 
     /**
-     * FUNCTION/PROCEDURE : messages()
-     * KEGUNAAN           : Menyediakan pesan kesalahan validasi dalam Bahasa Indonesia yang informatif.
-     * CARA KERJA         : Mengembalikan pemetaan pesan kegagalan sesuai atribut aturan validasi.
+     * Pesan kesalahan validasi dalam Bahasa Indonesia yang informatif.
+     * 
+     * CARA KERJA & ALUR:
+     * Menjelaskan secara spesifik alasan kegagalan validasi form admin.
      *
      * @return array<string, string>
      */
@@ -112,3 +161,4 @@ class UpdateFacilityRequest extends FormRequest
         ];
     }
 }
+
