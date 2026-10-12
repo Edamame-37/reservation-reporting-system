@@ -417,15 +417,29 @@ Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReser
 Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Operasional Petugas Sarpras
-|--------------------------------------------------------------------------
-*/
-
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL 13: OPERASIONAL PETUGAS SARPRAS: DASBOR MONITORING ANTREAN CERDAS (PTG-01 / US-8)
+ * ------------------------------------------------------------------------------------------
+ * Rute-rute di dalam grup ini dikhususkan bagi staf operasional sarana dan prasarana kampus
+ * (Role: 'petugas') untuk memonitor beban kerja secara real-time, mengaudit antrean reservasi,
+ * meninjau matriks jadwal 30 menit, memverifikasi permohonan, dan menindaklanjuti tiket kerusakan.
+ * Dilindungi oleh middleware: 'auth' (wajib login) dan 'role:petugas' (hak akses petugas sarpras).
+ */
 Route::middleware(['auth', 'role:petugas'])->group(function () {
-    // ROUTE: Menerima GET request ke '/petugas/dashboard'
-    // FUNGSI: Menampilkan dasbor operasional pemantauan status ruang dan antrean verifikasi
+    /**
+     * RUTE: GET /petugas/dashboard (Dasbor Operasional Pemantauan Petugas Sarpras - PTG-01 / US-8)
+     * --------------------------------------------------------------------------------------------
+     * Syntax: Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
+     * - Method HTTP : GET (pengambilan halaman representasi dasbor pemantauan operasional).
+     * - URI Path   : '/petugas/dashboard'.
+     * - Handler    : DashboardPetugasController@index.
+     * - Route Name : 'petugas.dashboard' (dipanggil via helper route('petugas.dashboard')).
+     * - Cara Kerja : Menghubungkan browser dengan controller untuk menghitung metrik kuantitas antrean
+     *                (tiket reservasi pending, tiket laporan aktif baru/diproses, fasilitas terkunci maintenance),
+     *                menarik 5 data antrean teratas secara FIFO dengan Eager Loading, dan merender view
+     *                Bento UI modern 'petugas.dashboard'.
+     */
     Route::get('/petugas/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
 
     // ROUTE: Menerima GET request ke '/petugas/reservation-management'
