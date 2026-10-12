@@ -489,12 +489,44 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
      */
     Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard');
 
-    // ROUTE: Menerima GET request ke '/user/reservation-form'
-    // FUNGSI: Menampilkan formulir pengajuan reservasi peminjaman ruang baru dengan data fasilitas aktif
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 10: FORMULIR PENGAJUAN RESERVASI RUANGAN MANDIRI (USR-01)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini mengelola antarmuka pengajuan sewa ruangan mandiri bagi sivitas:
+     * - Menampilkan antarmuka pemilih fasilitas bertingkat 3 level (Gedung -> Lantai -> Ruangan).
+     * - Memvalidasi ketersediaan jadwal 30 menitan (07:00-20:00 WIB) dan memproses penyimpanan
+     *   permohonan secara atomik dengan algoritma anti-bentrok (anti double-booking).
+     */
+
+    /**
+     * RUTE: GET /user/reservation-form (Formulir Pengajuan Reservasi Ruangan Mandiri - USR-01)
+     * ----------------------------------------------------------------------------------------
+     * Syntax: Route::get('/user/reservation-form', [ReservationController::class, 'create'])->name('user.reservation-form');
+     * - Method HTTP : GET (pengambilan halaman representasi formulir reservasi).
+     * - URI Path   : '/user/reservation-form'.
+     * - Handler    : ReservationController@create.
+     * - Route Name : 'user.reservation-form'.
+     * - Cara Kerja : Menarik seluruh master data fasilitas berstatus aktif (`status = 'aktif'`),
+     *                menyiapkan parameter query `facility_id` jika pengguna datang dari katalog,
+     *                dan merender view Apple-esque Bento `user.reservation-form`.
+     */
     Route::get('/user/reservation-form', [ReservationController::class, 'create'])->name('user.reservation-form');
 
-    // ROUTE: Menerima POST request ke '/user/reservations'
-    // FUNGSI: Memproses penyimpanan pengajuan reservasi baru dan validasi anti-bentrok
+    /**
+     * RUTE: POST /user/reservations (Simpan Transaksi Pengajuan Reservasi Baru - USR-01)
+     * ----------------------------------------------------------------------------------
+     * Syntax: Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
+     * - Method HTTP : POST (pengiriman payload data baru secara aman via HTTP Body).
+     * - URI Path   : '/user/reservations'.
+     * - Handler    : ReservationController@store.
+     * - FormRequest: StoreReservationRequest (validasi jam operasional 07-20 WIB, kelipatan 30m, dll).
+     * - Route Name : 'user.reservations.store'.
+     * - Cara Kerja : Memeriksa kelayakan fasilitas (wajib aktif), menghitung total slot 30 menit,
+     *                mengecek overlap bentrok jadwal dengan reservasi yang telah disetujui (approved),
+     *                membangkitkan kode tiket unik `TKT-YYYYMMDD-XXXX`, dan menyimpan data ke dalam
+     *                blok transaksi database `DB::transaction()` berstatus 'pending'.
+     */
     Route::post('/user/reservations', [ReservationController::class, 'store'])->name('user.reservations.store');
 
     // ROUTE: Menerima GET request ke '/user/reservation-history'
