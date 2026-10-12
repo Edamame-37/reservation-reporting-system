@@ -1,46 +1,82 @@
 {{-- 
+  ==============================================================================
   NAMA FILE      : availability.blade.php
-  FUNGSIONALITAS : Matriks Transparan Slot Waktu Ketersediaan Fasilitas Publik
-  DESKRIPSI      : Menampilkan kalender visual slot 30 menit (07:00-20:00 WIB) untuk fasilitas kampus dengan paginasi maksimal 8 item per request dan indikator status real-time.
-  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menerima paginator $facilities dari PublicFacilityController@availability, dan menarik data matriks via endpoint /api/availability/{date} yang dirender dengan Alpine.js.
+  MODUL          : Modul 4 - Portal Publik: Beranda, Katalog Fasilitas, Filter & Matriks Ketersediaan
+  KODE FITUR     : PUB-01 (Matriks Transparan Slot Ketersediaan Publik) & PUB-02 (Pencarian)
+  ==============================================================================
+  DESKRIPSI:
+  Antarmuka visual matriks ketersediaan fasilitas publik kampus CAVA.
+  Menampilkan jadwal ketersediaan seluruh ruangan aktif dalam kisi-kisi (grid) 26 slot waktu
+  30-menitan sepanjang jam operasional kampus (07:00 – 20:00 WIB) secara transparan.
+  Mengintegrasikan pemilihan tanggal cepat (Hari ini, Besok, H+2, H+3), formulir pencarian
+  cerdas dengan filter spesifik, pemanggilan API asinkron (Alpine.js Fetch API),
+  animasi transisi tanggal geser terarah, serta paginasi server-side 8 ruangan per request.
+
+  STRUKTUR HIERARKI:
+  <x-public-layout active="availability">
+    └── <div> Container Matriks (Alpine.js x-data="availabilityMatrix()")
+        ├── <header> Judul, Pintasan Tanggal Cepat, & Form Pencarian Autocomplete
+        ├── Panel Kartu Matriks Jadwal
+        │    ├── Baris Status Legend (Tersedia = Hijau, Terpakai = Merah, Perbaikan = Abu-abu)
+        │    ├── Baris Header Waktu (26 Slot: 07:00, 07:30, 08:00, ..., 19:30)
+        │    ├── Baris Fasilitas (Nama Ruang, Gedung, & 26 Kotak Status Slot Reaktif)
+        │    └── Kontrol Paginasi Laravel ($facilities->links())
+        └── <script> Alpine.data('availabilityMatrix') (Fetch JSON, Parsing Intl, & Overlap Lookup)
+  ==============================================================================
 --}}
 
 <x-public-layout title="Matriks Jadwal Ketersediaan" active="availability">
+    {{-- 
+      CONTAINER UTAMA MATRIKS:
+      - x-data="availabilityMatrix()": Memuat logic Alpine.js untuk memanajemen state jadwal.
+      - x-init="initMatrix(...)": Memuat data matriks ketersediaan tanggal terpilih saat halaman dibuka.
+    --}}
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="availabilityMatrix()" x-init="initMatrix('{{ request('date', date('Y-m-d')) }}')">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8">
             <div>
                 <h1 class="text-4xl font-bold tracking-tight mb-2">Matriks Jadwal</h1>
                 <p class="text-lg text-[#86868B]">Pantau ketersediaan slot waktu secara transparan.</p>
 
-                <!-- Quick Date Navigation -->
+                {{-- 
+                  PINTASAN NAVIGASI TANGGAL CEPAT (Desktop):
+                  Tombol pintas untuk memuat jadwal hari ini, besok, lusa, dan 3 hari ke depan
+                  tanpa perlu melakukan reload seluruh halaman web (SPA-like reactive switch).
+                --}}
                 <div class="mt-8 hidden md:block">
                     <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Pintasan Tanggal</div>
                     <div class="flex gap-2">
+                        {{-- Tombol Hari Ini --}}
                         <button type="button" @click="initMatrix('{{ date('Y-m-d') }}', 1)" 
                                 :class="currentDate === '{{ date('Y-m-d') }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
-                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
                             Hari Ini
                         </button>
+                        
+                        {{-- Tombol Besok (H+1) --}}
                         <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+1 day')) }}', 2)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+1 day')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
-                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
                             Besok
                         </button>
+                        
+                        {{-- Tombol Lusa (H+2) --}}
                         <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+2 days')) }}', 3)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+2 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
-                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
                             {{ \Carbon\Carbon::now()->addDays(2)->translatedFormat('d M') }}
                         </button>
+                        
+                        {{-- Tombol H+3 --}}
                         <button type="button" @click="initMatrix('{{ date('Y-m-d', strtotime('+3 days')) }}', 4)" 
                                 :class="currentDate === '{{ date('Y-m-d', strtotime('+3 days')) }}' ? 'bg-[#1D1D1F] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'"
-                                class="px-4 py-2 rounded-xl text-xs font-medium transition">
+                                class="px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
                             {{ \Carbon\Carbon::now()->addDays(3)->translatedFormat('d M') }}
                         </button>
                         
-                        <!-- Custom Date (if selected date is outside the 4 shortcuts) -->
+                        {{-- Chip Penanda Tanggal Kustom (Jika memilih tanggal di luar 4 tombol pintas di atas) --}}
                         <template x-if="currentDate && !['{{ date('Y-m-d') }}', '{{ date('Y-m-d', strtotime('+1 day')) }}', '{{ date('Y-m-d', strtotime('+2 days')) }}', '{{ date('Y-m-d', strtotime('+3 days')) }}'].includes(currentDate)">
                             <button type="button" 
-                                    class="bg-[#1D1D1F] text-white shadow-md px-4 py-2 rounded-xl text-xs font-medium transition"
+                                    class="bg-[#1D1D1F] text-white shadow-md px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer"
                                     x-text="formatDate(currentDate).substring(0, 6) + '..'">
                             </button>
                         </template>
@@ -48,6 +84,11 @@
                 </div>
             </div>
 
+            {{-- 
+              FORM PENCARIAN & FILTER JADWAL MATRIKS:
+              - Mendukung pencarian kata kunci nama ruang / gedung.
+              - Panel filter spesifik dengan pilihan tanggal kustom, kategori, kapasitas, dan alat.
+            --}}
             <form action="{{ route('public.availability') }}" method="GET" class="w-full md:w-96 relative group shrink-0" 
                   @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
                   x-data="{ 
@@ -88,13 +129,13 @@
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
                         <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
-                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center" title="Filter Spesifik">
                             <span class="material-symbols-outlined text-[20px]">tune</span>
                         </button>
                         <button type="submit" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition">Cari</button>
                     </div>
 
-                    <!-- Smart Search Dropdown -->
+                    {{-- DROPDOWN SMART SEARCH AUTOCOMPLETE --}}
                     <div x-show="open" 
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-2"
@@ -105,7 +146,7 @@
                          class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 pointer-events-auto"
                          style="display: none;">
                          
-                        <!-- Loading State -->
+                        <!-- Loading State Spinner -->
                         <div x-show="loading" class="p-4 flex items-center justify-center text-gray-500">
                             <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -114,9 +155,9 @@
                             <span class="text-sm font-medium">Mencari...</span>
                         </div>
 
-                        <!-- Results -->
+                        <!-- Hasil Pencarian -->
                         <div x-show="!loading" class="flex flex-col">
-                            <!-- Text Suggestions -->
+                            <!-- Saran Rekomendasi Teks -->
                             <template x-if="suggestions.length > 0">
                                 <div class="px-2 pt-2">
                                     <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Rekomendasi</div>
@@ -129,7 +170,7 @@
                                 </div>
                             </template>
 
-                            <!-- Facility Suggestions -->
+                            <!-- Rekomendasi Fasilitas Langsung -->
                             <template x-if="facilities.length > 0">
                                 <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
                                     <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
@@ -145,7 +186,7 @@
                                 </div>
                             </template>
 
-                            <!-- Empty State Warning -->
+                            <!-- State Peringatan Kosong -->
                             <template x-if="emptyState">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
@@ -153,7 +194,7 @@
                                 </div>
                             </template>
 
-                            <!-- No Results -->
+                            <!-- Tidak Ada Hasil -->
                             <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
@@ -161,7 +202,7 @@
                                 </div>
                             </template>
 
-                            <!-- Action Buttons -->
+                            <!-- Tombol Aksi Bawah Dropdown -->
                             <template x-if="suggestions.length > 0 || facilities.length > 0">
                                 <div class="bg-gray-50 p-2.5 border-t border-gray-100 flex gap-2">
                                     <button type="submit" class="w-full flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
@@ -173,7 +214,7 @@
                     </div>
                 </div>
 
-                <!-- Absolute Container for Filters and Popup -->
+                {{-- WADAH DINAMIS UNTUK PILL FILTER AKTIF DAN DRAWER FILTER SPESIFIK --}}
                 <div class="absolute top-full left-0 right-0 w-full z-40 pointer-events-none"
                      x-data="{ pillsHeight: 0 }"
                      x-init="
@@ -185,7 +226,7 @@
                         }
                      ">
                      
-                    <!-- Filter Aktif (Absolute) -->
+                    <!-- FILTER AKTIF (Dapat Dihapus Satuan) -->
                     <div class="absolute top-0 left-0 right-0 w-full pointer-events-auto"
                          x-ref="pillContainer">
                         <div x-show="allFilters.length > 0" 
@@ -212,15 +253,16 @@
                                 <span x-text="'+' + (allFilters.length - 3) + ' lainnya'"></span>
                             </span>
 
-                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''; selectedDate = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''; selectedDate = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">
+                                Hapus Semua
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Advanced Search Popup (Absolute positioning slides based on pillsHeight) -->
+                    <!-- DRAWER PENCARIAN SPESIFIK JADWAL (Tanggal, Kategori, Kapasitas, Fasilitas) -->
                     <div class="absolute right-0 md:min-w-[600px] transition-all duration-300 ease-out pointer-events-auto"
                          :style="`top: ${(allFilters.length > 0) ? pillsHeight : 0}px`">
                         
-                        <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
                         <div x-show="showAdvanced" 
                              @click.away="showAdvanced = false"
                              x-transition:enter="transition ease-out duration-200"
@@ -232,13 +274,19 @@
                              class="mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 z-50 text-left" style="display: none;">
                              <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-100">
                                 <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
-                                <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined text-xl">close</span></button>
+                                <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600">
+                                    <span class="material-symbols-outlined text-xl">close</span>
+                                </button>
                             </div>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- 1. Input Pemilihan Tanggal Kalender --}}
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Tanggal Jadwal</label>
                                     <input type="date" name="date" x-model="selectedDate" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
                                 </div>
+                                
+                                {{-- 2. Multi-Kategori --}}
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
                                     <div class="relative mt-2">
@@ -257,10 +305,14 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                {{-- 3. Kapasitas Minimum --}}
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
                                     <input type="number" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
                                 </div>
+                                
+                                {{-- 4. Peralatan Pendukung --}}
                                 <div>
                                     <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
                                     <div class="relative mt-2">
@@ -280,6 +332,7 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="mt-8 flex justify-end gap-3">
                                 <button type="reset" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition text-sm">Reset</button>
                                 <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
@@ -290,16 +343,25 @@
             </form>
         </div>
 
+        {{-- 
+          PAPAN MATRIKS JADWAL VISUAL:
+          - Menampilkan legenda status warna:
+            * Hijau   (bg-emerald-400) : Slot Kosong / Siap Dipesan (Available).
+            * Merah   (bg-red-400)     : Slot Terisi oleh Peminjaman yang Disetujui (Booked).
+            * Abu-abu (bg-gray-300)    : Fasilitas Sedang Dalam Perbaikan / Ditutup (Maintenance).
+        --}}
         <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-x-auto">
             <div class="flex justify-between items-center mb-6 min-w-[800px]">
                 <div class="flex items-center gap-4">
                     <h2 class="font-semibold text-lg">Jadwal: <span class="text-[#86868B]" x-text="formatDate(currentDate)"></span></h2>
-                    <!-- Spinner SVG instead of simple text -->
+                    <!-- Spinner Animasi Saat Memuat Data Asinkron -->
                     <svg x-show="loading" class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </div>
+                
+                {{-- LEGENDA STATUS SLOT --}}
                 <div class="flex gap-4">
                     <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-emerald-400 border border-emerald-500"></span> Tersedia</div>
                     <div class="flex items-center gap-2 text-xs font-medium"><span class="w-3 h-3 rounded-sm bg-red-400 border border-red-500"></span> Terpakai</div>
@@ -308,11 +370,11 @@
             </div>
 
             <div class="min-w-[1000px] pb-4">
-                <!-- HEADER ROW -->
+                <!-- BARIS HEADER WAKTU (26 Slot: 07:00 - 20:00 WIB) -->
                 <div class="grid grid-cols-[250px_1fr] gap-1.5 mb-2 border-b border-gray-100 pb-2 px-2 text-[#86868B]">
                     <div class="pr-4 font-semibold text-gray-700 text-xs self-end pb-1">Nama Fasilitas</div>
                     
-                    <!-- Time slots header (Static) -->
+                    <!-- Label Jam 30-menit per Kolom Grid -->
                     <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5">
                         <template x-for="(timeSlot, index) in timeSlots">
                             <div class="flex flex-col items-center justify-end pb-1 relative">
@@ -324,17 +386,17 @@
                     </div>
                 </div>
 
-                <!-- ROWS CONTAINER (Not animated directly anymore) -->
+                <!-- DAFTAR BARIS FASILITAS & GRID SLOT REAKTIF -->
                 <div class="space-y-3">
                     @foreach ($facilities as $f)
                     <div class="grid grid-cols-[250px_1fr] gap-1.5 items-center hover:bg-gray-50 py-1.5 px-2 rounded-xl transition">
-                        <!-- Facility Name (Static) -->
+                        <!-- Kolom Informasi Fasilitas -->
                         <div class="pr-2">
                             <div class="text-sm font-semibold text-[#1D1D1F] leading-tight">{{ $f['name'] }}</div>
                             <div class="text-[10px] text-gray-500">{{ $f['building'] }}</div>
                         </div>
                         
-                        <!-- Slots (Animated) -->
+                        <!-- Kolom 26 Kotak Slot Waktu Berwarna Dinamis -->
                         <div class="grid grid-cols-[repeat(26,1fr)] gap-1.5 opacity-0" :class="animationClass || 'animate-fade-in'">
                             <template x-for="timeSlot in timeSlots">
                                 <div class="h-8 w-full rounded-md transition hover:scale-105 hover:shadow-sm" 
@@ -353,11 +415,7 @@
                     @endif
                 </div>
 
-                <!-- 
-                  ELEMEN       : Kontrol Paginasi Matriks Jadwal (Maksimal 8 Item Sekali Request)
-                  KEGUNAAN     : Menampilkan counter rentang fasilitas aktif dan tombol navigasi halaman matriks.
-                  CARA KERJA   : Merender method $facilities->links() bawaan Laravel dengan query string filter dan tanggal otomatis dipertahankan.
-                -->
+                <!-- PAGINASI MATRIKS JADWAL (Maksimal 8 Ruang Per Request) -->
                 @if($facilities instanceof \Illuminate\Pagination\LengthAwarePaginator && $facilities->total() > 0)
                     <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-6">
                         <p class="text-xs text-[#86868B]">
@@ -374,27 +432,38 @@
         </div>
     </div>
 
+    {{-- 
+      LOGIKA ALPINE.JS: 'availabilityMatrix'
+      Mengelola komunikasi API, parsing jam, kalkulasi rentang slot, dan penentuan pewarnaan.
+    --}}
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('availabilityMatrix', () => ({
-                currentDate: '',
-                matrixData: {},
-                loading: true,
-                currentDateIndex: 1,
+                currentDate: '',             // Tanggal aktif yang sedang ditampilkan (format 'YYYY-MM-DD')
+                matrixData: {},              // Objek mapping: { [facility_id]: ['08:00', '08:30', ...] }
+                loading: true,               // Status pemuatan data dari API
+                currentDateIndex: 1,         // Indeks tombol pintas untuk animasi geser terarah
                 animationClass: 'animate-fade-in',
+                
+                // Label waktu representatif untuk header
                 timeLabels: [
                     '07:00','','08:00','','09:00','','10:00','','11:00','','12:00','','13:00','',
                     '14:00','','15:00','','16:00','','17:00','','18:00','','19:00',''
                 ],
+                
+                // 26 Slot Waktu Eksak (Blok 30 Menit, Mulai 07:00 s.d Selesai 20:00 WIB)
                 timeSlots: [
                     '07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
                     '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
                     '17:00','17:30','18:00','18:30','19:00','19:30'
                 ],
                 
+                /**
+                 * Menginisialisasi dan berpindah tanggal matriks dengan animasi geser
+                 */
                 initMatrix(date, index = 1) {
                     if (this.currentDate !== '' && index !== this.currentDateIndex) {
-                        this.animationClass = ''; // reset
+                        this.animationClass = ''; // Reset kelas animasi sesaat
                         setTimeout(() => {
                             if (index > this.currentDateIndex) {
                                 this.animationClass = 'animate-slide-in-right';
@@ -408,12 +477,19 @@
                     this.fetchMatrix();
                 },
 
+                /**
+                 * Memformat string tanggal YYYY-MM-DD menjadi Bahasa Indonesia lokal (misal: "13 Oktober 2026")
+                 */
                 formatDate(dateStr) {
                     if(!dateStr) return '';
                     const d = new Date(dateStr);
                     return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
                 },
 
+                /**
+                 * Menghitung jam selesai dari suatu slot waktu dengan penambahan 30 menit
+                 * Contoh: input '07:30' ➔ output '08:00'
+                 */
                 getEndTime(timeStr) {
                     let parts = timeStr.split(':');
                     let hours = parseInt(parts[0]);
@@ -425,21 +501,32 @@
                     return (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes);
                 },
                 
+                /**
+                 * Mengambil data matriks slot terpakai dari API publik CAVA secara asinkron
+                 */
                 async fetchMatrix() {
                     this.loading = true;
                     try {
-                        const response = await fetch(`/api/availability/matrix/${this.currentDate}`);
+                        const response = await fetch(`/api/availability/${this.currentDate}`);
                         if (response.ok) {
                             this.matrixData = await response.json();
                         } else {
-                            console.error('Failed to fetch matrix data');
+                            // Fallback jika API dipanggil lewat endpoint alias
+                            const fallbackResponse = await fetch(`/api/availability/matrix/${this.currentDate}`);
+                            if (fallbackResponse.ok) {
+                                this.matrixData = await fallbackResponse.json();
+                            }
                         }
                     } catch (error) {
-                        console.error('Error:', error);
+                        console.error('Gagal mengambil data matriks ketersediaan:', error);
                     }
                     this.loading = false;
                 },
                 
+                /**
+                 * Mengecek apakah fasilitas dan slot jam tertentu sedang dipesan (booked)
+                 * Mengembalikan true jika array timeSlots fasilitas di JSON memuat timeSlot ini
+                 */
                 isBooked(facilityId, slotTime) {
                     if (!this.matrixData[facilityId]) return false;
                     return this.matrixData[facilityId].includes(slotTime);
