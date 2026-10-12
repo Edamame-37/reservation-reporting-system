@@ -149,8 +149,28 @@ Route::get('/bantuan', fn() => redirect()->route('public.information', ['section
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-// ROUTE: Menerima GET request ke '/admin/dashboard'
-// FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL KONSOL ADMIN: DASBOR EKSEKUTIF & STATISTIK UTAMA (ADM-04 / US-17)
+ * ------------------------------------------------------------------------------------------
+ * Rute ini menjadi pintu gerbang utama bagi Super Administrator untuk meninjau metrik makro
+ * operasional kampus: utilisasi ruangan, tingkat okupansi real-time, rasio penanganan tiket
+ * kerusakan (SLA resolution), antrean verifikasi akun pending, dan log transaksi terkini.
+ * Dilindungi oleh middleware: 'auth' (wajib terotentikasi) dan 'role:admin' (hanya Super Admin).
+ */
+
+/**
+ * RUTE: GET /admin/dashboard (Dasbor Eksekutif Super Administrator - ADM-04 / US-17)
+ * ----------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+ * - Method HTTP : GET (pengambilan dan visualisasi representasi metrik).
+ * - URI Path   : '/admin/dashboard'.
+ * - Handler    : AdminDashboardController@index.
+ * - Route Name : 'admin.dashboard' (dipanggil via helper route('admin.dashboard')).
+ * - Cara Kerja : Menghubungkan permintaan browser dengan AdminDashboardController untuk mengeksekusi
+ *                agregasi data real-time, lalu merender antarmuka eksekutif Bento UI (kartu KPI,
+ *                grafik okupansi mingguan, dan tabel riwayat transaksi terbaru).
+ */
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
 /**
