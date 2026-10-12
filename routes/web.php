@@ -552,17 +552,58 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
      */
     Route::delete('/petugas/reservations/{id}/force-cancel', [ReservationManagementController::class, 'forceCancel'])->name('petugas.reservations.force-cancel');
 
-    // ROUTE: Menerima GET request ke '/petugas/report-management'
-    // FUNGSI: Menampilkan lembar kerja manajemen tiket kerusakan fasilitas sarpras (PTG-04 / US-11)
+    /**
+     * ------------------------------------------------------------------------------------------
+     * MODUL 16: OPERASIONAL PETUGAS SARPRAS: MANAJEMEN TIKET KERUSAKAN & MODE PERBAIKAN (PTG-04 & PTG-05)
+     * ------------------------------------------------------------------------------------------
+     * Rute-rute di bawah ini memfasilitasi penanganan tiket keluhan kerusakan fasilitas kampus:
+     * - Penarikan lembar kerja tiket perbaikan dengan filter status, pencarian, dan paginasi (PTG-04 / US-11).
+     * - Pembaruan progres perbaikan (Baru -> Diproses -> Selesai / Ditolak) beserta catatan resolusi teknisi.
+     * - Saklar penguncian operasional fasilitas ke status 'Dalam Perbaikan' / Maintenance Mode (PTG-05 / US-12).
+     */
+
+    /**
+     * RUTE: GET /petugas/report-management (Lembar Kerja Tiket Kerusakan Petugas - PTG-04 / US-11)
+     * ---------------------------------------------------------------------------------------------
+     * Syntax: Route::get('/petugas/report-management', [ReportManagementController::class, 'index'])->name('petugas.report-management');
+     * - Method HTTP : GET (pengambilan halaman web lembar kerja manajemen tiket kerusakan).
+     * - URI Path   : '/petugas/report-management' (dan alias '/petugas/reports').
+     * - Handler    : ReportManagementController@index.
+     * - Route Name : 'petugas.report-management' & 'petugas.reports.index'.
+     * - Cara Kerja : Menarik seluruh tiket keluhan sarpras dengan filter status tab ('baru', 'diproses',
+     *                'selesai', 'ditolak'), pencarian teks, dan paginasi server-side 10 baris per halaman.
+     */
     Route::get('/petugas/report-management', [ReportManagementController::class, 'index'])->name('petugas.report-management');
     Route::get('/petugas/reports', [ReportManagementController::class, 'index'])->name('petugas.reports.index');
 
-    // ROUTE: Menerima PATCH request ke '/petugas/reports/{id}'
-    // FUNGSI: Memperbarui status penanganan tiket keluhan kerusakan dan mencatat resolusi teknisi (PTG-04 / US-11)
+    /**
+     * RUTE: PATCH /petugas/reports/{id} (Pembaruan Status Penanganan & Resolusi Teknisi - PTG-04 / US-11)
+     * ---------------------------------------------------------------------------------------------------
+     * Syntax: Route::patch('/petugas/reports/{id}', [ReportManagementController::class, 'updateStatus'])->name('petugas.reports.update');
+     * - Method HTTP : PATCH (pembaruan data status dan catatan perbaikan).
+     * - URI Path   : '/petugas/reports/{id}'.
+     * - Parameter  : {id} ID tiket laporan kerusakan target.
+     * - FormRequest: UpdateReportStatusRequest (validasi enum status dan kewajiban catatan resolusi).
+     * - Handler    : ReportManagementController@updateStatus.
+     * - Route Name : 'petugas.reports.update'.
+     * - Cara Kerja : Memperbarui status tiket, mencatat isi `resolution_note`, merekam `handled_by` dan
+     *                `resolved_at`, serta menyinkronkan status gembok fasilitas jika diminta.
+     */
     Route::patch('/petugas/reports/{id}', [ReportManagementController::class, 'updateStatus'])->name('petugas.reports.update');
 
-    // ROUTE: Menerima PATCH request ke '/petugas/facilities/{id}/toggle-maintenance'
-    // FUNGSI: Mengunci/membuka kunci fasilitas ke status pemeliharaan / Mode Perbaikan (PTG-05 / US-12)
+    /**
+     * RUTE: PATCH /petugas/facilities/{id}/toggle-maintenance (Saklar Toggle Mode Perbaikan Ruangan - PTG-05 / US-12)
+     * ----------------------------------------------------------------------------------------------------------------
+     * Syntax: Route::patch('/petugas/facilities/{id}/toggle-maintenance', [ReportManagementController::class, 'toggleMaintenance'])->name('petugas.facilities.toggle-maintenance');
+     * - Method HTTP : PATCH.
+     * - URI Path   : '/petugas/facilities/{id}/toggle-maintenance'.
+     * - Parameter  : {id} ID master fasilitas yang akan dikunci/dibuka.
+     * - Handler    : ReportManagementController@toggleMaintenance.
+     * - Route Name : 'petugas.facilities.toggle-maintenance'.
+     * - Cara Kerja : Mengubah status operasional ruangan antara 'aktif' <-> 'dalam perbaikan' dalam
+     *                transaksi `lockForUpdate()`, sekaligus menyinkronkan atribut `is_facility_locked`
+     *                pada tiket pengaduan aktif yang terkait dengan ruangan tersebut.
+     */
     Route::patch('/petugas/facilities/{id}/toggle-maintenance', [ReportManagementController::class, 'toggleMaintenance'])->name('petugas.facilities.toggle-maintenance');
 });
 
