@@ -1,8 +1,10 @@
 {{-- 
   ==============================================================================
   NAMA FILE      : status-badge.blade.php
-  MODUL          : Modul 4 - Portal Publik: Beranda, Katalog Fasilitas, Filter & Matriks Ketersediaan
-  KODE FITUR     : PUB-01 (Komponen Badge Visual Status Semantik Universal CAVA)
+  LOKASI         : resources/views/components/cava/status-badge.blade.php
+  MODUL CAVA     : Modul 11 (Riwayat Reservasi & Pembatalan), Modul 12 (Pelaporan Kerusakan),
+                   Modul 4 (Katalog Publik), Modul 19 (Komponen UI Bersama)
+  KODE FITUR     : USR-02, USR-05, PUB-01 (Komponen Badge Visual Status Semantik Universal CAVA)
   ==============================================================================
   DESKRIPSI:
   Komponen UI seragam (Reusable Blade Component) yang merender badge status berdesain kapsul
