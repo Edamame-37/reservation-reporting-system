@@ -24,37 +24,117 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Portal Publik (Terbuka untuk Sivitas & Umum)
+| Portal Publik (Terbuka untuk Sivitas & Tamu Umum - Modul 4 / PUB-01 & PUB-02)
 |--------------------------------------------------------------------------
+| Rute-rute di bawah ini bersifat publik dan TIDAK dilindungi oleh middleware 'auth'.
+| Siapa pun, termasuk pengunjung anonim tanpa akun, dapat mengakses katalog ruang,
+| memeriksa matriks ketersediaan slot waktu, dan melakukan pencarian fasilitas.
 */
 
-// ROUTE: Menerima GET request ke root domain ('/')
-// FUNGSI: Menampilkan halaman beranda (landing page) publik CAVA
+/**
+ * --------------------------------------------------------------------------
+ * RUTE: GET / (Root URL / Landing Page Beranda)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/', [PublicFacilityController::class, 'home'])->name('home');
+ * - Method HTTP : GET (pengambilan data representasi halaman).
+ * - URI Path   : '/' (halaman muka aplikasi).
+ * - Handler    : Controller PublicFacilityController, method 'home'.
+ * - Name       : 'home' (digunakan pada fungsi helper route('home') di Blade/Controller).
+ * - Cara Kerja : Menampilkan hero section, statistik ringkas fasilitas kampus,
+ *                pilihan venue populer, dan direktori alur pengajuan peminjaman.
+ */
 Route::get('/', [PublicFacilityController::class, 'home'])->name('home');
 
-
-// ROUTE: Menerima GET request ke '/public/catalog'
-// FUNGSI: Menampilkan katalog daftar fasilitas dan ruang kampus beserta filter
+/**
+ * --------------------------------------------------------------------------
+ * RUTE: GET /public/catalog (Katalog Fasilitas & Filter Multi-Dimensi - PUB-01)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/public/catalog', [PublicFacilityController::class, 'index'])->name('public.catalog');
+ * - Method HTTP : GET.
+ * - URI Path   : '/public/catalog'.
+ * - Handler    : Controller PublicFacilityController, method 'index'.
+ * - Name       : 'public.catalog'.
+ * - Cara Kerja : Menerima parameter kueri filter (search, category, equipment, min_capacity),
+ *                menyimpan riwayat filter terakhir ke cookie browser (1 minggu), dan
+ *                mengembalikan view katalog daftar kartu fasilitas interaktif.
+ */
 Route::get('/public/catalog', [PublicFacilityController::class, 'index'])->name('public.catalog');
 
-// ROUTE: Menerima GET request ke '/public/availability'
-// FUNGSI: Menampilkan matriks jadwal slot ketersediaan ruang 30 menit
+/**
+ * --------------------------------------------------------------------------
+ * RUTE: GET /public/availability (Kalender Matriks Ketersediaan Publik - PUB-01)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/public/availability', [PublicFacilityController::class, 'availability'])->name('public.availability');
+ * - Method HTTP : GET.
+ * - URI Path   : '/public/availability'.
+ * - Handler    : Controller PublicFacilityController, method 'availability'.
+ * - Name       : 'public.availability'.
+ * - Cara Kerja : Merender tampilan antarmuka visual grid ketersediaan seluruh ruangan
+ *                kampus pada tanggal tertentu (default: hari ini). Menghubungkan
+ *                datepicker frontend dengan pemanggilan asynchronous ke endpoint API.
+ */
 Route::get('/public/availability', [PublicFacilityController::class, 'availability'])->name('public.availability');
 
-// API ROUTE: Menarik matriks slot waktu terpakai untuk seluruh fasilitas pada tanggal tertentu
+/**
+ * --------------------------------------------------------------------------
+ * API ENDPOINT: GET /api/availability/{date} (JSON Matriks Slot Seluruh Fasilitas)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMatrixAvailability'])->name('api.availability.matrix');
+ * - Method HTTP : GET.
+ * - URI Path   : '/api/availability/{date}' di mana parameter {date} berformat YYYY-MM-DD.
+ * - Handler    : Controller PublicFacilityController, method 'getMatrixAvailability'.
+ * - Name       : 'api.availability.matrix'.
+ * - Cara Kerja : Menghasilkan payload JSON yang memetakan slot 30 menit (07:00 - 20:00 WIB)
+ *                untuk seluruh ruangan aktif. Slot yang terisi oleh reservasi berstatus
+ *                'approved' ditandai sebagai 'booked' dengan privasi identitas pemohon disembunyikan.
+ */
 Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMatrixAvailability'])->name('api.availability.matrix');
 
-// API ROUTE: Menarik status ketersediaan spesifik 1 fasilitas pada tanggal tertentu (Sesuai Blueprint PUB-01)
+/**
+ * --------------------------------------------------------------------------
+ * API ENDPOINT: GET /api/availability/{id}/{date} (JSON Ketersediaan Tunggal)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
+ * - Method HTTP : GET.
+ * - URI Path   : '/api/availability/{id}/{date}' ({id}: ID fasilitas, {date}: format YYYY-MM-DD).
+ * - Handler    : Controller PublicFacilityController, method 'showAvailability'.
+ * - Name       : 'api.availability.single'.
+ * - Cara Kerja : Mengembalikan rincian jam mulai & selesai permohonan yang disetujui
+ *                untuk 1 fasilitas tertentu guna validasi slot pada formulir pemesanan.
+ */
 Route::get('/api/availability/{id}/{date}', [PublicFacilityController::class, 'showAvailability'])->name('api.availability.single');
 
-// API ROUTE: Menarik saran pencarian fasilitas (Autocomplete) untuk PUB-02
+/**
+ * --------------------------------------------------------------------------
+ * API ENDPOINT: GET /api/facilities/search (Autocomplete & Pencarian Instan - PUB-02)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/api/facilities/search', [PublicFacilityController::class, 'searchSuggestions'])->name('api.facilities.search');
+ * - Method HTTP : GET.
+ * - URI Path   : '/api/facilities/search?q=keyword'.
+ * - Handler    : Controller PublicFacilityController, method 'searchSuggestions'.
+ * - Name       : 'api.facilities.search'.
+ * - Cara Kerja : Menangani AJAX request dari search bar untuk menampilkan dropdown
+ *                rekomendasi ruangan (nama, kode, gedung, kapasitas) secara instan.
+ */
 Route::get('/api/facilities/search', [PublicFacilityController::class, 'searchSuggestions'])->name('api.facilities.search');
 
-// ROUTE: Menerima GET request ke '/informasi/{section?}'
-// FUNGSI: Menampilkan pusat informasi publik (Kebijakan, Syarat & Ketentuan, dan Bantuan)
+/**
+ * --------------------------------------------------------------------------
+ * RUTE: GET /informasi/{section?} (Pusat Informasi, Kebijakan, S&K, dan Bantuan)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/informasi/{section?}', [PublicInformationController::class, 'index'])->name('public.information');
+ * - Parameter opsional: {section?} dapat bernilai 'kebijakan', 'syarat-ketentuan', atau 'bantuan'.
+ */
 Route::get('/informasi/{section?}', [PublicInformationController::class, 'index'])->name('public.information');
 
-// ROUTE ALIAS: Tautan cepat langsung menuju tab spesifik informasi publik
+/**
+ * --------------------------------------------------------------------------
+ * RUTE ALIAS / SHORTCUT: Redireksi Cepat ke Tab Pusat Informasi
+ * --------------------------------------------------------------------------
+ * Syntax: Route::get('/...', fn() => redirect()->route(...));
+ * Menggunakan Arrow Function (PHP 7.4+) untuk mengembalikan respon redirect HTTP 302
+ * ke rute 'public.information' dengan parameter tab yang bersangkutan.
+ */
 Route::get('/kebijakan', fn() => redirect()->route('public.information', ['section' => 'kebijakan']))->name('public.kebijakan');
 Route::get('/syarat-ketentuan', fn() => redirect()->route('public.information', ['section' => 'syarat-ketentuan']))->name('public.syarat-ketentuan');
 Route::get('/bantuan', fn() => redirect()->route('public.information', ['section' => 'bantuan']))->name('public.bantuan');
