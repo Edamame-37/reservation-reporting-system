@@ -1,12 +1,53 @@
 {{-- 
-  NAMA FILE      : user-management.blade.php
-  FUNGSIONALITAS : Halaman Manajemen Sivitas Kampus & Otorisasi Pengguna (100% Sesuai Opsi 1 Prototype 4_try-admin.html)
-  DESKRIPSI      : Menampilkan direktori seluruh sivitas akademika, verifikasi pendaftar mandiri, underline tabs kategori (Semua Sivitas, Menunggu Otorisasi, Akun Aktif, Dinonaktifkan), tabel presisi dengan status tipografis murni, serta modal interaktif Apple Bento.
-  DESAIN SISTEM  : Apple Bento & Minimalist Precision (Opsi 1)
-  CARA KERJA     : Menggunakan layout <x-admin-layout active="user-management"> dengan state Alpine.js terintegrasi penuh ke endpoint Controller.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 6: KONSOL ADMIN - VERIFIKASI AKUN PENDING SIVITAS & MANAJEMEN PENGGUNA INTERNAL (ADM-01 & ADM-02)
+BERKAS: resources/views/admin/user-management.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Halaman Konsol Tata Kelola Sivitas & Petugas Sarpras (User Management Console) bagi Super Admin.
+Menyediakan antarmuka tunggal terpadu untuk:
+1. Verifikasi Antrean Pendaftaran Mandiri Sivitas (ADM-01 / UR15):
+   Meninjau kelengkapan identitas calon pengguna (Mahasiswa/Dosen/Staf), memeriksa berkas kartu
+   identitas resmi (KTM/NIP/Surat Tugas), menyetujui akun (status -> 'active'), atau menolak dengan alasan terstandarisasi (status -> 'rejected').
+2. Pembuatan Akun Internal Langsung (ADM-02 / US-13 & US-14):
+   Mendaftarkan personil Petugas Sarpras (teknisi pemeliharaan) serta akun sivitas kolektif
+   langsung aktif tanpa melewati antrean verifikasi mandiri.
+3. Kontrol Operasional Akun (Quick Suspension & Soft Delete):
+   Mengubah status aktif/non-aktif akun secara cepat (toggle-status) serta pengarsipan aman via Soft Delete.
+
+DESAIN & ARSITEKTUR ANTARMUKA:
+- Mengadopsi prinsip desain Apple Bento UI & Minimalist Precision: tata letak kartu bersih, sudut membulat lebar (rounded-[2rem]),
+  bayangan lembut, serta tipografi kontras tinggi (Inter & Outfit).
+- Dikelola oleh mesin reaktivitas sisi klien Alpine.js (`x-data`):
+  * Filter pencarian instan multi-kolom tanpa reload halaman (`userSearch`).
+  * Tab underline navigasi kategori status (`userTab`: 'all', 'pending', 'active', 'suspended').
+  * Dialog modal pratinjau data & kartu identitas sivitas (`showUserModal`).
+  * Dialog modal konfirmasi penolakan pendaftaran berformat resmi (`showRejectModal`).
+====================================================================================================
 --}}
 
+{{--
+  PENJELASAN WRAPPER LAYOUT:
+  Menggunakan komponen Blade <x-admin-layout> dari app/View/Components/AdminLayout.php:
+  - 'title'  : Menyetel judul halaman dinamis "Manajemen Sivitas".
+  - 'active' : Mengaktifkan indikator visual rute "user-management" pada sidebar.
+--}}
 <x-admin-layout title="Manajemen Sivitas" active="user-management">
+
+    {{--
+      PENJELASAN STATE MACHINE ALPINE.JS (x-data):
+      - 'userTab'         : Menyimpan tab filter aktif ('all', 'pending', 'active', 'suspended').
+      - 'userSearch'      : Menyimpan string kata kunci pencarian real-time pengguna.
+      - 'showUserModal'   : Boolean visibilitas modal form tambah / detail data sivitas.
+      - 'selectedUser'    : Object data pengguna yang dipilih untuk ditinjau (null jika membuat akun baru).
+      - 'showRejectModal' : Boolean visibilitas dialog modal penolakan pendaftaran akun pending.
+      - 'rejectTarget'    : Object penampung data pengguna target penolakan { id, name, nim, role }.
+      - 'openAddUser()'   : Mereset selectedUser ke null lalu membuka modal form pembuatan akun baru.
+      - 'openDetailUser()': Mengisi data selectedUser dengan payload pengguna lalu membuka modal detail.
+      - 'openReject()'    : Mengisi rejectTarget lalu menampilkan dialog modal penolakan resmi.
+    --}}
     <div x-data="{
         userTab: 'all',
         userSearch: '',
@@ -28,7 +69,10 @@
         }
     }" class="space-y-8">
 
-        {{-- Flash Session Notifications --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- FLASH SESSION NOTIFICATIONS (Umpan Balik Sukses & Galat Controller)                --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- Menampilkan alert hijau saat operasi verifikasi, aktivasi, atau pembuatan akun sukses: --}}
         @if (session('success'))
             <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-100 text-xs text-emerald-900 flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-3">
@@ -38,6 +82,7 @@
             </div>
         @endif
 
+        {{-- Menampilkan alert merah jika terjadi kegagalan validasi atau pelanggaran keamanan: --}}
         @if (isset($errors) && $errors->any())
             <div class="p-4 rounded-2xl bg-rose-50/80 border border-rose-100 text-xs text-rose-900 shadow-xs">
                 <div class="flex items-center gap-3">
@@ -51,13 +96,16 @@
             </div>
         @endif
 
-        {{-- 1. Header & Action Button (100% Sesuai 4_try-admin.html Opsi 1) --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 1. HEADER HALAMAN & TOMBOL TAMBAH AKUN INTERNAL (ADM-02)                           --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold tracking-tight text-[#1D1D1F] font-display">Manajemen Sivitas</h1>
                 <p class="text-sm text-[#86868B] mt-1.5 leading-relaxed">Direktori seluruh civitas akademika, verifikasi pendaftar mandiri, dan penugasan peran sistem.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- Tombol pemicu modal pembuatan akun baru secara langsung oleh Super Admin --}}
                 <button type="button" 
                         @click="openAddUser()" 
                         class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition shadow-sm cursor-pointer flex items-center gap-2">
@@ -67,12 +115,16 @@
             </div>
         </div>
 
-        {{-- 2. Search Bar Desain Katalog Publik (Aura Glow Halus) & Underline Tabs Filter --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 2. SEARCH BAR PENCARIAN INSTAN & UNDERLINE TABS FILTER                              --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <div class="space-y-3">
+            {{-- Input pencarian real-time dengan efek aura glow halus --}}
             <div class="relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                 <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                     <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
+                    {{-- Binding dua arah dengan properti Alpine.js userSearch --}}
                     <input type="text" 
                            x-model="userSearch" 
                            placeholder="Cari nama sivitas, NIM/NIP, alamat email, atau jurusan..." 
@@ -84,30 +136,40 @@
                 </div>
             </div>
 
-            <!-- Underline Tabs Filter Kategori (Bebas Kotak Warna-Warni - 100% Sesuai Prototype) -->
+            {{-- 
+              Kalkulasi Agregat Jumlah Pengguna untuk Label Tab Underline:
+              - $totalSivitasAll : Menjumlahkan seluruh data pada 4 kategori.
+              - $activeCountTotal: Total akun yang berstatus aktif (Sivitas + Petugas).
+            --}}
             @php
                 $totalSivitasAll = $sivitasCount + $petugasCount + $pendingCount + $inactiveCount;
                 $activeCountTotal = $sivitasCount + $petugasCount;
             @endphp
+
+            {{-- Underline Tabs Navigasi Kategori Akun --}}
             <div class="flex items-center gap-8 text-sm font-medium overflow-x-auto no-scrollbar pt-2 border-b border-gray-100">
+                {{-- Tab 1: Semua Sivitas --}}
                 <button type="button" 
                         @click="userTab = 'all'" 
                         :class="userTab === 'all' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" 
                         class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
                     Semua Sivitas ({{ $totalSivitasAll }})
                 </button>
+                {{-- Tab 2: Antrean Verifikasi Pending (ADM-01) --}}
                 <button type="button" 
                         @click="userTab = 'pending'" 
                         :class="userTab === 'pending' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" 
                         class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
                     Menunggu Otorisasi ({{ $pendingCount }})
                 </button>
+                {{-- Tab 3: Akun Aktif Sivitas & Petugas --}}
                 <button type="button" 
                         @click="userTab = 'active'" 
                         :class="userTab === 'active' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" 
                         class="pb-3 -mb-px transition whitespace-nowrap cursor-pointer">
                     Akun Aktif ({{ $activeCountTotal }})
                 </button>
+                {{-- Tab 4: Akun Dinonaktifkan / Soft Deleted --}}
                 <button type="button" 
                         @click="userTab = 'suspended'" 
                         :class="userTab === 'suspended' ? 'text-[#1D1D1F] border-b-2 border-[#1D1D1F] font-semibold' : 'text-[#86868B] hover:text-[#1D1D1F]'" 
@@ -117,7 +179,9 @@
             </div>
         </div>
 
-        {{-- 3. Tabel Data Sivitas: Bersih, Lega, dan Status Tipografis Murni --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
+        {{-- 3. TABEL DATA SIVITAS & PETUGAS (DENGAN REAKTIVITAS ALPINE.JS)                     --}}
+        {{-- ---------------------------------------------------------------------------------- --}}
         <div class="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -131,9 +195,16 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        {{-- Data Gabungan dengan Filter Tab Alpine.js & Pencarian Real-time --}}
-                        
-                        {{-- 1. Pendaftar Pending --}}
+                        {{-- 
+                          PENGGABUNGAN DATA & FILTER DINAMIS:
+                          Baris tabel di bawah ini disaring secara reaktif menggunakan direktif Alpine.js `x-show`:
+                          1. Memeriksa kecocokan tab aktif (`userTab`).
+                          2. Memeriksa substring teks pencarian (`userSearch`) pada nama, email, identitas, atau departemen.
+                        --}}
+
+                        {{-- ==================================================================== --}}
+                        {{-- KELOMPOK 1: PENDAFTAR MANDIRI BERSTATUS PENDING (ADM-01)            --}}
+                        {{-- ==================================================================== --}}
                         @foreach($pendingUsers as $user)
                             <tr class="hover:bg-[#FBFBFD] transition group"
                                 x-show="(userTab === 'all' || userTab === 'pending') && (!userSearch || '{{ strtolower($user->name . ' ' . $user->identity_number . ' ' . $user->email . ' ' . $user->department . ' ' . $user->role) }}'.includes(userSearch.toLowerCase()))">
@@ -152,13 +223,23 @@
                                     </span>
                                 </td>
                                 <td class="py-5 px-6 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline">
+                                    <div class="flex items-center justify-end gap-2">
+                                        {{-- Formulir Verifikasi Cepat (POST ke admin.users.verify) --}}
+                                        <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Verifikasi dan aktifkan akun sivitas ini?')">
                                             @csrf
-                                            <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
+                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-[#1D1D1F] text-white text-xs font-medium hover:bg-black transition cursor-pointer">
                                                 Verifikasi
                                             </button>
                                         </form>
+
+                                        {{-- Tombol Buka Dialog Penolakan Berformat Resmi --}}
+                                        <button type="button" 
+                                                @click="openReject({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->identity_number ?? '-') }}', '{{ ucfirst($user->role) }}')" 
+                                                class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-medium transition cursor-pointer">
+                                            Tolak
+                                        </button>
+
+                                        {{-- Tombol Buka Modal Pratinjau Detail & Berkas Kartu Identitas --}}
                                         <button type="button" 
                                                 @click="openDetailUser({
                                                     id: {{ $user->id }},
@@ -173,14 +254,16 @@
                                                     created_at: '{{ $user->created_at ? $user->created_at->format('d M Y, H:i') : '-' }}'
                                                 })" 
                                                 class="text-xs font-medium text-[#86868B] hover:text-[#1D1D1F] transition cursor-pointer">
-                                            Lihat Detail
+                                            Detail
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         @endforeach
 
-                        {{-- 2. Sivitas Aktif --}}
+                        {{-- ==================================================================== --}}
+                        {{-- KELOMPOK 2: SIVITAS AKADEMIKA AKTIF (MAHASISWA, DOSEN, STAF)        --}}
+                        {{-- ==================================================================== --}}
                         @foreach($sivitasUsers as $user)
                             <tr class="hover:bg-[#FBFBFD] transition group"
                                 x-show="(userTab === 'all' || userTab === 'active') && (!userSearch || '{{ strtolower($user->name . ' ' . $user->identity_number . ' ' . $user->email . ' ' . $user->department . ' ' . $user->role) }}'.includes(userSearch.toLowerCase()))">
@@ -221,7 +304,9 @@
                             </tr>
                         @endforeach
 
-                        {{-- 3. Petugas Sarpras Aktif --}}
+                        {{-- ==================================================================== --}}
+                        {{-- KELOMPOK 3: PETUGAS SARPRAS AKTIF (OPERASIONAL FASILITAS)           --}}
+                        {{-- ==================================================================== --}}
                         @foreach($petugasUsers as $user)
                             <tr class="hover:bg-[#FBFBFD] transition group"
                                 x-show="(userTab === 'all' || userTab === 'active') && (!userSearch || '{{ strtolower($user->name . ' ' . $user->identity_number . ' ' . $user->email . ' ' . $user->department . ' ' . $user->assignment_zone) }}'.includes(userSearch.toLowerCase()))">
@@ -262,7 +347,9 @@
                             </tr>
                         @endforeach
 
-                        {{-- 4. Akun Nonaktif / Ditangguhkan --}}
+                        {{-- ==================================================================== --}}
+                        {{-- KELOMPOK 4: AKUN DINONAKTIFKAN / DITANGGUHKAN / SOFT DELETED        --}}
+                        {{-- ==================================================================== --}}
                         @foreach($inactiveUsers as $user)
                             <tr class="hover:bg-[#FBFBFD] transition group"
                                 x-show="(userTab === 'all' || userTab === 'suspended') && (!userSearch || '{{ strtolower($user->name . ' ' . $user->identity_number . ' ' . $user->email . ' ' . $user->department . ' ' . $user->role) }}'.includes(userSearch.toLowerCase()))">
@@ -307,11 +394,14 @@
             </div>
         </div>
 
-        {{-- ============================================================== --}}
-        {{-- MODAL TAMBAH / DETAIL SIVITAS (100% Persis 4_try-admin.html)   --}}
-        {{-- ============================================================== --}}
+        {{-- ================================================================================== --}}
+        {{-- MODAL TAMBAH / DETAIL SIVITAS (BENTO UI CARD WITH ALPINE.JS)                       --}}
+        {{-- ================================================================================== --}}
         <div x-show="showUserModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {{-- Backdrop Gelap dengan Efek Blur --}}
             <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showUserModal = false"></div>
+            
+            {{-- Wadah Kartu Dialog Modal --}}
             <div class="relative w-full max-w-md bg-white rounded-[2rem] p-7 sm:p-8 shadow-2xl border border-gray-100 z-10 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between pb-4 mb-5 border-b border-gray-100">
                     <h3 class="text-base font-bold text-[#1D1D1F]" x-text="selectedUser ? 'Detail Data Sivitas' : 'Tambah Akun Baru'"></h3>
@@ -320,7 +410,9 @@
                     </button>
                 </div>
 
-                {{-- FORM TAMBAH PENGGUNA BARU (Saat selectedUser null) --}}
+                {{-- -------------------------------------------------------------------------- --}}
+                {{-- 1. FORMULIR TAMBAH AKUN BARU (Dirender saat selectedUser === null)          --}}
+                {{-- -------------------------------------------------------------------------- --}}
                 <template x-if="!selectedUser">
                     <form action="{{ route('admin.users.create-user') }}" method="POST" class="space-y-4 text-xs">
                         @csrf
@@ -337,7 +429,7 @@
                             <select id="m-role" name="role_type" class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-black">
                                 <option value="mahasiswa">Mahasiswa</option>
                                 <option value="dosen">Dosen</option>
-                                <option value="staf">Tendik</option>
+                                <option value="staf">Tendik / Staf</option>
                             </select>
                         </div>
                         <div>
@@ -359,7 +451,9 @@
                     </form>
                 </template>
 
-                {{-- TAMPILAN DETAIL SIVITAS (Saat selectedUser aktif) --}}
+                {{-- -------------------------------------------------------------------------- --}}
+                {{-- 2. TAMPILAN DETAIL SIVITAS & KARTU IDENTITAS (Saat selectedUser !== null)   --}}
+                {{-- -------------------------------------------------------------------------- --}}
                 <template x-if="selectedUser">
                     <div class="space-y-4 text-xs">
                         <div>
@@ -385,13 +479,18 @@
                             <div class="text-xs text-[#1D1D1F]" x-text="selectedUser.dept"></div>
                         </div>
                         
+                        {{-- Pratinjau Gambar Berkas Bukti Kartu Identitas (KTM / NIP) --}}
                         <template x-if="selectedUser.id_card">
                             <div>
                                 <label class="block font-medium text-[#86868B] mb-1.5">Berkas Bukti Identitas (KTM / SK)</label>
-                                <img :src="selectedUser.id_card" alt="Bukti Identitas" class="w-full max-h-44 object-contain rounded-xl border border-gray-100 bg-[#F5F5F7]">
+                                <a :href="selectedUser.id_card" target="_blank" title="Klik untuk memperbesar gambar">
+                                    <img :src="selectedUser.id_card" alt="Bukti Identitas" class="w-full max-h-44 object-contain rounded-xl border border-gray-100 bg-[#F5F5F7] hover:opacity-90 transition">
+                                </a>
+                                <p class="text-[10px] text-gray-400 mt-1">Klik gambar untuk membuka ukuran penuh di tab baru.</p>
                             </div>
                         </template>
 
+                        {{-- Tindakan Pengubahan Status Cepat (Aktif <-> Nonaktif) --}}
                         <div class="pt-5 mt-6 border-t border-gray-100 flex items-center justify-between gap-3">
                             <form :action="'{{ url('/admin/users') }}/' + selectedUser.id + '/toggle-status'" method="POST" onsubmit="return confirm('Perbarui status akun ini?')">
                                 @csrf
@@ -406,6 +505,60 @@
                         </div>
                     </div>
                 </template>
+            </div>
+        </div>
+
+        {{-- ================================================================================== --}}
+        {{-- MODAL KONFIRMASI PENOLAKAN PENDAFTARAN SIVITAS PENDING (ADM-01 / RejectUserRequest)--}}
+        {{-- ================================================================================== --}}
+        <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showRejectModal = false"></div>
+            
+            <div class="relative w-full max-w-md bg-white rounded-[2rem] p-7 sm:p-8 shadow-2xl border border-gray-100 z-10">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+                    <div class="flex items-center gap-2 text-rose-700">
+                        <span class="material-symbols-outlined text-[22px]">cancel</span>
+                        <h3 class="text-base font-bold text-[#1D1D1F]">Tolak Pendaftaran Akun</h3>
+                    </div>
+                    <button type="button" @click="showRejectModal = false" class="text-gray-400 hover:text-[#1D1D1F] cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+
+                {{-- Formulir Penolakan Akun yang mengirim payload reason & notes ke admin.users.reject --}}
+                <form :action="'{{ url('/admin/users') }}/' + rejectTarget.id + '/reject'" method="POST" class="space-y-4 text-xs">
+                    @csrf
+                    <div>
+                        <p class="text-slate-600 mb-3">
+                            Anda akan menolak pendaftaran akun sivitas <strong class="text-slate-900" x-text="rejectTarget.name"></strong> (<span x-text="rejectTarget.nim"></span>).
+                        </p>
+                    </div>
+
+                    {{-- Pilihan Alasan Standar Terverifikasi Sesuai RejectUserRequest --}}
+                    <div>
+                        <label class="block font-medium text-[#86868B] mb-1.5" for="rej-reason">Kategori Alasan Penolakan <span class="text-rose-500">*</span></label>
+                        <select id="rej-reason" name="reason" required class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-rose-500">
+                            <option value="invalid_ktm">Foto KTM / SK buram atau tidak terbaca</option>
+                            <option value="mismatched_data">Data NIM/NIP tidak cocok dengan pangkalan data</option>
+                            <option value="invalid_email">Bukan domain email resmi universitas</option>
+                            <option value="invalid_data">Data identitas palsu atau mencurigakan</option>
+                            <option value="other">Alasan lainnya</option>
+                        </select>
+                    </div>
+
+                    {{-- Catatan Tambahan bagi Sivitas (Opsional) --}}
+                    <div>
+                        <label class="block font-medium text-[#86868B] mb-1.5" for="rej-notes">Catatan Tambahan untuk Pendaftar (Opsional)</label>
+                        <textarea id="rej-notes" name="notes" rows="3" maxlength="500" placeholder="Berikan arahan perbaikan bagi sivitas untuk pendaftaran ulang..." class="w-full bg-[#F5F5F7] border-0 text-[#1D1D1F] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 resize-none"></textarea>
+                    </div>
+
+                    <div class="pt-5 mt-5 border-t border-gray-100 flex items-center justify-end gap-3">
+                        <button type="button" @click="showRejectModal = false" class="px-4 py-2 rounded-xl text-xs font-medium text-[#86868B] hover:text-[#1D1D1F]">Batal</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-medium hover:bg-rose-700 transition cursor-pointer shadow-sm">
+                            Konfirmasi Tolak
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
