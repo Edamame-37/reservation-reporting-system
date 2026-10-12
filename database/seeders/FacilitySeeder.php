@@ -1,9 +1,20 @@
 <?php
+
 /**
- * NAMA FILE    : FacilitySeeder.php
- * FUNGSI       : Seeder inisialisasi master inventaris fasilitas dan ruang kampus
- * DESKRIPSI    : Menanamkan 6 fasilitas representatif utama kampus untuk inisialisasi katalog ruangan dan matriks jadwal.
- * CARA KERJA   : Mengiterasi data array fasilitas dan mengeksekusi Facility::firstOrCreate() dengan atribut JSON equipment.
+ * ==============================================================================================
+ * SEEDER BASIS DATA: MASTER INVENTARIS FASILITAS & RUANGAN KAMPUS
+ * ==============================================================================================
+ * Berkas: database/seeders/FacilitySeeder.php
+ * 
+ * PERAN & FUNGSI UTAMA:
+ * 1. Menginisialisasi katalog ruang kampus dengan data realistis untuk pengujian sistem CAVA.
+ * 2. Mendaftarkan 6 fasilitas unggulan utama (Flagship Venues) dengan variasi kategori lengkap
+ *    (Auditorium, Laboratorium Komputer, Smart Classroom, Aula Olahraga, Ruang Seminar, Ruang Senat).
+ * 3. Menghasilkan puluhan ruang kelas terstandarisasi secara prosedural (Gedung A s.d. F, Lantai 1-3)
+ *    menggunakan perulangan bersarang (`sprintf`) untuk simulasi skala lingkungan kampus nyata.
+ * 4. Menerapkan `Facility::updateOrCreate()` agar seeder bersifat idempoten (dapat dijalankan
+ *    berulang kali tanpa menghasilkan data duplikat atau merusak kode ruangan).
+ * ==============================================================================================
  */
 
 namespace Database\Seeders;
@@ -14,12 +25,18 @@ use Illuminate\Database\Seeder;
 class FacilitySeeder extends Seeder
 {
     /**
-     * FUNCTION/PROCEDURE : run()
-     * KEGUNAAN           : Mengeksekusi penanaman data master fasilitas ke dalam tabel facilities.
-     * CARA KERJA         : Menginput 6 data ruang lengkap dengan kapasitas, kategori, peralatan (JSON), dan status operasional.
+     * Run the database seeds.
+     * 
+     * CARA KERJA & ALUR:
+     * 1. Menyiapkan array data untuk 6 fasilitas unggulan representatif.
+     * 2. Menjalankan algoritma procedural generator untuk memproduksi ruangan di Gedung A s.d. F.
+     * 3. Melakukan sinkronisasi ke tabel `facilities` menggunakan `updateOrCreate()` berbasis kolom `code`.
      */
     public function run(): void
     {
+        // ------------------------------------------------------------------------------------------
+        // 1. FASILITAS UNGGULAN REPRESENTATIF (FLAGSHIP VENUES)
+        // ------------------------------------------------------------------------------------------
         $facilities = [
             [
                 'code'           => 'AUD-H01',
@@ -85,11 +102,15 @@ class FacilitySeeder extends Seeder
                 'capacity'       => 35,
                 'equipment'      => ['Meja Oval Konferensi', 'Delegate Mic Units', 'Display LCD 85 Inch', 'Executive Chairs'],
                 'description'    => 'Ruang sidang formal para pimpinan universitas dan dewan senat. Saat ini sedang dalam perbaikan tata suara.',
+                // Status 'dalam perbaikan' berguna sebagai data uji untuk memvalidasi pencegahan reservasi fasilitas yang terkunci:
                 'status'         => 'dalam perbaikan',
             ],
         ];
 
-        // Master Ruangan Terstruktur Gedung A sampai F, Lantai 1 sampai 3, Ruang 101 sampai 104
+        // ------------------------------------------------------------------------------------------
+        // 2. GENERASI PROSEDURAL RUANG KELAS & LAB (GEDUNG A s.d. F)
+        // ------------------------------------------------------------------------------------------
+        // Metadata konfigurasi kluster gedung universitas:
         $buildings = [
             'A' => ['name' => 'Gedung Kuliah Terpadu A', 'category' => 'kelas', 'capacity' => 40],
             'B' => ['name' => 'Gedung Kuliah Bersama B', 'category' => 'kelas', 'capacity' => 45],
@@ -99,10 +120,16 @@ class FacilitySeeder extends Seeder
             'F' => ['name' => 'Gedung Pusat Bahasa & Budaya F', 'category' => 'kelas', 'capacity' => 35],
         ];
 
+        // Perulangan bertingkat 3 level (Gedung -> Lantai 1-3 -> Ruang 1-4 per lantai):
         foreach ($buildings as $bLetter => $bMeta) {
             for ($floor = 1; $floor <= 3; $floor++) {
                 for ($roomNum = 1; $roomNum <= 4; $roomNum++) {
-                    $roomCode = sprintf('%s%d%02d', $bLetter, $floor, $roomNum); // Contoh: A101, A102, A103, A104
+                    // Format kode ruangan (contoh: A101, A102, C203):
+                    // - %s = huruf gedung ('A')
+                    // - %d = angka lantai (1)
+                    // - %02d = nomor ruangan 2 digit berpading nol ('01', '02', dst.)
+                    $roomCode = sprintf('%s%d%02d', $bLetter, $floor, $roomNum);
+                    
                     $facilities[] = [
                         'code'           => $roomCode,
                         'name'           => sprintf('Ruang %s (%s)', $roomCode, $bMeta['category'] === 'lab' ? 'Laboratorium' : 'Ruang Kelas'),
@@ -118,8 +145,17 @@ class FacilitySeeder extends Seeder
             }
         }
 
+        // ------------------------------------------------------------------------------------------
+        // 3. PENYIMPANAN DATA IDEMPOTEN KE BASIS DATA
+        // ------------------------------------------------------------------------------------------
         foreach ($facilities as $facility) {
+            // Facility::updateOrCreate(['code' => ...], $facility)
+            // - Mencari apakah fasilitas dengan kode 'code' sudah pernah ada di database.
+            // - Jika ada: Melakukan UPDATE atribut-atributnya agar tetap mutakhir.
+            // - Jika belum ada: Melakukan INSERT data baru.
+            // - Menjamin seeder dapat dijalankan berulang kali tanpa memicu galat "Duplicate entry 'AUD-H01'".
             Facility::updateOrCreate(['code' => $facility['code']], $facility);
         }
     }
 }
+
