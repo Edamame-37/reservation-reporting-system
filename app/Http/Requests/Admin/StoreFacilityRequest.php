@@ -1,9 +1,20 @@
 <?php
+
 /**
- * NAMA FILE    : StoreFacilityRequest.php
- * FUNGSI       : Form Request validasi data penambahan master fasilitas baru (Konsol Admin)
- * DESKRIPSI    : Memvalidasi integritas payload pembuatan ruangan kampus baru (ADM-03 / US-16) sebelum diteruskan ke Controller.
- * CARA KERJA   : Memastikan otorisasi request, memeriksa keunikan nama dan kode ruang, batas kapasitas, format kategori, dan format foto cover (<2MB).
+ * ==============================================================================================
+ * FORM REQUEST: VALIDASI PENAMBAHAN FASILITAS BARU (KONSOL ADMIN - ADM-03)
+ * ==============================================================================================
+ * Berkas: app/Http/Requests/Admin/StoreFacilityRequest.php
+ * 
+ * PERAN & FUNGSI UTAMA:
+ * 1. Mengenkapsulasi logika otorisasi dan validasi input data pembuatan fasilitas baru
+ *    ke dalam kelas terpisah (mematuhi Single Responsibility Principle).
+ * 2. Mencegah data kotor atau berbahaya masuk ke database sebelum mencapai `FacilityController::store`.
+ * 3. Menjalankan normalisasi input otomatis pada lifecycle hook `prepareForValidation`
+ *    (kapitalisasi kode ruang, pembersihan spasi, dan penyelarasan alias input form).
+ * 4. Memastikan keunikan `code` dan `name` di tabel `facilities` guna mencegah konflik integritas data.
+ * 5. Menolak berkas gambar cover yang tidak aman atau berukuran lebih dari 2MB (2048 KB).
+ * ==============================================================================================
  */
 
 namespace App\Http\Requests\Admin;
@@ -13,9 +24,14 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreFacilityRequest extends FormRequest
 {
     /**
-     * FUNCTION/PROCEDURE : authorize()
-     * KEGUNAAN           : Menentukan apakah pengguna yang sedang login berhak mengeksekusi request ini.
-     * CARA KERJA         : Mengembalikan nilai true (dapat diintegrasikan dengan otorisasi Gate/Role Admin).
+     * Menentukan apakah pengguna saat ini diizinkan mengirimkan request ini.
+     * 
+     * CARA KERJA & ALUR:
+     * - Mengembalikan boolean `true` atau `false`.
+     * - Karena rute telah diproteksi middleware `role:admin` pada `routes/web.php`,
+     *   metode ini mengembalikan `true`. Jika `false`, Laravel melempar HTTP 403 Forbidden.
+     * 
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -23,30 +39,38 @@ class StoreFacilityRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : prepareForValidation()
-     * KEGUNAAN           : Menormalkan input data sebelum aturan validasi dievaluasi.
-     * CARA KERJA         : Membersihkan spasi pada kode ruang dan memastikan kategori dalam format huruf kecil.
+     * Mempersiapkan dan membersihkan data input sebelum aturan validasi dijalankan.
+     * 
+     * CARA KERJA & ALUR:
+     * - Method ini dipanggil otomatis oleh Laravel sebelum method `rules()`.
+     * - Menormalkan kode ruangan menjadi huruf kapital seragam (contoh: 'aud-h01' -> 'AUD-H01').
+     * - Menormalkan kategori menjadi huruf kecil ('AUDITORIUM' -> 'auditorium').
+     * - Menangani fallback alias input form jika frontend mengirim 'type' atau 'location'.
      */
     protected function prepareForValidation(): void
     {
+        // 1. Kapitalisasi kode ruang dan pembersihan whitespace:
         if ($this->has('code')) {
             $this->merge([
                 'code' => strtoupper(trim((string) $this->code)),
             ]);
         }
 
+        // 2. Harmonisasi nilai kategori huruf kecil:
         if ($this->has('category')) {
             $this->merge([
                 'category' => strtolower(trim((string) $this->category)),
             ]);
         }
 
+        // 3. Fallback alias 'type' ke 'category':
         if ($this->has('type') && !$this->has('category')) {
             $this->merge([
                 'category' => strtolower(trim((string) $this->type)),
             ]);
         }
 
+        // 4. Fallback alias 'location' ke 'building':
         if ($this->has('location') && !$this->has('building')) {
             $this->merge([
                 'building' => trim((string) $this->location),
@@ -55,32 +79,55 @@ class StoreFacilityRequest extends FormRequest
     }
 
     /**
-     * FUNCTION/PROCEDURE : rules()
-     * KEGUNAAN           : Mendefinisikan aturan validasi integritas data fasilitas baru.
-     * CARA KERJA         : Menetapkan batasan tipe data, keunikan nama/kode di tabel facilities, batasan ukuran berkas gambar, serta daftar enum kategori.
+     * Mendefinisikan aturan validasi yang wajib dipenuhi oleh data request.
+     * 
+     * CARA KERJA & ALUR:
+     * - Jika ada satu saja aturan yang gagal, siklus HTTP langsung dihentikan:
+     *   * Untuk request HTML form biasa: Otomatis redirect back dengan flash session errors `$errors`.
+     *   * Untuk request AJAX/JSON: Mengembalikan response HTTP 422 Unprocessable Content.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
+            // 'name': Wajib diisi string maksimal 150 karakter, tidak boleh duplikat di tabel facilities.
             'name'           => ['required', 'string', 'max:150', 'unique:facilities,name'],
+
+            // 'code': Wajib diisi string maksimal 30 karakter, unik di kolom 'code' tabel facilities.
             'code'           => ['required', 'string', 'max:30', 'unique:facilities,code'],
+
+            // 'category': Wajib salah satu dari 5 enum resmi sistem CAVA.
             'category'       => ['required', 'string', 'in:auditorium,lab,kelas,olahraga,rapat'],
+
+            // 'building': Nama gedung wajib diisi, maksimal 100 karakter.
             'building'       => ['required', 'string', 'max:100'],
+
+            // 'floor_location': Keterangan lantai bersifat opsional, maksimal 50 karakter.
             'floor_location' => ['nullable', 'string', 'max:50'],
+
+            // 'capacity': Wajib bilangan bulat positif minimal 1 orang.
             'capacity'       => ['required', 'integer', 'min:1'],
+
+            // 'equipment': Boleh null atau berupa array/string perlengkapan.
             'equipment'      => ['nullable'],
+
+            // 'description': Keterangan naratif opsional hingga 1000 karakter.
             'description'    => ['nullable', 'string', 'max:1000'],
+
+            // 'cover_image': Berkas upload opsional, harus file gambar asli (jpg, jpeg, png) maksimal 2048 KB (2MB).
             'cover_image'    => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+
+            // 'status': Opsional, jika diisi harus sesuai status operasional yang valid.
             'status'         => ['nullable', 'string', 'in:aktif,dalam perbaikan,nonaktif'],
         ];
     }
 
     /**
-     * FUNCTION/PROCEDURE : messages()
-     * KEGUNAAN           : Menyediakan pesan kesalahan validasi dalam Bahasa Indonesia yang informatif.
-     * CARA KERJA         : Mengembalikan pemetaan pesan kegagalan sesuai atribut aturan validasi.
+     * Kustomisasi pesan kesalahan validasi dalam Bahasa Indonesia yang ramah pengguna.
+     * 
+     * CARA KERJA & ALUR:
+     * Memetakan pasangan "nama_field.nama_aturan" => "Pesan galat yang ditampilkan ke pengguna".
      *
      * @return array<string, string>
      */
@@ -109,3 +156,4 @@ class StoreFacilityRequest extends FormRequest
         ];
     }
 }
+
