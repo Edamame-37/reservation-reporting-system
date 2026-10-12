@@ -1,12 +1,40 @@
 {{-- 
+  ====================================================================================================
   NAMA FILE      : report-form.blade.php
-  FUNGSIONALITAS : Formulir Pelaporan Kerusakan & Malfungsi Fasilitas Kampus (USR-04)
-  DESKRIPSI      : Form pengaduan malfungsi atau kerusakan fisik fasilitas kampus dengan dropdown dinamis, kategori kerusakan, deskripsi masalah, dan pratinjau unggah foto bukti (Maks 2MB).
-  DESAIN         : Opsi 1 (Apple-esque Bento) dengan styling borderless soft gray (bg-[#F5F5F7] border-0), tipografi bersih Outfit/Inter, tanpa AI slop / tanpa border hitam pekat.
-  CARA KERJA     : Menerima koleksi $facilities dari ReportController@create, mengirimkan multipart POST ke user.reports.store, divalidasi via StoreDamageReportRequest.
+  LOKASI         : resources/views/user/report-form.blade.php
+  FUNGSIONALITAS : Antarmuka Formulir Pengaduan Kerusakan & Malfungsi Fasilitas Kampus (USR-04)
+  MODUL CAVA     : 12. Portal Pengguna: Pelaporan Kerusakan Fasilitas & Pelacakan Tiket (USR-04 & USR-05)
+  ====================================================================================================
+
+  DESKRIPSI ARSITEKTUR & DESAIN SISTEM:
+  1. Integrasi Master Layout:
+     - Menggunakan komponen Blade `<x-app-layout title="Form Lapor Kerusakan Fasilitas" active="report-form">`.
+     - Sinkron dengan sidebar navigasi kiri dan topbar header pengguna.
+  
+  2. Pendekatan Desain Apple-esque Bento UI:
+     - Kartu kontainer membulat luas (`rounded-[2rem]`), latar belakang bersih dengan bayangan lembut,
+       dan penataan field borderless soft gray (`bg-[#F5F5F7] border-0 text-[#1D1D1F]`).
+  
+  3. Validasi & Pratinjau Klien Interaktif (Alpine.js):
+     - `handleFile(e)`: Mencegah unggahan berkas berukuran besar di sisi browser pengguna
+       sebelum mengirimkan beban ke jaringan server (`file.size > 2 * 1024 * 1024` / 2 MB).
+     - Menolak berkas non-gambar (hanya image/jpeg, image/png, image/jpg).
+     - Menggunakan JavaScript `FileReader.readAsDataURL` untuk menampilkan pratinjau foto secara instan.
+     - Menyediakan tombol pembersihan berkas `resetFile()` untuk membatalkan foto yang dipilih.
+  
+  4. Pengiriman Multipart Form-Data:
+     - Formulir dikirimkan melalui metode HTTP POST ke rute `user.reports.store` dengan atribut
+       `enctype="multipart/form-data"` agar berkas biner gambar dapat diunggah dengan aman.
+  ====================================================================================================
 --}}
 
+{{-- Memanggil komponen master layout khusus portal pengguna dengan prop active="report-form" --}}
 <x-app-layout title="Form Lapor Kerusakan Fasilitas" active="report-form">
+    
+    {{-- 
+      Blok @php: Definisi Kategori Kerusakan Fasilitas Kampus Terstandar
+      - Membantu sivitas mengklasifikasikan jenis kendala teknis secara cepat.
+    --}}
     @php
         $categories = [
             'AC & Pendingin',
@@ -20,6 +48,14 @@
         ];
     @endphp
 
+    {{-- 
+      Pembungkus Konten Formulir dengan State Management Alpine.js:
+      - submitting       : State indikator saat permohonan sedang dikirimkan ke server.
+      - selectedCategory : Menyimpan kategori yang dipilih (termasuk memulihkan old value).
+      - fileName         : Nama file gambar yang dipilih.
+      - imagePreview     : DataURL string untuk render pratinjau gambar di peramban.
+      - fileError        : Pesan error validasi berkas di tingkat peramban pengguna.
+    --}}
     <div x-data="{
         submitting: false,
         selectedCategory: '{{ old('category', '') }}',
@@ -27,11 +63,12 @@
         imagePreview: null,
         fileError: '',
 
+        // Fungsi penanganan berkas foto bukti dari input file
         handleFile(e) {
             const file = e.target.files[0];
             this.fileError = '';
             if (file) {
-                // Validasi ukuran file di sisi browser (Maksimal 2 MB / 2048 KB)
+                // 1. Validasi Batas Ukuran File di Sisi Browser (Maksimal 2 MB / 2048 KB)
                 if (file.size > 2 * 1024 * 1024) {
                     this.fileError = 'Ukuran berkas melebihi batas maksimal 2 MB (terbaca: ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB). Silakan gunakan gambar yang lebih kecil.';
                     e.target.value = '';
@@ -39,7 +76,7 @@
                     this.imagePreview = null;
                     return;
                 }
-                // Validasi tipe file
+                // 2. Validasi Tipe Ekstensi Gambar (MIME Type)
                 if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
                     this.fileError = 'Format berkas tidak didukung. Harap pilih gambar bertipe JPG atau PNG.';
                     e.target.value = '';
@@ -48,6 +85,7 @@
                     return;
                 }
 
+                // 3. Menghasilkan DataURL Pratinjau Gambar via FileReader
                 this.fileName = file.name;
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -57,6 +95,7 @@
             }
         },
 
+        // Fungsi membersihkan foto terpilih
         resetFile() {
             this.imagePreview = null;
             this.fileName = '';
@@ -66,7 +105,7 @@
         }
     }" class="max-w-4xl mx-auto space-y-8">
 
-        {{-- Top Navigation & Indikator Status (Judul halaman telah terwakili pada Universal Top Header) --}}
+        {{-- Top Navigation & Indikator SLA Penanganan Sarpras --}}
         <div class="flex items-center justify-between">
             <a href="{{ route('user.report-history') }}" class="inline-flex items-center gap-1.5 text-sm text-[#86868B] hover:text-[#1D1D1F] font-medium transition">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -77,7 +116,7 @@
             </span>
         </div>
 
-        {{-- Flash Session Sukses --}}
+        {{-- Flash Session Notifikasi Sukses --}}
         @if (session('success'))
             <div class="p-6 rounded-[2rem] bg-emerald-50/70 border border-emerald-100 text-emerald-900 flex items-center gap-4">
                 <span class="material-symbols-outlined text-emerald-600 text-[24px] shrink-0">check_circle</span>
@@ -88,7 +127,7 @@
             </div>
         @endif
 
-        {{-- Flash Session Error / Validation Errors --}}
+        {{-- Flash Session Error Validasi Server --}}
         @if ($errors->any())
             <div class="p-6 rounded-[2rem] bg-rose-50/70 border border-rose-100 text-rose-900 flex items-start gap-4">
                 <span class="material-symbols-outlined text-rose-600 text-[24px] shrink-0 mt-0.5">error</span>
@@ -103,19 +142,21 @@
             </div>
         @endif
 
-        <!-- 
-          ROUTE: POST /user/reports
-          FUNGSI: Mengirimkan data kerusakan sarpras beserta foto bukti (JPG/PNG < 2MB)
-        -->
+        {{-- 
+          Formulir Utama Pelaporan Kerusakan:
+          - action: route('user.reports.store') -> POST /user/reports
+          - enctype: multipart/form-data (wajib untuk pengunggahan file foto)
+        --}}
         <form action="{{ route('user.reports.store') }}" 
               method="POST" 
               enctype="multipart/form-data" 
               @submit="submitting = true" 
               class="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
+            {{-- Token Proteksi CSRF --}}
             @csrf
 
             <div class="space-y-6">
-                {{-- 1. Fasilitas Bermasalah --}}
+                {{-- 1. Pemilihan Fasilitas / Ruangan yang Bermasalah --}}
                 <div>
                     <label for="rep-facility" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                         Fasilitas / Ruangan yang Mengalami Kerusakan <span class="text-rose-500">*</span>
@@ -138,7 +179,7 @@
                     @enderror
                 </div>
 
-                {{-- 2. Kategori Kerusakan --}}
+                {{-- 2. Pemilihan Kategori Kerusakan --}}
                 <div>
                     <label for="rep-category" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                         Kategori Kerusakan Sarana
@@ -161,7 +202,7 @@
                     @enderror
                 </div>
 
-                {{-- 3. Deskripsi Masalah (Wajib) --}}
+                {{-- 3. Deskripsi Masalah Rinci (Wajib Diisi Minimal 10 Karakter) --}}
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <label for="rep-desc" class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider">
@@ -182,20 +223,22 @@
                     @enderror
                 </div>
 
-                {{-- 4. Upload Foto Bukti --}}
+                {{-- 4. Pengunggahan Foto Bukti Fisik Kerusakan (Maksimal 2MB) --}}
                 <div>
                     <label class="block text-xs font-semibold text-[#86868B] uppercase tracking-wider mb-2">
                         Unggah Foto Bukti Kerusakan <span class="text-rose-500">*</span>
                         <span class="text-[#86868B] font-normal lowercase">(Maks. 2 MB - JPG/PNG)</span>
                     </label>
                     
-                    {{-- Banner Error Klien --}}
+                    {{-- Banner Peringatan Error Klien --}}
                     <div x-show="fileError" x-cloak class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs flex items-center gap-2">
                         <span class="material-symbols-outlined text-[16px] text-rose-600">warning</span>
                         <span x-text="fileError"></span>
                     </div>
 
+                    {{-- Kotak Drag-and-Drop / Penelusur File --}}
                     <div class="border border-dashed border-gray-200 bg-[#F9F9FB] rounded-2xl p-8 text-center hover:bg-gray-50 transition relative">
+                        {{-- Input File Tersembunyi yang Dipicu oleh Label --}}
                         <input type="file" 
                                id="photo-file" 
                                name="attachment_photo" 
@@ -204,6 +247,7 @@
                                @change="handleFile" 
                                class="hidden">
                         
+                        {{-- Tampilan Sebelum Gambar Dipilih --}}
                         <template x-if="!imagePreview">
                             <div class="flex flex-col items-center">
                                 <span class="material-symbols-outlined text-[#86868B] text-[40px] mb-2 font-light">add_photo_alternate</span>
@@ -215,11 +259,12 @@
                             </div>
                         </template>
 
+                        {{-- Tampilan Pratinjau Setelah Gambar Dipilih --}}
                         <template x-if="imagePreview">
                             <div class="flex flex-col items-center">
                                 <img :src="imagePreview" alt="Pratinjau Foto" class="h-48 w-auto object-cover rounded-2xl border border-gray-100 mb-3 shadow-xs">
                                 <div class="text-xs font-mono font-medium text-[#1D1D1F] truncate max-w-xs" x-text="fileName"></div>
-                                <button type="button" @click="resetFile()" class="mt-2 text-xs font-medium text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1">
+                                <button type="button" @click="resetFile()" class="mt-2 text-xs font-medium text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1 cursor-pointer">
                                     <span class="material-symbols-outlined text-[14px]">delete</span>
                                     <span>Hapus & Ganti Foto</span>
                                 </button>
@@ -239,7 +284,7 @@
                 </a>
                 <button type="submit" 
                         :disabled="submitting" 
-                        class="px-8 py-3.5 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black disabled:opacity-50 transition shadow-sm flex items-center gap-2">
+                        class="px-8 py-3.5 rounded-xl bg-[#1D1D1F] text-white text-sm font-medium hover:bg-black disabled:opacity-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
                     <span x-show="!submitting" class="material-symbols-outlined text-[18px]">send</span>
                     <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span x-text="submitting ? 'Mengirim Laporan...' : 'Kirim Laporan Kerusakan'"></span>
