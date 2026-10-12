@@ -153,33 +153,134 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // FUNGSI: Menampilkan dasbor analitik dan metrik penggunaan fasilitas untuk Admin (ADM-04 / US-17)
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-// ROUTE: Menerima GET request ke '/admin/user-management' atau '/admin/users'
-// FUNGSI: Menampilkan antrean verifikasi akun pending (ADM-01 / UR15), daftar sivitas terdaftar, dan direktori petugas sarpras via AdminUserManagementController
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL KONSOL ADMIN: VERIFIKASI AKUN PENDING & MANAJEMEN PENGGUNA INTERNAL (ADM-01 & ADM-02)
+ * ------------------------------------------------------------------------------------------
+ * Rute-rute di bawah ini mengelola seluruh siklus hidup akun pengguna dalam sistem CAVA,
+ * mencakup verifikasi pendaftaran mandiri sivitas (status 'pending' -> 'active' / 'rejected'),
+ * pembuatan akun internal langsung (Petugas Sarpras & Pengguna Sivitas), pengalihan status,
+ * serta mekanisme penghapusan lunak (soft delete) dan pemulihan (restore).
+ * Dilindungi oleh middleware: 'auth' (wajib login) dan 'role:admin' (hanya Super Admin).
+ */
+
+/**
+ * RUTE: GET /admin/user-management & GET /admin/users (Indeks Manajemen Pengguna & Verifikasi Pending)
+ * -------------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/user-management', [AdminUserManagementController::class, 'index'])->name('admin.user-management');
+ * - Method HTTP : GET (pengambilan dan perenderan halaman).
+ * - URI Path   : '/admin/user-management' (dan alias '/admin/users').
+ * - Handler    : AdminUserManagementController@index.
+ * - Route Name : 'admin.user-management' & 'admin.users.index'.
+ * - Cara Kerja : Menampilkan dasbor pengguna dengan pembagian 4 tab utama:
+ *                1. Antrean Verifikasi Pending (sivitas yang baru mendaftar mandiri).
+ *                2. Sivitas Akademika Aktif (Mahasiswa, Dosen, Staf yang telah diverifikasi).
+ *                3. Petugas Sarpras Internal (staf operasional pemeliharaan & validasi).
+ *                4. Akun Non-aktif / Terhapus (arsip soft delete).
+ */
 Route::get('/admin/user-management', [AdminUserManagementController::class, 'index'])->name('admin.user-management');
 Route::get('/admin/users', [AdminUserManagementController::class, 'index'])->name('admin.users.index');
 
-// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/verify' (atau alias '/admin/users/{id}/approve')
-// FUNGSI: Mengubah status akun pendaftaran mandiri dari 'pending' menjadi 'active' (ADM-01 / UR15)
+/**
+ * RUTE: POST/PATCH /admin/users/{id}/verify (Persetujuan & Verifikasi Akun Sivitas - ADM-01)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::match(['post', 'patch'], '/admin/users/{id}/verify', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
+ * - Method HTTP : POST atau PATCH (mendukung form submit standar Blade dan request RESTful AJAX).
+ * - Parameter  : {id} ID pengguna yang statusnya masih 'pending'.
+ * - Handler    : AdminUserManagementController@verifyUser.
+ * - Route Name : 'admin.users.verify' & alias 'admin.users.approve'.
+ * - Cara Kerja : Mengubah nilai kolom 'status' pengguna dari 'pending' menjadi 'active',
+ *                membersihkan alasan penolakan (jika ada sebelumnya), dan mencatat timestamp
+ *                verifikasi sehingga akun tersebut dapat langsung login ke portal CAVA.
+ */
 Route::match(['post', 'patch'], '/admin/users/{id}/verify', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.verify');
 Route::match(['post', 'patch'], '/admin/users/{id}/approve', [AdminUserManagementController::class, 'verifyUser'])->name('admin.users.approve');
 
-// ROUTE: Menerima POST atau PATCH request ke '/admin/users/{id}/reject' beserta payload FormRequest (reason & notes)
-// FUNGSI: Menolak verifikasi pendaftaran akun dan mencatat alasan penolakan pada database (ADM-01 / UR15)
+/**
+ * RUTE: POST/PATCH /admin/users/{id}/reject (Penolakan Akun Pending Sivitas - ADM-01)
+ * ----------------------------------------------------------------------------------
+ * Syntax: Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
+ * - Method HTTP : POST atau PATCH.
+ * - Parameter  : {id} ID pengguna yang pendaftarannya ditolak.
+ * - Payload    : Divalidasi oleh RejectUserRequest (wajib menyertakan 'reason' dan opsional 'notes').
+ * - Handler    : AdminUserManagementController@rejectUser.
+ * - Route Name : 'admin.users.reject'.
+ * - Cara Kerja : Mengubah kolom 'status' menjadi 'rejected' dan menyimpan deskripsi penolakan
+ *                ke kolom 'rejection_reason'. Saat pengguna mencoba login, sistem menampilkan
+ *                alasan penolakan tersebut secara transparan.
+ */
 Route::match(['post', 'patch'], '/admin/users/{id}/reject', [AdminUserManagementController::class, 'rejectUser'])->name('admin.users.reject');
 
-// ROUTE: Menerima POST request pendaftaran internal oleh Admin
+/**
+ * RUTE: POST /admin/users/petugas (Pembuatan Akun Internal Petugas Sarpras - ADM-02)
+ * ----------------------------------------------------------------------------------
+ * Syntax: Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+ * - Method HTTP : POST.
+ * - Payload    : Divalidasi oleh StoreInternalUserRequest (nama, email unik, password opsional, NIP, zona penugasan).
+ * - Handler    : AdminUserManagementController@storePetugas.
+ * - Route Name : 'admin.users.create-petugas'.
+ * - Cara Kerja : Membuat akun baru dengan status langsung 'active', menetapkan role 'petugas' via Spatie RBAC,
+ *                dan menyimpan data spesifik penugasan sarpras.
+ */
 Route::post('/admin/users/petugas', [AdminUserManagementController::class, 'storePetugas'])->name('admin.users.create-petugas');
+
+/**
+ * RUTE: POST /admin/users/pengguna (Pembuatan Akun Sivitas Langsung oleh Admin - ADM-02)
+ * ------------------------------------------------------------------------------------
+ * Syntax: Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+ * - Method HTTP : POST.
+ * - Payload    : Divalidasi oleh StoreInternalUserRequest (nama, email unik, NIM/NIP, fakultas/departemen).
+ * - Handler    : AdminUserManagementController@storePengguna.
+ * - Route Name : 'admin.users.create-user'.
+ * - Cara Kerja : Membuat akun sivitas langsung aktif tanpa melalui antrean verifikasi mandiri.
+ */
 Route::post('/admin/users/pengguna', [AdminUserManagementController::class, 'storePengguna'])->name('admin.users.create-user');
+
+/**
+ * RUTE: POST /admin/users (Endpoint Alias Penambahan Pengguna Universal)
+ * ----------------------------------------------------------------------
+ * Syntax: Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
+ * - Handler: Mengarahkan secara cerdas ke storePetugas() atau storePengguna() berdasarkan nilai atribut 'role'.
+ */
 Route::post('/admin/users', [AdminUserManagementController::class, 'storeUser'])->name('admin.users.store');
 
-// ROUTE: Mengubah status akun pengguna (Aktif <-> Non-aktif)
+/**
+ * RUTE: POST /admin/users/{id}/toggle-status (Pengubahan Status Akun Aktif <-> Nonaktif)
+ * --------------------------------------------------------------------------------------
+ * Syntax: Route::post('/admin/users/{id}/toggle-status', [AdminUserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+ * - Parameter  : {id} ID akun pengguna yang akan diubah statusnya.
+ * - Handler    : AdminUserManagementController@toggleStatus.
+ * - Route Name : 'admin.users.toggle-status'.
+ * - Cara Kerja : Membalik status pengguna antara 'active' dan 'inactive'. Akun berstatus 'inactive'
+ *                akan diblokir saat mencoba login ke sistem.
+ */
 Route::post('/admin/users/{id}/toggle-status', [AdminUserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
 
-// ROUTE: Soft delete akun pengguna (Pindahkan ke tab Non-aktif/Dihapus)
+/**
+ * RUTE: DELETE /admin/users/{id} (Penghapusan Lunak Akun Pengguna / Soft Delete)
+ * ------------------------------------------------------------------------------
+ * Syntax: Route::delete('/admin/users/{id}', [AdminUserManagementController::class, 'destroy'])->name('admin.users.destroy');
+ * - Method HTTP : DELETE (mengikuti konvensi RESTful untuk operasi penghapusan).
+ * - Parameter  : {id} ID pengguna yang dihapus.
+ * - Handler    : AdminUserManagementController@destroy.
+ * - Route Name : 'admin.users.destroy'.
+ * - Cara Kerja : Mengisi kolom 'deleted_at' (Eloquent SoftDeletes) atau mengatur status ke 'inactive'
+ *                sehingga akun tidak dapat login dan dipindahkan ke tab arsip tanpa menghapus riwayat audit transaksi.
+ */
 Route::delete('/admin/users/{id}', [AdminUserManagementController::class, 'destroy'])->name('admin.users.destroy');
 
-// ROUTE: Memulihkan akun pengguna yang di-soft delete atau dinonaktifkan
+/**
+ * RUTE: POST /admin/users/{id}/restore (Pemulihan Akun Terhapus / Restorasi)
+ * --------------------------------------------------------------------------
+ * Syntax: Route::post('/admin/users/{id}/restore', [AdminUserManagementController::class, 'restore'])->name('admin.users.restore');
+ * - Parameter  : {id} ID pengguna yang sebelumnya di-soft delete atau dinonaktifkan.
+ * - Handler    : AdminUserManagementController@restore.
+ * - Route Name : 'admin.users.restore'.
+ * - Cara Kerja : Mengembalikan 'deleted_at' menjadi NULL dan status kembali 'active' sehingga
+ *                pengguna dapat kembali mengakses sistem.
+ */
 Route::post('/admin/users/{id}/restore', [AdminUserManagementController::class, 'restore'])->name('admin.users.restore');
+
 
 // ------------------------------------------------------------------------------------------
 // MODUL MASTER FASILITAS & RUANGAN KAMPUS (ADM-03 / US-16)
