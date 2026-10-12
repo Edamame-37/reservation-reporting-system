@@ -1,9 +1,28 @@
 <?php
+
 /**
- * NAMA FILE    : DamageReportsExport.php
- * FUNGSI       : Generator Berkas Spreadsheet (.csv / Excel) Rekapitulasi Data Kerusakan Aset
- * DESKRIPSI    : Menyusun data tiket pengaduan kerusakan fisik dan malfungsi fasilitas kampus ke dalam format spreadsheet resmi dengan streaming chunking.
- * CARA KERJA   : Menerapkan UTF-8 BOM untuk kompatibilitas langsung Microsoft Excel dan chunking kueri per 500 baris.
+ * ====================================================================================================
+ * SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+ * MODUL 8: KONSOL ADMIN - REKAPITULASI ANALITIK, AUDIT OKUPANSI, & EKSPOR RESMI (PDF & EXCEL - ADM-04)
+ * BERKAS: app/Exports/DamageReportsExport.php
+ * ====================================================================================================
+ * 
+ * DESKRIPSI BERKAS:
+ * Generator berkas spreadsheet (Excel-compatible CSV) untuk rekapitulasi data tiket pelaporan kerusakan
+ * sarana dan prasarana kampus. Mengimplementasikan arsitektur streaming memori rendah berbasis chunking
+ * untuk menjamin kinerja stabil saat mengekspor ribuan catatan audit insiden aset.
+ * 
+ * PERAN & ARSITEKTUR DALAM SISTEM CAVA:
+ * 1. Pencegahan Memory Out-of-Bound (OOM Protection):
+ *    Mengalirkan data langsung ke buffer `php://output` per 500 baris record via `chunk(500)` sehingga
+ *    penggunaan RAM server tetap konstan (skala O(1)).
+ * 2. Integritas Data & Encoding Microsoft Excel:
+ *    - Menyuntikkan UTF-8 Byte Order Mark (`\xEF\xBB\xBF`) agar Microsoft Excel membaca teks tanpa masalah karakter aksen.
+ *    - Menyisipkan baris instruksi `sep=,\r\n` untuk memandu parser Excel membaca tanda koma sebagai pemisah kolom otomatis.
+ * 3. Eager Loading Tiga Relasi Sekaligus:
+ *    Memuat relasi `user` (pelapor), `facility` (ruang rusak), dan `handledBy` (teknisi PIC sarpras) secara efisien
+ *    tanpa menyebabkan N+1 database roundtrips.
+ * ====================================================================================================
  */
 
 namespace App\Exports;
@@ -12,54 +31,67 @@ use App\Models\DamageReport;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Class DamageReportsExport
+ * 
+ * Mengatur filter waktu/status, pembuatan kueri laporan kerusakan, tajuk kolom, dan pengaliran file spreadsheet.
+ */
 class DamageReportsExport
 {
     /**
-     * Rentang tanggal awal filter laporan
+     * Rentang tanggal awal filter pembuatan laporan (format YYYY-MM-DD).
      *
      * @var string|null
      */
     protected ?string $startDate;
 
     /**
-     * Rentang tanggal akhir filter laporan
+     * Rentang tanggal akhir filter pembuatan laporan (format YYYY-MM-DD).
      *
      * @var string|null
      */
     protected ?string $endDate;
 
     /**
-     * Status filter laporan kerusakan (opsional)
+     * Filter status penanganan tiket ('baru', 'diproses', 'selesai', 'ditolak', 'all').
      *
      * @var string|null
      */
     protected ?string $status;
 
     /**
-     * Inisialisasi parameter filter ekspor
+     * Konstruktor inisialisasi kriteria penyaringan ekspor tiket kerusakan aset.
      *
-     * @param string|null $startDate Tanggal awal (YYYY-MM-DD)
-     * @param string|null $endDate Tanggal akhir (YYYY-MM-DD)
-     * @param string|null $status Filter status penanganan
+     * @param string|null $startDate Tanggal awal batas pencarian tiket
+     * @param string|null $endDate Tanggal akhir batas pencarian tiket
+     * @param string|null $status Filter status progres investigasi sarpras
      */
     public function __construct(?string $startDate = null, ?string $endDate = null, ?string $status = null)
     {
         $this->startDate = $startDate;
-        $this->endDate = $endDate;
-        $this->status = $status;
+        $this->endDate   = $endDate;
+        $this->status    = $status;
     }
 
     /**
-     * FUNCTION/PROCEDURE : query()
-     * KEGUNAAN           : Membangun kueri Eloquent untuk mengambil data kerusakan aset sesuai filter.
-     * CARA KERJA         : Menggunakan eager loading relasi 'user', 'facility', dan 'handledBy' serta menyaring tanggal pembuatan.
-     * PARAMETER          : Tidak ada.
-     * RETURN             : Builder
+     * FUNCTION: query()
+     * ------------------------------------------------------------------------------------------------
+     * KEGUNAAN   : Membangun kueri Eloquent terfilter untuk menarik riwayat tiket aduan sarpras.
+     * CARA KERJA :
+     * 1. Menyiapkan query builder `DamageReport::query()`.
+     * 2. Menerapkan eager loading ke relasi `user`, `facility`, dan `handledBy`.
+     * 3. Menyaring kolom `created_at` mencakup jam 00:00:00 hari awal hingga 23:59:59 hari akhir.
+     * 4. Menyaring status tiket jika parameter status disetel dan bukan 'all'.
+     * 5. Mengurutkan tiket dari yang paling baru diajukan (`created_at desc`).
+     * 
+     * @return Builder
      */
     public function query(): Builder
     {
+        // Menyiapkan kueri dengan eager loading untuk pelapor, fasilitas, dan teknisi penanggung jawab
         $query = DamageReport::query()->with(['user', 'facility', 'handledBy']);
 
+        // Penerapan filter batas tanggal pelaporan aduan
         if (!empty($this->startDate) && !empty($this->endDate)) {
             $query->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
         } elseif (!empty($this->startDate)) {
@@ -68,19 +100,22 @@ class DamageReportsExport
             $query->where('created_at', '<=', $this->endDate . ' 23:59:59');
         }
 
+        // Penerapan filter status penanganan tiket jika ditentukan
         if (!empty($this->status) && $this->status !== 'all') {
             $query->where('status', $this->status);
         }
 
+        // Pengurutan kronologis mundur dari aduan paling mutakhir
         return $query->orderBy('created_at', 'desc');
     }
 
     /**
-     * FUNCTION/PROCEDURE : headings()
-     * KEGUNAAN           : Menentukan baris header kolom pada lembar kerja spreadsheet.
-     * CARA KERJA         : Mengembalikan senarai string teks header dalam Bahasa Indonesia baku.
-     * PARAMETER          : Tidak ada.
-     * RETURN             : array<int, string>
+     * FUNCTION: headings()
+     * ------------------------------------------------------------------------------------------------
+     * KEGUNAAN   : Mendefinisikan baris tajuk kolom dokumen spreadsheet hasil ekspor.
+     * CARA KERJA : Mengembalikan array label kolom dalam Bahasa Indonesia baku sesuai standar audit sarpras.
+     * 
+     * @return array<int, string>
      */
     public function headings(): array
     {
@@ -104,14 +139,24 @@ class DamageReportsExport
     }
 
     /**
-     * FUNCTION/PROCEDURE : download()
-     * KEGUNAAN           : Mengalirkan data insiden kerusakan dalam bentuk berkas CSV yang kompatibel penuh dengan Microsoft Excel.
-     * CARA KERJA         : Menggunakan StreamedResponse dengan UTF-8 BOM dan chunking memori per 500 baris.
-     * PARAMETER          : string $filename
-     * RETURN             : StreamedResponse
+     * FUNCTION: download()
+     * ------------------------------------------------------------------------------------------------
+     * KEGUNAAN   : Mengalirkan data tiket kerusakan dalam format berkas CSV yang dioptimalkan untuk Microsoft Excel.
+     * CARA KERJA :
+     * 1. Menetapkan header respon HTTP stream untuk unduhan file attachment.
+     * 2. Membuka stream output ke buffer `php://output`.
+     * 3. Menulis UTF-8 BOM (`\xEF\xBB\xBF`) dan penanda pembagi kolom (`sep=,\r\n`).
+     * 4. Menulis baris judul kolom melalui `fputcsv()`.
+     * 5. Mengeksekusi database chunking per 500 baris untuk efisiensi alokasi RAM server.
+     * 6. Memetakan nilai setiap kolom (termasuk status penguncian ruangan dan tanggal resolusi).
+     * 7. Mengalirkan ke klien dan menutup stream handle.
+     * 
+     * @param string $filename Nama berkas lampiran (misal: 'rekap-kerusakan-aset-2026.csv')
+     * @return StreamedResponse
      */
     public function download(string $filename): StreamedResponse
     {
+        // Header HTTP untuk menginstruksikan browser mengunduh lampiran CSV secara langsung
         $headers = [
             'Content-Type'        => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
@@ -120,28 +165,30 @@ class DamageReportsExport
             'Expires'             => '0',
         ];
 
+        // Mengembalikan instance StreamedResponse dengan callback penulisan bertahap
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
 
-            // Menulis UTF-8 BOM agar Microsoft Excel langsung mengenali format dan encoding tanpa error
+            // 1. Menulis UTF-8 BOM agar Excel mengenali format karakter internasional
             fputs($handle, "\xEF\xBB\xBF");
 
-            // Menyisipkan instruksi pemisah kolom agar Microsoft Excel otomatis memetakan kolom A, B, C, dst.
+            // 2. Menulis instruksi penentu separator kolom koma
             fputs($handle, "sep=,\r\n");
 
-            // Tulis Header Kolom
+            // 3. Menulis baris header kolom
             fputcsv($handle, $this->headings());
 
-            // Tulis baris data menggunakan chunking untuk efisiensi memori (Poin 5 ADM-04)
+            // 4. Menulis baris data menggunakan chunking memori rendah
             $rowNumber = 0;
             $this->query()->chunk(500, function ($damageReports) use ($handle, &$rowNumber) {
                 foreach ($damageReports as $row) {
                     $rowNumber++;
+                    // Menulis baris data laporan kerusakan yang telah dinormalisasi
                     fputcsv($handle, [
                         $rowNumber,
                         $row->report_code,
                         $row->user?->name ?? 'Pelapor Anonim',
-                        $row->user?->identifier ?? '-',
+                        $row->user?->identifier ?? $row->user?->identity_number ?? '-',
                         $row->facility?->name ?? 'Fasilitas Tidak Dikenal',
                         $row->facility?->code ?? '-',
                         $row->facility?->building ?? '-',
@@ -157,6 +204,7 @@ class DamageReportsExport
                 }
             });
 
+            // Menutup stream output
             fclose($handle);
         }, 200, $headers);
     }
