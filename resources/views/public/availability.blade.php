@@ -1,8 +1,8 @@
 {{-- 
   NAMA FILE      : availability.blade.php
   FUNGSIONALITAS : Matriks Transparan Slot Waktu Ketersediaan Fasilitas Publik
-  DESKRIPSI      : Menampilkan kalender visual slot 30 menit (07:00-20:00 WIB) untuk seluruh ruang kampus dengan indikator status terpakai, terkunci, dan tersedia secara real-time.
-  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menarik matriks slot waktu via API endpoint /api/availability/{date} dan dirender dengan Alpine.js.
+  DESKRIPSI      : Menampilkan kalender visual slot 30 menit (07:00-20:00 WIB) untuk fasilitas kampus dengan paginasi maksimal 8 item per request dan indikator status real-time.
+  CARA KERJA     : Menggunakan layout <x-public-layout active="availability">, menerima paginator $facilities dari PublicFacilityController@availability, dan menarik data matriks via endpoint /api/availability/{date} yang dirender dengan Alpine.js.
 --}}
 
 <x-public-layout title="Matriks Jadwal Ketersediaan" active="availability">
@@ -352,6 +352,24 @@
                     </div>
                     @endif
                 </div>
+
+                <!-- 
+                  ELEMEN       : Kontrol Paginasi Matriks Jadwal (Maksimal 8 Item Sekali Request)
+                  KEGUNAAN     : Menampilkan counter rentang fasilitas aktif dan tombol navigasi halaman matriks.
+                  CARA KERJA   : Merender method $facilities->links() bawaan Laravel dengan query string filter dan tanggal otomatis dipertahankan.
+                -->
+                @if($facilities instanceof \Illuminate\Pagination\LengthAwarePaginator && $facilities->total() > 0)
+                    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-6">
+                        <p class="text-xs text-[#86868B]">
+                            Menampilkan <span class="font-medium text-[#1D1D1F]">{{ $facilities->firstItem() ?? 0 }}</span> sampai <span class="font-medium text-[#1D1D1F]">{{ $facilities->lastItem() ?? 0 }}</span> dari <span class="font-medium text-[#1D1D1F]">{{ $facilities->total() }}</span> fasilitas
+                        </p>
+                        @if($facilities->hasPages())
+                            <div class="overflow-x-auto max-w-full">
+                                {{ $facilities->links() }}
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>
