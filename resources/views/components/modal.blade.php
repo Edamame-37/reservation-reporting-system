@@ -1,17 +1,19 @@
 {{-- 
 ====================================================================================================
 SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
-MODUL 6: KONSOL ADMIN - VERIFIKASI AKUN PENDING SIVITAS & MANAJEMEN PENGGUNA INTERNAL (ADM-01 & ADM-02)
+KOMPONEN BERSAMA: DIALOG MODAL INTERAKTIF (WAI-ARIA & ALPINE.JS)
+MODUL CAVA: Modul 11 (Konfirmasi Pembatalan Mandiri H-1), Modul 15 & 16 (Resolusi Petugas), Modul 19 (Shared UI)
 BERKAS: resources/views/components/modal.blade.php
 ====================================================================================================
 
 DESKRIPSI BERKAS:
 Komponen Blade 'modal' ini menyediakan dialog pop-up modal interaktif dan aksesibel (WAI-ARIA compliant)
-berbasis Alpine.js dan Tailwind CSS. Digunakan secara intensif pada Konsol Manajemen Pengguna (ADM-01 & ADM-02)
-untuk menampilkan:
-1. Modal Pratinjau Dokumen Identitas (KTM/NIP/Surat Tugas) ukuran penuh sebelum verifikasi.
-2. Dialog Formulir Konfirmasi Penolakan Akun beserta input alasan dan catatan.
-3. Modal Formulir Pendaftaran Akun Internal Petugas Sarpras & Pengguna Baru.
+berbasis Alpine.js dan Tailwind CSS. Digunakan secara luas di seluruh portal CAVA untuk:
+1. Dialog formulir konfirmasi pembatalan mandiri tiket reservasi sebelum batas H-1 (Modul 11 / USR-03).
+2. Modal penolakan reservasi dan pembatalan darurat sepihak / override oleh petugas sarpras (Modul 15 / PTG-02 & PTG-03).
+3. Modal penanganan tiket kerusakan dan pencatatan catatan teknisi (Modul 16 / PTG-04 & PTG-05).
+4. Dialog konfirmasi penghapusan akun pengguna (Modul 17 / Profile Destroy).
+5. Modal pratinjau dokumen KTM / Surat Tugas pada konsol admin (Modul 6 / ADM-01).
 
 PERAN & ARSITEKTUR DALAM SISTEM CAVA:
 1. Komunikasi Event-Driven (Decoupled Architecture):
