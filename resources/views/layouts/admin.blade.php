@@ -1,23 +1,45 @@
 {{-- 
-  ==============================================================================================
-  MASTER LAYOUT: KONSOL TATA KELOLA SUPER ADMINISTRATOR (ADMIN LAYOUT SHELL)
-  ==============================================================================================
-  Berkas: resources/views/layouts/admin.blade.php
-  
-  PERAN & FUNGSI UTAMA:
-  1. Menjadi kerangka induk (Master Template) untuk seluruh antarmuka Konsol Administrator Biro Sarpras
-     (Dasbor Eksekutif, Manajemen Akun Sivitas, Master Data Fasilitas, dan Rekapitulasi Laporan).
-  2. Mengimplementasikan Apple-inspired Bento UI Design System: tipografi berkelas (Inter & Outfit),
-     palet warna abu netral (#F5F5F7, #1D1D1F), border halus, dan micro-animation transisi yang mulus.
-  3. Mengelola state global sidebar navigasi responsif via Alpine.js (`sidebarOpen`, `isLoaded`).
-  4. Mendukung dua paradigma Blade: injeksi komponen (`{{ $slot }}`) via `<x-admin-layout>`
-     serta warisan template klasik (`@yield('content')`).
-  ==============================================================================================
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 6: KONSOL ADMIN - VERIFIKASI AKUN PENDING SIVITAS & MANAJEMEN PENGGUNA INTERNAL (ADM-01 & ADM-02)
+BERKAS: resources/views/layouts/admin.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Berkas ini merupakan Master Layout induk (Shell Layout) untuk seluruh halaman antarmuka Administrator
+Biro Sarana dan Prasarana (Super Admin) dalam sistem CAVA. Menyediakan kerangka visual Bento UI yang elegan,
+navigasi sidebar terpadu, header dinamis dengan indikator peran, serta kompatibilitas penuh dengan
+Alpine.js untuk interaktivitas sisi klien.
+
+PERAN & ARSITEKTUR DALAM SISTEM CAVA:
+1. Kerangka Konsol Terpadu:
+   Menjadi wadah bersama bagi modul:
+   - Konsol Verifikasi Akun Sivitas & Petugas (ADM-01 & ADM-02: resources/views/admin/user-management.blade.php)
+   - Dasbor Eksekutif & Statistik Utama (ADM-04 / US-17: resources/views/admin/dashboard.blade.php)
+   - Master Data Fasilitas Kampus (ADM-03: resources/views/admin/facility-master.blade.php)
+   - Rekapitulasi & Ekspor Laporan Resmi (ADM-04: resources/views/admin/export-report.blade.php)
+2. Bento UI Design Tokens:
+   Mengadopsi estetika Apple-inspired Bento UI dengan latar belakang lembut (#F5F5F7), kartu putih bersih,
+   teks kontras tinggi (#1D1D1F), tipografi modern Google Fonts (Inter, Outfit, JetBrains Mono),
+   dan ikon Material Symbols Outlined.
+3. Manajemen State Responsif Alpine.js:
+   Mengontrol visibilitas sidebar (`sidebarOpen`) yang otomatis terbuka pada layar desktop (>= 768px)
+   dan tertutup pada layar ponsel, dilengkapi transisi halus (`isLoaded`) tanpa kedipan FOUC (`[x-cloak]`).
+4. Fleksibilitas Templating Blade:
+   Mendukung pemanggilan deklaratif komponen `<x-admin-layout>` melalui variabel `{{ $slot ?? '' }}`
+   maupun warisan view klasik `@extends('layouts.admin')` melalui `@yield('content')`.
+====================================================================================================
 --}}
 
+{{--
+  PENJELASAN DIREKTIF @props:
+  Mendefinisikan properti bawaan komponen Blade:
+  - 'title'  : Judul halaman spesifik untuk tag <title> browser dan breadcrumb header (default: CAVA Admin).
+  - 'active' : Identifier menu sidebar aktif untuk penandaan visual (misal: 'user-management', 'dashboard').
+--}}
 @props([
-    'title' => 'CAVA - Konsol Tata Kelola & Administrasi Sistem', // Judul halaman dinamis pada tag <title>
-    'active' => 'dashboard'                                       // Pengenal rute aktif untuk penanda sidebar
+    'title'  => 'CAVA - Konsol Tata Kelola & Administrasi Sistem',
+    'active' => 'dashboard'
 ])
 
 <!DOCTYPE html>
@@ -26,13 +48,15 @@
     {{-- Meta Tag Standar Web & Keamanan --}}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{-- Token CSRF (Cross-Site Request Forgery) untuk otentikasi request fetch/AJAX JavaScript: --}}
+
+    {{-- Token CSRF (Cross-Site Request Forgery) untuk mengamankan request fetch/AJAX JavaScript: --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- Judul Halaman Dinamis --}}
     <title>{{ $title }} | CAVA</title>
     <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}">
 
-    {{-- Tipografi Google Fonts: Inter (UI Body), Outfit (Heading Display), JetBrains Mono & Ikon Material Symbols --}}
+    {{-- Tipografi Google Fonts: Inter (UI Body), Outfit (Heading Display), JetBrains Mono (Code/Number), Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
@@ -54,10 +78,13 @@
         .font-mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
+
 {{-- 
-    x-data: Mendeklarasikan state reaktif Alpine.js:
-    - sidebarOpen: Otomatis bernilai true pada layar desktop (>= 768px), false pada mobile.
-    - isLoaded: Flag transisi untuk mencegah animasi CSS berkedip saat pertama kali load.
+  BODY ELEMEN DENGAN ALPINE.JS STATE:
+  - x-data="{ sidebarOpen: window.innerWidth >= 768, isLoaded: false }":
+    Mengatur sidebar terbuka otomatis di desktop dan tertutup di mobile.
+  - x-init="$nextTick(() => { isLoaded = true })":
+    Mengaktifkan kelas animasi CSS setelah DOM terpasang sempurna untuk menghindari animasi liar saat refresh.
 --}}
 <body x-data="{ sidebarOpen: window.innerWidth >= 768, isLoaded: false }" x-init="$nextTick(() => { isLoaded = true })" class="bg-[#F5F5F7] font-sans text-[#1D1D1F] antialiased min-h-screen flex flex-col selection:bg-[#1D1D1F] selection:text-white">
 
@@ -82,16 +109,16 @@
     <x-cava.sidebar role="admin" :active="$active" />
 
     {{-- -------------------------------------------------------------------------------------- --}}
-    {{-- 3. AREA KONTEN UTAMA & CONTAINER RESPONTIF                                             --}}
+    {{-- 3. AREA KONTEN UTAMA & CONTAINER RESPONSIF                                            --}}
     {{-- -------------------------------------------------------------------------------------- --}}
     {{-- Memberikan offset padding kiri (md:pl-64) saat sidebar terbuka agar konten tidak tertutup sidebar --}}
     <div :class="{'md:pl-64': sidebarOpen, 'transition-all duration-300': isLoaded}" class="flex-1 flex flex-col min-h-screen pt-16">
 
         <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8">
             {{-- 
-                Suntikan Konten Dinamis Halaman:
-                - {{ $slot ?? '' }} : Menangkap markup jika dipanggil via <x-admin-layout>
-                - @yield('content') : Menangkap markup jika dipanggil via @extends('layouts.admin')
+              Suntikan Konten Dinamis Halaman:
+              - {{ $slot ?? '' }} : Menangkap konten jika dipanggil via <x-admin-layout>
+              - @yield('content') : Menangkap konten jika dipanggil via @extends('layouts.admin')
             --}}
             {{ $slot ?? '' }}
             @yield('content')
@@ -108,4 +135,3 @@
 
 </body>
 </html>
-
