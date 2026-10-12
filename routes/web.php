@@ -334,27 +334,85 @@ Route::delete('/admin/facilities/{facility}', [App\Http\Controllers\FacilityCont
 Route::post('/admin/facilities/{facility}/toggle', [App\Http\Controllers\FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
 
 
-// ROUTE: Menerima GET request ke '/admin/export-report'
-// FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
+/**
+ * ------------------------------------------------------------------------------------------
+ * MODUL KONSOL ADMIN: REKAPITULASI ANALITIK & EKSPOR RESMI (PDF & EXCEL - ADM-04 / UR17)
+ * ------------------------------------------------------------------------------------------
+ * Rute-rute di bawah ini memfasilitasi Super Administrator dalam menghasilkan dokumen laporan
+ * statuter resmi universitas terkait riwayat peminjaman ruangan dan audit kerusakan sarana prasarana.
+ * Menyediakan pengunduhan dokumen biner PDF Landscape A4 (berkop surat, bertanda tangan digital,
+ * dan stempel biro) serta berkas spreadsheet CSV/Excel streaming memori rendah.
+ * Dilindungi oleh middleware: 'auth' (wajib login) dan 'role:admin' (hanya Super Admin).
+ */
+
+/**
+ * RUTE: GET /admin/export-report (Panel Filter & Pusat Unduh Rekapitulasi)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/export-report', [ExportController::class, 'index'])->name('admin.export-report');
+ * - Method HTTP : GET (pengambilan formulir filter laporan).
+ * - URI Path   : '/admin/export-report'.
+ * - Handler    : ExportController@index.
+ * - Route Name : 'admin.export-report'.
+ * - Cara Kerja : Menampilkan antarmuka Bento UI untuk memilih tipe laporan (Reservasi vs Kerusakan),
+ *                menentukan rentang tanggal (start_date & end_date), memilih format unduhan (PDF vs Excel),
+ *                dan menampilkan ringkasan metrik statistik sebelum dokumen diunduh.
+ */
 Route::get('/admin/export-report', [ExportController::class, 'index'])->name('admin.export-report');
 
-// ROUTE: Menerima GET request ke '/admin/export/reservations/pdf'
-// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi reservasi format PDF landscape A4 (ADM-04 / UR17)
+/**
+ * RUTE: GET /admin/export/reservations/pdf (Dokumen Cetak PDF Resmi Audit Reservasi)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/export/reservations/pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.export.reservations.pdf');
+ * - Method HTTP : GET (menerima parameter kueri start_date, end_date, dan status).
+ * - Handler    : ExportController@exportReservationsPdf.
+ * - Route Name : 'admin.export.reservations.pdf'.
+ * - Cara Kerja : Menarik data permohonan tervalidasi, mengompilasi view Blade reservations-pdf,
+ *                merender dokumen PDF format Landscape A4 via pustaka DomPDF, dan mengalirkan file biner
+ *                ke browser dengan nama dinamis berstempel tanggal.
+ */
 Route::get('/admin/export/reservations/pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.export.reservations.pdf');
 
-// ROUTE: Menerima GET request ke '/admin/export/reservations/excel'
-// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi peminjaman ruang format Excel/CSV (ADM-04 / UR17)
+/**
+ * RUTE: GET /admin/export/reservations/excel (Spreadsheet Audit Transaksi Reservasi Ruang)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/export/reservations/excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.export.reservations.excel');
+ * - Method HTTP : GET (menerima parameter filter temporal).
+ * - Handler    : ExportController@exportReservationsExcel.
+ * - Route Name : 'admin.export.reservations.excel'.
+ * - Cara Kerja : Menginstansiasi ReservationsExport class dan mengalirkan berkas CSV bertaraf Excel
+ *                (disertai UTF-8 BOM dan chunking per 500 baris) langsung ke browser tanpa lonjakan memori RAM.
+ */
 Route::get('/admin/export/reservations/excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.export.reservations.excel');
 
-// ROUTE: Menerima GET request ke '/admin/export/damage-reports/pdf'
-// FUNGSI: Mengunduh berkas laporan resmi rekapitulasi kerusakan aset kampus format PDF landscape A4 (ADM-04 / UR17)
+/**
+ * RUTE: GET /admin/export/damage-reports/pdf (Dokumen Cetak PDF Resmi Tiket Insiden Sarpras)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/export/damage-reports/pdf', [ExportController::class, 'exportDamageReportsPdf'])->name('admin.export.damage-reports.pdf');
+ * - Method HTTP : GET.
+ * - Handler    : ExportController@exportDamageReportsPdf.
+ * - Route Name : 'admin.export.damage-reports.pdf'.
+ * - Cara Kerja : Mengagregasikan tiket kerusakan sarana kampus, menghitung SLA resolusi perbaikan,
+ *                dan menghasilkan dokumen PDF resmi bertanda tangan digital UPT Sarpras via DomPDF.
+ */
 Route::get('/admin/export/damage-reports/pdf', [ExportController::class, 'exportDamageReportsPdf'])->name('admin.export.damage-reports.pdf');
 
-// ROUTE: Menerima GET request ke '/admin/export/damage-reports/excel'
-// FUNGSI: Mengunduh berkas spreadsheet rekapitulasi keluhan kerusakan fasilitas format Excel/CSV (ADM-04 / UR17)
+/**
+ * RUTE: GET /admin/export/damage-reports/excel (Spreadsheet Audit Tiket Kerusakan Fasilitas)
+ * ------------------------------------------------------------------------------------------
+ * Syntax: Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'exportDamageReportsExcel'])->name('admin.export.damage-reports.excel');
+ * - Method HTTP : GET.
+ * - Handler    : ExportController@exportDamageReportsExcel.
+ * - Route Name : 'admin.export.damage-reports.excel'.
+ * - Cara Kerja : Mengalirkan rekapitulasi tiket malfungsi aset fisik kampus via DamageReportsExport
+ *                dengan efisiensi pemrosesan berbasis streaming chunking.
+ */
 Route::get('/admin/export/damage-reports/excel', [ExportController::class, 'exportDamageReportsExcel'])->name('admin.export.damage-reports.excel');
 
-// ROUTE ALIAS: Kompatibilitas tautan mockup ekspor laporan statuter pada antarmuka admin
+/**
+ * RUTE ALIAS: Kompatibilitas Tautan UI Ekspor Laporan
+ * ------------------------------------------------------------------------------------------
+ * Menjaga kompatibilitas navigasi pada antarmuka admin lama atau mock-up template.
+ */
 Route::get('/admin/reports/export-excel', [ExportController::class, 'exportReservationsExcel'])->name('admin.reports.export-excel');
 Route::get('/admin/reports/export-pdf', [ExportController::class, 'exportReservationsPdf'])->name('admin.reports.export-pdf');
 });
