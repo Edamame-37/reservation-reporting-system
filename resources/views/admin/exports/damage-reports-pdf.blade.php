@@ -1,8 +1,27 @@
 {{-- 
-  NAMA FILE      : damage-reports-pdf.blade.php
-  FUNGSIONALITAS : Dokumen Cetak PDF Resmi Rekapitulasi Insiden Kerusakan & Pemeliharaan Fasilitas
-  DESKRIPSI      : Menampilkan kop universitas resmi, rentang tanggal filter, tabel keluhan kerusakan sarpras, status penanganan, teknisi PIC, dan pengesahan bagian pemeliharaan.
-  CARA KERJA     : Dirender oleh Barryvdh\DomPDF\Facade\Pdf dan diunduh sebagai berkas PDF landscape A4.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 8: KONSOL ADMIN - REKAPITULASI ANALITIK, AUDIT OKUPANSI, & EKSPOR RESMI (PDF & EXCEL - ADM-04)
+BERKAS: resources/views/admin/exports/damage-reports-pdf.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Template cetak dokumen PDF resmi (Institutional Incident & Maintenance Report) untuk Rekapitulasi
+Insiden Kerusakan Sarana & Prasarana Kampus beserta riwayat resolusi teknisi. Dikompilasi oleh library
+DomPDF (`Barryvdh\DomPDF\Facade\Pdf`) ke dalam format biner PDF A4 Landscape.
+
+PERAN & ARSITEKTUR DALAM SISTEM CAVA:
+1. Format Cetak Statuter Insiden Aset (Statutory Maintenance Report):
+   Memuat kop surat resmi Divisi Pemeliharaan Aset & Tanggap Kerusakan, kode registrasi dokumen
+   `STATUTER-INSIDEN`, stempel waktu pencetakan audit, dan tanda tangan legal Koordinator Divisi Pemeliharaan.
+2. Optimasi Mesin Render DomPDF:
+   - CSS inline statis bergaya crimson red (#991b1b) penanda dokumen audit keselamatan & sarpras.
+   - Orientasi `@page { size: A4 landscape; margin: 15mm; }` untuk keleluasaan tabel rincian kerusakan 10 kolom.
+   - Properti `page-break-inside: avoid` pada signature box agar lembar tanda tangan tidak terpotong ke halaman baru.
+3. Transparansi Rekam Jejak Resolusi:
+   Menyajikan kolom teknisi penanggung jawab (PIC) dan catatan teknis perbaikan (`resolution_note`)
+   sebagai bahan evaluasi pemeliharaan berkala universitas.
+====================================================================================================
 --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -10,6 +29,7 @@
     <meta charset="utf-8">
     <title>Laporan Rekapitulasi Kerusakan & Pemeliharaan Fasilitas</title>
     <style>
+        /* Konfigurasi Ukuran Kertas & Margin Cetak DomPDF (A4 Landscape) */
         @page {
             size: A4 landscape;
             margin: 15mm 15mm 15mm 15mm;
@@ -22,6 +42,7 @@
             margin: 0;
             padding: 0;
         }
+        /* Tata Letak Kop Surat Institusi */
         .header-table {
             width: 100%;
             border-bottom: 2px solid #0f172a;
@@ -57,6 +78,7 @@
             text-align: center;
             margin-bottom: 14px;
         }
+        /* Tabel Data Insiden Kerusakan */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -87,6 +109,7 @@
         .text-right {
             text-align: right;
         }
+        /* Badge Status Penanganan Tiket */
         .badge {
             display: inline-block;
             padding: 2px 6px;
@@ -100,6 +123,7 @@
         .badge-selesai { background-color: #dcfce7; color: #166534; }
         .badge-ditolak { background-color: #f1f5f9; color: #475569; }
 
+        /* Kolom Tanda Tangan Pejabat Pengesah */
         .signature-table {
             width: 100%;
             margin-top: 20px;
@@ -126,7 +150,9 @@
     </style>
 </head>
 <body>
-    {{-- Header Kop Surat Resmi --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 1. KOP SURAT RESMI DIVISI PEMELIHARAAN ASET & TANGGAP KERUSAKAN                        --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="header-table">
         <tr>
             <td style="width: 70%;">
@@ -141,13 +167,16 @@
         </tr>
     </table>
 
+    {{-- Judul Dokumen dan Informasi Rentang Periode Laporan --}}
     <div class="doc-title">Laporan Rekapitulasi Insiden Kerusakan & Tindak Lanjut Pemeliharaan</div>
     <div class="doc-meta">
         Periode Laporan: <strong>{{ $startDate ? date('d F Y', strtotime($startDate)) : 'Awal Sistem' }}</strong> s/d <strong>{{ $endDate ? date('d F Y', strtotime($endDate)) : date('d F Y') }}</strong>
         • Total Tiket: <strong>{{ count($damageReports) }} Laporan</strong>
     </div>
 
-    {{-- Tabel Utama Kerusakan --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 2. TABEL DATA TIKET ADUAN KERUSAKAN FASILITAS                                          --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="data-table">
         <thead>
             <tr>
@@ -166,12 +195,14 @@
         <tbody>
             @forelse($damageReports as $index => $item)
                 @php
+                    // Pemetaan gaya badge berdasarkan status tiket penanganan
                     $badgeClass = match($item->status) {
-                        'baru' => 'badge-baru',
-                        'diproses' => 'badge-diproses',
-                        'selesai' => 'badge-selesai',
-                        'ditolak' => 'badge-ditolak',
-                        default => 'badge-baru'
+                        'baru', 'submitted'      => 'badge-baru',
+                        'diproses', 'in_review',
+                        'in_progress'            => 'badge-diproses',
+                        'selesai', 'resolved'    => 'badge-selesai',
+                        'ditolak', 'rejected'    => 'badge-ditolak',
+                        default                  => 'badge-baru'
                     };
                 @endphp
                 <tr>
@@ -179,7 +210,7 @@
                     <td style="font-family: monospace; font-weight: bold;">{{ $item->report_code }}</td>
                     <td>
                         <strong>{{ $item->user?->name ?? '-' }}</strong><br>
-                        <span style="color: #64748b; font-size: 8px;">{{ $item->user?->identifier ?? '-' }}</span>
+                        <span style="color: #64748b; font-size: 8px;">{{ $item->user?->identifier ?? $item->user?->identity_number ?? '-' }}</span>
                     </td>
                     <td>
                         <strong>{{ $item->facility?->name ?? '-' }}</strong><br>
@@ -204,7 +235,9 @@
         </tbody>
     </table>
 
-    {{-- Tabel Tanda Tangan Pengesahan --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 3. KOLOM PENGESAHAN DOKUMEN & TANDA TANGAN KOORDINATOR PEMELIHARAAN                    --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="signature-table">
         <tr>
             <td style="width: 65%;">
