@@ -1,8 +1,27 @@
 {{-- 
-  NAMA FILE      : reservations-pdf.blade.php
-  FUNGSIONALITAS : Dokumen Cetak PDF Resmi Rekapitulasi Peminjaman & Okupansi Ruang Kampus
-  DESKRIPSI      : Menampilkan kop universitas resmi, rentang tanggal filter, tabel rekapitulasi data reservasi, dan tanda tangan otoritas Biro Sarpras & TIK.
-  CARA KERJA     : Dirender oleh Barryvdh\DomPDF\Facade\Pdf dan diunduh sebagai file biner PDF landscape A4.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 8: KONSOL ADMIN - REKAPITULASI ANALITIK, AUDIT OKUPANSI, & EKSPOR RESMI (PDF & EXCEL - ADM-04)
+BERKAS: resources/views/admin/exports/reservations-pdf.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Template cetak dokumen PDF resmi (Institutional Audit Document) untuk Rekapitulasi Peminjaman & Okupansi
+Ruangan Kampus. Dirancang khusus untuk dikompilasi oleh pustaka DomPDF (`Barryvdh\DomPDF\Facade\Pdf`)
+menjadi dokumen biner PDF siap cetak berukuran A4 Landscape.
+
+PERAN & ARSITEKTUR DALAM SISTEM CAVA:
+1. Format Cetak Statuter Universitas (Statutory Report):
+   Dilengkapi kop surat resmi biro sarpras, kode dokumen registrasi audit (`STATUTER-UR17`),
+   timestamp pencetakan real-time, dan kolom legalitas pengesahan Kepala Biro Sarana Prasarana.
+2. Optimasi Mesin Render DomPDF:
+   - Menggunakan CSS inline murni tanpa pustaka JavaScript eksternal guna menjamin kecepatan kompilasi server.
+   - Mengatur `@page { size: A4 landscape; margin: 15mm; }` agar tabel 10 kolom tertampung rapi tanpa terpotong.
+   - Menerapkan `page-break-inside: avoid` pada blok tanda tangan untuk mencegah kolom pengesahan terbelah halaman.
+3. Tipografi Semantik & Status Badges:
+   Memetakan status reservasi (`approved`, `pending`, `rejected`, `cancelled`, `completed`) ke badge warna kontras
+   yang jelas terbaca dalam cetakan monokrom maupun warna.
+====================================================================================================
 --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -10,6 +29,7 @@
     <meta charset="utf-8">
     <title>Laporan Rekapitulasi Reservasi Ruang Kampus</title>
     <style>
+        /* Pengaturan Ukuran Kertas & Margin Cetak DomPDF (A4 Landscape) */
         @page {
             size: A4 landscape;
             margin: 15mm 15mm 15mm 15mm;
@@ -22,6 +42,7 @@
             margin: 0;
             padding: 0;
         }
+        /* Tata Letak Kop Surat Institusi */
         .header-table {
             width: 100%;
             border-bottom: 2px solid #0f172a;
@@ -57,6 +78,7 @@
             text-align: center;
             margin-bottom: 14px;
         }
+        /* Tabel Data Transaksi */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -87,6 +109,7 @@
         .text-right {
             text-align: right;
         }
+        /* Badge Status Persetujuan */
         .badge {
             display: inline-block;
             padding: 2px 6px;
@@ -101,6 +124,7 @@
         .badge-cancelled { background-color: #f1f5f9; color: #475569; }
         .badge-completed { background-color: #e0e7ff; color: #3730a3; }
 
+        /* Kolom Tanda Tangan Pejabat Pengesah */
         .signature-table {
             width: 100%;
             margin-top: 20px;
@@ -127,7 +151,9 @@
     </style>
 </head>
 <body>
-    {{-- Header Kop Surat Resmi --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 1. KOP SURAT RESMI UNIVERSITAS & BIRO SARANA PRASARANA                                --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="header-table">
         <tr>
             <td style="width: 70%;">
@@ -142,13 +168,16 @@
         </tr>
     </table>
 
+    {{-- Judul Dokumen Cetak dan Metadata Periode Laporan --}}
     <div class="doc-title">Laporan Rekapitulasi Okupansi & Peminjaman Ruang Kampus</div>
     <div class="doc-meta">
         Periode Laporan: <strong>{{ $startDate ? date('d F Y', strtotime($startDate)) : 'Awal Sistem' }}</strong> s/d <strong>{{ $endDate ? date('d F Y', strtotime($endDate)) : date('d F Y') }}</strong>
         • Total Transaksi: <strong>{{ count($reservations) }} Sesi</strong>
     </div>
 
-    {{-- Tabel Utama Reservasi --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 2. TABEL DATA TRANSAKSI RESERVASI RUANGAN                                              --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="data-table">
         <thead>
             <tr>
@@ -167,13 +196,14 @@
         <tbody>
             @forelse($reservations as $index => $item)
                 @php
+                    // Pemetaan kelas gaya badge berdasarkan status reservasi
                     $badgeClass = match($item->status) {
-                        'approved' => 'badge-approved',
-                        'pending' => 'badge-pending',
-                        'rejected' => 'badge-rejected',
+                        'approved'  => 'badge-approved',
+                        'pending'   => 'badge-pending',
+                        'rejected'  => 'badge-rejected',
                         'cancelled' => 'badge-cancelled',
                         'completed' => 'badge-completed',
-                        default => 'badge-pending'
+                        default     => 'badge-pending'
                     };
                 @endphp
                 <tr>
@@ -181,7 +211,7 @@
                     <td style="font-family: monospace; font-weight: bold;">{{ $item->ticket_code }}</td>
                     <td>
                         <strong>{{ $item->user?->name ?? '-' }}</strong><br>
-                        <span style="color: #64748b; font-size: 8px;">{{ $item->user?->identifier ?? '-' }} ({{ $item->user?->study_program ?? 'Umum' }})</span>
+                        <span style="color: #64748b; font-size: 8px;">{{ $item->user?->identifier ?? $item->user?->identity_number ?? '-' }} ({{ $item->user?->study_program ?? $item->user?->department ?? 'Umum' }})</span>
                     </td>
                     <td>
                         <strong>{{ $item->facility?->name ?? '-' }}</strong><br>
@@ -206,7 +236,9 @@
         </tbody>
     </table>
 
-    {{-- Tabel Tanda Tangan Pengesahan --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
+    {{-- 3. KOLOM PENGESAHAN DOKUMEN & TANDA TANGAN KEPALA BIRO                                  --}}
+    {{-- -------------------------------------------------------------------------------------- --}}
     <table class="signature-table">
         <tr>
             <td style="width: 65%;">
