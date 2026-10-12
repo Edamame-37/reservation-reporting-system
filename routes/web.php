@@ -89,6 +89,8 @@ Route::get('/public/availability', [PublicFacilityController::class, 'availabili
  *                'approved' ditandai sebagai 'booked' dengan privasi identitas pemohon disembunyikan.
  */
 Route::get('/api/availability/{date}', [PublicFacilityController::class, 'getMatrixAvailability'])->name('api.availability.matrix');
+// RUTE ALIAS: Mendukung pemanggilan fleksibel via endpoint /api/availability/matrix/{date}
+Route::get('/api/availability/matrix/{date}', [PublicFacilityController::class, 'getMatrixAvailability'])->name('api.availability.matrix.alias');
 
 /**
  * --------------------------------------------------------------------------
