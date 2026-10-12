@@ -1,11 +1,33 @@
 {{-- 
-  NAMA FILE      : dashboard.blade.php
-  FUNGSIONALITAS : Dasbor Operasional Petugas Sarpras
-  DESKRIPSI      : Menampilkan metrik beban kerja operasional, antrean verifikasi reservasi prioritas,
-                   serta pemantauan laporan kerusakan terkini secara terstruktur dan efisien.
-  CARA KERJA     : Terintegrasi dengan layout <x-petugas-layout>, Alpine.js mengelola modal pratinjau cepat.
+====================================================================================================
+SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
+MODUL 13: OPERASIONAL PETUGAS SARPRAS: DASBOR MONITORING ANTREAN CERDAS (PTG-01 / US-8)
+BERKAS: resources/views/petugas/dashboard.blade.php
+====================================================================================================
+
+DESKRIPSI BERKAS:
+Antarmuka dasbor operasional terpadu bagi Petugas UPT Sarana dan Prasarana Kampus.
+Menyajikan 3 kartu KPI Bento (beban antrean verifikasi, tiket kerusakan aktif, dan fasilitas terkunci),
+daftar antrean permohonan reservasi prioritas FIFO (First-In, First-Out), ringkasan laporan kerusakan
+terbaru, serta modal interaktif untuk pratinjau cepat dan tindakan langsung (Approval & Rejection).
+
+PERAN ARSITEKTURAL DALAM SISTEM CAVA:
+1. Dasbor Operasional Eksekutif Petugas (PTG-01 / US-8):
+   Memberikan visibilitas instan atas status sarana kampus saat petugas memulai shift kerja harian.
+2. Mekanisme Verifikasi Cepat (Quick Preview & Inline Action):
+   Memungkinkan petugas meninjau detail pemohon dan surat izin tanpa harus meninggalkan halaman dasbor,
+   didukung modal pop-up berbasis Alpine.js reaktif.
+3. Alur Persetujuan & Penolakan Resmi:
+   - Tombol "Setujui Permohonan" langsung mengirimkan permintaan HTTP PATCH ke endpoint verifikasi.
+   - Tombol "Tolak Permohonan" memicu modal penulisan alasan resmi penolakan untuk transparansi sivitas.
+====================================================================================================
 --}}
 
+{{--
+  INISIALISASI AMAN VARIABEL DASBOR:
+  Memastikan semua variabel agregasi dan koleksi data terdefinisi untuk mencegah PHP notice / undefined variable
+  jika view dipanggil dalam skenario pengujian atau rendering parsial.
+--}}
 @php
     $pendingReservationsCount = $pendingReservationsCount ?? 0;
     $newReportsCount = $newReportsCount ?? 0;
@@ -14,7 +36,25 @@
     $recentReports = $recentReports ?? collect([]);
 @endphp
 
+{{--
+  PEMBUNGKUS LAYOUT UTAMA PETUGAS SARPRAS:
+  - 'title'  : Judul halaman yang tampil pada header dan tab browser.
+  - 'active' : Menandai item menu 'dashboard' sebagai rute navigasi yang sedang aktif pada sidebar.
+--}}
 <x-petugas-layout title="Dasbor Operasional Sarpras" active="dashboard">
+
+    {{--
+      KOMPONEN REAKTIF ALPINE.JS (x-data):
+      Mengelola status lokal interaktivitas UI pada dasbor petugas:
+      - 'showModal'       : Boolean untuk mengontrol visibilitas Modal Pratinjau Cepat Reservasi.
+      - 'showRejectModal' : Boolean untuk mengontrol visibilitas Modal Alasan Penolakan Reservasi.
+      - 'selected'        : Objek data JSON reservasi yang dipilih untuk ditampilkan dalam modal rincian.
+      - 'selectedId'      : ID database reservasi yang sedang diproses untuk penolakan.
+      - 'applicantName'   : Nama pemohon reservasi yang akan ditolak (untuk konfirmasi konteks UI).
+      - 'ticketCode'      : Kode tiket reservasi yang akan ditolak (contoh: "TKT-20261013-0001").
+      - 'openDetail(item)': Method untuk memuat payload data item ke dalam `selected` dan membuka modal detail.
+      - 'openReject(...)' : Method untuk menyiapkan parameter penolakan dan membuka modal penolakan.
+    --}}
     <div x-data="{
         showModal: false,
         showRejectModal: false,
@@ -35,12 +75,16 @@
         }
     }" class="flex flex-col gap-6">
 
-        {{-- 1. Header Halaman Profesional --}}
+        {{-- 
+          1. HEADER HALAMAN PROFESIONAL:
+          Menampilkan judul modul, deskripsi operasional, dan tombol sinkronisasi pembaruan data real-time.
+        --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Dasbor Operasional Sarpras</h1>
                 <p class="text-xs text-slate-500 mt-0.5">Pemantauan antrean permohonan reservasi fasilitas kampus dan tiket laporan kerusakan.</p>
             </div>
+            {{-- Tombol Sinkronisasi Data (Reload Halaman Cepat) --}}
             <div class="flex items-center gap-2">
                 <button type="button" onclick="location.reload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer">
                     <span class="material-symbols-outlined text-[16px] text-slate-500">sync</span>
@@ -49,9 +93,15 @@
             </div>
         </div>
 
-        {{-- 2. Ringkasan Metrik Operasional (3 Bento KPI Cards) --}}
+        {{-- 
+          2. RINGKASAN METRIK OPERASIONAL (3 BENTO KPI CARDS):
+          Menyajikan 3 indikator beban kerja kritis petugas sarpras secara terintegrasi.
+        --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {{-- KPI 1: Antrean Reservasi --}}
+            {{-- 
+              KPI 1: ANTREAN RESERVASI PENDING
+              Menghubungkan langsung ke lembar kerja manajemen reservasi (`/petugas/reservation-management`).
+            --}}
             <a href="{{ url('/petugas/reservation-management') }}" class="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 transition-colors flex flex-col justify-between group">
                 <div>
                     <div class="flex items-center justify-between">
@@ -66,7 +116,10 @@
                 </div>
             </a>
 
-            {{-- KPI 2: Laporan Kerusakan --}}
+            {{-- 
+              KPI 2: TIKET LAPORAN KERUSAKAN AKTIF
+              Menghubungkan langsung ke lembar kerja tiket pengaduan (`/petugas/report-management`).
+            --}}
             <a href="{{ url('/petugas/report-management') }}" class="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 transition-colors flex flex-col justify-between group">
                 <div>
                     <div class="flex items-center justify-between">
@@ -81,7 +134,10 @@
                 </div>
             </a>
 
-            {{-- KPI 3: Fasilitas Terkunci / Perbaikan --}}
+            {{-- 
+              KPI 3: FASILITAS DALAM MODE PERBAIKAN
+              Menampilkan kuantitas ruangan kampus yang statusnya saat ini dikunci / dinonaktifkan sementara.
+            --}}
             <a href="{{ url('/petugas/report-management') }}" class="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 transition-colors flex flex-col justify-between group">
                 <div>
                     <div class="flex items-center justify-between">
@@ -97,7 +153,10 @@
             </a>
         </div>
 
-        {{-- 3. Antrean Prioritas Verifikasi Reservasi --}}
+        {{-- 
+          3. ANTREAN PRIORITAS VERIFIKASI RESERVASI (FIFO - 5 RECORD TERATAS):
+          Menampilkan baris permohonan reservasi dengan tombol "Tinjau Permohonan" untuk membuka modal interaktif.
+        --}}
         <section class="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
                 <h2 class="text-sm font-bold text-slate-900">Antrean Prioritas Verifikasi Reservasi</h2>
@@ -109,6 +168,11 @@
 
             <div class="divide-y divide-slate-100">
                 @forelse($recentReservations as $reservation)
+                    {{-- 
+                      PENYIAPAN PAYLOAD DATA JSON RESERVASI:
+                      Mengonstruksi array asosiatif PHP yang berisi seluruh rincian pemohon, jadwal,
+                      gedung, jumlah slot, dan URL berkas izin untuk diparsing ke fungsi Alpine.js.
+                    --}}
                     @php
                         $payload = [
                             'id' => $reservation->id,
@@ -130,8 +194,10 @@
                         ];
                     @endphp
 
+                    {{-- Baris Item Antrean Reservasi --}}
                     <div class="px-5 py-3.5 hover:bg-slate-50/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
                         <div class="min-w-0 flex-1">
+                            {{-- Baris Meta: Kode Tiket, Tanggal Kegiatan, dan Rentang Waktu --}}
                             <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
                                 <span class="font-mono font-medium text-slate-700">{{ $reservation->ticket_code ?? 'TKT-' . $reservation->id }}</span>
                                 <span class="text-slate-300">&bull;</span>
@@ -140,27 +206,32 @@
                                 <span class="font-mono text-slate-700">{{ substr($reservation->start_time ?? '00:00', 0, 5) }} - {{ substr($reservation->end_time ?? '00:00', 0, 5) }} WIB</span>
                             </div>
 
+                            {{-- Nama Fasilitas dan Gedung --}}
                             <div class="text-sm font-semibold text-slate-900 mt-1 truncate">
                                 {{ $reservation->facility->name ?? 'Fasilitas Kampus' }}
                                 <span class="text-xs font-normal text-slate-500">({{ $reservation->facility->building ?? 'Gedung' }})</span>
                             </div>
 
+                            {{-- Nama Pemohon --}}
                             <div class="text-xs text-slate-500 mt-0.5">
                                 Pemohon: <span class="text-slate-700 font-medium">{{ $reservation->user->name ?? 'Pemohon' }}</span>
                             </div>
                         </div>
 
+                        {{-- Aksi Cepat: Badge Status dan Tombol Tinjau Permohonan --}}
                         <div class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                             <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
                                 Menunggu Verifikasi
                             </span>
 
+                            {{-- Trigger Modal: Mengirim JSON payload ke fungsi Alpine.js openDetail() --}}
                             <button type="button" @click='openDetail(@json($payload))' class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors shadow-2xs cursor-pointer">
                                 Tinjau Permohonan
                             </button>
                         </div>
                     </div>
                 @empty
+                    {{-- Tampilan Kosong Jika Tidak Ada Antrean --}}
                     <div class="py-10 text-center text-xs text-slate-400">
                         Tidak ada permohonan reservasi yang menunggu verifikasi saat ini.
                     </div>
@@ -168,7 +239,10 @@
             </div>
         </section>
 
-        {{-- 4. Laporan Kerusakan Baru --}}
+        {{-- 
+          4. LAPORAN KERUSAKAN TERBARU (5 RECORD TERATAS):
+          Menampilkan tiket kerusakan aset fisik kampus yang paling baru dilaporkan oleh sivitas.
+        --}}
         <section class="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
                 <h2 class="text-sm font-bold text-slate-900">Laporan Kerusakan Terbaru</h2>
@@ -182,6 +256,7 @@
                 @forelse($recentReports as $report)
                     <div class="px-5 py-3.5 hover:bg-slate-50/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
                         <div class="min-w-0 flex-1">
+                            {{-- Kode Tiket Kerusakan, Tanggal Lapor, dan Kategori --}}
                             <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
                                 <span class="font-mono font-medium text-slate-700">{{ $report->report_code ?? 'RPT-' . $report->id }}</span>
                                 <span class="text-slate-300">&bull;</span>
@@ -190,15 +265,18 @@
                                 <span class="text-slate-600">{{ $report->category ?? 'Umum' }}</span>
                             </div>
 
+                            {{-- Nama Fasilitas Rusak --}}
                             <div class="text-sm font-semibold text-slate-900 mt-1 truncate">
                                 {{ $report->facility->name ?? 'Fasilitas Kampus' }}
                             </div>
 
+                            {{-- Deskripsi Keluhan --}}
                             <p class="text-xs text-slate-600 mt-0.5 truncate">
                                 {{ $report->description ?? '-' }}
                             </p>
                         </div>
 
+                        {{-- Status Badge dan Tombol Tautan ke Lembar Kerja Pengaduan --}}
                         <div class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                             <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 capitalize">
                                 {{ $report->status ?? 'baru' }}
@@ -210,6 +288,7 @@
                         </div>
                     </div>
                 @empty
+                    {{-- Tampilan Kosong Jika Tidak Ada Laporan Kerusakan --}}
                     <div class="py-10 text-center text-xs text-slate-400">
                         Tidak ada laporan kerusakan aktif yang tertunda saat ini.
                     </div>
@@ -217,16 +296,23 @@
             </div>
         </section>
 
-        {{-- 5. Modal Pratinjau Cepat Saat Klik "Tinjau Permohonan" --}}
+        {{-- 
+          5. MODAL PRATINJAU CEPAT RESERVASI (QUICK DETAIL MODAL):
+          Dipicu oleh Alpine.js saat tombol "Tinjau Permohonan" diklik.
+          Menyajikan rincian lengkap identitas pemohon, jadwal kegiatan, ruang yang dipinjam,
+          tautan berkas surat izin peminjaman, serta aksi persetujuan (Approve) atau penolakan (Reject).
+        --}}
         <div x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showModal = false" class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-slate-200 relative">
+                {{-- Tombol Tutup Silang di Sudut Kanan Atas --}}
                 <button type="button" @click="showModal = false" class="absolute top-5 right-5 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
 
+                {{-- Template Bersyarat: Hanya dirender saat variabel `selected` terisi objek data --}}
                 <template x-if="selected">
                     <div class="flex flex-col gap-5">
-                        {{-- Header Modal --}}
+                        {{-- Header Modal: Kode Tiket & Badge Status --}}
                         <div class="pr-8">
                             <div class="flex items-center gap-2">
                                 <span class="font-mono text-base font-bold text-slate-900" x-text="selected.ticket_code"></span>
@@ -237,7 +323,7 @@
 
                         {{-- Rincian Permohonan (Grid 2 Kolom) --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {{-- Kolom 1: Profil Pemohon --}}
+                            {{-- Kolom 1: Profil & Identitas Pemohon --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Identitas Pemohon</div>
                                 <div class="font-semibold text-slate-900 text-sm" x-text="selected.name"></div>
@@ -248,7 +334,7 @@
                                 </div>
                             </div>
 
-                            {{-- Kolom 2: Ruang & Jadwal --}}
+                            {{-- Kolom 2: Fasilitas & Waktu Pemakaian --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Fasilitas & Waktu</div>
                                 <div class="font-semibold text-slate-900 text-sm" x-text="selected.venue"></div>
@@ -259,7 +345,7 @@
                                 </div>
                             </div>
 
-                            {{-- Kolom Penuh: Tujuan Kegiatan & Berkas --}}
+                            {{-- Kolom Penuh: Tujuan Kegiatan & Berkas Surat Izin --}}
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 md:col-span-2">
                                 <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tujuan Kegiatan</div>
                                 <p class="text-xs text-slate-800 leading-relaxed bg-white p-3 rounded-lg border border-slate-200/80" x-text="selected.purpose"></p>
@@ -269,6 +355,7 @@
                                         Estimasi Peserta: <strong class="text-slate-900" x-text="selected.participants + ' Orang'"></strong>
                                     </div>
                                     <div>
+                                        {{-- Tautan Unduh Berkas Izin (Jika Diunggah Pemohon) --}}
                                         <template x-if="selected.permit_url">
                                             <a :href="selected.permit_url" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition shadow-2xs">
                                                 <span class="material-symbols-outlined text-[14px]">attachment</span>
@@ -283,7 +370,7 @@
                             </div>
                         </div>
 
-                        {{-- Footer Aksi Modal --}}
+                        {{-- Footer Aksi Modal: Tutup, Buka Lembar Antrean, Tolak, dan Setujui --}}
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
                             <div class="flex items-center gap-3">
                                 <button type="button" @click="showModal = false" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition cursor-pointer">
@@ -295,9 +382,12 @@
                             </div>
 
                             <div class="flex items-center gap-2">
+                                {{-- Tombol Tolak: Memicu pembukaan Modal Alasan Penolakan --}}
                                 <button type="button" @click="openReject(selected.id, selected.name, selected.ticket_code)" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-rose-700 hover:bg-rose-50 hover:border-rose-200 transition text-xs font-medium cursor-pointer">
                                     Tolak Permohonan
                                 </button>
+
+                                {{-- Formulir Persetujuan Langsung: HTTP PATCH ke /petugas/reservations/{id}/approve --}}
                                 <form :action="'{{ url('/petugas/reservations') }}/' + selected.id + '/approve'" method="POST" class="inline">
                                     @csrf
                                     @method('PATCH')
@@ -312,7 +402,11 @@
             </div>
         </div>
 
-        {{-- 6. Modal Tolak Permohonan --}}
+        {{-- 
+          6. MODAL TOLAK PERMOHONAN RESERVASI (REJECTION REASON MODAL):
+          Memfasilitasi petugas untuk menginput alasan penolakan secara transparan yang wajib diisi (min 5, max 1000 karakter).
+          Data dikirim via HTTP PATCH ke `/petugas/reservations/{id}/reject`.
+        --}}
         <div x-show="showRejectModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.away="showRejectModal = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
@@ -327,6 +421,7 @@
                     Menolak permohonan tiket <strong class="text-slate-900 font-mono" x-text="ticketCode"></strong> untuk pemohon <strong class="text-slate-900" x-text="applicantName"></strong>. Masukkan alasan resmi:
                 </p>
 
+                {{-- Formulir Penolakan --}}
                 <form :action="'{{ url('/petugas/reservations') }}/' + selectedId + '/reject'" method="POST">
                     @csrf
                     @method('PATCH')
