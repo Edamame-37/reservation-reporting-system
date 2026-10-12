@@ -1,12 +1,33 @@
 {{-- 
+  ==============================================================================
   NAMA FILE      : catalog.blade.php
-  FUNGSIONALITAS : Katalog Publik Daftar Fasilitas & Ruangan Kampus
-  DESKRIPSI      : Menampilkan daftar fasilitas kampus dengan paginasi maksimal 8 item per request, filter kategori, pencarian cerdas nama/gedung, kartu bento detail, dan modal pratinjau spesifikasi.
-  CARA KERJA     : Menerima paginator $facilities (8 item per request) dan array $categories dari PublicFacilityController@index, merender layout <x-public-layout active="catalog">.
+  MODUL          : Modul 4 - Portal Publik: Beranda, Katalog Fasilitas, Filter & Matriks Ketersediaan
+  KODE FITUR     : PUB-01 (Katalog Fasilitas & Filter Multi-Dimensi) & PUB-02 (Pencarian Cerdas)
+  ==============================================================================
+  DESKRIPSI:
+  Tampilan katalog direktori fasilitas dan ruangan kampus CAVA untuk publik.
+  Menampilkan grid kartu fasilitas dengan paginasi server-side (maksimal 8 item per request),
+  filter kategori cepat (horizontal scrollable pills), pencarian autocomplete berbasis Alpine.js,
+  drawer filter spesifik bertingkat (kategori, kapasitas kursi, peralatan pendukung),
+  animasi transisi antar-kategori berbasis sessionStorage, serta dialog modal detail spesifikasi
+  lengkap yang di-teleport ke root body.
+
+  STRUKTUR HIERARKI:
+  <x-public-layout active="catalog">
+    └── <div> Container Utama (State: showModal & activeFacility)
+        ├── <header> Judul Halaman & Formulir Pencarian Cerdas (Smart Search Bar)
+        ├── Tab Pills Kategori Horizontal (Semua, Auditorium, Lab, Ruang Rapat, Kelas)
+        ├── Grid Kartu Fasilitas (4 Kolom Desktop dengan Efek Hover & Status Badge Perbaikan)
+        ├── Kontrol Paginasi Laravel ($facilities->links() dengan Query String Dipertahankan)
+        └── Modal Pop-up Teleport (Pratinjau Foto, Kapasitas, Fasilitas Pendukung, & CTA Jadwal)
+  ==============================================================================
 --}}
 
 @php
+    // Ambil kategori saat ini dari query string URL (default: 'semua')
     $currentCategory = request('category', 'semua');
+    
+    // Petakan indeks urutan kategori untuk menghitung arah animasi slide saat berganti filter
     $categoryIndexes = ['semua' => 1];
     $idx = 2;
     foreach($categories as $cat) {
@@ -14,7 +35,13 @@
     }
     $subIndex = $categoryIndexes[$currentCategory] ?? 1;
 @endphp
+
 <x-public-layout title="Katalog Fasilitas" active="catalog">
+    {{-- 
+      CONTAINER UTAMA KATALOG:
+      - x-data: Mengelola status visibilitas modal (showModal) dan objek data fasilitas terpilih (activeFacility).
+      - x-init: Jika URL membawa parameter ?auto_open=1 (misal dari pencarian beranda), modal otomatis terbuka.
+    --}}
     <div class="pt-24 pb-20 max-w-7xl mx-auto px-6" x-data="{ 
         showModal: false, 
         activeFacility: null 
@@ -26,12 +53,18 @@
             });
         @endif
     ">
+        {{-- HEADER & FORMULIR FILTER CEPAT --}}
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-24">
             <div>
                 <h1 class="text-4xl font-bold tracking-tight mb-2">Katalog Fasilitas</h1>
                 <p class="text-lg text-[#86868B]">Temukan ruang yang sesuai dengan kebutuhan spesifik kegiatan Anda.</p>
             </div>
             
+            {{-- 
+              FORM PENCARIAN & FILTER MULTI-DIMENSI:
+              - Method: GET ke route('public.catalog')
+              - Parameter reaktif: query kata kunci, selectedCategories, minCapacity, selectedFacilities
+            --}}
             <form action="{{ route('public.catalog') }}" method="GET" class="w-full md:w-96 relative group shrink-0" 
                   @close-other-popups.window="openCategory = false; openFacility = false; showAdvanced = false;"
                   x-data="{ 
@@ -61,20 +94,27 @@
                 }
             }">
                 <div class="relative group" x-data="smartSearch('catalog')" @click.outside="open = false">
+                    {{-- Pertahankan filter kategori tunggal jika sedang aktif --}}
                     @if(request()->has('category') && request('category') !== 'semua')
                         <input type="hidden" name="category" value="{{ request('category') }}">
                     @endif
+                    
+                    {{-- Efek Glow Gradien di Belakang Search Input --}}
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    
+                    {{-- Input Pencarian Kompak --}}
                     <div class="relative bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-1.5 flex items-center border border-gray-100">
                         <span class="material-symbols-outlined text-gray-400 ml-3 mr-2 text-[20px]">search</span>
                         <input type="text" name="search" x-model="query" @focus="if(query.length > 0) { open = true; $dispatch('close-other-popups'); }" value="{{ request('search') }}" placeholder="Cari nama ruang, gedung..." class="flex-1 py-2.5 px-2 border-0 focus:ring-0 focus:border-transparent outline-none text-base bg-transparent" autocomplete="off">
-                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center">
+                        
+                        {{-- Tombol Buka Panel Filter Spesifik (Ikon 'tune') --}}
+                        <button type="button" @click="showAdvanced = !showAdvanced; if(showAdvanced) { $dispatch('close-smart-search'); }" class="text-gray-400 hover:text-[#1D1D1F] p-1 mr-1 transition rounded-lg hover:bg-gray-50 focus:outline-none flex items-center justify-center" title="Filter Spesifik">
                             <span class="material-symbols-outlined text-[20px]">tune</span>
                         </button>
                         <button type="submit" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition">Cari</button>
                     </div>
 
-                    <!-- Smart Search Dropdown -->
+                    {{-- DROPDOWN AUTOCOMPLETE SMART SEARCH --}}
                     <div x-show="open" 
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-2"
@@ -85,7 +125,7 @@
                          class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 pointer-events-auto"
                          style="display: none;">
                          
-                        <!-- Loading State -->
+                        <!-- Loading State Spinner -->
                         <div x-show="loading" class="p-4 flex items-center justify-center text-gray-500">
                             <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -94,9 +134,9 @@
                             <span class="text-sm font-medium">Mencari...</span>
                         </div>
 
-                        <!-- Results -->
+                        <!-- Hasil Saran Pencarian -->
                         <div x-show="!loading" class="flex flex-col">
-                            <!-- Text Suggestions -->
+                            <!-- Rekomendasi Teks Cepat -->
                             <template x-if="suggestions.length > 0">
                                 <div class="px-2 pt-2">
                                     <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Rekomendasi</div>
@@ -109,7 +149,7 @@
                                 </div>
                             </template>
 
-                            <!-- Facility Suggestions -->
+                            <!-- Rekomendasi Fasilitas Langsung -->
                             <template x-if="facilities.length > 0">
                                 <div class="px-2 pb-2" :class="suggestions.length > 0 ? 'border-t border-gray-100 mt-2 pt-2' : 'pt-2'">
                                     <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fasilitas</div>
@@ -125,7 +165,7 @@
                                 </div>
                             </template>
 
-                            <!-- Empty State Warning -->
+                            <!-- Peringatan Kosong -->
                             <template x-if="emptyState">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-yellow-500">warning</span>
@@ -133,7 +173,7 @@
                                 </div>
                             </template>
 
-                            <!-- No Results -->
+                            <!-- Hasil Tidak Ditemukan -->
                             <template x-if="!emptyState && suggestions.length === 0 && facilities.length === 0">
                                 <div class="p-6 text-center text-gray-500">
                                     <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">search_off</span>
@@ -141,7 +181,7 @@
                                 </div>
                             </template>
 
-                            <!-- Action Buttons -->
+                            <!-- Tombol Submit Bawah Dropdown -->
                             <template x-if="suggestions.length > 0 || facilities.length > 0">
                                 <div class="bg-gray-50 p-2.5 border-t border-gray-100 flex gap-2">
                                     <button type="submit" class="w-full flex justify-center items-center gap-2 bg-white border border-gray-200 text-[#1D1D1F] px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition">
@@ -153,7 +193,7 @@
                     </div>
                 </div>
 
-                <!-- Absolute Container for Filters and Popup -->
+                {{-- WADAH DINAMIS RESIZE OBSERVER UNTUK FILTER AKTIF & DRAWER SPESIFIK --}}
                 <div class="absolute top-full left-0 right-0 w-full z-40 pointer-events-none"
                      x-data="{ pillsHeight: 0 }"
                      x-init="
@@ -165,7 +205,7 @@
                         }
                      ">
                      
-                    <!-- Filter Aktif (Absolute) -->
+                    <!-- TAG FILTER AKTIF (Bisa Dihapus Satuan) -->
                     <div class="absolute top-0 left-0 right-0 w-full pointer-events-auto"
                          x-ref="pillContainer">
                         <div x-show="allFilters.length > 0" 
@@ -192,15 +232,16 @@
                                 <span x-text="'+' + (allFilters.length - 3) + ' lainnya'"></span>
                             </span>
 
-                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">Hapus Semua</button>
+                            <button type="button" x-transition.opacity.duration.200ms @click.prevent.stop="selectedCategories = []; selectedFacilities = []; minCapacity = ''" class="text-[13px] font-medium text-gray-500 hover:text-red-600 underline px-2 py-1 transition ml-1">
+                                Hapus Semua
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Advanced Search Popup (Absolute positioning slides based on pillsHeight) -->
+                    <!-- DRAWER PENCARIAN SPESIFIK KATALOG (Kategori, Kapasitas Minimum, Peralatan) -->
                     <div class="absolute right-0 md:min-w-[600px] transition-all duration-300 ease-out pointer-events-auto"
                          :style="`top: ${(allFilters.length > 0) ? pillsHeight : 0}px`">
                         
-                        <!-- TODO: Hardcoded advanced search panel, sesuaikan dengan rute dan backend nanti -->
                         <div x-show="showAdvanced" 
                              @click.away="showAdvanced = false"
                              x-transition:enter="transition ease-out duration-200"
@@ -211,61 +252,75 @@
                              x-transition:leave-end="opacity-0 translate-y-2"
                              class="mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 z-50 text-left" style="display: none;">
                              <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-100">
-                        <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
-                        <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600"><span class="material-symbols-outlined text-xl">close</span></button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
-                            <div class="relative mt-2">
-                                <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
-                                    <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
-                                    <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
+                                <h3 class="font-semibold text-lg text-[#1D1D1F]">Pencarian Spesifik</h3>
+                                <button type="button" @click="showAdvanced = false" class="text-gray-400 hover:text-gray-600">
+                                    <span class="material-symbols-outlined text-xl">close</span>
                                 </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {{-- 1. Filter Kategori Majemuk --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kategori Fasilitas</label>
+                                    <div class="relative mt-2">
+                                        <button type="button" @click="openCategory = !openCategory; if(openCategory) { openFacility = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <span x-text="selectedCategories.length === 0 ? 'Pilih Kategori...' : selectedCategories.length + ' Kategori Dipilih'" class="truncate mr-2"></span>
+                                            <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openCategory ? 'rotate-180' : ''">expand_more</span>
+                                        </button>
+                                        
+                                        <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                            @foreach($categories as $index => $cat)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
                                 
-                                <div x-show="openCategory" @click.away="openCategory = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                    @foreach($categories as $index => $cat)
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
-                                        <input type="checkbox" name="categories[]" value="{{ $cat }}" x-model="selectedCategories" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $cat }}</span>
-                                    </label>
-                                    @endforeach
+                                {{-- 2. Filter Kapasitas Kursi Minimum --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
+                                    <input type="number" name="capacity" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
+                                </div>
+                                
+                                {{-- 3. Filter Peralatan Inventaris --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
+                                    <div class="relative mt-2">
+                                        <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
+                                            <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
+                                        </button>
+                                        
+                                        <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
+                                            @foreach($equipments as $index => $eq)
+                                            <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
+                                                <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Kapasitas Minimum</label>
-                            <input type="number" name="capacity" x-model="minCapacity" placeholder="Mis: 30" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-[#1D1D1F] mb-2">Fasilitas Pendukung</label>
-                            <div class="relative mt-2">
-                                <button type="button" @click="openFacility = !openFacility; if(openFacility) { openCategory = false; $dispatch('close-smart-search'); }" class="w-full bg-gray-50 border border-gray-200 text-[#1D1D1F] text-sm rounded-xl p-3 flex justify-between items-center text-left focus:ring-blue-500 focus:border-blue-500 transition">
-                                    <span x-text="selectedFacilities.length === 0 ? 'Pilih Fasilitas...' : selectedFacilities.length + ' Fasilitas Dipilih'" class="truncate mr-2"></span>
-                                    <span class="material-symbols-outlined text-gray-500 text-sm transition-transform duration-200" :class="openFacility ? 'rotate-180' : ''">expand_more</span>
-                                </button>
-                                
-                                <div x-show="openFacility" @click.away="openFacility = false" x-transition.opacity.duration.200ms class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="display: none;">
-                                    @foreach($equipments as $index => $eq)
-                                    <label class="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition {{ $index > 0 ? 'border-t border-gray-50' : '' }}">
-                                        <input type="checkbox" name="equipments[]" value="{{ $eq }}" x-model="selectedFacilities" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <span class="text-sm font-medium text-gray-700 capitalize">{{ $eq }}</span>
-                                    </label>
-                                    @endforeach
-                                </div>
+                            
+                            <div class="mt-8 flex justify-end gap-3">
+                                <button type="reset" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition text-sm">Reset</button>
+                                <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-8 flex justify-end gap-3">
-                        <button type="reset" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition text-sm">Reset</button>
-                        <button type="button" @click="showAdvanced = false" class="bg-[#1D1D1F] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition text-sm">Terapkan Filter</button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </form>
+            </form>
         </div>
 
+        {{-- 
+          TAB PILLS KATEGORI CEPAT (Horizontal Scrollable):
+          Mengizinkan navigasi cepat antar kategori (Semua, Auditorium, Ruang Rapat, Lab, Kelas).
+          Menandai sessionStorage 'categoryClicked' agar transisi tetap mulus tanpa kedip.
+        --}}
         @php
             $currentCategory = request('category', 'semua');
             $hasFilterQuery = request()->filled('categories') || request()->filled('equipments') || request()->filled('capacity');
@@ -287,7 +342,10 @@
             @endforeach
         </div>
 
-        <!-- Grid Container (Animated) -->
+        {{-- 
+          GRID KARTU FASILITAS (4 KOLOM RESPONSIVE DENGAN ANIMASI TRANSISI):
+          Menggunakan Alpine.js x-data untuk mendeteksi perubahan $subIndex dan memberikan animasi terarah.
+        --}}
         <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-0"
              x-data="{
                 localClass: 'opacity-0',
@@ -305,8 +363,11 @@
                 }
              }"
              :class="localClass">
+            
+            {{-- Perulangan Menampilkan Kartu Fasilitas dari Controller Paginator --}}
             @foreach ($facilities as $facility)
             <div class="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition duration-300 group cursor-pointer flex flex-col" @click="activeFacility = {{ json_encode($facility) }}; showModal = true">
+                {{-- Foto Sampul Ruangan --}}
                 <div class="h-40 rounded-xl bg-gray-50 mb-5 flex items-center justify-center group-hover:bg-gray-100 transition overflow-hidden">
                     @if($facility['image'])
                         <img src="{{ asset('storage/' . $facility['image']) }}" alt="{{ $facility['name'] }}" class="w-full h-full object-cover">
@@ -314,8 +375,11 @@
                         <span class="material-symbols-outlined text-5xl text-gray-300">meeting_room</span>
                     @endif
                 </div>
+                {{-- Nama Ruangan & Keterangan Gedung/Kapasitas --}}
                 <h3 class="font-semibold text-[#1D1D1F] mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-300">{{ $facility['name'] }}</h3>
                 <p class="text-xs text-[#86868B] mb-4">{{ $facility['building'] }} • Kapasitas {{ $facility['capacity'] }}</p>
+                
+                {{-- Status Operasional & Indikator Panah --}}
                 <div class="flex items-center justify-between mt-auto">
                     @if($facility['status'] === 'locked')
                         <span class="flex items-center gap-1.5 text-xs font-medium text-red-600"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Perbaikan</span>
@@ -327,6 +391,7 @@
             </div>
             @endforeach
             
+            {{-- Tampilan Fallback Jika Tidak Ada Data Fasilitas yang Cocok --}}
             @if($facilities->isEmpty())
             <div class="col-span-full py-20 text-center text-gray-500">
                 <span class="material-symbols-outlined text-6xl mb-4">search_off</span>
@@ -335,11 +400,11 @@
             @endif
         </div>
 
-        <!-- 
-          ELEMEN       : Kontrol Paginasi Katalog Fasilitas (Maksimal 8 Item Sekali Request)
-          KEGUNAAN     : Menampilkan informasi rentang item yang tampil dan tombol navigasi halaman.
-          CARA KERJA   : Merender method $facilities->links() bawaan Laravel dengan query string filter otomatis dipertahankan.
-        -->
+        {{-- 
+          PAGINASI SERVER-SIDE LARAVEL (Maksimal 8 Item Sekali Muat):
+          - Membaca metadata paginasi: firstItem(), lastItem(), total(), hasPages().
+          - Mempertahankan parameter filter aktif via query string otomatis.
+        --}}
         @if($facilities instanceof \Illuminate\Pagination\LengthAwarePaginator && $facilities->total() > 0)
             <div class="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-6">
                 <p class="text-xs text-[#86868B]">
@@ -353,10 +418,13 @@
             </div>
         @endif
 
-        <!-- Pop-up Modal Detail Fasilitas -->
+        {{-- 
+          POP-UP MODAL DETAIL SPESIFIKASI FASILITAS:
+          Menggunakan directive <template x-teleport="body"> untuk memindahkan modal langsung ke DOM body.
+        --}}
         <template x-teleport="body">
             <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
-                <!-- Backdrop -->
+                <!-- Backdrop Gelap dengan Efek Blur -->
                 <div x-show="showModal" 
                      x-transition:enter="ease-out duration-300" 
                      x-transition:enter-start="opacity-0" 
@@ -368,61 +436,65 @@
                      @click="showModal = false">
                 </div>
 
-            <!-- Modal Content -->
-            <div x-show="showModal" 
-                 x-transition:enter="ease-out duration-300" 
-                 x-transition:enter-start="opacity-0 translate-y-8 scale-95" 
-                 x-transition:enter-end="opacity-100 translate-y-0 scale-100" 
-                 x-transition:leave="ease-in duration-200" 
-                 x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
-                 x-transition:leave-end="opacity-0 translate-y-8 scale-95" 
-                 class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
-                
-                <button @click="showModal = false" class="absolute top-4 right-4 z-20 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition flex items-center justify-center">
-                    <span class="material-symbols-outlined block text-[20px]">close</span>
-                </button>
+                <!-- Konten Modal Dialog -->
+                <div x-show="showModal" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-8 scale-95" 
+                     class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                    
+                    <button @click="showModal = false" class="absolute top-4 right-4 z-20 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition flex items-center justify-center">
+                        <span class="material-symbols-outlined block text-[20px]">close</span>
+                    </button>
 
-                <div class="h-64 bg-gray-50 relative shrink-0 border-b border-gray-100">
-                    <template x-if="activeFacility && activeFacility.image">
-                        <img :src="'/storage/' + activeFacility.image" :alt="activeFacility.name" class="w-full h-full object-contain">
-                    </template>
-                    <template x-if="!activeFacility || !activeFacility.image">
-                        <div class="w-full h-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-7xl text-gray-200">meeting_room</span>
+                    {{-- Pratinjau Gambar Fasilitas Terpilih --}}
+                    <div class="h-64 bg-gray-50 relative shrink-0 border-b border-gray-100">
+                        <template x-if="activeFacility && activeFacility.image">
+                            <img :src="'/storage/' + activeFacility.image" :alt="activeFacility.name" class="w-full h-full object-contain">
+                        </template>
+                        <template x-if="!activeFacility || !activeFacility.image">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-7xl text-gray-200">meeting_room</span>
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Informasi Rinci Spesifikasi --}}
+                    <div class="p-8 overflow-y-auto">
+                        <div class="flex items-start justify-between mb-2">
+                            <h2 class="text-3xl font-bold text-[#1D1D1F] leading-tight" x-text="activeFacility ? activeFacility.name : ''"></h2>
                         </div>
-                    </template>
-                </div>
+                        <div class="text-[#86868B] text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span>
+                            <span x-text="activeFacility ? activeFacility.building : ''"></span>
+                            <span>•</span>
+                            <span class="material-symbols-outlined text-[16px]">group</span>
+                            <span x-text="activeFacility ? activeFacility.capacity + ' Orang' : ''"></span>
+                        </div>
 
-                <div class="p-8 overflow-y-auto">
-                    <div class="flex items-start justify-between mb-2">
-                        <h2 class="text-3xl font-bold text-[#1D1D1F] leading-tight" x-text="activeFacility ? activeFacility.name : ''"></h2>
-                    </div>
-                    <div class="text-[#86868B] text-sm mb-6 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">location_on</span>
-                        <span x-text="activeFacility ? activeFacility.building : ''"></span>
-                        <span>•</span>
-                        <span class="material-symbols-outlined text-[16px]">group</span>
-                        <span x-text="activeFacility ? activeFacility.capacity + ' Orang' : ''"></span>
-                    </div>
+                        <h3 class="text-lg font-semibold mb-2 text-[#1D1D1F]">Deskripsi</h3>
+                        <p class="text-[#86868B] leading-relaxed mb-6 text-sm" x-text="activeFacility && activeFacility.desc ? activeFacility.desc : 'Tidak ada deskripsi tersedia.'"></p>
 
-                    <h3 class="text-lg font-semibold mb-2 text-[#1D1D1F]">Deskripsi</h3>
-                    <p class="text-[#86868B] leading-relaxed mb-6 text-sm" x-text="activeFacility && activeFacility.desc ? activeFacility.desc : 'Tidak ada deskripsi tersedia.'"></p>
-
-                    <h3 class="text-lg font-semibold mb-3 text-[#1D1D1F]">Fasilitas Pendukung</h3>
-                    <div class="flex flex-wrap gap-2 mb-10">
-                        <template x-if="activeFacility && activeFacility.equipment && activeFacility.equipment.length > 0">
-                            <template x-for="item in activeFacility.equipment">
-                                <span class="bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium" x-text="item"></span>
+                        <h3 class="text-lg font-semibold mb-3 text-[#1D1D1F]">Fasilitas Pendukung</h3>
+                        <div class="flex flex-wrap gap-2 mb-10">
+                            <template x-if="activeFacility && activeFacility.equipment && activeFacility.equipment.length > 0">
+                                <template x-for="item in activeFacility.equipment">
+                                    <span class="bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium" x-text="item"></span>
+                                </template>
                             </template>
-                        </template>
-                        <template x-if="!activeFacility || !activeFacility.equipment || activeFacility.equipment.length === 0">
-                            <span class="text-sm text-gray-500 italic">Tidak ada rincian fasilitas pendukung.</span>
-                        </template>
-                    </div>
+                            <template x-if="!activeFacility || !activeFacility.equipment || activeFacility.equipment.length === 0">
+                                <span class="text-sm text-gray-500 italic">Tidak ada rincian fasilitas pendukung.</span>
+                            </template>
+                        </div>
 
-                    <a :href="'{{ route('public.availability') }}?search=' + encodeURIComponent(activeFacility ? activeFacility.name : '')" class="block w-full text-center bg-[#1D1D1F] text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10">
-                        Cek Jadwal Ketersediaan
-                    </a>
+                        {{-- Tombol CTA Langsung ke Kalender Ketersediaan --}}
+                        <a :href="'{{ route('public.availability') }}?search=' + encodeURIComponent(activeFacility ? activeFacility.name : '')" class="block w-full text-center bg-[#1D1D1F] text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10">
+                            Cek Jadwal Ketersediaan
+                        </a>
+                    </div>
                 </div>
             </div>
         </template>
