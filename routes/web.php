@@ -99,14 +99,37 @@ Route::delete('/admin/users/{id}', [AdminUserManagementController::class, 'destr
 // ROUTE: Memulihkan akun pengguna yang di-soft delete atau dinonaktifkan
 Route::post('/admin/users/{id}/restore', [AdminUserManagementController::class, 'restore'])->name('admin.users.restore');
 
-// Master Fasilitas Routes
+// ------------------------------------------------------------------------------------------
+// MODUL MASTER FASILITAS & RUANGAN KAMPUS (ADM-03 / US-16)
+// ------------------------------------------------------------------------------------------
+// Memfasilitasi Administrator untuk mengelola seluruh siklus hidup venue kampus
+// (Katalogisasi, Unggah Foto, Pengaturan Kapasitas & Alat, serta Toggle Status Operasional).
+
+// ROUTE: Menerima GET request ke '/admin/facility-master' atau '/admin/facilities'
+// FUNGSI: Menampilkan antarmuka Bento UI manajemen fasilitas kampus dengan filter pencarian & kategori
 Route::get('/admin/facility-master', [App\Http\Controllers\FacilityController::class, 'index'])->name('admin.facility-master');
 Route::get('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
+
+// ROUTE: Menerima POST request ke '/admin/facilities/save'
+// FUNGSI: Endpoint alias serbaguna untuk menyimpan data baru atau memperbarui data via modal pop-up
 Route::post('/admin/facilities/save', [App\Http\Controllers\FacilityController::class, 'saveAlias'])->name('facilities.save');
+
+// ROUTE: Menerima POST request ke '/admin/facilities'
+// FUNGSI: Menyimpan entitas ruangan baru ke basis data dengan validasi StoreFacilityRequest & upload cover image
 Route::post('/admin/facilities', [App\Http\Controllers\FacilityController::class, 'store'])->name('facilities.store');
+
+// ROUTE: Menerima PUT request ke '/admin/facilities/{facility}'
+// FUNGSI: Memperbarui spesifikasi ruangan yang sudah ada menggunakan Implicit Route Model Binding {facility}
 Route::put('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'update'])->name('facilities.update');
+
+// ROUTE: Menerima DELETE request ke '/admin/facilities/{facility}'
+// FUNGSI: Melakukan penghapusan lunak (Soft Delete) pada ruangan sehingga tidak muncul di katalog tapi tetap tersimpan di arsip
 Route::delete('/admin/facilities/{facility}', [App\Http\Controllers\FacilityController::class, 'destroy'])->name('facilities.destroy');
+
+// ROUTE: Menerima POST request ke '/admin/facilities/{facility}/toggle'
+// FUNGSI: Mengubah status operasional ruangan ('aktif' <-> 'dalam perbaikan' <-> 'nonaktif') secara cepat
 Route::post('/admin/facilities/{facility}/toggle', [App\Http\Controllers\FacilityController::class, 'toggleStatus'])->name('admin.facilities.toggle');
+
 
 // ROUTE: Menerima GET request ke '/admin/export-report'
 // FUNGSI: Menampilkan antarmuka rekapitulasi okupansi dan frekuensi kerusakan aset resmi (ADM-04 / UR17)
