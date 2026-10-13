@@ -102,13 +102,65 @@ Sebelum membaca kode, pahami bagaimana Laravel 11 mengorganisasi file dan menjal
    - Diproses di dalam **Controller** (memanggil **Model Eloquent**).
    - Hasil dikembalikan dalam bentuk **Blade View** (HTML) atau **JSON Response**.
 
-2. **File & Folder Kunci yang Wajib Dipetakan:**
-   - `app/Models/`: Definisi tabel, relasi, tipe data kolom, dan query scopes.
-   - `app/Http/Controllers/`: Logika pemrosesan bisnis per modul.
-   - `app/Http/Requests/`: Validasi payload request dan pesan error.
-   - `database/migrations/`: Cetak biru struktur tabel MySQL.
-   - `database/seeders/`: Data awal untuk pengujian lokal.
-   - `resources/views/`: Kode antarmuka (Blade template terbagi atas folder `admin/`, `petugas/`, `user/`, `public/`, `components/`).
+2. **Taksonomi & Jenis-Jenis Berkas dalam Arsitektur CAVA (Serta Kegunaannya):**
+
+Di dalam ekosistem Laravel dan proyek CAVA, setiap berkas dikelompokkan ke dalam kategori fungsional (*Separation of Concerns*). Berikut adalah jenis-jenis berkas utama beserta fungsinya tanpa mencantumkan satu per satu nama berkasnya:
+
+* **Model (Eloquent ORM Model)**
+  * *Peran*: Representasi objek data untuk entitas basis data (penerapan pola *Active Record*).
+  * *Kegunaan*: Mengabstraksi komunikasi ke tabel basis data tanpa perlu menulis kueri SQL manual. Bertanggung jawab mengelola relasi antar entitas (*One-to-Many*, *Belongs-To*), mengonversi tipe data kolom secara otomatis (*Attribute Type Casting*), melindungi sistem dari manipulasi massal (*Mass Assignment Protection* via `$fillable`), serta menyediakan fungsi filter kueri yang dapat digunakan berulang kali (*Local Query Scopes*).
+
+* **Controller (HTTP Controller Layer)**
+  * *Peran*: Pengendali alur logika bisnis (*traffic coordinator*) dalam arsitektur MVC (Model-View-Controller).
+  * *Kegunaan*: Menerima permintaan HTTP dari Router, mengorkestrasi logika proses bisnis (memanggil Model, mengeksekusi kalkulasi, menjalankan transaksi basis data `DB::transaction()`), mengambil keputusan alur kerja, lalu mengembalikan respon yang sesuai (mengirimkan data ke Blade View untuk antarmuka browser atau menghasilkan respon format JSON untuk permintaan AJAX/API).
+
+* **Form Request (Validation & Gatekeeper Layer)**
+  * *Peran*: Kelas pemisah logika validasi dan otorisasi dari Controller.
+  * *Kegunaan*: Bertindak sebagai filter penjaga gerbang sebelum data request HTTP mencapai Controller. Memeriksa hak otorisasi pengguna (`authorize()`), memvalidasi tipe data, format teks, aturan bisnis (seperti interval slot 30 menit atau kapasitas minimum), batasan ukuran berkas unggahan bukti fisik (`rules()`), serta menyajikan kamus pesan kesalahan kustom berbahasa Indonesia (`messages()`). Jika validasi gagal, sistem otomatis menghentikan request dan mengembalikan pesan error.
+
+* **Migration (Database Migration / Schema Blueprint)**
+  * *Peran*: Berkas *version control* terstruktur untuk arsitektur skema basis data.
+  * *Kegunaan*: Mendefinisikan cetak biru (blueprint DDL) pembuatan, pembaruan, dan penghapusan tabel basis data, kolom, indeks performa, nilai default, dan relasi *Foreign Key Constraint* secara terprogram. Memastikan seluruh lingkungan kerja developer maupun server produksi memiliki skema basis data yang 100% konsisten melalui perintah otomatis `php artisan migrate`.
+
+* **Seeder (Database Seeder / Initial Population)**
+  * *Peran*: Skrip pengisi data awal (*data population loader*) ke dalam tabel basis data.
+  * *Kegunaan*: Menyuntikkan data master fundamental (seperti akun awal Super Admin, master izin dan peran Spatie RBAC, katalog awal ruangan universitas) serta kumpulan data tiruan (*dummy records*) untuk kebutuhan demonstrasi, simulasi transaksi jadwal, dan pengujian sistem tanpa memerlukan input manual lewat antarmuka.
+
+* **Factory (Model Factory / Dummy Data Generator)**
+  * *Peran*: Cetak biru generator data acak untuk entitas model menggunakan pustaka Faker.
+  * *Kegunaan*: Menghasilkan sekumpulan besar data tiruan berformat realistis (nama acak, email, stempel waktu, nomor identitas) secara instan untuk mempercepat pengujian otomatis (*automated testing*) atau pengisian basis data via Seeder.
+
+* **Route (Routing Table Definition)**
+  * *Peran*: Tabel pemetaan jalur URL (Uniform Resource Identifier) HTTP ke pengendali aksi (Controller).
+  * *Kegunaan*: Mendaftarkan seluruh alamat endpoint web dan API yang dapat diakses oleh klien, menentukan metode HTTP (GET, POST, PUT, PATCH, DELETE), mengaitkan lapisan pengaman Middleware, serta memberikan nama unik rute (*named routes*) untuk pemanggilan URL yang dinamis dan fleksibel pada view maupun controller.
+
+* **Middleware (HTTP Request Filter Layer)**
+  * *Peran*: Lapisan penyaring dan inspeksi keamanan perantara antara request browser dan Controller.
+  * *Kegunaan*: Memeriksa status otentikasi sesi pengguna (apakah sudah login), memverifikasi hak akses peran (*Role-Based Access Control* / RBAC seperti admin atau petugas), memvalidasi token CSRF untuk mencegah serangan pemalsuan request, serta menerapkan pembatasan laju percobaan (*rate limiting / anti-brute force*).
+
+* **Service Provider (Bootstrap & Dependency Injection Layer)**
+  * *Peran*: Pusat inisialisasi awal (*bootstrapping*) dan pengikatan layanan ke Service Container (IoC).
+  * *Kegunaan*: Mengonfigurasi layanan inti framework tingkat global sebelum request ditangani, mengintegrasikan paket pustaka pihak ketiga (seperti DomPDF, PhpSpreadsheet, Spatie Permission), serta mendaftarkan pengaturan konfigurasi default (misalnya menerapkan styling Tailwind CSS untuk engine paginasi Blade).
+
+* **Blade View (Presentation / UI Template Layer)**
+  * *Peran*: Berkas antarmuka pengguna berbasis template engine bawaan Laravel (`.blade.php`).
+  * *Kegunaan*: Merender struktur tampilan halaman HTML dinamis kepada pengguna. Mengonsumsi dan menampilkan data dari Controller menggunakan direktif Blade (`{{ }}`, `@if`, `@foreach`, `@forelse`), menyisipkan formulir interaktif dengan proteksi `@csrf`, serta mengintegrasikan reaktivitas sisi klien menggunakan Alpine.js dan Tailwind CSS.
+
+* **Blade Component (Reusable UI Component)**
+  * *Peran*: Komponen antarmuka pengguna modular yang dapat disematkan berulang kali di berbagai view.
+  * *Kegunaan*: Menghilangkan duplikasi kode HTML/CSS (*Don't Repeat Yourself* / DRY). Mengisolasi elemen visual spesifik yang sering digunakan (seperti tombol aksi, badge penanda status, kartu statistik metrik, pop-up modal dialog, dan tautan navigasi) sehingga perubahan desain cukup dilakukan pada satu berkas komponen terpusat.
+
+* **Layout Template (Master Layout Wrapper)**
+  * *Peran*: Berkas kerangka induk yang membungkus tata letak global dokumen web.
+  * *Kegunaan*: Menyediakan konsistensi visual di seluruh aplikasi dengan menyediakan kerangka dasar HTML (`<head>`, meta tag, pemanggilan bundel aset CSS/JS, bilah navigasi atas, sidebar menu, dan footer). Setiap halaman konten hanya perlu mengisi bagian slot penampung (`{{ $slot }}`) tanpa perlu menyusun ulang kerangka dokumen dari nol.
+
+* **Policy (Resource Authorization Policy)**
+  * *Peran*: Kelas aturan otorisasi berbasis entitas model tertentu.
+  * *Kegunaan*: Mengatur hak akses granular per instans data (misalnya: memverifikasi apakah sivitas yang sedang login berhak membatalkan permohonan reservasi tertentu miliknya sendiri, atau apakah seorang petugas memiliki wewenang menyetujui jadwal tersebut).
+
+* **Configuration File (`config/*.php`)**
+  * *Peran*: Berkas penyimpan pengaturan parameter dan konfigurasi runtime aplikasi.
+  * *Kegunaan*: Mengatur driver koneksi database, sistem session, mekanisme caching, filesystem storage, pengiriman email, serta memetakan variabel lingkungan dari berkas `.env` ke dalam konfigurasi aplikasi yang aman.
 
 ---
 
