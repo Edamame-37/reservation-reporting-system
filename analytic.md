@@ -1051,3 +1051,103 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
 * **Kegunaan & Untuk Apa**:
   * Mengatur driver koneksi database, sistem penyimpanan sesi (*session*), mekanisme caching, filesystem storage, dan driver pengiriman email.
   * Memetakan variabel lingkungan dari berkas `.env` ke dalam konfigurasi aplikasi yang aman dan dapat di-cache (`php artisan config:cache`) untuk performa tinggi pada server produksi.
+
+---
+
+## 21. Inventarisasi & Manajemen Cookies dalam Sistem CAVA
+
+Sistem CAVA mengadopsi standar kepatuhan privasi data dan transparansi peramban (*GDPR & UU Pelindungan Data Pribadi*). Cookies yang digunakan dikelompokkan ke dalam kategori **Preferensi**, **Fungsional**, **Esensial**, **Keamanan**, dan **Otentikasi**.
+
+Berikut adalah rincian inventarisasi seluruh cookies yang aktif di dalam sistem CAVA, tujuan penggunaannya, masa berlakunya, serta lokasi berkas implementasinya:
+
+### Tabel Ringkasan Cookies CAVA
+
+| Nama Cookie | Kategori | Masa Berlaku | Tujuan & Fungsi Utama | Letak File Implementasi |
+|---|---|---|---|---|
+| `cava_policy_accepted` | Preferensi | 365 Hari | Mengingat konfirmasi persetujuan kebijakan privasi & cookies agar banner floating consent tidak muncul berulang kali. | [public.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/layouts/public.blade.php)<br>[information.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) |
+| `cava_pref_category` | Fungsional | 30 Hari | Menyimpan preferensi kategori fasilitas terakhir yang difilter oleh pengunjung di katalog publik. | [PublicFacilityController.php](file:///c:/my-project/reservation-reporting-system/app/Http/Controllers/PublicFacilityController.php)<br>[information.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) |
+| `cava_pref_building` | Fungsional | 30 Hari | Mengingat filter gedung/zona terakhir yang dipilih petugas pada matriks ketersediaan jadwal 30 menit. | [PetugasScheduleMatrixController.php](file:///c:/my-project/reservation-reporting-system/app/Http/Controllers/PetugasScheduleMatrixController.php)<br>[schedule-matrix.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/petugas/schedule-matrix.blade.php) |
+| `cava_session` *(atau `laravel_session`)* | Esensial | 120 Menit | Menyimpan identifier sesi terenkripsi untuk memelihara status login dan penampung draf sementara (*drafting*). | [config/session.php](file:///c:/my-project/reservation-reporting-system/config/session.php)<br>[bootstrap/app.php](file:///c:/my-project/reservation-reporting-system/bootstrap/app.php) |
+| `XSRF-TOKEN` | Keamanan | Sesi Aktif | Token keamanan bawaan Laravel untuk mencegah serangan Cross-Site Request Forgery (CSRF) pada form interaktif. | [bootstrap/app.php](file:///c:/my-project/reservation-reporting-system/bootstrap/app.php)<br>[information.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) |
+| `remember_web_*` | Otentikasi | Persisten (5 Tahun) | Token otentikasi login otomatis ketika pengguna mencentang opsi 'Ingat Saya' (*Remember Me*). | [LoginRequest.php](file:///c:/my-project/reservation-reporting-system/app/Http/Requests/Auth/LoginRequest.php)<br>[login.blade.php](file:///c:/my-project/reservation-reporting-system/resources/views/auth/login.blade.php) |
+
+---
+
+### Penjelasan Mendalam per Cookie & File Terkait
+
+#### 1. `cava_policy_accepted` (Cookie Persetujuan Kebijakan Privasi)
+* **Kategori**: Preferensi Pengguna (*Consent Cookie*).
+* **Masa Berlaku**: 365 Hari (1 Tahun).
+* **Tujuan & Untuk Apa**:
+  * Menandai bahwa pengunjung situs telah membaca dan menyetujui kebijakan privasi serta penggunaan cookies pada sistem CAVA.
+  * Mencegah spanduk banner pemberitahuan persetujuan cookie (*floating notification pill*) muncul berulang kali di bagian bawah layar setiap kali pengguna berpindah halaman.
+* **File Terkait & Implementasi**:
+  * [`resources/views/layouts/public.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/layouts/public.blade.php) (Baris 311–325):
+    * Pengecekan status: `accepted: document.cookie.split('; ').some(row => row.startsWith('cava_policy_accepted=1'))`.
+    * Penyimpanan saat tombol diklik: `document.cookie = 'cava_policy_accepted=1;path=/;max-age=' + (60 * 60 * 24 * 365)`.
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 140–144): Dokumentasi transparansi tabel kebijakan kepada publik.
+
+#### 2. `cava_pref_category` (Cookie Preferensi Kategori Fasilitas Publik)
+* **Kategori**: Fungsionalitas Pengguna (*Functional / User Preference Cookie*).
+* **Masa Berlaku**: 30 Hari (43.200 menit).
+* **Tujuan & Untuk Apa**:
+  * Mengingat opsi kategori ruangan terakhir yang dipilih oleh pengunjung pada katalog publik (misal: 'auditorium', 'lab', 'kelas', 'olahraga', atau 'rapat').
+  * Memberikan pengalaman pengguna yang mulus: saat pengguna kembali membuka halaman `/public/catalog`, katalog otomatis menampilkan kategori favorit terakhir tanpa harus memilih dropdown ulang.
+* **File Terkait & Implementasi**:
+  * [`app/Http/Controllers/PublicFacilityController.php`](file:///c:/my-project/reservation-reporting-system/app/Http/Controllers/PublicFacilityController.php) (Baris 68 & 235):
+    * Pembacaan cookie saat request masuk: `$cookieCategory = $request->cookie('cava_pref_category', 'semua')`.
+    * Penyimpanan cookie ke HTTP Response: `$response->cookie('cava_pref_category', $request->category, 60 * 24 * 30)`.
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 146–150): Pencatatan transparansi privasi PDP.
+
+#### 3. `cava_pref_building` (Cookie Preferensi Gedung Jadwal Petugas)
+* **Kategori**: Fungsionalitas Operasional (*Operational Preference Cookie*).
+* **Masa Berlaku**: 30 Hari (2.592.000 detik).
+* **Tujuan & Untuk Apa**:
+  * Mengingat filter gedung atau zona kampus yang terakhir kali dipilih oleh Petugas Sarpras saat memantau matriks jadwal 30 menit.
+  * Mempermudah alur kerja harian petugas agar tidak perlu memilih ulang gedung saat melakukan refresh halaman atau memeriksa jadwal secara berkala.
+* **File Terkait & Implementasi**:
+  * [`app/Http/Controllers/PetugasScheduleMatrixController.php`](file:///c:/my-project/reservation-reporting-system/app/Http/Controllers/PetugasScheduleMatrixController.php) (Baris 94 & 100):
+    * Pembacaan nilai preferensi: `$selectedBuilding = $request->query('building', $request->cookie('cava_pref_building', 'semua'))`.
+  * [`resources/views/petugas/schedule-matrix.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/petugas/schedule-matrix.blade.php) (Baris 155–160):
+    * Penyimpanan langsung di sisi klien via Alpine.js `@change`:
+      `document.cookie = 'cava_pref_building=' + encodeURIComponent(selectedBuilding) + ';path=/;max-age=' + (60*60*24*30)`.
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 152–156).
+
+#### 4. `cava_session` / `laravel_session` (Cookie Sesi Terenkripsi Aplikasi)
+* **Kategori**: Esensial (*Strictly Necessary / Session State Cookie*).
+* **Masa Berlaku**: 120 Menit (Idle Timeout / Masa Tidak Aktif).
+* **Tujuan & Untuk Apa**:
+  * Mengaitkan browser klien dengan data sesi yang tersimpan di basis data/server secara aman menggunakan token string terenkripsi.
+  * Menjaga status otentikasi login pengguna aktif tanpa meminta kredensial ulang di setiap perpindahan halaman.
+  * Menyimpan draf isian sementara (*form drafting*) seperti draf reservasi (`reservation_draft`) dan draf tiket aduan (`report_draft`) agar data yang sedang diketik tidak hilang jika browser ter-refresh secara tidak sengaja.
+* **File Terkait & Implementasi**:
+  * [`config/session.php`](file:///c:/my-project/reservation-reporting-system/config/session.php) (Baris 121–135):
+    * Konfigurasi nama cookie: `'cookie' => env('SESSION_COOKIE', Str::slug(env('APP_NAME', 'laravel'), '_').'_session')`.
+    * Waktu kadaluarsa: `'lifetime' => env('SESSION_LIFETIME', 120)`.
+  * [`bootstrap/app.php`](file:///c:/my-project/reservation-reporting-system/bootstrap/app.php) (Baris 35–45):
+    * Disuntikkan secara otomatis ke seluruh rute web melalui pipeline middleware bawaan `\Illuminate\Session\Middleware\StartSession`.
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 158–162 & 180–183).
+
+#### 5. `XSRF-TOKEN` (Cookie Keamanan Perlindungan CSRF)
+* **Kategori**: Keamanan Sistem (*Security & Anti-Exploit Cookie*).
+* **Masa Berlaku**: Selama Sesi Peramban Aktif.
+* **Tujuan & Untuk Apa**:
+  * Melindungi aplikasi dari eksploitasi serangan siber *Cross-Site Request Forgery* (CSRF).
+  * Menyediakan token keamanan versi teks biasa (*unencrypted token*) yang dapat dibaca oleh library JavaScript klien (Fetch API / Axios / Alpine.js).
+  * JavaScript membaca cookie ini dan menyematkannya ke header HTTP `X-XSRF-TOKEN` saat mengirimkan permintaan AJAX/POST, sehingga server Laravel dapat memvalidasi keaslian pengirim request.
+* **File Terkait & Implementasi**:
+  * Ditangani secara otomatis oleh middleware bawaan framework `\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken` yang aktif pada kernel web (`bootstrap/app.php`).
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 164–168).
+
+#### 6. `remember_web_*` (Cookie Otentikasi Persisten "Ingat Saya")
+* **Kategori**: Otentikasi Persisten (*Authentication State Cookie*).
+* **Masa Berlaku**: Hingga 5 Tahun (atau sampai pengguna menekan tombol Logout).
+* **Tujuan & Untuk Apa**:
+  * Memungkinkan pengguna tetap masuk ke dalam sistem meskipun sesi peramban telah ditutup atau melewati batas idle 120 menit.
+  * Hanya diterbitkan jika pengguna secara eksplisit mencentang kotak "Ingat Saya" (*Remember Me*) pada formulir login.
+* **File Terkait & Implementasi**:
+  * [`app/Http/Requests/Auth/LoginRequest.php`](file:///c:/my-project/reservation-reporting-system/app/Http/Requests/Auth/LoginRequest.php) (Baris 101):
+    * Pemanggilan autentikasi berflag remember: `Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))`.
+  * [`resources/views/auth/login.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/auth/login.blade.php) (Baris 86–92):
+    * Input checkbox HTML: `<input id="remember_me" type="checkbox" name="remember" ...>`.
+  * [`resources/views/public/information.blade.php`](file:///c:/my-project/reservation-reporting-system/resources/views/public/information.blade.php) (Baris 170–174).
