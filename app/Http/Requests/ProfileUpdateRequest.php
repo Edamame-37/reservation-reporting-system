@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ====================================================================================================
  * SISTEM INFORMASI RESERVASI & PELAPORAN FASILITAS KAMPUS (CAVA)
@@ -23,39 +24,48 @@
  * ====================================================================================================
  */
 
+// ====================================================================================================
+// 1. DEKLARASI NAMESPACE (PHP NATIVE)
+// ====================================================================================================
+// SYNTAX     : namespace App\Http\Requests;
+// UNTUK APA  : Mengelompokkan class ini ke dalam namespace HTTP Requests sesuai konvensi PSR-4.
+// CARA KERJA : Memungkinkan resolusi pemanggilan otomatis oleh framework via Dependency Injection Controller.
 namespace App\Http\Requests;
 
+// ====================================================================================================
+// 2. IMPORT NAMESPACE & DEPENDENCIES (PHP NATIVE 'use')
+// ====================================================================================================
+// SYNTAX     : use <Vendor>\<Package>\<ClassName>;
+// UNTUK APA  : Mengimpor class model User, base FormRequest, dan Rule builder Laravel ke dalam berkas ini.
+// CARA KERJA : Aliasing simbol class pada waktu kompilasi PHP script.
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Class ProfileUpdateRequest
- *
- * Menangani validasi pembaruan nama lengkap dan alamat email pengguna aktif CAVA.
- */
+// ====================================================================================================
+// 3. DEKLARASI CLASS & EXTENDS (PHP OOP INHERITANCE)
+// ====================================================================================================
+// SYNTAX     : class ProfileUpdateRequest extends FormRequest
+// UNTUK APA  : Mewarisi fitur HTTP Request Validation bawaan Laravel (intersepsi otomatis sebelum controller).
+// CARA KERJA : Jika aturan pada `rules()` gagal, framework langsung membatalkan eksekusi controller dan
+//              mengembalikan respon redirect/JSON dengan kumpulan pesan error validation ($errors).
 class ProfileUpdateRequest extends FormRequest
 {
+    // ================================================================================================
+    // 4. ATURAN VALIDASI DATA FORMULIR (LARAVEL FORM REQUEST RULES)
+    // ================================================================================================
+    // SYNTAX     : public function rules(): array
+    // UNTUK APA  : Mendefinisikan array aturan validasi untuk payload nama dan email pengguna.
+    // CARA KERJA :
+    // - 'name'  : Wajib diisi ('required'), bertipe string, maksimal 255 karakter.
+    // - 'email' : Wajib diisi, string, huruf kecil ('lowercase'), format email RFC valid ('email'),
+    //             maksimal 255 karakter, dan unik pada tabel users kecuali ID user saat ini
+    //             (`Rule::unique(User::class)->ignore($this->user()->id)`).
     /**
-     * METHOD: rules()
-     * ------------------------------------------------------------------------------------------------
-     * FUNGSI / KEGUNAAN:
-     * Mendefinisikan aturan validasi integritas untuk payload perubahan profil pengguna.
+     * Get the validation rules that apply to the request.
      *
-     * RETURN VALUE:
-     * array<string, ValidationRule|array<mixed>|string> : Daftar aturan validasi:
-     * - 'name'  : Wajib diisi ('required'), bertipe string, maksimal 255 karakter.
-     * - 'email' : Wajib diisi ('required'), string, huruf kecil ('lowercase'), format email valid ('email'),
-     *             maksimal 255 karakter, dan unik pada tabel users kecuali untuk ID pengguna saat ini
-     *             (`Rule::unique(User::class)->ignore($this->user()->id)`).
-     *
-     * CARA KERJA & ALUR LOGIKA:
-     * 1. Laravel mengekstrak nilai input 'name' dan 'email' dari request HTTP PATCH.
-     * 2. Evaluasi rule memeriksa tipe data dan panjang string.
-     * 3. Aturan `Rule::unique(User::class)->ignore(...)` menghasilkan kueri SQL:
-     *    `SELECT count(*) FROM users WHERE email = ? AND id != ?`
-     * 4. Jika valid, controller diizinkan memproses pembaruan; jika gagal, dialihkan kembali dengan pesan error.
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
