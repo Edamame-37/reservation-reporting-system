@@ -2,10 +2,12 @@
 
 /**
  * ==============================================================================================
- * MODEL ELOQUENT ENTITAS PENGGUNA (USER & AUTHENTICATION)
+ * SISTEM INFORMASI MANAJEMEN FASILITAS & SARANA PRASARANA KAMPUS (CAVA)
  * ==============================================================================================
- * Berkas: app/Models/User.php
- * 
+ * Berkas          : app/Models/User.php
+ * Entitas         : User (Pengguna, Sivitas Akademika, Petugas, & Administrator)
+ * Layer Arsitektur: Data Access Layer / Eloquent Authenticatable Model (ORM & Security)
+ * ==============================================================================================
  * PERAN & FUNGSI UTAMA:
  * 1. Merepresentasikan entitas pengguna tunggal di dalam sistem aplikasi CAVA.
  * 2. Menjadi jembatan utama autentikasi web (Laravel Auth Guard), verifikasi login sandi,
@@ -19,42 +21,66 @@
  * ==============================================================================================
  */
 
+// ==============================================================================================
+// 1. DEKLARASI NAMESPACE (PHP NATIVE)
+// ==============================================================================================
+// SYNTAX     : namespace App\Models;
+// UNTUK APA  : Mengelompokkan class ini ke dalam hierarki namespace virtual 'App\Models' sesuai
+//              standar autoloading PSR-4 Composer.
+// CARA KERJA : Mencegah benturan nama (name collision) antar class yang berbeda. Composer memetakan
+//              namespace 'App\' ke direktori fisik 'app/', sehingga class ini dapat dipanggil
+//              di mana pun dengan Fully Qualified Class Name (FQCN) `\App\Models\User`.
 namespace App\Models;
 
-// Mengimpor kelas pendukung Eloquent, Relasi, dan Trait Inti Laravel
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
+// ==============================================================================================
+// 2. IMPORT NAMESPACE & DEPENDENCIES (PHP NATIVE 'use')
+// ==============================================================================================
+// SYNTAX     : use <Vendor>\<Package>\<ClassName>;
+// UNTUK APA  : Mengimpor class, interface, trait, atau authentication contracts ke dalam berkas ini
+//              agar dapat diakses langsung menggunakan nama pendek tanpa menulis FQCN panjang.
+// CARA KERJA : Diuraikan oleh PHP engine saat kompilasi berkas (compile-time aliasing).
+use Illuminate\Database\Eloquent\Factories\HasFactory;      // Trait untuk integrasi Database Seeder & Factory
+use Illuminate\Database\Eloquent\Relations\HasMany;         // Tipe kembalian relasi One-to-Many Eloquent
+use Illuminate\Database\Eloquent\SoftDeletes;               // Trait soft delete bawaan Laravel
+use Illuminate\Foundation\Auth\User as Authenticatable;     // Base Class Authenticatable User bawaan Laravel Breeze
+use Illuminate\Notifications\Notifiable;                   // Trait notifikasi (email, database, SMS)
+use Spatie\Permission\Traits\HasRoles;                     // Trait Role-Based Access Control dari Spatie Permission
 
-/**
- * Class User
- * 
- * Mewarisi `Illuminate\Foundation\Auth\User` (Authenticatable) yang mengimplementasikan interface:
- * - Illuminate\Contracts\Auth\Authenticatable (metode getAuthIdentifier, getAuthPassword, dll.)
- * - Illuminate\Contracts\Auth\CanResetPassword (fitur reset kata sandi)
- */
+// ==============================================================================================
+// 3. DEKLARASI CLASS & INHERITANCE (PHP NATIVE 'class ... extends ...')
+// ==============================================================================================
+// SYNTAX     : class User extends Authenticatable
+// UNTUK APA  : Mendefinisikan class entitas `User` yang mewarisi class `Illuminate\Foundation\Auth\User`
+//              (Authenticatable).
+// CARA KERJA : Mewarisi implementasi interface `Illuminate\Contracts\Auth\Authenticatable`
+//              (seperti `getAuthIdentifier()`, `getAuthPassword()`) dan `CanResetPassword`
+//              sehingga class ini dapat langsung dikenali oleh sistem session dan guard Laravel.
 class User extends Authenticatable
 {
     // ==========================================================================================
-    // TRAIT ELOQUENT & SPATIE EXTENSIONS
+    // 4. TRAIT COMPOSITION (PHP NATIVE 'use TraitName;')
     // ==========================================================================================
-    // - HasFactory   : Memungkinkan pembuatan dummy data otomatis menggunakan model factory (User::factory()->create()).
-    // - Notifiable   : Menyediakan method ->notify() untuk pengiriman email, database notifications, atau SMS.
-    // - HasRoles     : Trait Spatie RBAC yang menambahkan relasi polymorphic many-to-many ke roles dan permissions.
-    // - SoftDeletes  : Mengaktifkan filter otomatis `WHERE deleted_at IS NULL` dan method `$user->delete()`, `$user->restore()`.
+    // SYNTAX     : use HasFactory, Notifiable, HasRoles, SoftDeletes;
+    // UNTUK APA  : Menyuntikkan fungsionalitas tambahan ke dalam class tanpa inheritance bertingkat.
+    // CARA KERJA :
+    // - HasFactory   : Menyediakan method `User::factory()` untuk pembuatan data uji otomatis.
+    // - Notifiable   : Menyediakan method `$user->notify($instance)` untuk pengiriman notifikasi.
+    // - HasRoles     : Menyediakan method RBAC seperti `$user->assignRole()`, `$user->hasRole()`,
+    //                  dan `$user->can()` via relasi polymorphic Spatie.
+    // - SoftDeletes  : Mengintersepsi method `delete()` menjadi pengisian kolom `deleted_at`.
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
+    // ==========================================================================================
+    // 5. PROTEKSI MASS ASSIGNMENT (LARAVEL ELOQUENT SECURITY PROPERTY)
+    // ==========================================================================================
+    // SYNTAX     : protected $fillable = [ ... ];
+    // UNTUK APA  : Menentukan daftar putih (whitelist) kolom tabel yang diizinkan untuk diisi
+    //              secara serentak dari input pengguna (`User::create($request->validated())`).
+    // CARA KERJA : Melindungi sistem dari eksploitasi Mass Assignment Vulnerability (CWE-915).
+    //              Eloquent secara otomatis mengabaikan kolom apa pun di luar daftar ini saat
+    //              proses pengisian massal.
     /**
      * The attributes that are mass assignable.
-     * 
-     * CARA KERJA & ALUR:
-     * Melindungi sistem dari kerentanan Mass Assignment Vulnerability (CWE-915).
-     * Hanya atribut-atribut yang terdaftar secara eksplisit di dalam array `$fillable` ini yang
-     * diizinkan untuk diisi secara massal saat memanggil `User::create($request->all())`
-     * atau `$user->update($data)`.
      *
      * @var list<string>
      */
@@ -72,13 +98,15 @@ class User extends Authenticatable
         'assignment_zone',  // Zona/gedung penugasan khusus untuk petugas pemeriksa (misal: 'Gedung A', 'Laboratorium').
     ];
 
+    // ==========================================================================================
+    // 6. PENYEMBUNYIAN ATRIBUT DARI SERIALISASI (LARAVEL ELOQUENT HIDDEN PROPERTY)
+    // ==========================================================================================
+    // SYNTAX     : protected $hidden = [ ... ];
+    // UNTUK APA  : Menyembunyikan atribut sensitif dari hasil konversi array/JSON (`$user->toArray()`).
+    // CARA KERJA : Mencegah kebocoran data keamanan (seperti hash password dan token 'remember me')
+    //              ke klien browser atau respon API RESTful.
     /**
      * The attributes that should be hidden for serialization.
-     * 
-     * CARA KERJA & ALUR:
-     * Menyembunyikan atribut sensitif dari hasil serialisasi JSON atau konversi ke array
-     * (misal: `$user->toArray()` atau saat model dikembalikan sebagai HTTP JSON response).
-     * Hal ini mencegah bocornya hash password atau remember_token ke frontend/browser.
      *
      * @var list<string>
      */
@@ -87,15 +115,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // ==========================================================================================
+    // 7. TYPE CASTING ATRIBUT MODEL (LARAVEL 11 NATIVE METHOD 'casts(): array')
+    // ==========================================================================================
+    // SYNTAX     : protected function casts(): array { return [ ... ]; }
+    // UNTUK APA  : Mengonversi format data SQL ke tipe data objek PHP secara otomatis saat dibaca/disimpan.
+    // CARA KERJA :
+    // - 'email_verified_at' => 'datetime' : Mengonversi string waktu SQL menjadi objek `Illuminate\Support\Carbon`.
+    // - 'password' => 'hashed'            : Mengamankan kata sandi baru secara otomatis menggunakan
+    //                                       algoritma hashing default (Bcrypt/Argon2) saat diisi ke atribut.
     /**
      * Get the attributes that should be cast.
-     * 
-     * CARA KERJA & ALUR:
-     * Fitur Type-Casting bawaan Laravel 11 berbasis method `casts(): array`.
-     * - 'email_verified_at' => 'datetime' : Otomatis mengubah string datetime SQL menjadi objek Carbon PHP.
-     * - 'password' => 'hashed'            : Fitur otomatisasi keamanan di mana setiap nilai plaintext baru
-     *                                       yang di-set ke `$user->password` akan otomatis di-hash menggunakan
-     *                                       algoritma Bcrypt/Argon2 tanpa perlu memanggil `Hash::make()` manual.
      *
      * @return array<string, string>
      */
@@ -107,14 +137,15 @@ class User extends Authenticatable
         ];
     }
 
+    // ==========================================================================================
+    // 8. RELASI ELOQUENT ONE-TO-MANY: PERMOHONAN RESERVASI OLEH PEMOHON
+    // ==========================================================================================
+    // SYNTAX     : public function reservations(): HasMany
+    // UNTUK APA  : Menghubungkan akun pengguna ini dengan seluruh tiket reservasi yang pernah diajukannya.
+    // CARA KERJA : Relasi One-to-Many (`hasMany`) yang menghubungkan `users.id` ke `reservations.user_id`.
+    //              Mengembalikan instance `HasMany` untuk query chaining atau koleksi model.
     /**
-     * ==========================================================================================
-     * RELASI ELOQUENT: PEMOHON RESERVASI RUANGAN
-     * ==========================================================================================
-     * 
-     * KEGUNAAN   : Menarik seluruh riwayat permohonan reservasi ruangan yang diajukan oleh pengguna ini.
-     * CARA KERJA : Relasi One-to-Many (`hasMany`) yang mencocokkan `users.id` ke `reservations.user_id`.
-     * CONTOH     : `$user->reservations()->where('status', 'approved')->get();`
+     * Mendapatkan seluruh riwayat permohonan reservasi yang diajukan oleh pengguna ini.
      * 
      * @return HasMany
      */
@@ -123,14 +154,14 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class, 'user_id');
     }
 
+    // ==========================================================================================
+    // 9. RELASI ELOQUENT ONE-TO-MANY: LAPORAN KERUSAKAN OLEH PELAPOR
+    // ==========================================================================================
+    // SYNTAX     : public function damageReports(): HasMany
+    // UNTUK APA  : Menghubungkan akun pengguna dengan seluruh laporan kerusakan sarana yang dibuatnya.
+    // CARA KERJA : Relasi One-to-Many (`hasMany`) yang menghubungkan `users.id` ke `damage_reports.user_id`.
     /**
-     * ==========================================================================================
-     * RELASI ELOQUENT: PEMBUAT TIKET LAPORAN KERUSAKAN
-     * ==========================================================================================
-     * 
-     * KEGUNAAN   : Menarik seluruh riwayat tiket pelaporan kerusakan sarana yang dilaporkan pengguna ini.
-     * CARA KERJA : Relasi One-to-Many (`hasMany`) yang mencocokkan `users.id` ke `damage_reports.user_id`.
-     * CONTOH     : `$user->damageReports()->latest()->get();`
+     * Mendapatkan seluruh tiket pelaporan kerusakan fasilitas yang dilaporkan oleh pengguna ini.
      * 
      * @return HasMany
      */
@@ -139,14 +170,14 @@ class User extends Authenticatable
         return $this->hasMany(DamageReport::class, 'user_id');
     }
 
+    // ==========================================================================================
+    // 10. RELASI ELOQUENT ONE-TO-MANY: TINJAUAN RESERVASI OLEH PETUGAS/ADMIN
+    // ==========================================================================================
+    // SYNTAX     : public function reviewedReservations(): HasMany
+    // UNTUK APA  : Menghubungkan akun petugas/admin dengan seluruh reservasi yang diverifikasi olehnya.
+    // CARA KERJA : Relasi One-to-Many (`hasMany`) yang menghubungkan `users.id` ke `reservations.reviewed_by`.
     /**
-     * ==========================================================================================
-     * RELASI ELOQUENT: PENINJAU / VERIFIKATOR RESERVASI (ROLE: PETUGAS / ADMIN)
-     * ==========================================================================================
-     * 
-     * KEGUNAAN   : Menarik daftar reservasi yang ditinjau, disetujui, atau ditolak oleh petugas ini.
-     * CARA KERJA : Relasi One-to-Many (`hasMany`) yang mencocokkan `users.id` ke `reservations.reviewed_by`.
-     * CONTOH     : `$petugas->reviewedReservations()->count();`
+     * Mendapatkan seluruh daftar reservasi yang ditinjau/diverifikasi oleh petugas ini.
      * 
      * @return HasMany
      */
@@ -155,14 +186,14 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class, 'reviewed_by');
     }
 
+    // ==========================================================================================
+    // 11. RELASI ELOQUENT ONE-TO-MANY: PENANGANAN TIKET KERUSAKAN OLEH PETUGAS/TEKNISI
+    // ==========================================================================================
+    // SYNTAX     : public function handledReports(): HasMany
+    // UNTUK APA  : Menghubungkan akun teknisi/petugas dengan tiket kerusakan yang ditanganinya.
+    // CARA KERJA : Relasi One-to-Many (`hasMany`) yang menghubungkan `users.id` ke `damage_reports.handled_by`.
     /**
-     * ==========================================================================================
-     * RELASI ELOQUENT: PENANGAN TIKET KERUSAKAN / TEKNISI (ROLE: PETUGAS / TEKNISI)
-     * ==========================================================================================
-     * 
-     * KEGUNAAN   : Menarik daftar tiket kerusakan fasilitas yang ditangani atau diperbaiki oleh petugas ini.
-     * CARA KERJA : Relasi One-to-Many (`hasMany`) yang mencocokkan `users.id` ke `damage_reports.handled_by`.
-     * CONTOH     : `$teknisi->handledReports()->where('status', 'in_progress')->get();`
+     * Mendapatkan seluruh tiket kerusakan fasilitas yang ditangani/diperbaiki oleh petugas ini.
      * 
      * @return HasMany
      */
@@ -171,4 +202,3 @@ class User extends Authenticatable
         return $this->hasMany(DamageReport::class, 'handled_by');
     }
 }
-
