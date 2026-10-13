@@ -920,9 +920,11 @@ Berikut adalah pemetaan nomor poin modul yang wajib dipahami dan dikuasai oleh m
 
 ## 20. Taksonomi & Penjelasan Jenis-Jenis Berkas dalam Ekosistem Laravel (Serta Kegunaannya)
 
-Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*file types*) yang membentuk arsitektur sistem CAVA. Penjelasan ini berfokus pada **kategori dan kegunaan masing-masing jenis berkas** tanpa perlu mencantumkan daftar nama file satu per satu:
+Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*file types*) yang membentuk arsitektur sistem CAVA. Penjelasan ini menyertakan **lokasi path direktori fisik**, **format ekstensi dan penamaan berkas**, serta **peran dan kegunaan fungsional masing-masing jenis berkas** tanpa perlu mencantumkan daftar nama file satu per satu:
 
 ### 1. Model (Eloquent ORM Model)
+* **Lokasi Direktori (Path)**: `app/Models/`
+* **Format Nama & Ekstensi Berkas**: `[NamaEntitas].php` (PascalCase, contoh pola: `Facility.php`, `Reservation.php`, `User.php`)
 * **Definisi & Peran**: Kelas representasi objek data untuk entitas basis data yang menerapkan pola desain *Active Record*.
 * **Kegunaan & Untuk Apa**:
   * Mengabstraksi seluruh komunikasi ke tabel MySQL tanpa perlu menulis kueri SQL mentah secara manual.
@@ -932,6 +934,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Menyediakan fungsi penyaring kueri yang dapat digunakan berulang kali (*Local Query Scopes* seperti `scopeActive()` atau `scopeApproved()`).
 
 ### 2. Controller (HTTP Controller Layer)
+* **Lokasi Direktori (Path)**: `app/Http/Controllers/` (serta sub-folder seperti `app/Http/Controllers/Auth/`)
+* **Format Nama & Ekstensi Berkas**: `[NamaFitur]Controller.php` (PascalCase berakhiran Controller, contoh pola: `ReservationController.php`, `PublicFacilityController.php`)
 * **Definisi & Peran**: Pengendali alur logika bisnis (*traffic coordinator*) dalam arsitektur Model-View-Controller (MVC).
 * **Kegunaan & Untuk Apa**:
   * Menerima HTTP Request yang diteruskan oleh Router dan mengekstrak parameter masukan dari pengguna.
@@ -939,6 +943,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Menentukan respon akhir aplikasi: mengoper variabel data ke template Blade View untuk antarmuka browser, melakukan pengalihan halaman (*HTTP Redirect*), atau mengembalikan struktur JSON untuk konsumsi API/AJAX.
 
 ### 3. Form Request (Validation & Gatekeeper Layer)
+* **Lokasi Direktori (Path)**: `app/Http/Requests/` (serta sub-folder seperti `app/Http/Requests/Auth/`)
+* **Format Nama & Ekstensi Berkas**: `[NamaAksi]Request.php` (PascalCase berakhiran Request, contoh pola: `StoreReservationRequest.php`, `LoginRequest.php`)
 * **Definisi & Peran**: Kelas khusus turunan `Illuminate\Foundation\Http\FormRequest` yang memisahkan logika validasi dan sanitasi dari Controller.
 * **Kegunaan & Untuk Apa**:
   * Bertindak sebagai filter penjaga gerbang (gatekeeper) sebelum data kiriman pengguna menyentuh Controller.
@@ -948,6 +954,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Otomatis membatalkan eksekusi dan mengembalikan respon error (Redirect dengan flash session `$errors` atau HTTP JSON 422 Unprocessable Content) jika validasi tidak terpenuhi.
 
 ### 4. Migration (Database Migration / Schema Blueprint)
+* **Lokasi Direktori (Path)**: `database/migrations/`
+* **Format Nama & Ekstensi Berkas**: `YYYY_MM_DD_HHMMSS_create_[nama_tabel]_table.php` (Stempel waktu + snake_case, contoh pola: `2026_09_20_000001_create_facilities_table.php`)
 * **Definisi & Peran**: Sistem *version control* terstruktur untuk arsitektur skema basis data aplikasi.
 * **Kegunaan & Untuk Apa**:
   * Mendefinisikan cetak biru (blueprint DDL) pembuatan, pembaruan, dan penghapusan tabel basis data, kolom, tipe data native, nilai bawaan (*default values*), dan indeks komposit secara terprogram.
@@ -955,6 +963,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Memastikan seluruh lingkungan kerja anggota tim developer maupun server produksi memiliki struktur database yang 100% sinkron dan konsisten cukup dengan mengeksekusi `php artisan migrate`.
 
 ### 5. Seeder (Database Seeder / Initial Population)
+* **Lokasi Direktori (Path)**: `database/seeders/`
+* **Format Nama & Ekstensi Berkas**: `[NamaSubjek]Seeder.php` (PascalCase berakhiran Seeder, contoh pola: `DatabaseSeeder.php`, `FacilitySeeder.php`, `UserSeeder.php`)
 * **Definisi & Peran**: Skrip penyuntik data awal (*data population loader*) ke dalam tabel basis data.
 * **Kegunaan & Untuk Apa**:
   * Mengisi basis data dengan data master fundamental yang menjadi prasyarat sistem berjalan (misal: akun awal Super Admin, master izin dan peran Spatie RBAC, daftar kategori ruangan).
@@ -962,12 +972,16 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Menerapkan pipeline urutan eksekusi (*Dependency Pipeline*) pada `DatabaseSeeder` agar pemuatan data tidak melanggar foreign key constraint.
 
 ### 6. Factory (Model Factory / Dummy Data Generator)
+* **Lokasi Direktori (Path)**: `database/factories/`
+* **Format Nama & Ekstensi Berkas**: `[NamaModel]Factory.php` (PascalCase berakhiran Factory, contoh pola: `UserFactory.php`, `FacilityFactory.php`)
 * **Definisi & Peran**: Cetak biru generator data acak untuk entitas model menggunakan pustaka Faker.
 * **Kegunaan & Untuk Apa**:
   * Memproduksi puluhan hingga ribuan baris data tiruan berformat realistis (nama acak, email, stempel waktu, nomor identitas) secara instan.
   * Digunakan secara intensif untuk mempercepat penulisan skenario pengujian otomatis (*automated testing*) atau pengisian basis data melalui Seeder.
 
-### 7. Route (Routing Table Definition / `routes/*.php`)
+### 7. Route (Routing Table Definition)
+* **Lokasi Direktori (Path)**: `routes/`
+* **Format Nama & Ekstensi Berkas**: `[nama_domain].php` (snake_case/kebab-case berektensi `.php`, contoh pola: `web.php`, `auth.php`, `console.php`)
 * **Definisi & Peran**: Berkas pendaftaran pemetaan jalur URL (Uniform Resource Identifier) HTTP ke pengendali aksi (Controller).
 * **Kegunaan & Untuk Apa**:
   * Mendaftarkan seluruh alamat endpoint web dan API yang sah dan dapat diakses oleh klien.
@@ -976,6 +990,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Memberikan nama pengenal unik (*named routes*) untuk pemanggilan URL dinamis yang kebal terhadap perubahan path fisik URL di kemudian hari.
 
 ### 8. Middleware (HTTP Request Filter Layer)
+* **Lokasi Direktori (Path)**: `app/Http/Middleware/` (serta dikonfigurasikan secara sentral di `bootstrap/app.php`)
+* **Format Nama & Ekstensi Berkas**: `[NamaFilter]Middleware.php` atau `[NamaFilter].php` (PascalCase berektensi `.php`)
 * **Definisi & Peran**: Lapisan penyaring dan inspeksi keamanan perantara yang beroperasi di antara permintaan browser dan Controller.
 * **Kegunaan & Untuk Apa**:
   * Memeriksa status otentikasi sesi pengguna (apakah sudah login atau masih bertindak sebagai *guest*).
@@ -984,6 +1000,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Menerapkan pembatasan laju percobaan (*rate limiting / throttling*) guna melindungi sistem dari serangan *brute-force* atau *denial-of-service*.
 
 ### 9. Service Provider (Bootstrap & Dependency Injection Layer)
+* **Lokasi Direktori (Path)**: `app/Providers/` (serta didaftarkan di `bootstrap/providers.php`)
+* **Format Nama & Ekstensi Berkas**: `[NamaLayanan]ServiceProvider.php` (PascalCase berakhiran ServiceProvider, contoh pola: `AppServiceProvider.php`)
 * **Definisi & Peran**: Titik sentral inisialisasi awal (*bootstrapping*) dan pengikatan layanan ke dalam Laravel Service Container (IoC).
 * **Kegunaan & Untuk Apa**:
   * Mengonfigurasi layanan inti framework tingkat global sebelum request ditangani (seperti pada method `register()` dan `boot()`).
@@ -991,6 +1009,8 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Mendaftarkan konfigurasi default aplikasi, seperti menetapkan template paginasi Tailwind CSS secara global (`Paginator::useTailwind()`).
 
 ### 10. Blade View (Presentation / UI Template Layer)
+* **Lokasi Direktori (Path)**: `resources/views/` (dengan sub-folder seperti `resources/views/user/`, `admin/`, `petugas/`, `public/`, `auth/`)
+* **Format Nama & Ekstensi Berkas**: `[nama-tampilan].blade.php` (kebab-case ganda berektensi `.blade.php`, contoh pola: `reservation-form.blade.php`, `dashboard.blade.php`)
 * **Definisi & Peran**: Berkas antarmuka pengguna berbasis template engine bawaan Laravel (`.blade.php`).
 * **Kegunaan & Untuk Apa**:
   * Merender struktur tampilan halaman HTML dinamis kepada browser klien.
@@ -999,13 +1019,17 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Mengintegrasikan reaktivitas sisi klien menggunakan Alpine.js serta tata letak visual modern berbasis Tailwind CSS.
 
 ### 11. Blade Component (Reusable UI Component)
-* **Definisi & Peran**: Komponen antarmuka pengguna modular yang dapat disematkan berulang kali di berbagai view.
+* **Lokasi Direktori (Path)**: `resources/views/components/` (serta subdirektori modul kustom seperti `resources/views/components/cava/`)
+* **Format Nama & Ekstensi Berkas**: `[nama-komponen].blade.php` (kebab-case berektensi `.blade.php`, contoh pola: `stat-card.blade.php`, `modal.blade.php`, `status-badge.blade.php`)
+* **Definisi & Peran**: Komponen antarmuka pengguna modular yang dapat disematkan berulang kali di berbagai view menggunakan tag `<x-[nama-komponen]>`.
 * **Kegunaan & Untuk Apa**:
   * Menghilangkan duplikasi kode HTML/CSS (*Don't Repeat Yourself* / DRY).
   * Mengisolasi elemen visual spesifik yang sering digunakan (seperti tombol aksi, badge penanda status, kartu statistik metrik, pop-up modal dialog, dan tautan navigasi).
   * Memungkinkan perubahan styling atau interaktivitas komponen visual di seluruh aplikasi cukup dengan menyunting satu berkas komponen terpusat.
 
 ### 12. Layout Template (Master Layout Wrapper)
+* **Lokasi Direktori (Path)**: `resources/views/layouts/` (dan kelas pengatur komponen di `app/View/Components/`)
+* **Format Nama & Ekstensi Berkas**: `[nama-layout].blade.php` (kebab-case berektensi `.blade.php`, contoh pola: `app.blade.php`, `admin.blade.php`, `petugas.blade.php`, `public.blade.php`)
 * **Definisi & Peran**: Berkas kerangka induk yang membungkus tata letak global dokumen web.
 * **Kegunaan & Untuk Apa**:
   * Menyediakan konsistensi visual di seluruh aplikasi dengan menyediakan kerangka dasar HTML (`<html>`, `<head>`, meta tag, pemanggilan bundel aset CSS/JS `@vite`, bilah navigasi atas, sidebar menu, dan footer).
@@ -1013,12 +1037,16 @@ Bagian ini menyajikan klasifikasi menyeluruh mengenai seluruh jenis berkas (*fil
   * Halaman konten spesifik cukup mengisi bagian slot penampung (`{{ $slot }}`) tanpa perlu menyusun ulang kerangka dokumen dari awal.
 
 ### 13. Policy (Resource Authorization Policy)
+* **Lokasi Direktori (Path)**: `app/Policies/`
+* **Format Nama & Ekstensi Berkas**: `[NamaModel]Policy.php` (PascalCase berakhiran Policy, contoh pola: `ReservationPolicy.php`)
 * **Definisi & Peran**: Kelas aturan otorisasi granular berbasis entitas model tertentu.
 * **Kegunaan & Untuk Apa**:
   * Mengatur hak akses granular per instans data (misalnya: memverifikasi apakah sivitas yang sedang login berhak membatalkan tiket reservasi tertentu miliknya sendiri, atau apakah seorang petugas memiliki wewenang menyetujui jadwal tersebut).
   * Dipanggil melalui helper `$this->authorize('update', $reservation)` di controller atau direktif `@can` di Blade view.
 
-### 14. Configuration File (`config/*.php`)
+### 14. Configuration File
+* **Lokasi Direktori (Path)**: `config/` (serta konfigurasi kernel modern di `bootstrap/app.php`)
+* **Format Nama & Ekstensi Berkas**: `[nama_konfigurasi].php` (snake_case berektensi `.php`, contoh pola: `app.php`, `database.php`, `auth.php`, `filesystems.php`)
 * **Definisi & Peran**: Berkas penyimpan pengaturan parameter dan konfigurasi runtime aplikasi.
 * **Kegunaan & Untuk Apa**:
   * Mengatur driver koneksi database, sistem penyimpanan sesi (*session*), mekanisme caching, filesystem storage, dan driver pengiriman email.
